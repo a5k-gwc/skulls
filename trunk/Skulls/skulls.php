@@ -206,7 +206,7 @@ function Inizialize($supported_networks){
 
 function Pong($ver){
 	print "PONG ".$NAME." ".$ver."\r\n";
-	print "I|pong|".$NAME." ".$ver."|multi\r\n";
+	print "I|pong|".$NAME." ".$ver."|multi|TCP\r\n";
 }
 
 function Support($supported_networks)
@@ -976,7 +976,6 @@ elseif( $KICK_START )
 else
 {
 	header("Content-Type: text/plain");
-	header("Web-Cache: ".$NAME." ".$VER." | multi | TCP");
 	header("X-Remote-IP: ".$REMOTE_IP);
 
 	if( $CLIENT == NULL )
@@ -999,6 +998,10 @@ else
 		die("ERROR: Invalid command - Request rejected\r\n");
 
 
+	if ( $NET == NULL )
+		$NET = "gnutella1";
+
+
 	if ($PING)
 		Pong($VER);
 
@@ -1007,22 +1010,14 @@ else
 
 	if ($UPDATE)
 	{
-		if( $NET == NULL )
-			print "I|".$request."|WARNING|Missing network parameter\r\n";
-
 		if ( CheckNetParameter($SUPPORTED_NETWORKS, $NET, "update") )
 			Update($REMOTE_IP, $IP, $LEAVES, $NET, $CLUSTER, $CACHE, $CLIENT, $VERSION);
 	}
 	else
 	{
 		if( $IP != NULL )
-		{
-			if ( $NET == NULL )
-				$NET = "gnutella1";
-
-			if ( CheckNetParameter($SUPPORTED_NETWORKS, $NET, "ip") )
+			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
 				Update($REMOTE_IP, $IP, $LEAVES, $NET, NULL, NULL, $CLIENT, $VERSION);
-		}
 
 		if( $CACHE != NULL )
 			Update(NULL, NULL, NULL, NULL, NULL, $CACHE, $CLIENT, $VERSION);
@@ -1030,24 +1025,18 @@ else
 
 	if ($GET)
 	{
-		if ( $NET == NULL )
-			$NET = "gnutella1";
-
 		if ( CheckNetParameter($SUPPORTED_NETWORKS, $NET, "get") )
 			Get($NET);
 	}
 	else
 	{
 		if ($HOSTFILE)
-		{
-			$NET = "gnutella1";
-			HostFile($NET);
-		}
+			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
+				HostFile($NET);
+
 		if ($URLFILE)
-		{
-			$NET = "gnutella1";
-			UrlFile($NET);
-		}
+			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
+				UrlFile($NET);
 	}
 
 	if ($STATFILE)	// ToDO: Currently not supported
