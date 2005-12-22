@@ -34,7 +34,7 @@ if( !$ENABLED || !isset($ENABLED) )
 
 $NAME		= "Skulls";
 $VENDOR		= "SKLL";
-$SHORT_VER	= "0.0.1";
+$SHORT_VER	= "0.0.2";
 $VER		= $SHORT_VER." Alpha";
 
 $SUPPORTED_NETWORKS[0] = "Gnutella1";
@@ -187,8 +187,10 @@ function Inizialize($supported_networks){
 			die("ERROR: Writing file failed");
 		else
 		{
-			fwrite( $file, date("Y/m/d h:i:s A")."\r\n" );
-			fclose( $file );
+			flock($file, 2);
+			fwrite($file, date("Y/m/d h:i:s A"));
+			flock($file, 3);
+			fclose($file);
 		}
 	}
 
@@ -202,6 +204,24 @@ function Inizialize($supported_networks){
 
 	for( $i=0; $i<$networks_count; $i++ )
 		InizializeNetworkFiles( $supported_networks[$i] );
+
+
+	global $STATFILE_ENABLED;
+
+	if($STATFILE_ENABLED)
+	{
+		if( !file_exists("stats/") )
+			mkdir("stats/", 0775);
+
+		if( !file_exists("stats/requests.dat") )
+		{
+			$file = fopen( "stats/requests.dat", "x" );
+			flock($file, 2);
+			fwrite($file, "0");
+			flock($file, 3);
+			fclose($file);
+		}
+	}
 }
 
 function Pong($ver){
@@ -388,8 +408,8 @@ function PingWebCache($cache){
 			$cache_data[0] = trim( substr( $oldpong, 5, strlen($oldpong) - 5 ) );
 			$cache_data[1]= "gnutella1";
 		}
-		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for WebCache that follow Bazooka extension
-		{
+		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for WebCaches that follow Bazooka extensions of specifications
+		{																				// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter
 			$fp = fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
 			if (!$fp)
@@ -625,27 +645,6 @@ function Get($net){
 		print("I|NO-URL\r\n");
 	elseif ( $count_host == 0 )
 		print("I|NO-HOSTS\r\n");
-}
-
-function Update($remote_ip, $ip, $leaves, $net, $cluster, $cache, $client, $version) {
-	if( $ip!=NULL && !CheckIPValidity($remote_ip, $ip) )
-	{
-		print "I|update|WARNING|Rejected: Invalid IP ".$ip."\r\n";
-		$ip = NULL;
-		$leaves = NULL;
-	}
-
-	if( $cache!=NULL && !CheckURLValidity($cache) )
-	{
-		print("I|update|WARNING|Rejected: Invalid URL ".$cache."\r\n");
-		$cache = NULL;
-	}
-
-	if( $ip != NULL )
-		WriteHostFile($ip, $leaves, $net, $cluster, $client, $version);
-
-	if( $cache != NULL )
-		WriteCacheFile($cache, $client, $version);
 }
 
 function KickStart($net, $cache){
@@ -914,7 +913,7 @@ if( $CLUSTER != NULL )
 
 $HOSTFILE = !empty($_GET['hostfile']) ? $_GET['hostfile'] : 0;
 $URLFILE = !empty($_GET['urlfile']) ? $_GET['urlfile'] : 0;
-$STATFILE = !empty($_GET['statfile']) ? $_GET['statfile'] : 0;	// ToDO: Currently not supported
+$STATFILE = !empty($_GET['statfile']) ? $_GET['statfile'] : 0;
 
 $GET = !empty($_GET['get']) ? $_GET['get'] : 0;
 $UPDATE = !empty($_GET['update']) ? $_GET['update'] : 0;
@@ -927,7 +926,7 @@ $SUPPORT = !empty($_GET['support']) ? $_GET['support'] : 0;
 $SHOWINFO = !empty($_GET['showinfo']) ? $_GET['showinfo'] : 0;
 $SHOWHOSTS = !empty($_GET['showhosts']) ? $_GET['showhosts'] : 0;
 $SHOWCACHES = !empty($_GET['showurls']) ? $_GET['showurls'] : 0;
-$SHOWSTATS = !empty($_GET['stats']) ? $_GET['stats'] : 0;	// ToDO: Currently not supported
+$SHOWSTATS = !empty($_GET['stats']) ? $_GET['stats'] : 0;
 
 if( empty($_SERVER['QUERY_STRING']) )
 	$SHOWINFO=1;
@@ -978,6 +977,18 @@ else
 	header("Content-Type: text/plain");
 	header("X-Remote-IP: ".$REMOTE_IP);
 
+	if($STATFILE_ENABLED)
+	{
+		$request = file("stats/requests.dat");
+
+		$file = fopen("stats/requests.dat", "w");
+
+		flock($file, 2);
+		fwrite($file, $request[0] + 1);
+		flock($file, 3);
+		fclose($file);
+	}
+
 	if( $CLIENT == NULL )
 		die("ERROR: Client unknown - Request rejected\r\n");
 
@@ -994,7 +1005,7 @@ else
 	if( IsClientTooOld( $CLIENT, $VERSION ) )
 		die("ERROR: Client too old - Request rejected\r\n");
 
-	if ( !$PING && !$GET && !$UPDATE && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && ($CACHE == NULL) && ($IP == NULL) )
+	if ( !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && ($CACHE == NULL) && ($IP == NULL) )
 		die("ERROR: Invalid command - Request rejected\r\n");
 
 
@@ -1011,16 +1022,32 @@ else
 	if ($UPDATE)
 	{
 		if ( CheckNetParameter($SUPPORTED_NETWORKS, $NET, "update") )
-			Update($REMOTE_IP, $IP, $LEAVES, $NET, $CLUSTER, $CACHE, $CLIENT, $VERSION);
+			if( $ip!=NULL )
+			{
+				if( CheckIPValidity($REMOTE_IP, $IP) )
+					WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+				else
+					print "I|update|WARNING|Rejected: Invalid IP ".$IP."\r\n";
+			}
+
+		if( $cache!=NULL )
+		{
+			if( CheckURLValidity($CACHE) )
+				WriteCacheFile($CACHE, $CLIENT, $VERSION);
+			else
+				print("I|update|WARNING|Rejected: Invalid URL ".$CACHE."\r\n");
+		}
 	}
 	else
 	{
 		if( $IP != NULL )
 			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
-				Update($REMOTE_IP, $IP, $LEAVES, $NET, NULL, NULL, $CLIENT, $VERSION);
+				if( CheckIPValidity($REMOTE_IP, $IP) )
+					WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
 
 		if( $CACHE != NULL )
-			Update(NULL, NULL, NULL, NULL, NULL, $CACHE, $CLIENT, $VERSION);
+			if( CheckURLValidity($CACHE) )
+				WriteCacheFile($CACHE, $CLIENT, $VERSION);
 	}
 
 	if ($GET)
@@ -1039,7 +1066,15 @@ else
 				UrlFile($NET);
 	}
 
-	if ($STATFILE)	// ToDO: Currently not supported
-		print "I|statfile|WARNING|Currently not supported\r\n";
+	if ($STATFILE)	// ToDO: Partially supported
+	{
+		if($STATFILE_ENABLED)
+		{
+			$request = file("stats/requests.dat");
+			print $request[0]."\r\n";
+		}
+		else
+			print "I|statfile|WARNING|Disabled\r\n";
+	}
 }
 ?>
