@@ -3,7 +3,6 @@ $ENABLED				= 1;
 
 $KICK_START_ENABLED		= 1;
 $LOG_ENABLED			= 1;
-$STATS_ENABLED			= 1;
 $STATFILE_ENABLED		= 1;
 
 $MAX_HOSTS				= 20;	// Maximum number of host stored for EACH network
