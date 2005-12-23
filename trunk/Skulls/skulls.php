@@ -221,6 +221,12 @@ function Inizialize($supported_networks){
 			flock($file, 3);
 			fclose($file);
 		}
+
+		if( !file_exists("stats/update_requests_hour.dat") )
+			fclose( fopen("stats/update_requests_hour.dat", "x") );
+
+		if( !file_exists("stats/other_requests_hour.dat") )
+			fclose( fopen("stats/other_requests_hour.dat", "x") );
 	}
 }
 
@@ -647,6 +653,27 @@ function Get($net){
 		print("I|NO-HOSTS\r\n");
 }
 
+function UpdateStats($request){
+	$stat_file = file("stats/".$request."_requests_hour.dat");
+
+	$file = fopen("stats/".$request."_requests_hour.dat", "w");
+
+	flock($file, 2);
+
+	for($i = 0; $i < count($stat_file); $i++)
+	{
+		$stat_file[$i] = trim($stat_file[$i]);
+		$time_diff = bcdiv( time() - strtotime( $stat_file[$i] ), 3600 );
+
+		if( $time_diff < 1 )
+			fwrite($file, $stat_file[$i]."\r\n");
+	}
+
+	fwrite($file, date("Y/m/d h:i A")."\r\n");
+	flock($file, 3);
+	fclose($file);
+}
+
 function KickStart($net, $cache){
 	if( !CheckURLValidity($cache) )
 		die("ERROR: The KickStart URL isn't valid\r\n");
@@ -690,7 +717,7 @@ function KickStart($net, $cache){
 }
 
 function ShowHtmlPage($num){
-	global $NAME, $VER, $NET, $MAX_HOSTS, $MAX_CACHES;
+	global $NAME, $VER, $NET, $MAX_HOSTS, $MAX_CACHES, $STATFILE_ENABLED;
 
 	if( $NET == NULL )
 		$NET = "gnutella2";
@@ -721,7 +748,7 @@ function ShowHtmlPage($num){
 					<td height="30" valign="top" bgcolor="#FFFFFF">
 						<a href="?showinfo=1">General Details</a> /
 						<a href="?showhosts=1&amp;net=<? echo($NET); ?>">Hosts</a> /
-						<a href="?showurls=1">Alternative Caches</a> /
+						<a href="?showurls=1">Alternative WebCaches</a> /
 						<a href="?stats=1">Statistics</a>
 					</td>
 				</tr>
@@ -730,7 +757,7 @@ function ShowHtmlPage($num){
 			{
 				?>
 				<tr bgcolor="#CCFF99"> 
-					<td style="color: #0044FF;"><b>Cache Details</b></td>
+					<td style="color: #0044FF;"><b>Cache Info</b></td>
 				</tr>
 				<tr> 
 					<td bgcolor="#FFFFFF">
@@ -880,6 +907,62 @@ function ShowHtmlPage($num){
 				</tr>
 				<?
 			}
+			elseif ($num == 4)	// Statistics
+			{
+				?>
+				<tr bgcolor="#CCFF99"> 
+					<td style="color: #0044FF;"><b>Statistics</b></td>
+				</tr>
+				<tr> 
+					<td bgcolor="#FFFFFF">
+						<table width="100%" cellspacing="0">
+							<tr> 
+								<td width="150">- Total requests:</td>
+								<td style="color: #994433;">
+								<?
+									if($STATFILE_ENABLED)
+									{
+										$requests = file("stats/requests.dat");
+										echo($requests[0]);
+									}
+									else
+										echo("Disabled");
+								?>
+								</td>
+							</tr>
+							<tr> 
+								<td width="150">- Requests this hour:</td>
+								<td style="color: #994433;">
+								<?
+									if($STATFILE_ENABLED)
+									{
+										$requests = count( file("stats/other_requests_hour.dat") ) + count( file("stats/update_requests_hour.dat") );
+										echo($requests);
+									}
+									else
+										echo("Disabled");
+								?>
+								</td>
+							</tr>
+							<tr> 
+								<td width="150">- Updates this hour:</td>
+								<td style="color: #994433;">
+								<?
+									if($STATFILE_ENABLED)
+									{
+										$requests = count( file("stats/update_requests_hour.dat") );
+										echo($requests);
+									}
+									else
+										echo("Disabled");
+								?>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+		        <?
+			}
 				?>
 			</table>
 		</td>
@@ -961,7 +1044,7 @@ elseif( $SHOWHOSTS )
 elseif( $SHOWCACHES )
 	ShowHtmlPage(3);
 elseif( $SHOWSTATS )
-	ShowHtmlPage(4);	// ToDO: Currently not supported
+	ShowHtmlPage(4);
 elseif( $KICK_START )
 {
 	if(!$KICK_START_ENABLED)
@@ -1005,8 +1088,11 @@ else
 	if( IsClientTooOld( $CLIENT, $VERSION ) )
 		die("ERROR: Client too old - Request rejected\r\n");
 
-	if ( !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && ($CACHE == NULL) && ($IP == NULL) )
+	if ( !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && !$UPDATE && ($CACHE == NULL) && ($IP == NULL) )
+	{
+		UpdateStats("other");
 		die("ERROR: Invalid command - Request rejected\r\n");
+	}
 
 
 	if ( $NET == NULL )
@@ -1022,7 +1108,7 @@ else
 	if ($UPDATE)
 	{
 		if ( CheckNetParameter($SUPPORTED_NETWORKS, $NET, "update") )
-			if( $ip!=NULL )
+			if( $IP != NULL )
 			{
 				if( CheckIPValidity($REMOTE_IP, $IP) )
 					WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
@@ -1030,7 +1116,7 @@ else
 					print "I|update|WARNING|Rejected: Invalid IP ".$IP."\r\n";
 			}
 
-		if( $cache!=NULL )
+		if( $CACHE != NULL )
 		{
 			if( CheckURLValidity($CACHE) )
 				WriteCacheFile($CACHE, $CLIENT, $VERSION);
@@ -1066,12 +1152,21 @@ else
 				UrlFile($NET);
 	}
 
-	if ($STATFILE)	// ToDO: Partially supported
+	if( $UPDATE || ($CACHE != NULL) || ($IP != NULL) )
+		UpdateStats("update");
+	else
+		UpdateStats("other");
+
+	if ($STATFILE)
 	{
 		if($STATFILE_ENABLED)
 		{
-			$request = file("stats/requests.dat");
-			print $request[0]."\r\n";
+			$requests = file("stats/requests.dat");
+			print $requests[0]."\r\n";
+			$requests = count( file("stats/other_requests_hour.dat") ) + count( file("stats/update_requests_hour.dat") );
+			print $requests."\r\n";
+			$requests = count( file("stats/update_requests_hour.dat") );
+			print $requests."\r\n";
 		}
 		else
 			print "I|statfile|WARNING|Disabled\r\n";
