@@ -34,8 +34,8 @@ if( !$ENABLED || !isset($ENABLED) )
 
 $NAME		= "Skulls";
 $VENDOR		= "SKLL";
-$SHORT_VER	= "0.0.2";
-$VER		= $SHORT_VER." Alpha";
+$SHORT_VER	= "0.0.3";
+$VER		= $SHORT_VER." Beta";
 
 $SUPPORTED_NETWORKS[0] = "Gnutella1";
 $SUPPORTED_NETWORKS[1] = "Gnutella2";
