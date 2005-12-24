@@ -197,14 +197,19 @@ function Inizialize($supported_networks){
 	if ( !file_exists("webcachedata/caches.dat") )
 		fclose( fopen("webcachedata/caches.dat", "x") );
 
-	if ( !file_exists("webcachedata/blocked_caches.dat") )
-		fclose( fopen("webcachedata/blocked_caches.dat", "x") );
-
 	$networks_count=count($supported_networks);
 
 	for( $i=0; $i<$networks_count; $i++ )
 		InizializeNetworkFiles( $supported_networks[$i] );
 
+	if ( !file_exists("webcachedata/blocked_caches.dat") )
+	{
+		$file = fopen("webcachedata/blocked_caches.dat", "x");
+		flock($file, 2);
+		fwrite($file, "http://gwc.wodi.org/g2/bazooka\r\n");
+		flock($file, 3);
+		fclose($file);
+	}
 
 	global $STATFILE_ENABLED;
 
@@ -499,73 +504,77 @@ function WriteCacheFile($cache, $client, $version){
 
 	$cache_file = file("webcachedata/caches.dat");
 
-	if ( count($cache_file) >= $MAX_CACHES )
-		print "I|update|WARNING|Rejected: Cache file full\r\n";
-	else
+	$cache_exists = FALSE;
+
+	for ($i = 0; $i < count($cache_file); $i++)
 	{
-		$cache_exists = FALSE;
+		list ($read, ) = explode("|", $cache_file[$i], 2);
 
-		for ($i = 0; $i < count($cache_file); $i++)
+		if ( strtolower($cache) == strtolower($read) )
 		{
-			list ($read, ) = explode("|", $cache_file[$i], 2);
-
-			if ( strtolower($cache) == strtolower($read) )
-			{
-				list ( , , , , , $time ) = explode("|", $cache_file[$i], 6);
-				$cache_exists = TRUE;
-				break;
-			}
+			list ( , , , , , $time ) = explode("|", $cache_file[$i], 6);
+			$cache_exists = TRUE;
+			break;
 		}
+	}
 
-		if ($cache_exists == FALSE)
+	if ($cache_exists == TRUE)
+	{
+		$time_diff = bcdiv( time() - strtotime( trim($time) ), 86400 );
+
+		if ( $time_diff < 10 )
+			print "I|update|OK|".$cache." already exists and it is already updated\r\n";
+		else
 		{
-			$blocked = CheckBlockedCache($cache);
-			if ($blocked)
-				print "I|update|WARNING|Rejected: Blocked URL\r\n";
+			$cache_data = PingWebCache($cache);
+
+			if( $cache_data[0] == "FAILED" )
+			{
+				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
+				print "I|update|WARNING|Rejected: Ping of ".$cache." failed - Removed\r\n";
+			}
+			elseif( $cache_data[0] == "UNSUPPORTED" )
+			{
+				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
+				print "I|update|WARNING|Rejected: Network of ".$cache." not supported - Removed\r\n";
+			}
 			else
 			{
-				$cache_data = PingWebCache($cache);
+				ReplaceCache( $cache_file, $i, $cache, $cache_data, $client, $version );
+				print "I|update|OK|".$cache." already exists - Updated timestamp\r\n";
+			}
+		}
+	}
+	else
+	{
+		$blocked = CheckBlockedCache($cache);
 
-				if( $cache_data[0] == "FAILED" )
-					print "I|update|WARNING|Rejected: Ping of ".$cache." failed\r\n";
-				elseif( $cache_data[0] == "UNSUPPORTED" )
-					print "I|update|WARNING|Rejected: Network of ".$cache." not supported\r\n";
+		if ($blocked)
+			print "I|update|WARNING|Rejected: Blocked URL\r\n";
+		else
+		{
+			$cache_data = PingWebCache($cache);
+
+			if( $cache_data[0] == "FAILED" )
+				print "I|update|WARNING|Rejected: Ping of ".$cache." failed\r\n";
+			elseif( $cache_data[0] == "UNSUPPORTED" )
+				print "I|update|WARNING|Rejected: Network of ".$cache." not supported\r\n";
+			else
+			{
+				$file = fopen("webcachedata/caches.dat", "a");
+
+				if ( count($cache_file) >= $MAX_CACHES )
+				{
+					ReplaceCache( $cache_file, 0, $cache, $cache_data, $client, $version );
+					print "I|update|OK|Cache file full - Pushed old data and inserted ".$cache."\r\n";
+				}
 				else
 				{
-					$file = fopen("webcachedata/caches.dat", "a");
-
 					flock($file, 2);
 					fwrite($file, $cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
 					flock($file, 3);
 					fclose($file);
 					print "I|update|OK|URL ".$cache." added successfully\r\n";
-				}
-			}
-		}
-		else
-		{
-			$time_diff = bcdiv( time() - strtotime( trim($time) ), 86400 );
-
-			if ( $time_diff < 10 )
-				print "I|update|OK|".$cache." already exists and it is already updated\r\n";
-			else
-			{
-				$cache_data = PingWebCache($cache);
-
-				if( $cache_data[0] == "FAILED" )
-				{
-					ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
-					print "I|update|WARNING|Rejected: Ping of ".$cache." failed - Removed\r\n";
-				}
-				elseif( $cache_data[0] == "UNSUPPORTED" )
-				{
-					ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
-					print "I|update|WARNING|Rejected: Network of ".$cache." not supported - Removed\r\n";
-				}
-				else
-				{
-					ReplaceCache( $cache_file, $i, $cache, $cache_data, $client, $version );
-					print "I|update|OK|".$cache." already exists - Updated timestamp\r\n";
 				}
 			}
 		}
@@ -601,8 +610,6 @@ function UrlFile($net){
 	else
 		$max_caches = $MAX_CACHES_OUT;
 
-	shuffle($cache_file);	
-
 	for( $i=0; $i<$max_caches; $i++ )
 	{
 		list ( $cache, , $cache_net, ) = explode("|", $cache_file[$i], 4);
@@ -636,8 +643,6 @@ function Get($net){
 	else
 		$max_caches = $MAX_CACHES_OUT;
 
-	shuffle($cache_file);	
-
 	for( $i=0; $i<$max_caches; $i++ )
 	{
 		list ( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i], 6);
@@ -653,7 +658,7 @@ function Get($net){
 		print("I|NO-HOSTS\r\n");
 }
 
-function UpdateStats($request){
+function UpdateStats($request, $add = TRUE ){
 	$stat_file = file("stats/".$request."_requests_hour.dat");
 
 	$file = fopen("stats/".$request."_requests_hour.dat", "w");
@@ -669,7 +674,9 @@ function UpdateStats($request){
 			fwrite($file, $stat_file[$i]."\r\n");
 	}
 
-	fwrite($file, date("Y/m/d h:i A")."\r\n");
+	if( $add == TRUE )
+		fwrite($file, date("Y/m/d h:i A")."\r\n");
+
 	flock($file, 3);
 	fclose($file);
 }
@@ -909,6 +916,11 @@ function ShowHtmlPage($num){
 			}
 			elseif ($num == 4)	// Statistics
 			{
+				if($STATFILE_ENABLED)
+				{
+					UpdateStats("update", FALSE);
+					UpdateStats("other", FALSE);
+				}
 				?>
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF;"><b>Statistics</b></td>
@@ -1118,22 +1130,40 @@ else
 
 		if( $CACHE != NULL )
 		{
-			if( CheckURLValidity($CACHE) )
-				WriteCacheFile($CACHE, $CLIENT, $VERSION);
+			if( ini_get("allow_url_fopen") )
+			{
+				if( CheckURLValidity($CACHE) )
+					WriteCacheFile($CACHE, $CLIENT, $VERSION);
+				else
+					print("I|update|WARNING|Rejected: Invalid URL ".$CACHE."\r\n");
+			}
 			else
-				print("I|update|WARNING|Rejected: Invalid URL ".$CACHE."\r\n");
+				print("I|update|WARNING|Fsockopen disabled\r\n");
 		}
 	}
 	else
 	{
 		if( $IP != NULL )
 			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
+			{
 				if( CheckIPValidity($REMOTE_IP, $IP) )
 					WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+				else
+					print "ERROR: Invalid IP ".$IP."\r\n";
+			}
 
 		if( $CACHE != NULL )
-			if( CheckURLValidity($CACHE) )
-				WriteCacheFile($CACHE, $CLIENT, $VERSION);
+		{
+			if( ini_get("allow_url_fopen") )
+			{
+				if( CheckURLValidity($CACHE) )
+					WriteCacheFile($CACHE, $CLIENT, $VERSION);
+				else
+					print("ERROR: Invalid URL ".$CACHE."\r\n");
+			}
+			else
+				print("ERROR: Fsockopen disabled\r\n");
+		}
 	}
 
 	if ($GET)
