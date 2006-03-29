@@ -369,8 +369,10 @@ function PingWebCache($cache){
 	$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
 	if (!$fp)
+	{
 		echo "Error ".$errno;
 		$cache_data[0] = "FAILED";
+	}
 	else
 	{
 		$pong = "";
@@ -425,8 +427,10 @@ function PingWebCache($cache){
 			$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
 			if (!$fp)
+			{
 				echo "Error ".$errno;
 				$cache_data[0] = "FAILED";
+			}
 			else
 			{
 				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&net=gnutella2&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
