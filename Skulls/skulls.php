@@ -366,9 +366,10 @@ function PingWebCache($cache){
 		$port = 80;
 	}
 
-	$fp = fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
+	$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
 	if (!$fp)
+		echo "Error ".$errno;
 		$cache_data[0] = "FAILED";
 	else
 	{
@@ -421,9 +422,10 @@ function PingWebCache($cache){
 		}
 		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for WebCaches that follow Bazooka extensions of specifications
 		{																				// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter
-			$fp = fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
+			$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
 			if (!$fp)
+				echo "Error ".$errno;
 				$cache_data[0] = "FAILED";
 			else
 			{
@@ -699,10 +701,13 @@ function KickStart($net, $cache){
 		$port = 80;
 	}
 
-	$fp = fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
+	$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
 	if(!$fp)
-		return NULL;
+	{
+		echo "Error ".$errno;
+		return;
+	}
 	else
 	{
 		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&net=".$net."&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n" );
@@ -1062,10 +1067,6 @@ elseif( $KICK_START )
 	if( !$KICK_START_ENABLED )
 		die("ERROR: KickStart is disabled\r\n");
 
-	if( !ini_get("allow_url_fopen") )
-		if( ini_set("allow_url_fopen", "1") == FALSE )
-			die("ERROR: Fsockopen disabled\r\n");
-
 	if ( !CheckNetwork($SUPPORTED_NETWORKS, $NET) )
 		die("ERROR: Network not supported\r\n");
 
@@ -1134,15 +1135,10 @@ else
 
 		if( $CACHE != NULL )
 		{
-			if( ini_get("allow_url_fopen") || ini_set("allow_url_fopen", "1") != FALSE )
-			{
-				if( CheckURLValidity($CACHE) )
-					WriteCacheFile($CACHE, $CLIENT, $VERSION);
-				else
-					print("I|update|WARNING|Rejected: Invalid URL ".$CACHE."\r\n");
-			}
+			if( CheckURLValidity($CACHE) )
+				WriteCacheFile($CACHE, $CLIENT, $VERSION);
 			else
-				print("I|update|WARNING|Fsockopen disabled\r\n");
+				print("I|update|WARNING|Rejected: Invalid URL ".$CACHE."\r\n");
 		}
 	}
 	else
@@ -1158,15 +1154,10 @@ else
 
 		if( $CACHE != NULL )
 		{
-			if( ini_get("allow_url_fopen") || ini_set("allow_url_fopen", "1") != FALSE )
-			{
-				if( CheckURLValidity($CACHE) )
-					WriteCacheFile($CACHE, $CLIENT, $VERSION);
-				else
-					print("ERROR: Invalid URL ".$CACHE."\r\n");
-			}
+			if( CheckURLValidity($CACHE) )
+				WriteCacheFile($CACHE, $CLIENT, $VERSION);
 			else
-				print("ERROR: Fsockopen disabled\r\n");
+				print("ERROR: Invalid URL ".$CACHE."\r\n");
 		}
 	}
 
