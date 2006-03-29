@@ -1,4 +1,4 @@
-<?
+<?php
 $ENABLED				= 1;
 
 $KICK_START_ENABLED		= 1;

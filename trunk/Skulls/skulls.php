@@ -25,7 +25,7 @@ if(file_exists("vars.php"))
 else
 	die("ERROR: The file vars.php is missing.");
 
-if( !$ENABLED || !isset($ENABLED) )
+if( !isset($ENABLED) || !$ENABLED )
 {
 	header("Status: 404 Not Found");
 	header("Content-Type: text/plain");
@@ -206,7 +206,7 @@ function Inizialize($supported_networks){
 	{
 		$file = fopen("webcachedata/blocked_caches.dat", "x");
 		flock($file, 2);
-		fwrite($file, "http://gwc.wodi.org/g2/bazooka\r\n");
+		fwrite($file, "http://gwc.wodi.org/g2/bazooka"."\r\n");
 		flock($file, 3);
 		fclose($file);
 	}
@@ -732,7 +732,7 @@ function ShowHtmlPage($num){
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<title><? echo($NAME); ?>! Multi-Network WebCache <? echo($VER); ?></title>
+	<title><?php echo($NAME); ?>! Multi-Network WebCache <?php echo($VER); ?></title>
 	<meta name="robots" content="noindex,nofollow,nocache">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
@@ -749,17 +749,17 @@ function ShowHtmlPage($num){
 		<td bgcolor="#FF3300">
 			<table width="100%" cellspacing="0" cellpadding="5">
 				<tr> 
-					<td bgcolor="#FFFFFF" style="font-size: 16px;"><b><span style="color: #008000"><? echo($NAME); ?>!</span> Multi-Network WebCache <? echo($VER); ?></b></td>
+					<td bgcolor="#FFFFFF" style="font-size: 16px;"><b><span style="color: #008000"><?php echo($NAME); ?>!</span> Multi-Network WebCache <?php echo($VER); ?></b></td>
 				</tr>
 				<tr> 
 					<td height="30" valign="top" bgcolor="#FFFFFF">
 						<a href="?showinfo=1">General Details</a> /
-						<a href="?showhosts=1&amp;net=<? echo($NET); ?>">Hosts</a> /
+						<a href="?showhosts=1&amp;net=<?php echo($NET); ?>">Hosts</a> /
 						<a href="?showurls=1">Alternative WebCaches</a> /
 						<a href="?stats=1">Statistics</a>
 					</td>
 				</tr>
-				<?
+				<?php
 			if ($num == 1)	// Info
 			{
 				?>
@@ -772,7 +772,7 @@ function ShowHtmlPage($num){
 							<tr> 
 								<td width="150">- Running since:</td>
 								<td style="color: #994433;">
-								<?
+								<?php
 									if (file_exists("webcachedata/runnig_since.dat"))
 									{
 										$runnig_since = file("webcachedata/runnig_since.dat");
@@ -783,12 +783,12 @@ function ShowHtmlPage($num){
 							</tr>
 							<tr> 
 								<td width="150">- Version:</td>
-								<td style="color: #008000;"><b><? echo($VER); ?></b></td>
+								<td style="color: #008000;"><b><?php echo($VER); ?></b></td>
 							</tr>
 							<tr> 
 								<td width="150">- Supported networks:</td>
 								<td style="color: #994433;">
-								<?
+								<?php
 									global $SUPPORTED_NETWORKS;
 
 									$networks_count=count($SUPPORTED_NETWORKS);
@@ -805,7 +805,7 @@ function ShowHtmlPage($num){
 						</table>
 					</td>
 				</tr>
-		        <?
+		        <?php
 			}
 			elseif ($num == 2)	// Host
 			{
@@ -813,7 +813,7 @@ function ShowHtmlPage($num){
 				?>
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF">
-					<b><? echo( ucfirst($NET) ); ?> Hosts (<? echo(count($host_file)." of ".$MAX_HOSTS); ?>)</b>
+					<b><?php echo( ucfirst($NET) ); ?> Hosts (<?php echo(count($host_file)." of ".$MAX_HOSTS); ?>)</b>
 					</td>
 				</tr>
 				<tr>
@@ -827,9 +827,9 @@ function ShowHtmlPage($num){
 											<td width="150">Client</td>
 											<td width="160">Last updated</td>
 										</tr>
-										<?
+										<?php
 											if( count($host_file) == 0 )
-												print("<tr align=\"center\" bgcolor=\"#FFFFFF\">\n\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td>\n\t\t\t\t\t\t\t\t\t\t</tr>\n");
+												print("<tr align=\"center\" bgcolor=\"#FFFFFF\">\r\n\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td>\r\n\t\t\t\t\t\t\t\t\t\t</tr>\r\n");
 											else
 												for( $i = count($host_file) - 1; $i >= 0; $i-- )
 												{
@@ -851,14 +851,14 @@ function ShowHtmlPage($num){
 						</table>
 					</td>
 				</tr>
-				<?
+				<?php
 			}
 			elseif ($num == 3)	// WebCache
 			{
 				$cache_file = file("webcachedata/caches.dat");
 				?>
 				<tr bgcolor="#CCFF99"> 
-					<td style="color: #0044FF"><b>Alternative WebCaches (<? echo(count($cache_file)." of ".$MAX_CACHES); ?>)</b></td>
+					<td style="color: #0044FF"><b>Alternative WebCaches (<?php echo(count($cache_file)." of ".$MAX_CACHES); ?>)</b></td>
 				</tr>
 				<tr> 
 					<td bgcolor="#FFFFFF">
@@ -873,9 +873,9 @@ function ShowHtmlPage($num){
 											<td width="120">Submitting client</td>
 											<td width="160">Date submitted</td>
 										</tr>
-										<?
+										<?php
 											if ( count($cache_file) == 0 )
-												print("<tr align=\"center\" bgcolor=\"#FFFFFF\">\n\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"5\" height=\"30\">There are no <strong>alternative webcaches</strong> listed at this time.</td>\n\t\t\t\t\t\t\t\t\t\t</tr>\n");
+												print("<tr align=\"center\" bgcolor=\"#FFFFFF\">\r\n\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"5\" height=\"30\">There are no <strong>alternative webcaches</strong> listed at this time.</td>\r\n\t\t\t\t\t\t\t\t\t\t</tr>\r\n");
 											else
 												for($i = count($cache_file) - 1; $i >= 0; $i--)
 												{
@@ -912,7 +912,7 @@ function ShowHtmlPage($num){
 						</table>
 					</td>
 				</tr>
-				<?
+				<?php
 			}
 			elseif ($num == 4)	// Statistics
 			{
@@ -931,7 +931,7 @@ function ShowHtmlPage($num){
 							<tr> 
 								<td width="150">- Total requests:</td>
 								<td style="color: #994433;">
-								<?
+								<?php
 									if($STATFILE_ENABLED)
 									{
 										$requests = file("stats/requests.dat");
@@ -945,7 +945,7 @@ function ShowHtmlPage($num){
 							<tr> 
 								<td width="150">- Requests this hour:</td>
 								<td style="color: #994433;">
-								<?
+								<?php
 									if($STATFILE_ENABLED)
 									{
 										$requests = count( file("stats/other_requests_hour.dat") ) + count( file("stats/update_requests_hour.dat") );
@@ -959,7 +959,7 @@ function ShowHtmlPage($num){
 							<tr> 
 								<td width="150">- Updates this hour:</td>
 								<td style="color: #994433;">
-								<?
+								<?php
 									if($STATFILE_ENABLED)
 									{
 										$requests = count( file("stats/update_requests_hour.dat") );
@@ -973,7 +973,7 @@ function ShowHtmlPage($num){
 						</table>
 					</td>
 				</tr>
-		        <?
+		        <?php
 			}
 				?>
 			</table>
@@ -983,7 +983,7 @@ function ShowHtmlPage($num){
 
 </body>
 </html>
-<?
+<?php
 }
 
 putenv('TZ=UTC');
@@ -1059,8 +1059,12 @@ elseif( $SHOWSTATS )
 	ShowHtmlPage(4);
 elseif( $KICK_START )
 {
-	if(!$KICK_START_ENABLED)
+	if( !$KICK_START_ENABLED )
 		die("ERROR: KickStart is disabled\r\n");
+
+	if( !ini_get("allow_url_fopen") )
+		if( ini_set("allow_url_fopen", "1") == FALSE )
+			die("ERROR: Fsockopen disabled\r\n");
 
 	if ( !CheckNetwork($SUPPORTED_NETWORKS, $NET) )
 		die("ERROR: Network not supported\r\n");
@@ -1130,7 +1134,7 @@ else
 
 		if( $CACHE != NULL )
 		{
-			if( ini_get("allow_url_fopen") )
+			if( ini_get("allow_url_fopen") || ini_set("allow_url_fopen", "1") != FALSE )
 			{
 				if( CheckURLValidity($CACHE) )
 					WriteCacheFile($CACHE, $CLIENT, $VERSION);
@@ -1154,7 +1158,7 @@ else
 
 		if( $CACHE != NULL )
 		{
-			if( ini_get("allow_url_fopen") )
+			if( ini_get("allow_url_fopen") || ini_set("allow_url_fopen", "1") != FALSE )
 			{
 				if( CheckURLValidity($CACHE) )
 					WriteCacheFile($CACHE, $CLIENT, $VERSION);
