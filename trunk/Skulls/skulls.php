@@ -2,7 +2,7 @@
 //
 //   Skulls! Multi-Network WebCache (PHP)
 //
-//   Copyright (C) 2005 by ale5000
+//   Copyright (C) 2005-2006 by ale5000
 //   Sources of this script can be downloaded here: http://sourceforge.net/projects/skulls/
 //
 //   This program is free software; you can redistribute it and/or
