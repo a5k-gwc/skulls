@@ -382,9 +382,9 @@ function PingWebCache($cache){
 		$error = "";
 
 		if ( $main_url[count($main_url)-1] == "bazooka.php" )	// Workaround for Bazooka WebCache
-			fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&net=gnutella2&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+			fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&net=gnutella2&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 		else
-			fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+			fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 
 		while ( !feof($fp) )
 		{
@@ -425,7 +425,7 @@ function PingWebCache($cache){
 			$cache_data[1]= "gnutella1";
 		}
 		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for WebCaches that follow Bazooka extensions of specifications
-		{																				// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter
+		{																				// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
 			if (!$fp)
@@ -435,7 +435,7 @@ function PingWebCache($cache){
 			}
 			else
 			{
-				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&net=gnutella2&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&net=gnutella2&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 
 				while ( !feof($fp) )
 				{
@@ -531,7 +531,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 		$time_diff = bcdiv( time() - strtotime( trim($time) ), 86400 );
 
 		if ( $time_diff < 10 )
-			print "I|update|OK|".$cache." already exists and it is already updated\r\n";
+			return 0; // Exists
 		else
 		{
 			if( $PING_WEBCACHES )
@@ -545,17 +545,17 @@ function WriteCacheFile($cache, $net, $client, $version){
 			if( $cache_data[0] == "FAILED" )
 			{
 				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
-				print "I|update|WARNING|Rejected: Ping of ".$cache." failed - Removed\r\n";
+				return 5; // Ping failed
 			}
 			elseif( $cache_data[0] == "UNSUPPORTED" )
 			{
 				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
-				print "I|update|WARNING|Rejected: Network of ".$cache." not supported - Removed\r\n";
+				return 6; // Unsupported network
 			}
 			else
 			{
 				ReplaceCache( $cache_file, $i, $cache, $cache_data, $client, $version );
-				print "I|update|OK|".$cache." already exists - Updated timestamp\r\n";
+				return 1; // Updated timestamp
 			}
 		}
 	}
@@ -564,7 +564,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 		$blocked = CheckBlockedCache($cache);
 
 		if ($blocked)
-			print "I|update|WARNING|Rejected: Blocked URL\r\n";
+			return 4; // Blocked URL
 		else
 		{
 			if( $PING_WEBCACHES )
@@ -576,9 +576,9 @@ function WriteCacheFile($cache, $net, $client, $version){
 			}
 
 			if( $cache_data[0] == "FAILED" )
-				print "I|update|WARNING|Rejected: Ping of ".$cache." failed\r\n";
+				return 5; // Ping failed
 			elseif( $cache_data[0] == "UNSUPPORTED" )
-				print "I|update|WARNING|Rejected: Network of ".$cache." not supported\r\n";
+				return 6; // Unsupported network
 			else
 			{
 				$file = fopen("webcachedata/caches.dat", "a");
@@ -586,7 +586,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 				if ( count($cache_file) >= $MAX_CACHES )
 				{
 					ReplaceCache( $cache_file, 0, $cache, $cache_data, $client, $version );
-					print "I|update|OK|Cache file full - Pushed old data and inserted ".$cache."\r\n";
+					return 3; // OK, pushed old data
 				}
 				else
 				{
@@ -594,7 +594,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 					fwrite($file, $cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
 					flock($file, 3);
 					fclose($file);
-					print "I|update|OK|URL ".$cache." added successfully\r\n";
+					return 2; // OK
 				}
 			}
 		}
@@ -1117,8 +1117,6 @@ else
 	{
 		if ( strlen($CLIENT) > 4 )
 			$VERSION = substr( $CLIENT, 4, strlen($CLIENT) - 4 );
-		else
-			die("ERROR: Version unknown - Request rejected\r\n");
 
 		$CLIENT = substr( $CLIENT, 0, 4 );
 	}
@@ -1157,8 +1155,25 @@ else
 		if( $CACHE != NULL )
 		{
 			if( CheckURLValidity($CACHE) )
-				WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
-			else
+			{
+				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
+
+				if( $result == 0 ) // Exists
+					print "I|update|OK|Cache already exists and it is already updated\r\n";
+				elseif( $result == 1 ) // Updated timestamp
+					print "I|update|OK|Updated timestamp\r\n";
+				elseif( $result == 2 ) // OK
+					print "I|update|OK|Cache added successfully\r\n";
+				elseif( $result == 3 ) // OK, pushed old data
+					print "I|update|OK|Cache added successfully - pushed old data\r\n";
+				elseif( $result == 4 ) // Blocked URL
+					print "I|update|OK|Blocked URL\r\n";
+				elseif( $result == 5 ) // Ping failed
+					print "I|update|WARNING|Rejected: Ping of ".$CACHE." failed\r\n";
+				elseif( $result == 6 ) // Unsupported network
+					print "I|update|WARNING|Rejected: Network of ".$CACHE." not supported\r\n";
+			}
+			else // Invalid URL
 				print("I|update|WARNING|Rejected: Invalid URL ".$CACHE."\r\n");
 		}
 	}
@@ -1170,15 +1185,24 @@ else
 				if( CheckIPValidity($REMOTE_IP, $IP) )
 					WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
 				else
-					print "ERROR: Invalid IP ".$IP."\r\n";
+					print "WARNING: Invalid IP ".$IP."\r\n";
 			}
 
 		if( $CACHE != NULL )
 		{
 			if( CheckURLValidity($CACHE) )
-				WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
-			else
-				print("ERROR: Invalid URL ".$CACHE."\r\n");
+			{
+				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
+
+				if( $result <= 4 )
+					print "OK\r\n";
+				elseif( $result == 5 ) // Ping failed
+					print "WARNING: Ping of ".$CACHE." failed\r\n";
+				elseif( $result == 6 ) // Unsupported network
+					print "WARNING: Network of ".$CACHE." not supported\r\n";
+			}
+			else // Invalid URL
+				print("WARNING: Invalid URL ".$CACHE."\r\n");
 		}
 	}
 
