@@ -25,7 +25,7 @@ if(file_exists("vars.php"))
 else
 	die("ERROR: The file vars.php is missing.");
 
-if( !isset($ENABLED) || !$ENABLED )
+if( !$ENABLED )
 {
 	header("Status: 404 Not Found");
 	header("Content-Type: text/plain");
@@ -34,7 +34,7 @@ if( !isset($ENABLED) || !$ENABLED )
 
 $NAME		= "Skulls";
 $VENDOR		= "SKLL";
-$SHORT_VER	= "0.0.3";
+$SHORT_VER	= "0.0.5";
 $VER		= $SHORT_VER." Beta";
 
 $SUPPORTED_NETWORKS[0] = "Gnutella1";
@@ -236,6 +236,8 @@ function Inizialize($supported_networks){
 }
 
 function Pong($ver){
+	global $NAME;
+
 	print "PONG ".$NAME." ".$ver."\r\n";
 	print "I|pong|".$NAME." ".$ver."|multi|TCP\r\n";
 }
@@ -460,7 +462,7 @@ function PingWebCache($cache){
 function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	global $MAX_HOSTS;
 
-	if($leaves < 50 && $leaves!=NULL)
+	if($leaves < 20 && $leaves != NULL)
 		print "I|update|WARNING|Rejected: Leaf count of ".$ip." too low\r\n";
 	else
 	{
@@ -505,8 +507,8 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	}
 }
 
-function WriteCacheFile($cache, $client, $version){
-	global $MAX_CACHES;
+function WriteCacheFile($cache, $net, $client, $version){
+	global $MAX_CACHES, $PING_WEBCACHES;
 
 	$cache_file = file("webcachedata/caches.dat");
 
@@ -532,7 +534,13 @@ function WriteCacheFile($cache, $client, $version){
 			print "I|update|OK|".$cache." already exists and it is already updated\r\n";
 		else
 		{
-			$cache_data = PingWebCache($cache);
+			if( $PING_WEBCACHES )
+				$cache_data = PingWebCache($cache);
+			else
+			{
+				$cache_data[0] = "";
+				$cache_data[1] = $net;
+			}
 
 			if( $cache_data[0] == "FAILED" )
 			{
@@ -559,7 +567,13 @@ function WriteCacheFile($cache, $client, $version){
 			print "I|update|WARNING|Rejected: Blocked URL\r\n";
 		else
 		{
-			$cache_data = PingWebCache($cache);
+			if( $PING_WEBCACHES )
+				$cache_data = PingWebCache($cache);
+			else
+			{
+				$cache_data[0] = "";
+				$cache_data[1] = $net;
+			}
 
 			if( $cache_data[0] == "FAILED" )
 				print "I|update|WARNING|Rejected: Ping of ".$cache." failed\r\n";
@@ -995,7 +1009,10 @@ function ShowHtmlPage($num){
 <?php
 }
 
-putenv('TZ=UTC');
+if( (float)PHP_VERSION >= 5.1 )
+	date_default_timezone_set("UTC");
+else
+	@putenv("TZ=UTC");
 
 Inizialize($SUPPORTED_NETWORKS);
 
@@ -1140,7 +1157,7 @@ else
 		if( $CACHE != NULL )
 		{
 			if( CheckURLValidity($CACHE) )
-				WriteCacheFile($CACHE, $CLIENT, $VERSION);
+				WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
 			else
 				print("I|update|WARNING|Rejected: Invalid URL ".$CACHE."\r\n");
 		}
@@ -1159,7 +1176,7 @@ else
 		if( $CACHE != NULL )
 		{
 			if( CheckURLValidity($CACHE) )
-				WriteCacheFile($CACHE, $CLIENT, $VERSION);
+				WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
 			else
 				print("ERROR: Invalid URL ".$CACHE."\r\n");
 		}
