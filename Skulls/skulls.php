@@ -317,10 +317,15 @@ function CheckBlockedCache($cache){
 }
 
 function IsClientTooOld( $client, $version ){
+	if( $version == "" )
+		return 0;
+
+	$version = (float)$version;
+
     switch($client)
 	{
 		case "RAZA":
-			if( substr( $version, 0, 1 ) <= 1 && substr( $version, 1, 1 ) == "." )
+			if( $version < 2 )
 				return 1;
 			break;
     }
