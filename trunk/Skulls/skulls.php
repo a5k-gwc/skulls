@@ -42,134 +42,6 @@ $SUPPORTED_NETWORKS[1] = "Gnutella2";
 
 
 
-function ReplaceVendorCode($client){
-    switch($client)
-	{
-		case "ACQL":
-			$client_name = "Acqlite";
-			$url = "http://acqlite.sourceforge.net/";
-			break;
-		case "ACQX":
-			$client_name = "Acquisition";
-			$url = "http://www.acquisitionx.com/";
-			break;
-		case "AGIO":
-			$client_name = "Adagio";
-			$url = "http://sourceforge.net/projects/agio/";
-			break;
-		case "BEAR":
-			$client_name = "BearShare";
-			$url = "http://www.bearshare.com/";
-			break;
-		case "COCO":
-			$client_name = "CocoGnut";
-			$url = "http://www.alpha-programming.co.uk/software/cocognut/";
-			break;
-		case "GDNA":
-			$client_name = "GnucDNA";
-			$url = "http://www.gnucleus.com/GnucDNA/";
-			break;
-		case "GIFT":
-			$client_name = "giFT";
-			$url = "http://gift.sourceforge.net/";
-			break;
-		case "GNUC":
-			$client_name = "Gnucleus";
-			$url = "http://www.gnucleus.com/Gnucleus/";
-			break;
-		case "GPUX":
-			$client_name = "GPU";
-			$url = "http://sourceforge.net/projects/gpu/";
-			break;
-		case "GTKG":
-			$client_name = "GTK Gnutella";
-			$url = "http://gtk-gnutella.sourceforge.net/";
-			break;
-		case "LIME":
-			$client_name = "LimeWire";
-			$url = "http://www.limewire.com/";
-			break;
-        case "MLDK":
-			$client_name = "MLDonkey";
-			$url = "http://www.mldonkey.net/";
-			break;
-		case "MMMM":
-			$client_name = "Morpheus";
-			$url = "http://www.morpheus.com";
-			break;
-		case "MRPH":
-			$client_name = "Morpheus";
-			$url = "http://www.morpheus.com";
-			break;
-		case "MNAP":
-			$client_name = "MyNapster";
-			$url = "http://www.mynapster.com/";
-			break;
-		case "MUTE":
-			$client_name = "Mutella";
-			$url = "http://mutella.sourceforge.net/";
-			break;
-		case "MXIE":
-			$client_name = "mxie";
-			$url = "http://www.mxie.com/";
-			break;
-		case "NOVA":
-			$client_name = "Nova";
-			$url = "http://novap2p.sourceforge.net/";
-			break;
-		case "PHEX":
-			$client_name = "Phex";
-			$url = "http://phex.kouk.de/mambo/";
-			break;
-		case "RAZA":
-			$client_name = "Shareaza";
-			$url = "http://www.shareaza.com/";
-			break;
-		case "RAZB":
-			$client_name = "SBeta";		// Beta version of Shareaza
-			$url = "http://www.shareaza.com/beta/";
-			break;
-		case "SWAP":
-			$client_name = "Swapper";
-			$url = "http://www.revolutionarystuff.com/swapper/";
-			break;
-		case "TFLS":
-			$client_name = "TrustyFiles";
-			$url = "http://www.trustyfiles.com/";
-			break;
-
-        case "TEST":
-			$client_name = "Web Cache";
-			$url = "";
-			break;
-		case "SKLL":
-			$client_name = "Skulls";
-			$url = "http://ale5000.altervista.org/";
-			break;	
-		case "GCII":
-			$client_name = "PHPGnuCacheII";
-			$url = "http://gwcii.sourceforge.net/";
-			break;	
-        case "BAZK":
-			$client_name = "Bazooka";
-			$url = "http://rocketx.port5.com/";
-			break;
-
-        default:
-			if ( !empty($client) )
-				$client_name = "Unknown client (".$client.")";
-			else
-				$client_name = "Unknown client";
-
-			$url = "";
-    }
-
-	if( !empty($url) )
-		return "<a href=\"".$url."\" target=\"_blank\">".$client_name."</a>";
-	else
-		return $client_name;
-}
-
 function InizializeNetworkFiles($net){
 	$net = strtolower($net);
 
@@ -744,7 +616,7 @@ function KickStart($net, $cache){
 			if( strtolower( substr($line, 0, 2) ) == "h|" )
 			{
 				list ( , $host, , $cluster, )  = explode( "|", $line, 5 );
-				WriteHostFile( trim($host), NULL, $net, $cluster, "TEST", NULL );
+				WriteHostFile( trim($host), NULL, $net, $cluster, "KICKSTART", NULL );
 			}
 		}
 		fclose ($fp);
@@ -753,6 +625,8 @@ function KickStart($net, $cache){
 
 function ShowHtmlPage($num){
 	global $NAME, $VER, $NET, $MAX_HOSTS, $MAX_CACHES, $STATFILE_ENABLED;
+
+	include "vendor_code.php";
 
 	if( $NET == NULL )
 		$NET = "gnutella2";
@@ -869,7 +743,7 @@ function ShowHtmlPage($num){
 													if( !empty($leaves) )
 														echo(" (".$leaves.")");
 													echo("</td>");
-													echo("<td width=\"150\"><strong>".ReplaceVendorCode($client)." ".$version."</strong></td>");
+													echo("<td width=\"150\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>");
 													echo("<td width=\"160\">".$time."</td></tr>");
 												}
 										?>
@@ -930,7 +804,7 @@ function ShowHtmlPage($num){
 													echo("</a></td>");
 													echo("<td width=\"140\">".$cache_name."</td>");
 													echo("<td width=\"90\">".ucfirst($net)."</td>");
-													echo("<td width=\"120\"><strong>".ReplaceVendorCode($client)." ".$version."</strong></td>");
+													echo("<td width=\"120\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>");
 													echo("<td width=\"160\">".$time."</td></tr>");
 												}
 										?>
