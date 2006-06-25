@@ -34,10 +34,10 @@ if( !$ENABLED )
 
 $NAME		= "Skulls";
 $VENDOR		= "SKLL";
-$SHORT_VER	= "0.0.5";
+$SHORT_VER	= "0.1.1";
 $VER		= $SHORT_VER." Beta";
 
-$SUPPORTED_NETWORKS[0] = "Gnutella1";
+$SUPPORTED_NETWORKS[0] = "Gnutella";
 $SUPPORTED_NETWORKS[1] = "Gnutella2";
 
 
@@ -45,17 +45,17 @@ $SUPPORTED_NETWORKS[1] = "Gnutella2";
 function InizializeNetworkFiles($net){
 	$net = strtolower($net);
 
-	if ( !file_exists("webcachedata/hosts_".$net.".dat") )
-		fclose( fopen("webcachedata/hosts_".$net.".dat", "x") );
+	if ( !file_exists(DATA_DIR."/hosts_".$net.".dat") )
+		fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "x") );
 }
 
 function Inizialize($supported_networks){
-	if ( !file_exists("webcachedata/") )
-		mkdir("webcachedata/", 0775);
+	if ( !file_exists(DATA_DIR."/") )
+		mkdir(DATA_DIR."/", 0777);
 
-	if ( !file_exists("webcachedata/runnig_since.dat") )
+	if ( !file_exists(DATA_DIR."/runnig_since.dat") )
 	{
-		if ( !$file = fopen( "webcachedata/runnig_since.dat", "w" ) )
+		if ( !$file = fopen( DATA_DIR."/runnig_since.dat", "w" ) )
 			die("ERROR: Writing file failed");
 		else
 		{
@@ -66,17 +66,17 @@ function Inizialize($supported_networks){
 		}
 	}
 
-	if ( !file_exists("webcachedata/caches.dat") )
-		fclose( fopen("webcachedata/caches.dat", "x") );
+	if ( !file_exists(DATA_DIR."/caches.dat") )
+		fclose( fopen(DATA_DIR."/caches.dat", "x") );
 
 	$networks_count=count($supported_networks);
 
 	for( $i=0; $i<$networks_count; $i++ )
 		InizializeNetworkFiles( $supported_networks[$i] );
 
-	if ( !file_exists("webcachedata/blocked_caches.dat") )
+	if ( !file_exists(DATA_DIR."/blocked_caches.dat") )
 	{
-		$file = fopen("webcachedata/blocked_caches.dat", "x");
+		$file = fopen(DATA_DIR."/blocked_caches.dat", "x");
 		flock($file, 2);
 		fwrite($file, "http://gwc.wodi.org/g2/bazooka"."\r\n");
 		flock($file, 3);
@@ -174,7 +174,7 @@ function CheckURLValidity($cache){
 }
 
 function CheckBlockedCache($cache){
-	$blocked_cache_file = file("webcachedata/blocked_caches.dat");
+	$blocked_cache_file = file(DATA_DIR."/blocked_caches.dat");
 
 	$blocked = FALSE;
 
@@ -208,7 +208,7 @@ function IsClientTooOld( $client, $version ){
 function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version){
 	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($line + 1) ) ) );
 
-	$file = fopen("webcachedata/hosts_".$net.".dat", "w");
+	$file = fopen(DATA_DIR."/hosts_".$net.".dat", "w");
 
 	flock($file, 2);
 	fwrite($file, $new_host_file.$ip."|".$leaves."|".$cluster."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
@@ -219,7 +219,7 @@ function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $
 function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version){
 	$new_cache_file = implode("", array_merge( array_slice($cache_file, 0, $line), array_slice( $cache_file, ($line + 1) ) ) );
 
-	$file = fopen("webcachedata/caches.dat", "w");
+	$file = fopen(DATA_DIR."/caches.dat", "w");
 
 	flock($file, 2);
 	if ($cache != NULL)
@@ -258,10 +258,11 @@ function PingWebCache($cache){
 		$oldpong = "";
 		$error = "";
 
+		$query = "ping=1&multi=1&client=".$VENDOR."&version=".$SHORT_VER;
 		if ( $main_url[count($main_url)-1] == "bazooka.php" )	// Workaround for Bazooka WebCache
-			fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&net=gnutella2&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
-		else
-			fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+			$query .= "&net=gnutella2";
+
+		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 
 		while ( !feof($fp) )
 		{
@@ -299,7 +300,7 @@ function PingWebCache($cache){
 		elseif( !empty($oldpong) )
 		{
 			$cache_data[0] = trim( substr( $oldpong, 5, strlen($oldpong) - 5 ) );
-			$cache_data[1]= "gnutella1";
+			$cache_data[1]= "gnutella";
 		}
 		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for WebCaches that follow Bazooka extensions of specifications
 		{																				// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
@@ -312,21 +313,31 @@ function PingWebCache($cache){
 			}
 			else
 			{
-				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&net=gnutella2&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".$VENDOR."&version=".$SHORT_VER."&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+
+				$pong = "";
 
 				while ( !feof($fp) )
 				{
 					$line = fgets( $fp, 1024 );
 
 					if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
+					{
 						$pong = $line;
+						break;
+					}
 				}
 
 				fclose ($fp);
 
-				$received_data = explode( "|", $pong );
-				$cache_data[0] = trim( $received_data[2] );
-				$cache_data[1] = "gnutella2";
+				if( !empty($pong) )
+				{
+					$received_data = explode( "|", $pong );
+					$cache_data[0] = trim( $received_data[2] );
+					$cache_data[1] = "gnutella2";
+				}
+				else
+					$cache_data[0] = "FAILED";
 			}
 		}
 		else
@@ -343,7 +354,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 		print "I|update|WARNING|Rejected: Leaf count of ".$ip." too low\r\n";
 	else
 	{
-		$host_file = file("webcachedata/hosts_".$net.".dat");
+		$host_file = file(DATA_DIR."/hosts_".$net.".dat");
 
 		$host_exists = FALSE;
 
@@ -372,7 +383,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 			}
 			else
 			{
-				$file = fopen("webcachedata/hosts_".$net.".dat", "a");
+				$file = fopen(DATA_DIR."/hosts_".$net.".dat", "a");
 
 				flock($file, 2);
 				fwrite($file, $ip."|".$leaves."|".$cluster."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
@@ -387,7 +398,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 function WriteCacheFile($cache, $net, $client, $version){
 	global $MAX_CACHES, $PING_WEBCACHES;
 
-	$cache_file = file("webcachedata/caches.dat");
+	$cache_file = file(DATA_DIR."/caches.dat");
 
 	$cache_exists = FALSE;
 
@@ -472,7 +483,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 				return 6; // Unsupported network
 			else
 			{
-				$file = fopen("webcachedata/caches.dat", "a");
+				$file = fopen(DATA_DIR."/caches.dat", "a");
 
 				if ( count($cache_file) >= $MAX_CACHES )
 				{
@@ -495,7 +506,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 function HostFile($net){
 	global $MAX_HOSTS_OUT;
 
-	$host_file = file("webcachedata/hosts_".$net.".dat");
+	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
 	$count_host = count($host_file);
 
 	if($count_host <= $MAX_HOSTS_OUT)
@@ -513,7 +524,7 @@ function HostFile($net){
 function UrlFile($net){
 	global $MAX_CACHES_OUT;
 
-	$cache_file = file("webcachedata/caches.dat");
+	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
 
 	if ($count_cache <= $MAX_CACHES_OUT)
@@ -530,9 +541,9 @@ function UrlFile($net){
 }
 
 function Get($net){
-	global $MAX_HOSTS_OUT, $MAX_CACHES_OUT;
+	global $MAX_HOSTS_OUT, $MAX_CACHES_OUT, $PV;
 
-	$host_file = file("webcachedata/hosts_".$net.".dat");
+	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
 	$count_host = count($host_file);
 
 	if($count_host <= $MAX_HOSTS_OUT)
@@ -543,10 +554,14 @@ function Get($net){
 	for( $i=0; $i<$max_hosts; $i++ )
 	{
 		list ( $host, , $cluster, , , $time ) = explode("|", $host_file[($count_host - 1) - $i], 6);
-		print("H|".$host."|".TimeSinceSubmissionInSeconds( $time )."|".$cluster."\r\n");
+		$out = "H|".$host."|".TimeSinceSubmissionInSeconds( $time )."|".$cluster;
+		if( $PV >= 4 )
+			$out .= "|".$net;
+
+		print($out."\r\n");
 	}
 
-	$cache_file = file("webcachedata/caches.dat");
+	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
 
 	if ($count_cache <= $MAX_CACHES_OUT)
@@ -629,8 +644,10 @@ function KickStart($net, $cache){
 
 			if( strtolower( substr($line, 0, 2) ) == "h|" )
 			{
-				list ( , $host, , $cluster, )  = explode( "|", $line, 5 );
-				WriteHostFile( trim($host), NULL, $net, $cluster, "KICKSTART", NULL );
+				$host = explode( "|", $line, 5 );
+				if( !isset($host[3]) ) // Cluster
+					$host[3] = NULL;
+				WriteHostFile( trim($host[1]), NULL, $net, $host[3], "KICKSTART", NULL );
 			}
 		}
 		fclose ($fp);
@@ -689,9 +706,9 @@ function ShowHtmlPage($num){
 								<td width="150">- Running since:</td>
 								<td style="color: #994433;">
 								<?php
-									if (file_exists("webcachedata/runnig_since.dat"))
+									if (file_exists(DATA_DIR."/runnig_since.dat"))
 									{
-										$runnig_since = file("webcachedata/runnig_since.dat");
+										$runnig_since = file(DATA_DIR."/runnig_since.dat");
 										echo($runnig_since[0]);
 									}
 								?>
@@ -725,23 +742,26 @@ function ShowHtmlPage($num){
 			}
 			elseif ($num == 2)	// Host
 			{
+				$max_of_hosts = $MAX_HOSTS;
+
 				if( $NET == "all" )
 				{
 					global $SUPPORTED_NETWORKS;
 					$networks_count = count($SUPPORTED_NETWORKS);
+					$max_of_hosts *= $networks_count;
 
 					$host_file = array();
 					for( $i=0; $i<$networks_count; $i++ )
-						$host_file = array_merge( $host_file, file("webcachedata/hosts_".$SUPPORTED_NETWORKS[$i].".dat") );
+						$host_file = array_merge( $host_file, file(DATA_DIR."/hosts_".$SUPPORTED_NETWORKS[$i].".dat") );
 				}
-				elseif( file_exists("webcachedata/hosts_".$NET.".dat") )
-					$host_file = file("webcachedata/hosts_".$NET.".dat");
+				elseif( file_exists(DATA_DIR."/hosts_".$NET.".dat") )
+					$host_file = file(DATA_DIR."/hosts_".$NET.".dat");
 				else
 					$host_file = array();
 				?>
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF">
-					<b><?php echo( ucfirst($NET) ); ?> Hosts (<?php echo(count($host_file)." of ".$MAX_HOSTS); ?>)</b>
+					<b><?php echo( ucfirst($NET) ); ?> Hosts (<?php echo(count($host_file)." of ".$max_of_hosts); ?>)</b>
 					</td>
 				</tr>
 				<tr>
@@ -783,7 +803,7 @@ function ShowHtmlPage($num){
 			}
 			elseif ($num == 3)	// WebCache
 			{
-				$cache_file = file("webcachedata/caches.dat");
+				$cache_file = file(DATA_DIR."/caches.dat");
 				?>
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF"><b>Alternative WebCaches (<?php echo(count($cache_file)." of ".$MAX_CACHES); ?>)</b></td>
@@ -921,6 +941,7 @@ else
 
 Inizialize($SUPPORTED_NETWORKS);
 
+$PV = !empty($_GET['pv']) ? $_GET['pv'] : 0;
 $PING = !empty($_GET['ping']) ? $_GET['ping'] : 0;
 
 $NET = !empty($_GET['net']) ? strtolower($_GET['net']) : NULL;
@@ -998,6 +1019,7 @@ else
 {
 	header("Content-Type: text/plain");
 	header("X-Remote-IP: ".$REMOTE_IP);
+	header("Connection: close");
 
 	if($STATFILE_ENABLED)
 	{
@@ -1032,8 +1054,8 @@ else
 	}
 
 
-	if ( $NET == NULL )
-		$NET = "gnutella1";
+	if ( $NET == NULL || $NET == "gnutella1" )
+		$NET = "gnutella";
 
 
 	if ($PING)
@@ -1109,18 +1131,31 @@ else
 
 	if ($GET)
 	{
-		if ( CheckNetParameter($SUPPORTED_NETWORKS, $NET, "get") )
+		if( CheckNetParameter($SUPPORTED_NETWORKS, $NET, "get") )
 			Get($NET);
+
+		if( $PV >= 4 )
+		{
+			$networks_count=count($SUPPORTED_NETWORKS);
+			$networks = $SUPPORTED_NETWORKS[0];
+
+			for( $i=1; $i<$networks_count; $i++ )
+				$networks .= "!".$SUPPORTED_NETWORKS[$i];
+			print("I|networks|".strtolower($networks)."\r\n");
+		}
 	}
 	else
 	{
-		if ($HOSTFILE)
+		if($HOSTFILE)
 			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
 				HostFile($NET);
 
-		if ($URLFILE)
+		if($URLFILE)
 			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
 				UrlFile($NET);
+
+		if( $PV >= 3 && ($HOSTFILE || $URLFILE) )
+			print("net: ".$NET."\r\n");
 	}
 
 	if( $UPDATE || ($CACHE != NULL) || ($IP != NULL) )
