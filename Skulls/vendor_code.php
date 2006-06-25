@@ -141,7 +141,7 @@ function ReplaceVendorCode($client, $version){
     }
 
 	if( $url != "" )
-		return "<a href=\"".$url."\" target=\"_blank\">".$client_name."</a>"." ".$version;
+		return "<a href=\"".$url."\" target=\"_blank\">".$client_name." ".$version."</a>";
 	else
 		return $client_name." ".$version;
 }

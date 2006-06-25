@@ -20,7 +20,7 @@
 //   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-if(file_exists("vars.php"))
+if( file_exists("vars.php") )
 	include "vars.php";
 else
 	die("ERROR: The file vars.php is missing.");
@@ -415,8 +415,15 @@ function WriteCacheFile($cache, $net, $client, $version){
 				$cache_data = PingWebCache($cache);
 			else
 			{
-				$cache_data[0] = "";
-				$cache_data[1] = $net;
+				global $SUPPORTED_NETWORKS;
+
+				if( CheckNetwork($SUPPORTED_NETWORKS, $net) )
+				{
+					$cache_data[0] = NULL;
+					$cache_data[1] = $net;
+				}
+				else
+					$cache_data[0] = "UNSUPPORTED";
 			}
 
 			if( $cache_data[0] == "FAILED" )
@@ -448,8 +455,15 @@ function WriteCacheFile($cache, $net, $client, $version){
 				$cache_data = PingWebCache($cache);
 			else
 			{
-				$cache_data[0] = "";
-				$cache_data[1] = $net;
+				global $SUPPORTED_NETWORKS;
+
+				if( CheckNetwork($SUPPORTED_NETWORKS, $net) )
+				{
+					$cache_data[0] = NULL;
+					$cache_data[1] = $net;
+				}
+				else
+					$cache_data[0] = "UNSUPPORTED";
 			}
 
 			if( $cache_data[0] == "FAILED" )
@@ -629,7 +643,7 @@ function ShowHtmlPage($num){
 	include "vendor_code.php";
 
 	if( $NET == NULL )
-		$NET = "gnutella2";
+		$NET = "all";
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -711,7 +725,19 @@ function ShowHtmlPage($num){
 			}
 			elseif ($num == 2)	// Host
 			{
-				$host_file = file("webcachedata/hosts_".$NET.".dat");
+				if( $NET == "all" )
+				{
+					global $SUPPORTED_NETWORKS;
+					$networks_count = count($SUPPORTED_NETWORKS);
+
+					$host_file = array();
+					for( $i=0; $i<$networks_count; $i++ )
+						$host_file = array_merge( $host_file, file("webcachedata/hosts_".$SUPPORTED_NETWORKS[$i].".dat") );
+				}
+				elseif( file_exists("webcachedata/hosts_".$NET.".dat") )
+					$host_file = file("webcachedata/hosts_".$NET.".dat");
+				else
+					$host_file = array();
 				?>
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF">
@@ -903,13 +929,10 @@ $IP = !empty($_GET['ip']) ? $_GET['ip'] : ( !empty($_GET['ip1']) ? $_GET['ip1'] 
 $CACHE = !empty($_GET['url']) ? $_GET['url'] : ( !empty($_GET['url1']) ? $_GET['url1'] : NULL );
 $LEAVES = !empty($_GET['x_leaves']) ? $_GET['x_leaves'] : NULL;
 $CLUSTER = !empty($_GET['cluster']) ? $_GET['cluster'] : NULL;
-if( $CLUSTER != NULL )
-{
-	if( strlen($CLUSTER) > 256 )
-		$CLUSTER = NULL;
-
+if( strlen($CLUSTER) > 256 )
+	$CLUSTER = NULL;
+elseif( $CLUSTER != NULL )
 	$CLUSTER = str_replace( "|", "", $CLUSTER );
-}
 
 $HOSTFILE = !empty($_GET['hostfile']) ? $_GET['hostfile'] : 0;
 $URLFILE = !empty($_GET['urlfile']) ? $_GET['urlfile'] : 0;
@@ -929,15 +952,14 @@ $SHOWCACHES = !empty($_GET['showurls']) ? $_GET['showurls'] : 0;
 $SHOWSTATS = !empty($_GET['stats']) ? $_GET['stats'] : 0;
 
 if( empty($_SERVER['QUERY_STRING']) )
-	$SHOWINFO=1;
+	$SHOWINFO = 1;
 
 $KICK_START = !empty($_GET['kickstart']) ? $_GET['kickstart'] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter.
 
-$REMOTE_IP = !empty($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : getenv("REMOTE_ADDR");
-$FORWARDED_IP = !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : getenv("HTTP_X_FORWARDED_FOR");
+if( !isset($_SERVER) )
+	$_SERVER = $HTTP_SERVER_VARS;
 
-if (strlen($FORWARDED_IP) > 0)
-	$REMOTE_IP = $FORWARDED_IP;
+$REMOTE_IP = !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
 
 
 if($LOG_ENABLED)
@@ -995,7 +1017,7 @@ else
 	if( $VERSION == NULL )
 	{
 		if ( strlen($CLIENT) > 4 )
-			$VERSION = substr( $CLIENT, 4, strlen($CLIENT) - 4 );
+			$VERSION = substr( $CLIENT, 4 );
 
 		$CLIENT = substr( $CLIENT, 0, 4 );
 	}
@@ -1003,7 +1025,7 @@ else
 	if( IsClientTooOld( $CLIENT, $VERSION ) )
 		die("ERROR: Client too old - Request rejected\r\n");
 
-	if ( !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && !$UPDATE && ($CACHE == NULL) && ($IP == NULL) )
+	if( !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && !$UPDATE && ($CACHE == NULL) && ($IP == NULL) )
 	{
 		UpdateStats("other");
 		die("ERROR: Invalid command - Request rejected\r\n");
@@ -1106,7 +1128,7 @@ else
 	else
 		UpdateStats("other");
 
-	if ($STATFILE)
+	if( $STATFILE && !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE )
 	{
 		if($STATFILE_ENABLED)
 		{
@@ -1118,7 +1140,7 @@ else
 			print $requests."\r\n";
 		}
 		else
-			print "I|statfile|WARNING|Disabled\r\n";
+			print "WARNING: Statfile disabled\r\n";
 	}
 }
 ?>
