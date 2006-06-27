@@ -34,7 +34,7 @@ if( !$ENABLED )
 
 $NAME		= "Skulls";
 $VENDOR		= "SKLL";
-$SHORT_VER	= "0.1.1";
+$SHORT_VER	= "0.1.2";
 $VER		= $SHORT_VER." Beta";
 
 $SUPPORTED_NETWORKS[0] = "Gnutella";
@@ -752,10 +752,13 @@ function ShowHtmlPage($num){
 
 					$host_file = array();
 					for( $i=0; $i<$networks_count; $i++ )
-						$host_file = array_merge( $host_file, file(DATA_DIR."/hosts_".$SUPPORTED_NETWORKS[$i].".dat") );
+						$host_file = array_merge( $host_file, file(DATA_DIR."/hosts_".$SUPPORTED_NETWORKS[$i].".dat"), array($SUPPORTED_NETWORKS[$i]) );
 				}
 				elseif( file_exists(DATA_DIR."/hosts_".$NET.".dat") )
+				{
 					$host_file = file(DATA_DIR."/hosts_".$NET.".dat");
+					$net = ucfirst($NET);
+				}
 				else
 					$host_file = array();
 				?>
@@ -771,27 +774,36 @@ function ShowHtmlPage($num){
 								<td bgcolor="#CCCCDD">
 									<table width="100%" cellspacing="0" cellpadding="4">
 										<tr bgcolor="#C6E6E6"> 
-											<td width="160">Host address (Leaves)</td>
-											<td width="150">Client</td>
-											<td width="160">Last updated</td>
+											<td>Host address (Leaves)</td>
+											<td>Client</td>
+											<td>Network</td>
+											<td>Last updated</td>
 										</tr>
 										<?php
 											if( count($host_file) == 0 )
-												print("<tr align=\"center\" bgcolor=\"#FFFFFF\">\r\n\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"3\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td>\r\n\t\t\t\t\t\t\t\t\t\t</tr>\r\n");
+												print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"4\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td></tr>\r\n");
 											else
+											{
 												for( $i = count($host_file) - 1; $i >= 0; $i-- )
 												{
-													list ($ip, $leaves, , $client, $version, $time) = explode("|", $host_file[$i], 6);
-													$color = $i % 2 == 0 ? "#F0F0F0" : "#FFFFFF";
+													if( strstr($host_file[$i], "|") )
+													{
+														list ($ip, $leaves, , $client, $version, $time) = explode("|", $host_file[$i], 6);
+														$color = $i % 2 == 0 ? "#F0F0F0" : "#FFFFFF";
 
-													echo("<tr align=\"left\" bgcolor=\"".$color."\">");
-													echo("<td width=\"160\"><a href=\"gnutella:host:".$ip."\">".$ip."</a>");
-													if( !empty($leaves) )
-														echo(" (".$leaves.")");
-													echo("</td>");
-													echo("<td width=\"150\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>");
-													echo("<td width=\"160\">".$time."</td></tr>");
+														echo("<tr align=\"left\" bgcolor=\"".$color."\">");
+														echo("<td style=\"padding-right: 10pt;\"><a href=\"gnutella:host:".$ip."\">".$ip."</a>");
+														if( !empty($leaves) )
+															echo(" (".$leaves.")");
+														echo("</td>");
+														echo("<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>");
+														echo("<td style=\"padding-right: 20pt;\">".$net."</td>");
+														echo("<td>".$time."</td></tr>");
+													}
+													else
+														$net = $host_file[$i];
 												}
+											}
 										?>
 									</table>
 								</td>
@@ -815,15 +827,15 @@ function ShowHtmlPage($num){
 								<td bgcolor="#CCCCDD">
 									<table width="100%" cellspacing="0" cellpadding="4">
 										<tr bgcolor="#C6E6E6"> 
-											<td width="170">WebCache URL</td>
-											<td width="140">Name</td>
-											<td width="90">Network</td>
-											<td width="120">Submitting client</td>
-											<td width="160">Date submitted</td>
+											<td>WebCache URL</td>
+											<td>Name</td>
+											<td>Network</td>
+											<td>Submitting client</td>
+											<td>Date submitted</td>
 										</tr>
 										<?php
 											if ( count($cache_file) == 0 )
-												print("<tr align=\"center\" bgcolor=\"#FFFFFF\">\r\n\t\t\t\t\t\t\t\t\t\t\t<td colspan=\"5\" height=\"30\">There are no <strong>alternative webcaches</strong> listed at this time.</td>\r\n\t\t\t\t\t\t\t\t\t\t</tr>\r\n");
+												print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"5\" height=\"30\">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>\r\n");
 											else
 												for($i = count($cache_file) - 1; $i >= 0; $i--)
 												{
@@ -834,7 +846,7 @@ function ShowHtmlPage($num){
 													$color = $i % 2 == 0 ? "#F0F0F0" : "#FFFFFF";
 
 													echo("<tr align=\"left\" bgcolor=\"".$color."\">");
-													echo("<td width=\"170\">");
+													echo("<td style=\"padding-right: 10pt;\">");
 													echo("<a href=\"".$cache_url."\" target=\"_blank\">");
 
 													list( , $cache_url ) = explode("://", $cache_url, 2);
@@ -848,10 +860,10 @@ function ShowHtmlPage($num){
 														echo( $cache_url );
 
 													echo("</a></td>");
-													echo("<td width=\"140\">".$cache_name."</td>");
-													echo("<td width=\"90\">".ucfirst($net)."</td>");
-													echo("<td width=\"120\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>");
-													echo("<td width=\"160\">".$time."</td></tr>");
+													echo("<td style=\"padding-right: 20pt;\">".$cache_name."</td>");
+													echo("<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>");
+													echo("<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>");
+													echo("<td>".$time."</td></tr>");
 												}
 										?>
 									</table>
@@ -924,6 +936,9 @@ function ShowHtmlPage($num){
 		        <?php
 			}
 				?>
+				<tr>
+					<td bgcolor="#FFFFFF" style="padding: 5pt;"><b><?php echo $NAME; ?>'s project page: <a href="http://sourceforge.net/projects/skulls/" target="_blank">http://sourceforge.net/projects/skulls/</a></b></td>
+				</tr>
 			</table>
 		</td>
 	</tr>
