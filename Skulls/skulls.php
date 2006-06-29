@@ -34,7 +34,7 @@ if( !$ENABLED )
 
 $NAME		= "Skulls";
 $VENDOR		= "SKLL";
-$SHORT_VER	= "0.1.2";
+$SHORT_VER	= "0.1.3";
 $VER		= $SHORT_VER." Beta";
 
 $SUPPORTED_NETWORKS[0] = "Gnutella";
@@ -350,8 +350,11 @@ function PingWebCache($cache){
 function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	global $MAX_HOSTS;
 
-	if($leaves < 20 && $leaves != NULL)
-		print "I|update|WARNING|Rejected: Leaf count of ".$ip." too low\r\n";
+	if($leaves < 15 && $leaves != NULL)
+	{
+		print "I|update|WARNING|Rejected: Leaf count too low\r\n";
+		return 4;
+	}
 	else
 	{
 		$host_file = file(DATA_DIR."/hosts_".$net.".dat");
@@ -372,14 +375,14 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 		if( $host_exists == TRUE )
 		{
 			ReplaceHost($host_file, $i, $ip, $leaves, $net, $cluster, $client, $version);
-			print "I|update|OK|".$ip." already exists - Updated timestamp\r\n";
+			return 1; // Updated timestamp
 		}
 		elseif( $host_exists == FALSE )
 		{
 			if( count($host_file) >= $MAX_HOSTS )
 			{
 				ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version);
-				print "I|update|OK|Host file full - Pushed old data and inserted ".$ip."\r\n";
+				return 3; // OK, pushed old data
 			}
 			else
 			{
@@ -389,7 +392,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 				fwrite($file, $ip."|".$leaves."|".$cluster."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
 				flock($file, 3);
 				fclose($file);
-				print "I|update|OK|Host ".$ip." added successfully\r\n";
+				return 2; // OK
 			}
 		}
 	}
@@ -747,6 +750,7 @@ function ShowHtmlPage($num){
 			elseif ($num == 2)	// Host
 			{
 				$max_of_hosts = $MAX_HOSTS;
+				$network_names = 0;
 
 				if( $NET == "all" )
 				{
@@ -756,7 +760,10 @@ function ShowHtmlPage($num){
 
 					$host_file = array();
 					for( $i=0; $i<$networks_count; $i++ )
+					{
 						$host_file = array_merge( $host_file, file(DATA_DIR."/hosts_".$SUPPORTED_NETWORKS[$i].".dat"), array($SUPPORTED_NETWORKS[$i]) );
+						$network_names++;
+					}
 				}
 				elseif( file_exists(DATA_DIR."/hosts_".$NET.".dat") )
 				{
@@ -765,10 +772,12 @@ function ShowHtmlPage($num){
 				}
 				else
 					$host_file = array();
+
+				$current_host = count($host_file) - $network_names;
 				?>
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF">
-					<b><?php echo( ucfirst($NET) ); ?> Hosts (<?php echo(count($host_file)." of ".$max_of_hosts); ?>)</b>
+					<b><?php echo( ucfirst($NET) ); ?> Hosts (<?php echo $current_host." of ".$max_of_hosts; ?>)</b>
 					</td>
 				</tr>
 				<tr>
@@ -1130,8 +1139,19 @@ else
 			if( $IP != NULL )
 			{
 				if( CheckIPValidity($REMOTE_IP, $IP) )
-					WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
-				else
+				{
+					$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+
+					if( $result == 1 ) // Updated timestamp
+						print "I|update|OK|Updated host timestamp\r\n";
+					elseif( $result == 2 ) // OK
+						print "I|update|OK|Host added successfully\r\n";
+					elseif( $result == 3 ) // OK, pushed old data
+						print "I|update|OK|Host added successfully - pushed old data\r\n";
+					elseif( $result == 6 ) // Unsupported network
+						;//print "I|update|WARNING|Rejected: Network of ".$CACHE." not supported\r\n";
+				}
+				else // Invalid IP
 					print "I|update|WARNING|Rejected: Invalid IP ".$IP."\r\n";
 			}
 
@@ -1144,7 +1164,7 @@ else
 				if( $result == 0 ) // Exists
 					print "I|update|OK|Cache already exists and it is already updated\r\n";
 				elseif( $result == 1 ) // Updated timestamp
-					print "I|update|OK|Updated timestamp\r\n";
+					print "I|update|OK|Updated cache timestamp\r\n";
 				elseif( $result == 2 ) // OK
 					print "I|update|OK|Cache added successfully\r\n";
 				elseif( $result == 3 ) // OK, pushed old data
@@ -1166,8 +1186,15 @@ else
 			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
 			{
 				if( CheckIPValidity($REMOTE_IP, $IP) )
-					WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
-				else
+				{
+					$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+
+					if( $result <= 3 )
+						print "OK\r\n";
+					elseif( $result == 6 ) // Unsupported network
+						;//print "WARNING: Network of ".$CACHE." not supported\r\n";
+				}
+				else // Invalid IP
 					print "WARNING: Invalid IP ".$IP."\r\n";
 			}
 
