@@ -398,6 +398,10 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 function WriteCacheFile($cache, $net, $client, $version){
 	global $MAX_CACHES, $PING_WEBCACHES;
 
+	list( , $temp ) = explode("://", $cache, 2);
+	if( $temp == $_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"] )	// It don't allow to insert this webcache url in caches list of this webcache
+		return 0;
+
 	$cache_file = file(DATA_DIR."/caches.dat");
 
 	$cache_exists = FALSE;
@@ -995,7 +999,7 @@ $KICK_START = !empty($_GET['kickstart']) ? $_GET['kickstart'] : 0;	// It request
 if( !isset($_SERVER) )
 	$_SERVER = $HTTP_SERVER_VARS;
 
-$REMOTE_IP = !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+$REMOTE_IP = $_SERVER['REMOTE_ADDR'];
 
 
 if($LOG_ENABLED)
@@ -1003,10 +1007,14 @@ if($LOG_ENABLED)
 	if ( !file_exists("log/") )
 		mkdir("log/", 0775);
 
+	$HTTP_X_FORWARDED_FOR = isset($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] : "";
+	$HTTP_CLIENT_IP = isset($_SERVER["HTTP_CLIENT_IP"]) ? $_SERVER["HTTP_CLIENT_IP"] : "";
+	$HTTP_FROM = isset($_SERVER["HTTP_FROM"]) ? $_SERVER["HTTP_FROM"] : "";
+
 	$file = fopen("log/".strtolower($NAME).".log", "a");
 
 	flock($file, 2);
-	fwrite($file, $_SERVER['QUERY_STRING']." | ".$REMOTE_IP."\r\n");
+	fwrite($file, $_SERVER['QUERY_STRING']." | ".$_SERVER["HTTP_USER_AGENT"]." | ".$_SERVER["REMOTE_ADDR"]." | ".$HTTP_X_FORWARDED_FOR." | ".$HTTP_CLIENT_IP." | ".$HTTP_FROM."\r\n");
 	flock($file, 3);
 	fclose($file);
 }
@@ -1035,6 +1043,43 @@ else
 	header("Content-Type: text/plain");
 	header("X-Remote-IP: ".$REMOTE_IP);
 	header("Connection: close");
+
+	if( $CACHE != NULL )
+	{	// Clean url
+		list( $protocol, $url ) = explode("://", $CACHE, 2);
+
+		if( strstr( $url, "/" ) )
+			list( $url, $other_part_url ) = explode("/", $url, 2);
+		else
+			$other_part_url = "";
+
+		if( substr( $other_part_url, 0, 1 ) == "." )
+			$other_part_url = substr( $other_part_url, 1 );					// Remove dot at the start of $other_part_url if present
+
+		while( substr($other_part_url, 0, 1) == "/" )
+			$other_part_url = substr($other_part_url, 1);
+
+		if( strstr( $url, ":" ) )
+		{
+			list( $host_name, $host_port ) = explode(":", $url, 2);
+			$host_port = (int)$host_port;
+		}
+		else
+		{
+			$host_name = $url;
+			$host_port = 80;
+		}
+
+		if( substr( $host_name, strlen($host_name) - 1, 1 ) == "." )
+			$host_name = substr( $host_name, 0, strlen($host_name) - 1 );	// Remove dot at the end of $host_name if present
+
+		if( $host_port == 80 )
+			$host_port = "";
+		else
+			$host_port = ":".$host_port;
+
+		$CACHE = $protocol."://".$host_name.$host_port."/".$other_part_url;
+	}
 
 	if($STATFILE_ENABLED)
 	{
