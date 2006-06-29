@@ -94,8 +94,12 @@ function ReplaceVendorCode($client, $version){
 			$url = "http://www.shareaza.com/";
 			break;
 		case "RAZB":
-			$client_name = "SBeta";		// Beta version of Shareaza
+			$client_name = "SBeta (Shareaza beta)";		// Beta version of Shareaza
 			$url = "http://www.shareaza.com/beta/";
+			break;
+		case "SNOW":
+			$client_name = "FrostWire";
+			$url = "http://www.frostwire.com/";
 			break;
 		case "SWAP":
 			$client_name = "Swapper";
