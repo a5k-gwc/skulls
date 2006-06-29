@@ -2,8 +2,8 @@
 function ReplaceVendorCode($client, $version){
 	if( $client == "TEST" && (float)$version == 0 && substr($version, 0, 1) != "0" )
 	{
-		$client = substr($version, 0, 4);
-		$version = substr($version, 4);
+		$client = $version;
+		$version = "";
 		$test = 1;
 	}
 
@@ -53,17 +53,21 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "LimeWire";
 			$url = "http://www.limewire.com/";
 			break;
+		case "MESH":
+			$client_name = "iMesh";
+			$url = "http://www.imesh.com/";
+			break;
         case "MLDK":
 			$client_name = "MLDonkey";
 			$url = "http://www.mldonkey.net/";
 			break;
 		case "MMMM":
 			$client_name = "Morpheus";
-			$url = "http://www.morpheus.com";
+			$url = "http://www.morpheus.com/";
 			break;
 		case "MRPH":
 			$client_name = "Morpheus";
-			$url = "http://www.morpheus.com";
+			$url = "http://www.morpheus.com/";
 			break;
 		case "MNAP":
 			$client_name = "MyNapster";
@@ -112,8 +116,8 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "WebCache";
 			$url = "";
 			break;
-        case "PGDB":
-			$client_name = "Jonatkins";
+        case "PGDBScan":
+			$client_name = "Jonatkins scan";
 			$url = "http://gcachescan.jonatkins.com/";
 			break;
 		case "SKLL":
