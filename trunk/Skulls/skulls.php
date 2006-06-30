@@ -108,10 +108,21 @@ function Inizialize($supported_networks){
 }
 
 function Pong($ver){
-	global $NAME;
+	global $NAME, $SUPPORTED_NETWORKS;
 
 	print "PONG ".$NAME." ".$ver."\r\n";
-	print "I|pong|".$NAME." ".$ver."|multi|TCP\r\n";
+	print "I|pong|".$NAME." ".$ver."|";
+
+	$networks_count=count($SUPPORTED_NETWORKS);
+	for( $i=0; $i<$networks_count; $i++ )
+	{
+		if($i)
+			print "-";
+
+		print strtolower($SUPPORTED_NETWORKS[$i]);
+	}
+
+	print "|TCP\r\n";
 }
 
 function Support($supported_networks)
@@ -286,13 +297,39 @@ function PingWebCache($cache){
 
 			if( count($received_data) >= 4 && ( substr( $received_data[3], 0, 4 ) != "http" ) )
 			{
-				$cache_data[1] = trim( strtolower( $received_data[3] ) );
+				$networks = trim( strtolower( $received_data[3] ) );
+				$supported = FALSE;
 
-				if( !CheckNetwork($SUPPORTED_NETWORKS, $cache_data[1]) && $cache_data[1] != "multi" )
+				if( $networks == "multi" )
+					$networks = "gnutella-gnutella2";
+
+				if( strstr( $networks, "-" ) )
+				{
+					$temp = explode( "-", $networks );
+
+					$networks_count=count($SUPPORTED_NETWORKS);
+					for( $i=0; $i<$networks_count; $i++ )
+					{
+						if( CheckNetwork($SUPPORTED_NETWORKS, $temp[$i]) )
+						{
+							$supported = TRUE;
+							break;
+						}
+					}
+				}
+				else
+				{
+					if( CheckNetwork($SUPPORTED_NETWORKS, $networks) )
+						$supported = TRUE;
+				}
+
+				$cache_data[1] = $networks;
+
+				if( !$supported )
 					$cache_data[0] = "UNSUPPORTED";
 			}
 			elseif( !empty($oldpong) )
-				$cache_data[1] = "multi";
+				$cache_data[1] = "gnutella-gnutella2";
 			else
 				$cache_data[1] = "gnutella2";
 
@@ -348,7 +385,10 @@ function PingWebCache($cache){
 }
 
 function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
-	global $MAX_HOSTS;
+	global $MAX_HOSTS, $SUPPORTED_NETWORKS;
+
+	if ( !CheckNetwork($SUPPORTED_NETWORKS, $net) )
+		return 6; // Unsupported network
 
 	if($leaves < 15 && $leaves != NULL)
 	{
@@ -542,7 +582,25 @@ function UrlFile($net){
 	for( $i=0; $i<$max_caches; $i++ )
 	{
 		list ( $cache, , $cache_net, ) = explode("|", $cache_file[$i], 4);
-		if( $cache_net == $net || $cache_net == "multi" )
+
+		$insert = FALSE;
+		if( strstr( $cache_net, "-" ) )
+		{
+			$cache_networks = explode( "-", $cache_net );
+			$networks_count=count($cache_networks);
+			for( $x=0; $x<$networks_count; $x++ )
+			{
+				if( $cache_networks[$x] == $net)
+				{
+					$insert = TRUE;
+					break;
+				}
+			}
+		}
+		elseif( $cache_net == $net )
+			$insert = TRUE;
+
+		if( $insert )
 			print($cache."\r\n");
 	}
 }
@@ -560,10 +618,10 @@ function Get($net){
 
 	for( $i=0; $i<$max_hosts; $i++ )
 	{
-		list ( $host, , $cluster, , , $time ) = explode("|", $host_file[($count_host - 1) - $i], 6);
+		list ( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[($count_host - 1) - $i], 6);
 		$out = "H|".$host."|".TimeSinceSubmissionInSeconds( $time )."|".$cluster;
 		if( $PV >= 4 )
-			$out .= "|".$net;
+			$out .= "|".$net."|".$leaves;
 
 		print($out."\r\n");
 	}
@@ -579,8 +637,32 @@ function Get($net){
 	for( $i=0; $i<$max_caches; $i++ )
 	{
 		list ( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i], 6);
-		if( $cache_net == $net || $cache_net == "multi" )
-			print("U|".$cache."|".TimeSinceSubmissionInSeconds( $time )."|".$cache_net."\r\n");
+
+		$insert = FALSE;
+		if( strstr( $cache_net, "-" ) )
+		{
+			$cache_networks = explode( "-", $cache_net );
+			$networks_count=count($cache_networks);
+			for( $x=0; $x<$networks_count; $x++ )
+			{
+				if( $cache_networks[$x] == $net)
+				{
+					$insert = TRUE;
+					break;
+				}
+			}
+		}
+		elseif( $cache_net == $net )
+			$insert = TRUE;
+
+		if( $insert )
+		{
+			$out = "U|".$cache."|".TimeSinceSubmissionInSeconds( $time );
+			if( $PV >= 4 )
+				$out .= "|".$cache_net;
+
+			print($out."\r\n");
+		}
 	}
 
 	if( $count_host == 0 && $count_cache == 0 )
@@ -853,8 +935,19 @@ function ShowHtmlPage($num){
 												for($i = count($cache_file) - 1; $i >= 0; $i--)
 												{
 													list ($cache_url, $cache_name, $net, $client, $version, $time) = explode("|", $cache_file[$i], 6);
-													if( $net == "multi" )
-														$net = "Multi-Network";
+													if( strstr( $net, "-" ) )
+													{
+														$networks = explode( "-", $net );
+														$networks_count=count($networks);
+														$net = "";
+														for( $x=0; $x<$networks_count; $x++ )
+														{
+															if($x)
+																$net .= " - ";
+
+															$net .= ucfirst($networks[$x]);
+														}
+													}
 
 													$color = $i % 2 == 0 ? "#F0F0F0" : "#FFFFFF";
 
@@ -969,10 +1062,11 @@ else
 
 Inizialize($SUPPORTED_NETWORKS);
 
-$PV = !empty($_GET['pv']) ? $_GET['pv'] : 0;
 $PING = !empty($_GET['ping']) ? $_GET['ping'] : 0;
 
+$PV = !empty($_GET['pv']) ? $_GET['pv'] : 0;
 $NET = !empty($_GET['net']) ? strtolower($_GET['net']) : NULL;
+$NETS = !empty($_GET['nets']) ? strtolower($_GET['nets']) : NULL;	// Currently unsupported
 
 $IP = !empty($_GET['ip']) ? $_GET['ip'] : ( !empty($_GET['ip1']) ? $_GET['ip1'] : NULL );
 $CACHE = !empty($_GET['url']) ? $_GET['url'] : ( !empty($_GET['url1']) ? $_GET['url1'] : NULL );
@@ -1014,7 +1108,7 @@ $REMOTE_IP = $_SERVER['REMOTE_ADDR'];
 if($LOG_ENABLED)
 {
 	if ( !file_exists("log/") )
-		mkdir("log/", 0775);
+		mkdir("log/", 0777);
 
 	$HTTP_X_FORWARDED_FOR = isset($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] : "";
 	$HTTP_CLIENT_IP = isset($_SERVER["HTTP_CLIENT_IP"]) ? $_SERVER["HTTP_CLIENT_IP"] : "";
@@ -1053,8 +1147,8 @@ else
 	header("X-Remote-IP: ".$REMOTE_IP);
 	header("Connection: close");
 
-	if( $CACHE != NULL )
-	{	// Clean url
+	if( $CACHE != NULL && strstr( $CACHE, "://" ) )
+	{	// Cleaning url
 		list( $protocol, $url ) = explode("://", $CACHE, 2);
 
 		if( strstr( $url, "/" ) )
@@ -1062,11 +1156,16 @@ else
 		else
 			$other_part_url = "";
 
-		if( substr( $other_part_url, 0, 1 ) == "." )
-			$other_part_url = substr( $other_part_url, 1 );					// Remove dot at the start of $other_part_url if present
+		$other_part_url = str_replace( "./", "", $other_part_url );			// Remove "./" from $other_part_url if present
 
-		while( substr($other_part_url, 0, 1) == "/" )
-			$other_part_url = substr($other_part_url, 1);
+		$slash = FALSE;
+		while( substr( $other_part_url, strlen($other_part_url) - 1, 1 ) == "/" )
+		{
+			$other_part_url = substr( $other_part_url, 0, strlen($other_part_url) - 1 );
+			$slash = TRUE;
+		}
+		if( strlen($other_part_url) && $slash )
+			$other_part_url .= "/";
 
 		if( strstr( $url, ":" ) )
 		{
@@ -1135,25 +1234,24 @@ else
 
 	if ($UPDATE)
 	{
-		if ( CheckNetParameter($SUPPORTED_NETWORKS, $NET, "update") )
-			if( $IP != NULL )
+		if( $IP != NULL )
+		{
+			if( CheckIPValidity($REMOTE_IP, $IP) )
 			{
-				if( CheckIPValidity($REMOTE_IP, $IP) )
-				{
-					$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+				$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
 
-					if( $result == 1 ) // Updated timestamp
-						print "I|update|OK|Updated host timestamp\r\n";
-					elseif( $result == 2 ) // OK
-						print "I|update|OK|Host added successfully\r\n";
-					elseif( $result == 3 ) // OK, pushed old data
-						print "I|update|OK|Host added successfully - pushed old data\r\n";
-					elseif( $result == 6 ) // Unsupported network
-						;//print "I|update|WARNING|Rejected: Network of ".$CACHE." not supported\r\n";
-				}
-				else // Invalid IP
-					print "I|update|WARNING|Rejected: Invalid IP ".$IP."\r\n";
+				if( $result == 1 ) // Updated timestamp
+					print "I|update|OK|Updated host timestamp\r\n";
+				elseif( $result == 2 ) // OK
+					print "I|update|OK|Host added successfully\r\n";
+				elseif( $result == 3 ) // OK, pushed old data
+					print "I|update|OK|Host added successfully - pushed old data\r\n";
+				elseif( $result == 6 ) // Unsupported network
+					print "I|update|WARNING|Rejected: Network of client not supported\r\n";
 			}
+			else // Invalid IP
+				print "I|update|WARNING|Rejected: Invalid IP"."\r\n";
+		}
 
 		if( $CACHE != NULL )
 		{
@@ -1174,28 +1272,31 @@ else
 				elseif( $result == 5 ) // Ping failed
 					print "I|update|WARNING|Rejected: Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
-					print "I|update|WARNING|Rejected: Network of ".$CACHE." not supported\r\n";
+					print "I|update|WARNING|Rejected: Network of webcache not supported\r\n";
 			}
 			else // Invalid URL
-				print("I|update|WARNING|Rejected: Invalid URL ".$CACHE."\r\n");
+				print("I|update|WARNING|Rejected: Invalid URL"."\r\n");
 		}
 	}
 	else
 	{
-		if( $IP != NULL )
-			if ( CheckNetwork($SUPPORTED_NETWORKS, $NET) )
-			{
-				if( CheckIPValidity($REMOTE_IP, $IP) )
-				{
-					$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+		$error = 0;
 
-					if( $result <= 3 )
-						print "OK\r\n";
-					elseif( $result == 6 ) // Unsupported network
-						;//print "WARNING: Network of ".$CACHE." not supported\r\n";
-				}
-				else // Invalid IP
-					print "WARNING: Invalid IP ".$IP."\r\n";
+		if( $IP != NULL )
+			if( CheckIPValidity($REMOTE_IP, $IP) )
+			{
+				$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+
+				if( $result >= 4 )
+					$error = 1;
+
+				if( $result == 6 ) // Unsupported network
+					print "WARNING: Network of client not supported\r\n";
+			}
+			else // Invalid IP
+			{
+				$error = 1;
+				print "WARNING: Invalid IP"."\r\n";
 			}
 
 		if( $CACHE != NULL )
@@ -1204,16 +1305,23 @@ else
 			{
 				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
 
-				if( $result <= 4 )
-					print "OK\r\n";
-				elseif( $result == 5 ) // Ping failed
+				if( $result >= 5 )
+					$error = 1;
+
+				if( $result == 5 ) // Ping failed
 					print "WARNING: Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
-					print "WARNING: Network of ".$CACHE." not supported\r\n";
+					print "WARNING: Network of webcache not supported\r\n";
 			}
 			else // Invalid URL
-				print("WARNING: Invalid URL ".$CACHE."\r\n");
+			{
+				$error = 1;
+				print("WARNING: Invalid URL"."\r\n");
+			}
 		}
+
+		if( ( $IP != NULL || $CACHE != NULL ) && !$error )
+			print "OK\r\n";
 	}
 
 	if ($GET)
@@ -1227,8 +1335,8 @@ else
 			$networks = $SUPPORTED_NETWORKS[0];
 
 			for( $i=1; $i<$networks_count; $i++ )
-				$networks .= "!".$SUPPORTED_NETWORKS[$i];
-			print("I|networks|".strtolower($networks)."\r\n");
+				$networks .= "-".$SUPPORTED_NETWORKS[$i];
+			print("I|nets|".strtolower($networks)."\r\n");
 		}
 	}
 	else
