@@ -1161,7 +1161,7 @@ else
 		else
 			$other_part_url = "";
 
-		$other_part_url = str_replace( "./", "", $other_part_url );			// Remove "./" from $other_part_url if present
+		$other_part_url = str_replace( "./", "", $other_part_url );		// Remove "./" from $other_part_url if present
 
 		$slash = FALSE;
 		while( substr( $other_part_url, strlen($other_part_url) - 1, 1 ) == "/" )
@@ -1169,6 +1169,10 @@ else
 			$other_part_url = substr( $other_part_url, 0, strlen($other_part_url) - 1 );
 			$slash = TRUE;
 		}
+
+		if( substr( $other_part_url, strlen($other_part_url) - 1, 1 ) == "." )
+			$other_part_url = substr( $other_part_url, 0, strlen($other_part_url) - 1 );	// Remove dot at the end of $other_part_url if present
+
 		if( strlen($other_part_url) && $slash )
 			$other_part_url .= "/";
 
