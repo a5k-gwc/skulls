@@ -34,7 +34,7 @@ if( !$ENABLED )
 
 $NAME		= "Skulls";
 $VENDOR		= "SKLL";
-$SHORT_VER	= "0.1.3";
+$SHORT_VER	= "0.1.4";
 $VER		= $SHORT_VER." Beta";
 
 $SUPPORTED_NETWORKS[0] = "Gnutella";
@@ -260,7 +260,7 @@ function PingWebCache($cache){
 
 	if (!$fp)
 	{
-		echo "Error ".$errno;
+		//echo "Error ".$errno;
 		$cache_data[0] = "FAILED";
 	}
 	else
@@ -337,7 +337,7 @@ function PingWebCache($cache){
 		elseif( !empty($oldpong) )
 		{
 			$cache_data[0] = trim( substr( $oldpong, 5, strlen($oldpong) - 5 ) );
-			$cache_data[1]= "gnutella";
+			$cache_data[1] = "gnutella";
 		}
 		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for WebCaches that follow Bazooka extensions of specifications
 		{																				// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
@@ -345,7 +345,7 @@ function PingWebCache($cache){
 
 			if (!$fp)
 			{
-				echo "Error ".$errno;
+				//echo "Error ".$errno;
 				$cache_data[0] = "FAILED";
 			}
 			else
@@ -353,16 +353,16 @@ function PingWebCache($cache){
 				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".$VENDOR."&version=".$SHORT_VER."&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 
 				$pong = "";
+				$oldpong = "";
 
 				while ( !feof($fp) )
 				{
 					$line = fgets( $fp, 1024 );
 
 					if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
-					{
 						$pong = $line;
-						break;
-					}
+					elseif( substr($line, 0, 4) == "PONG" )
+						$oldpong = $line;
 				}
 
 				fclose ($fp);
@@ -371,6 +371,11 @@ function PingWebCache($cache){
 				{
 					$received_data = explode( "|", $pong );
 					$cache_data[0] = trim( $received_data[2] );
+					$cache_data[1] = "gnutella2";
+				}
+				elseif( !empty($oldpong) )
+				{
+					$cache_data[0] = trim( substr( $oldpong, 5, strlen($oldpong) - 5 ) );
 					$cache_data[1] = "gnutella2";
 				}
 				else
@@ -843,7 +848,7 @@ function ShowHtmlPage($num){
 					$host_file = array();
 					for( $i=0; $i<$networks_count; $i++ )
 					{
-						$host_file = array_merge( $host_file, file(DATA_DIR."/hosts_".$SUPPORTED_NETWORKS[$i].".dat"), array($SUPPORTED_NETWORKS[$i]) );
+						$host_file = array_merge( $host_file, file(DATA_DIR."/hosts_".strtolower($SUPPORTED_NETWORKS[$i]).".dat"), array($SUPPORTED_NETWORKS[$i]) );
 						$network_names++;
 					}
 				}
