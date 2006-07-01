@@ -1207,7 +1207,8 @@ else
 	}
 
 	if( $CLIENT == NULL )
-		die("ERROR: Client unknown - Request rejected\r\n");
+		if( $_SERVER["QUERY_STRING"] != "ping=1" || $_SERVER["HTTP_USER_AGENT"] != "Mozilla/4.0 (compatible; Win32; WinHttp.WinHttpRequest.5)" )	// Workaround for Lynn Cache
+			die("ERROR: Client unknown - Request rejected\r\n");
 
 	if( $VERSION == NULL )
 	{
