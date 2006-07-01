@@ -34,8 +34,8 @@ if( !$ENABLED )
 
 $NAME		= "Skulls";
 $VENDOR		= "SKLL";
-$SHORT_VER	= "0.1.4";
-$VER		= $SHORT_VER." Beta";
+define( "SHORT_VER", "0.1.5" );
+$VER		= SHORT_VER." Beta";
 
 $SUPPORTED_NETWORKS[0] = "Gnutella";
 $SUPPORTED_NETWORKS[1] = "Gnutella2";
@@ -107,7 +107,7 @@ function Inizialize($supported_networks){
 	}
 }
 
-function Pong($ver){
+function Pong($ver, $multi){
 	global $NAME, $SUPPORTED_NETWORKS;
 
 	print "PONG ".$NAME." ".$ver."\r\n";
@@ -123,6 +123,13 @@ function Pong($ver){
 	}
 
 	print "|TCP\r\n";
+
+	if( !$multi )
+	{
+		global $NET, $CLIENT;
+		if( $NET == "gnutella2" && $CLIENT == "TEST" )
+			print "i|pong|".$NAME." ".$ver."|gnutella2|COMPATIBILITY";	// Workaround for compatibility with GWCv2 specs
+	}
 }
 
 function Support($supported_networks)
@@ -242,7 +249,7 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 }
 
 function PingWebCache($cache){
-	global $SUPPORTED_NETWORKS, $VENDOR, $SHORT_VER, $TIMEOUT;
+	global $SUPPORTED_NETWORKS, $VENDOR, $TIMEOUT;
 
 	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from "cache" - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
@@ -269,7 +276,7 @@ function PingWebCache($cache){
 		$oldpong = "";
 		$error = "";
 
-		$query = "ping=1&multi=1&client=".$VENDOR."&version=".$SHORT_VER;
+		$query = "ping=1&multi=1&client=".$VENDOR."&version=".SHORT_VER;
 		if ( $main_url[count($main_url)-1] == "bazooka.php" )	// Workaround for Bazooka WebCache
 			$query .= "&net=gnutella2";
 
@@ -339,7 +346,7 @@ function PingWebCache($cache){
 			$cache_data[0] = trim( substr( $oldpong, 5, strlen($oldpong) - 5 ) );
 			$cache_data[1] = "gnutella";
 		}
-		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for WebCaches that follow Bazooka extensions of specifications
+		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for compatibility with GWCv2 specs
 		{																				// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
@@ -350,7 +357,7 @@ function PingWebCache($cache){
 			}
 			else
 			{
-				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".$VENDOR."&version=".$SHORT_VER."&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".$VENDOR."&version=".SHORT_VER."&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 
 				$pong = "";
 				$oldpong = "";
@@ -705,7 +712,7 @@ function KickStart($net, $cache){
 	if( !CheckURLValidity($cache) )
 		die("ERROR: The KickStart URL isn't valid\r\n");
 
-	global $VENDOR, $SHORT_VER, $TIMEOUT;
+	global $VENDOR, $TIMEOUT;
 
 	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from "cache" - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
@@ -728,7 +735,7 @@ function KickStart($net, $cache){
 	}
 	else
 	{
-		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&net=".$net."&client=".$VENDOR."&version=".$SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n" );
+		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&net=".$net."&client=".$VENDOR."&version=".SHORT_VER." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n" );
 		while( !feof($fp) )
 		{
 			$line = fgets( $fp, 1024 );
@@ -1072,6 +1079,7 @@ $PING = !empty($_GET['ping']) ? $_GET['ping'] : 0;
 $PV = !empty($_GET['pv']) ? $_GET['pv'] : 0;
 $NET = !empty($_GET['net']) ? strtolower($_GET['net']) : NULL;
 $NETS = !empty($_GET['nets']) ? strtolower($_GET['nets']) : NULL;	// Currently unsupported
+$MULTI = !empty($_GET['multi']) ? strtolower($_GET['multi']) : 0;
 
 $IP = !empty($_GET['ip']) ? $_GET['ip'] : ( !empty($_GET['ip1']) ? $_GET['ip1'] : NULL );
 $CACHE = !empty($_GET['url']) ? $_GET['url'] : ( !empty($_GET['url1']) ? $_GET['url1'] : NULL );
@@ -1237,7 +1245,7 @@ else
 
 
 	if ($PING)
-		Pong($VER);
+		Pong($VER, $MULTI);
 
 	if ($SUPPORT)
 		Support($SUPPORTED_NETWORKS);

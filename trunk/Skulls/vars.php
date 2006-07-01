@@ -3,7 +3,7 @@ $ENABLED				= 1;
 
 $STATFILE_ENABLED		= 1;
 $PING_WEBCACHES			= 1;	// Disable ONLY if the server have FSOCKOPEN disabled
-$KICK_START_ENABLED		= 1;	// KickStart should be DISABLED after populating the webcache
+$KICK_START_ENABLED		= 0;	// KickStart should be DISABLED after populating the webcache
 
 $LOG_ENABLED			= 0;	// Enable ONLY for debugging
 
@@ -15,5 +15,5 @@ $MAX_CACHES_OUT			= 20;	// Maximum number of cache sent in each request
 
 $TIMEOUT				= 20;	// Sockets time out
 
-define("DATA_DIR", "data" );
+define( "DATA_DIR", "data" );
 ?>
