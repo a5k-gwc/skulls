@@ -25,7 +25,7 @@ if( file_exists("vars.php") )
 else
 	die("ERROR: The file vars.php is missing.");
 
-if( !$ENABLED )
+if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 {
 	header("Status: 404 Not Found");
 	header("Content-Type: text/plain");
