@@ -34,7 +34,7 @@ if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.1.6" );
+define( "SHORT_VER", "0.1.7" );
 define( "VER", SHORT_VER." Beta" );
 
 $SUPPORTED_NETWORKS[0] = "Gnutella";
@@ -59,7 +59,7 @@ function Inizialize($supported_networks){
 		else
 		{
 			flock($file, 2);
-			fwrite($file, date("Y/m/d h:i:s A"));
+			fwrite($file, gmdate("Y/m/d h:i:s A"));
 			flock($file, 3);
 			fclose($file);
 		}
@@ -107,29 +107,23 @@ function Inizialize($supported_networks){
 function Pong($multi, $net, $client){
 	global $SUPPORTED_NETWORKS;
 
-	if( !$multi && $net == "gnutella2" && $client == "TEST" )
-	{
-		print "I|pong|".NAME." ".VER."|gnutella2|COMPATIBILITY"."\r\n";	// Workaround for compatibility with GWCv2 specs
-		$pong = "superpong";
-	}
-	else
-	{
-		print "PONG ".NAME." ".VER."\r\n";
-		$pong = "pong";
-	}
-
-	print "I|".$pong."|".NAME." ".VER."|";
-
+	$supp_nets = "";
 	$networks_count=count($SUPPORTED_NETWORKS);
 	for( $i=0; $i<$networks_count; $i++ )
 	{
 		if($i)
-			print "-";
-
-		print strtolower($SUPPORTED_NETWORKS[$i]);
+			$supp_nets .= "-";
+		$supp_nets .= strtolower($SUPPORTED_NETWORKS[$i]);
 	}
+	$supp_nets .= "|TCP";
 
-	print "|TCP\r\n";
+	if( !$multi && $net == "gnutella2" && $client == "TEST" )
+		print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$supp_nets."\r\n";	// Workaround for compatibility with GWCv2 specs
+	else
+	{
+		print "PONG ".NAME." ".VER."\r\n";
+		print "I|pong|".NAME." ".VER."|".$supp_nets."\r\n";
+	}
 }
 
 function Support($supported_networks)
@@ -162,8 +156,7 @@ function CheckNetParameter($supported_networks, $net, $request){
 
 function TimeSinceSubmissionInSeconds($time_of_submission){
 	$time_of_submission = trim($time_of_submission);
-
-	return time() - strtotime($time_of_submission);
+	return time() - ( @strtotime($time_of_submission) + @date("Z") );	// GMT
 }
 
 function CheckIPValidity($remote_ip, $ip){
@@ -185,6 +178,9 @@ function CheckIPValidity($remote_ip, $ip){
 
 function CheckURLValidity($cache){
 	if( !PING_WEBCACHES && strstr( $cache, "*" ) )
+		return 0;
+
+	if( strstr( $cache, "|" ) )
 		return 0;
 
 	if( strlen($cache) > 10 )
@@ -230,9 +226,8 @@ function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $
 	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($line + 1) ) ) );
 
 	$file = fopen(DATA_DIR."/hosts_".$net.".dat", "w");
-
 	flock($file, 2);
-	fwrite($file, $new_host_file.$ip."|".$leaves."|".$cluster."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
+	fwrite($file, $new_host_file.$ip."|".$leaves."|".$cluster."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 	flock($file, 3);
 	fclose($file);
 }
@@ -241,10 +236,9 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	$new_cache_file = implode("", array_merge( array_slice($cache_file, 0, $line), array_slice( $cache_file, ($line + 1) ) ) );
 
 	$file = fopen(DATA_DIR."/caches.dat", "w");
-
 	flock($file, 2);
 	if($cache != NULL)
-		fwrite($file, $new_cache_file.$cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
+		fwrite($file, $new_cache_file.$cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 	else
 		fwrite($file, $new_cache_file);
 	flock($file, 3);
@@ -405,7 +399,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	if( !CheckNetwork($SUPPORTED_NETWORKS, $net) )
 		return 6; // Unsupported network
 
-	if($leaves < 15 && $leaves != NULL)
+	if($leaves != NULL && $leaves < 15)
 	{
 		print "I|update|WARNING|Rejected: Leaf count too low\r\n";
 		return 4;
@@ -427,12 +421,12 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 			}
 		}
 
-		if( $host_exists == TRUE )
+		if($host_exists)
 		{
 			ReplaceHost($host_file, $i, $ip, $leaves, $net, $cluster, $client, $version);
 			return 1; // Updated timestamp
 		}
-		elseif( $host_exists == FALSE )
+		else
 		{
 			if( count($host_file) >= MAX_HOSTS )
 			{
@@ -442,9 +436,8 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 			else
 			{
 				$file = fopen(DATA_DIR."/hosts_".$net.".dat", "a");
-
 				flock($file, 2);
-				fwrite($file, $ip."|".$leaves."|".$cluster."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
+				fwrite($file, $ip."|".$leaves."|".$cluster."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 				flock($file, 3);
 				fclose($file);
 				return 2; // OK
@@ -455,7 +448,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 
 function WriteCacheFile($cache, $net, $client, $version){
 	list( , $url ) = explode("://", $cache, 2);
-	if( $url == $_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"] )	// It don't allow to insert this webcache url in caches list of this webcache
+	if( $url == $_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"] )	// It doesn't allow to insert itself in cache list
 		return 0;
 
 	$cache_file = file(DATA_DIR."/caches.dat");
@@ -468,15 +461,16 @@ function WriteCacheFile($cache, $net, $client, $version){
 
 		if( strtolower($cache) == strtolower($read) )
 		{
-			list ( , , , , , $time ) = explode("|", $cache_file[$i], 6);
+			list ( , , , , , $time ) = explode("|", trim($cache_file[$i]));
 			$cache_exists = TRUE;
 			break;
 		}
 	}
 
-	if($cache_exists == TRUE)
+	if($cache_exists)
 	{
-		$time_diff = bcdiv( time() - strtotime( trim($time) ), 86400 );
+		$time_diff = time() - ( @strtotime( $time ) + @date("Z") );	// GMT
+		$time_diff = floor($time_diff / 86400);	// Days
 
 		if( $time_diff < 10 )
 			return 0; // Exists
@@ -559,8 +553,6 @@ function WriteCacheFile($cache, $net, $client, $version){
 				return 6; // Unsupported network
 			else
 			{
-				$file = fopen(DATA_DIR."/caches.dat", "a");
-
 				if( count($cache_file) >= MAX_CACHES )
 				{
 					ReplaceCache( $cache_file, 0, $cache, $cache_data, $client, $version );
@@ -568,8 +560,9 @@ function WriteCacheFile($cache, $net, $client, $version){
 				}
 				else
 				{
+					$file = fopen(DATA_DIR."/caches.dat", "a");
 					flock($file, 2);
-					fwrite($file, $cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".date("Y/m/d h:i:s A")."\r\n");
+					fwrite($file, $cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 					flock($file, 3);
 					fclose($file);
 					return 2; // OK
@@ -704,14 +697,15 @@ function UpdateStats($request, $add = TRUE){
 	for($i = 0; $i < count($stat_file); $i++)
 	{
 		$stat_file[$i] = trim($stat_file[$i]);
-		$time_diff = bcdiv( time() - strtotime( $stat_file[$i] ), 3600 );
+		$time_diff = time() - ( @strtotime( $stat_file[$i] ) + @date("Z") );	// GMT
+		$time_diff = floor($time_diff / 3600);	// Hours
 
 		if( $time_diff < 1 )
 			fwrite($file, $stat_file[$i]."\r\n");
 	}
 
 	if( $add == TRUE )
-		fwrite($file, date("Y/m/d h:i A")."\r\n");
+		fwrite($file, gmdate("Y/m/d h:i A")."\r\n");
 
 	flock($file, 3);
 	fclose($file);
@@ -766,10 +760,9 @@ function KickStart($net, $cache){
 
 function ShowHtmlPage($num){
 	global $NET;
-
 	include "vendor_code.php";
 
-	if( $NET == NULL )
+	if($NET == NULL)
 		$NET = "all";
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -853,7 +846,7 @@ function ShowHtmlPage($num){
 			elseif($num == 2)	// Host
 			{
 				$max_hosts = MAX_HOSTS;
-				$network_names = 0;
+				$elements = 0;
 
 				if( $NET == "all" )
 				{
@@ -861,26 +854,29 @@ function ShowHtmlPage($num){
 					$networks_count = count($SUPPORTED_NETWORKS);
 					$max_hosts *= $networks_count;
 
-					$host_file = array();
-					for( $i=0; $i<$networks_count; $i++ )
+					for($x = 0; $x < $networks_count; $x++)
 					{
-						$host_file = array_merge( $host_file, file(DATA_DIR."/hosts_".strtolower($SUPPORTED_NETWORKS[$i]).".dat"), array($SUPPORTED_NETWORKS[$i]) );
-						$network_names++;
+						$temp = file(DATA_DIR."/hosts_".strtolower($SUPPORTED_NETWORKS[$x]).".dat");
+						$n_temp = count($temp);
+						for($y = 0; $y < $n_temp; $y++)
+						{
+							$host_file["host"][$elements] = $temp[$y];
+							$host_file["net"][$elements] = $SUPPORTED_NETWORKS[$x];
+							$elements++;
+							unset($temp[$y]);
+						}
 					}
 				}
 				elseif( file_exists(DATA_DIR."/hosts_".$NET.".dat") )
 				{
-					$host_file = file(DATA_DIR."/hosts_".$NET.".dat");
+					$host_file["host"] = file(DATA_DIR."/hosts_".$NET.".dat");
 					$net = ucfirst($NET);
+					$elements = count($host_file["host"]);
 				}
-				else
-					$host_file = array();
-
-				$current_host = count($host_file) - $network_names;
 				?>
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF">
-					<b><?php echo ucfirst($NET); ?> Hosts (<?php echo $current_host." of ".$max_hosts; ?>)</b>
+					<b><?php echo ucfirst($NET); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</b>
 					</td>
 				</tr>
 				<tr>
@@ -896,28 +892,23 @@ function ShowHtmlPage($num){
 											<td>Last updated</td>
 										</tr>
 										<?php
-											if( count($host_file) == 0 )
+											if( $elements == 0 )
 												print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"4\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td></tr>\r\n");
 											else
 											{
-												for( $i = count($host_file) - 1; $i >= 0; $i-- )
+												for( $i = $elements - 1; $i >= 0; $i-- )
 												{
-													if( strstr($host_file[$i], "|") )
-													{
-														list ($ip, $leaves, , $client, $version, $time) = explode("|", $host_file[$i], 6);
-														$color = $i % 2 == 0 ? "#F0F0F0" : "#FFFFFF";
+													list ($ip, $leaves, , $client, $version, $time) = explode("|", $host_file["host"][$i]);
+													$color = $i % 2 == 0 ? "#F0F0F0" : "#FFFFFF";
 
-														echo "<tr align=\"left\" bgcolor=\"".$color."\">";
-														echo "<td style=\"padding-right: 10pt;\"><a href=\"gnutella:host:".$ip."\">".$ip."</a>";
-														if( !empty($leaves) )
-															echo " (".$leaves.")";
-														echo "</td>";
-														echo "<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>";
-														echo "<td style=\"padding-right: 20pt;\">".$net."</td>";
-														echo "<td>".$time."</td></tr>";
-													}
-													else
-														$net = $host_file[$i];
+													echo "<tr align=\"left\" bgcolor=\"".$color."\">";
+													echo "<td style=\"padding-right: 10pt;\"><a href=\"gnutella:host:".$ip."\">".$ip."</a>";
+													if( !empty($leaves) )
+														echo " (".$leaves.")";
+													echo "</td>";
+													echo "<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>";
+													echo "<td style=\"padding-right: 20pt;\">".(isset($net) ? $net : $host_file["net"][$i])."</td>";
+													echo "<td>".$time."</td></tr>";
 												}
 											}
 										?>
@@ -1076,10 +1067,6 @@ function ShowHtmlPage($num){
 <?php
 }
 
-if( (float)PHP_VERSION >= 5.1 )
-	date_default_timezone_set("UTC");
-else
-	@putenv("TZ=UTC");
 
 Inizialize($SUPPORTED_NETWORKS);
 
@@ -1093,11 +1080,10 @@ $MULTI = !empty($_GET['multi']) ? strtolower($_GET['multi']) : 0;
 $IP = !empty($_GET['ip']) ? $_GET['ip'] : ( !empty($_GET['ip1']) ? $_GET['ip1'] : NULL );
 $CACHE = !empty($_GET['url']) ? $_GET['url'] : ( !empty($_GET['url1']) ? $_GET['url1'] : NULL );
 $LEAVES = !empty($_GET['x_leaves']) ? $_GET['x_leaves'] : NULL;
+if( $LEAVES != NULL ) $LEAVES = str_replace( "|", "", $LEAVES );
 $CLUSTER = !empty($_GET['cluster']) ? $_GET['cluster'] : NULL;
-if( strlen($CLUSTER) > 256 )
-	$CLUSTER = NULL;
-elseif( $CLUSTER != NULL )
-	$CLUSTER = str_replace( "|", "", $CLUSTER );
+if( strlen($CLUSTER) > 256 ) $CLUSTER = NULL;
+elseif( $CLUSTER != NULL ) $CLUSTER = str_replace( "|", "", $CLUSTER );
 
 $HOSTFILE = !empty($_GET['hostfile']) ? $_GET['hostfile'] : 0;
 $URLFILE = !empty($_GET['urlfile']) ? $_GET['urlfile'] : 0;
@@ -1107,7 +1093,9 @@ $GET = !empty($_GET['get']) ? $_GET['get'] : 0;
 $UPDATE = !empty($_GET['update']) ? $_GET['update'] : 0;
 
 $CLIENT = !empty($_GET['client']) ? $_GET['client'] : NULL;
+$CLIENT = str_replace( "|", "", $CLIENT );
 $VERSION = !empty($_GET['version']) ? $_GET['version'] : NULL;
+$VERSION = str_replace( "|", "", $VERSION );
 
 $SUPPORT = !empty($_GET['support']) ? $_GET['support'] : 0;
 
@@ -1126,6 +1114,8 @@ if( !isset($_SERVER) )
 
 $REMOTE_IP = $_SERVER['REMOTE_ADDR'];
 
+if($NET == "gnutella1")
+	$NET = "gnutella";
 
 if(LOG_ENABLED)
 {
@@ -1241,14 +1231,13 @@ else
 	if( IsClientTooOld( $CLIENT, $VERSION ) )
 		die("ERROR: Client too old - Request rejected\r\n");
 
-	if( !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && !$UPDATE && ($CACHE == NULL) && ($IP == NULL) )
+	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL)
 	{
 		UpdateStats("other");
 		die("ERROR: Invalid command - Request rejected\r\n");
 	}
 
-
-	if( $NET == NULL || $NET == "gnutella1" )
+	if($NET == NULL)
 		$NET = "gnutella";
 
 
@@ -1379,12 +1368,12 @@ else
 			print("net: ".$NET."\r\n");
 	}
 
-	if( $UPDATE || ($CACHE != NULL) || ($IP != NULL) )
+	if($CACHE != NULL || $IP != NULL)
 		UpdateStats("update");
 	else
 		UpdateStats("other");
 
-	if( $STATFILE && !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE )
+	if($STATFILE && !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE)
 	{
 		if(STATFILE_ENABLED)
 		{
