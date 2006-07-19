@@ -109,32 +109,35 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "TrustyFiles";
 			$url = "http://www.trustyfiles.com/";
 			break;
-
-        case "KICKSTART":
-			$client_name = "KickStart";
-			$url = "";
+		case "XOLO":
+			$client_name = "XoloX";
+			$url = "http://www.xolox.nl/";
 			break;
 
-
-        case "TEST":
-			$client_name = "WebCache";
-			$url = "";
-			break;
         case "PGDBScan":
 			$client_name = "Jonatkins scan";
 			$url = "http://gcachescan.jonatkins.com/";
 			break;
-		case "SKLL":
-			$client_name = "Skulls (WebCache)";
-			$url = "http://ale5000.altervista.org/software.htm";
-			break;	
-		case "GCII":
-			$client_name = "PHPGnuCacheII (WebCache)";
-			$url = "http://gwcii.sourceforge.net/";
-			break;	
+        case "KICKSTART":
+			$client_name = "KickStart";
+			$url = "";
+			break;
+        case "TEST":
+			$client_name = "WebCache";
+			$url = "";
+			break;
+
         case "BAZK":
 			$client_name = "Bazooka (WebCache)";
 			$url = "http://rocketx.port5.com/";
+			break;
+		case "GCII":
+			$client_name = "PHPGnuCacheII (WebCache)";
+			$url = "http://gwcii.sourceforge.net/";
+			break;
+		case "SKLL":
+			$client_name = "Skulls (WebCache)";
+			$url = "http://ale5000.altervista.org/software.htm";
 			break;
 
         default:

@@ -34,7 +34,7 @@ if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.1.7" );
+define( "SHORT_VER", "0.1.8" );
 define( "VER", SHORT_VER." Beta" );
 
 $SUPPORTED_NETWORKS[0] = "Gnutella";
@@ -177,13 +177,10 @@ function CheckIPValidity($remote_ip, $ip){
 }
 
 function CheckURLValidity($cache){
-	if( !PING_WEBCACHES && strstr( $cache, "*" ) )
+	if( !PING_WEBCACHES && strpos($cache, "*") > -1 )
 		return 0;
 
-	if( strstr( $cache, "|" ) )
-		return 0;
-
-	if( strlen($cache) > 10 )
+	if( strlen($cache) > 10 && !(strpos($cache, "|") > -1) )
 		if( substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://" )
 			return 1;
 
@@ -264,7 +261,7 @@ function PingWebCache($cache){
 
 	if(!$fp)
 	{
-		//echo "Error ".$errno;
+		//echo "Error ".$errno."\r\n";
 		$cache_data[0] = "FAILED";
 	}
 	else
@@ -307,7 +304,7 @@ function PingWebCache($cache){
 				if( $networks == "multi" )
 					$networks = "gnutella-gnutella2";
 
-				if( strstr( $networks, "-" ) )
+				if( strpos($networks, "-") > -1 )
 				{
 					$temp = explode( "-", $networks );
 
@@ -343,13 +340,13 @@ function PingWebCache($cache){
 			$cache_data[0] = trim( substr( $oldpong, 5, strlen($oldpong) - 5 ) );
 			$cache_data[1] = "gnutella";
 		}
-		elseif( strtolower( trim( substr($error, 7) ) ) == "network not supported" )	// Workaround for compatibility with GWCv2 specs
-		{																				// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
+		elseif( strpos(strtolower($error), "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
+		{																	// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
 
 			if(!$fp)
 			{
-				//echo "Error ".$errno;
+				//echo "Error ".$errno."\r\n";
 				$cache_data[0] = "FAILED";
 			}
 			else
@@ -359,12 +356,15 @@ function PingWebCache($cache){
 				$pong = "";
 				$oldpong = "";
 
-				while ( !feof($fp) )
+				while( !feof($fp) )
 				{
-					$line = fgets( $fp, 1024 );
+					$line = fgets($fp, 1024);
 
-					if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
+					if( strtolower(substr($line, 0, 7)) == "i|pong|" )
+					{
 						$pong = $line;
+						break;
+					}
 					elseif( substr($line, 0, 4) == "PONG" )
 						$oldpong = $line;
 				}
@@ -373,13 +373,13 @@ function PingWebCache($cache){
 
 				if( !empty($pong) )
 				{
-					$received_data = explode( "|", $pong );
-					$cache_data[0] = trim( $received_data[2] );
+					list( , , $cache_data[0] ) = explode( "|", $pong );
+					$cache_data[0] = trim($cache_data[0]);
 					$cache_data[1] = "gnutella2";
 				}
 				elseif( !empty($oldpong) )
 				{
-					$cache_data[0] = trim( substr( $oldpong, 5, strlen($oldpong) - 5 ) );
+					$cache_data[0] = trim( substr($oldpong, 5) );
 					$cache_data[1] = "gnutella2";
 				}
 				else
@@ -602,7 +602,7 @@ function UrlFile($net){
 		list ( $cache, , $cache_net, ) = explode("|", $cache_file[$i], 4);
 
 		$show = FALSE;
-		if( strstr( $cache_net, "-" ) )
+		if( strpos($cache_net, "-") > -1 )
 		{
 			$cache_networks = explode( "-", $cache_net );
 			$networks_count=count($cache_networks);
@@ -655,7 +655,7 @@ function Get($net, $pv){
 		list ( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i], 6);
 
 		$show = FALSE;
-		if( strstr( $cache_net, "-" ) )
+		if( strpos($cache_net, "-") > -1 )
 		{
 			$cache_networks = explode( "-", $cache_net );
 			$networks_count=count($cache_networks);
@@ -947,7 +947,7 @@ function ShowHtmlPage($num){
 												for($i = count($cache_file) - 1; $i >= 0; $i--)
 												{
 													list ($cache_url, $cache_name, $net, $client, $version, $time) = explode("|", $cache_file[$i], 6);
-													if( strstr( $net, "-" ) )
+													if( strpos($net, "-") > -1 )
 													{
 														$networks = explode( "-", $net );
 														$networks_count=count($networks);
@@ -1159,11 +1159,11 @@ else
 	header("X-Remote-IP: ".$REMOTE_IP);
 	header("Connection: close");
 
-	if( $CACHE != NULL && strstr( $CACHE, "://" ) )
+	if( $CACHE != NULL && strpos($CACHE, "://") > -1 )
 	{	// Cleaning url
 		list( $protocol, $url ) = explode("://", $CACHE, 2);
 
-		if( strstr( $url, "/" ) )
+		if( strpos($url, "/") > -1 )
 			list( $url, $other_part_url ) = explode("/", $url, 2);
 		else
 			$other_part_url = "";
@@ -1183,7 +1183,7 @@ else
 		if( strlen($other_part_url) && $slash )
 			$other_part_url .= "/";
 
-		if( strstr( $url, ":" ) )
+		if( strpos($url, ":") > -1 )
 		{
 			list( $host_name, $host_port ) = explode(":", $url, 2);
 			$host_port = (int)$host_port;
@@ -1262,7 +1262,7 @@ else
 				elseif( $result == 3 ) // OK, pushed old data
 					print "I|update|OK|Host added successfully - pushed old data\r\n";
 				elseif( $result == 6 ) // Unsupported network
-					print "I|update|WARNING|Rejected: Network of client not supported\r\n";
+					print "ERROR: Network of client not supported\r\n";
 			}
 			else // Invalid IP
 				print "I|update|WARNING|Rejected: Invalid IP"."\r\n";
@@ -1306,7 +1306,7 @@ else
 					$error = 1;
 
 				if( $result == 6 ) // Unsupported network
-					print "WARNING: Network of client not supported\r\n";
+					print "ERROR: Network of client not supported\r\n";
 			}
 			else // Invalid IP
 			{
