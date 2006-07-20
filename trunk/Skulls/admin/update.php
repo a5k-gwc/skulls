@@ -12,7 +12,7 @@ if( !file_exists("revision.dat") )
 }
 $file_content = file("revision.dat");
 if($file_content[0] >= REVISION)
-	die("There is no need to update it.");
+	die("There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.<br>\r\n");
 
 
 $log = "";
@@ -118,7 +118,7 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 	}
 }
 
-if( file_exists("../log/") && !LOG_ENABLED )
+if( file_exists("../log/") && !LOG_ENABLED && !LOG_ERRORS )
 {
 	remove_dir("../log/");
 	$result = !file_exists("../log/");
