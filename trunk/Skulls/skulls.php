@@ -22,7 +22,7 @@
 
 include "vars.php";
 
-if( !defined("DATA_DIR") )
+if( !defined("DATA_DIR") && !file_exists("vars.php") )
 	die("ERROR: The file vars.php is missing.");
 
 if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
@@ -120,6 +120,9 @@ function NetsToString()
 
 function Pong($multi, $net, $client){
 	$nets = strtolower(NetsToString());
+
+	if($_SERVER["REMOTE_ADDR"] == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
+		die();
 
 	if( !$multi && $net == "gnutella2" && $client == "TEST" )
 		print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with GWCv2 specs
@@ -279,7 +282,7 @@ function PingWebCache($cache){
 		$oldpong = "";
 		$error = "";
 
-		$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER;
+		$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cachename=".NAME;
 		if( $main_url[count($main_url)-1] == "bazooka.php" )	// Workaround for Bazooka WebCache
 			$query .= "&net=gnutella2";
 
@@ -343,7 +346,7 @@ function PingWebCache($cache){
 				$pong = "";
 				$oldpong = "";
 
-				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cachename=".NAME."&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 				while( !feof($fp) )
 				{
 					$line = fgets($fp, 1024);
@@ -578,13 +581,7 @@ function HostFile($net){
 function UrlFile($net){
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
-
-	if($count_cache <= MAX_CACHES_OUT)
-		$max_caches = $count_cache;
-	else
-		$max_caches = MAX_CACHES_OUT;
-
-	for( $i = 0; $i < $max_caches; $i++ )
+	for( $i = 0, $n = 0; $n < MAX_CACHES_OUT && $i < $count_cache; $i++ )
 	{
 		list ( $cache, , $cache_net, ) = explode("|", $cache_file[$i], 4);
 
@@ -606,7 +603,10 @@ function UrlFile($net){
 			$show = TRUE;
 
 		if( $show )
+		{
 			print($cache."\r\n");
+			$n++;
+		}
 	}
 }
 
@@ -631,13 +631,7 @@ function Get($net, $pv){
 
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
-
-	if($count_cache <= MAX_CACHES_OUT)
-		$max_caches = $count_cache;
-	else
-		$max_caches = MAX_CACHES_OUT;
-
-	for( $i=0; $i<$max_caches; $i++ )
+	for( $i = 0, $n = 0; $n < MAX_CACHES_OUT && $i < $count_cache; $i++ )
 	{
 		list ( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
 
@@ -665,6 +659,7 @@ function Get($net, $pv){
 				$out .= "|".( $cache_net != $net ? $cache_net : "" );
 
 			print($out."\r\n");
+			$n++;
 		}
 	}
 
@@ -894,6 +889,7 @@ else
 		{
 			if(LOG_ERRORS)
 				Logging("unidentified", $CLIENT, $VERSION, $NET);
+			header("Retry-After: 604800");	// A week
 			die("ERROR: Client unknown - Request rejected\r\n");
 		}
 
