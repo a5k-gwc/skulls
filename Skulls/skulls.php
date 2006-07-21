@@ -476,8 +476,8 @@ function WriteCacheFile($cache, $net, $client, $version){
 				{
 					list( $url ) = explode("/", $url);
 					list( $host_name ) = explode(":", $url);
-
-					if( gethostbyname($host_name) == $host_name )	// Block host that cannot be resolved to IP when PING_WEBCACHES = 0
+					$ip = gethostbyname($host_name);
+					if( $ip == $host_name || $ip == "127.0.0.1" )	// Block host that cannot be resolved to IP when PING_WEBCACHES = 0
 						$cache_data[0] = "FAILED";
 					else
 					{
@@ -524,8 +524,8 @@ function WriteCacheFile($cache, $net, $client, $version){
 				{
 					list( $url ) = explode("/", $url);
 					list( $host_name ) = explode(":", $url);
-
-					if( gethostbyname($host_name) == $host_name )	// Block host that cannot be resolved to IP when PING_WEBCACHES = 0
+					$ip = gethostbyname($host_name);
+					if( $ip == $host_name || $ip == "127.0.0.1" )	// Block host that cannot be resolved to IP when PING_WEBCACHES = 0
 						$cache_data[0] = "FAILED";
 					else
 					{
