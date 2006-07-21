@@ -175,7 +175,7 @@ function ShowHtmlPage($num){
 											<td>Name</td>
 											<td>Network</td>
 											<td>Submitting client</td>
-											<td>Date submitted</td>
+											<td>Last updated</td>
 										</tr>
 										<?php
 											if( count($cache_file) == 0 )
