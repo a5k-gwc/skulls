@@ -166,7 +166,7 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 	if(LOG_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("unsupported", $CLIENT, $VERSION, $NET);
+		Logging("unsupported_net", $CLIENT, $VERSION, $NET);
 	}
 
 	return FALSE;
@@ -190,16 +190,28 @@ function CheckIPValidity($remote_ip, $ip){
 	)
 		return TRUE;
 
+	if(LOG_ERRORS)
+	{
+		global $CLIENT, $VERSION, $NET;
+		Logging("invalid_ip", $CLIENT, $VERSION, $NET);
+	}
+
 	return FALSE;
 }
 
 function CheckURLValidity($cache){
 	if( !PING_WEBCACHES && strpos($cache, "*") > -1 )
-		return FALSE;
+		$cache = "";
 
 	if( strlen($cache) > 10 && !(strpos($cache, "|") > -1) )
 		if( substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://" )
 			return TRUE;
+
+	if(LOG_ERRORS)
+	{
+		global $CLIENT, $VERSION, $NET;
+		Logging("invalid_url", $CLIENT, $VERSION, $NET);
+	}
 
 	return FALSE;
 }
@@ -631,7 +643,7 @@ function Get($net, $pv){
 
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
-	for( $i = 0, $n = 0; $n < MAX_CACHES_OUT && $i < $count_cache; $i++ )
+	for( $n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i-- )
 	{
 		list ( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
 
@@ -824,8 +836,43 @@ elseif( $KICK_START )
 else
 {
 	header("Content-Type: text/plain");
-	header("X-Remote-IP: ".$REMOTE_IP);
 	header("Connection: close");
+
+	if(STATS_ENABLED)
+	{
+		$request = file("stats/requests.dat");
+
+		$file = fopen("stats/requests.dat", "w");
+		flock($file, 2);
+		fwrite($file, $request[0] + 1);
+		flock($file, 3);
+		fclose($file);
+	}
+
+	if( $CLIENT == NULL )
+	{
+		if(LOG_ERRORS)
+			Logging("unidentified", $CLIENT, $VERSION, $NET);
+		header("Status: 404 Not Found");
+		die("ERROR: Client unknown - Request rejected\r\n");
+	}
+
+	if($VERSION == NULL && strlen($CLIENT) > 4)
+	{
+		$VERSION = substr( $CLIENT, 4 );
+		$CLIENT = substr( $CLIENT, 0, 4 );
+	}
+
+	if( IsClientTooOld( $CLIENT, $VERSION ) )
+		die("ERROR: Client too old - Request rejected\r\n");
+	
+	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL)
+	{
+		UpdateStats("other");
+		if(LOG_ERRORS)
+			Logging("invalid", $CLIENT, $VERSION, $NET);
+		die("ERROR: Invalid command - Request rejected\r\n");
+	}
 
 	if( $CACHE != NULL && strpos($CACHE, "://") > -1 )
 	{	// Cleaning url
@@ -873,52 +920,12 @@ else
 		$CACHE = $protocol."://".$host_name.$host_port."/".$other_part_url;
 	}
 
-	if(STATS_ENABLED)
-	{
-		$request = file("stats/requests.dat");
-
-		$file = fopen("stats/requests.dat", "w");
-		flock($file, 2);
-		fwrite($file, $request[0] + 1);
-		flock($file, 3);
-		fclose($file);
-	}
-
-	if( $CLIENT == NULL )
-		if( $_SERVER["HTTP_USER_AGENT"] != "Mozilla/4.0 (compatible; Win32; WinHttp.WinHttpRequest.5)" || $_SERVER["QUERY_STRING"] != "ping=1" )	// Workaround for Lynn Cache
-		{
-			if(LOG_ERRORS)
-				Logging("unidentified", $CLIENT, $VERSION, $NET);
-			header("Retry-After: 604800");	// A week
-			die("ERROR: Client unknown - Request rejected\r\n");
-		}
-
-	if( $VERSION == NULL )
-	{
-		if( strlen($CLIENT) > 4 )
-			$VERSION = substr( $CLIENT, 4 );
-
-		$CLIENT = substr( $CLIENT, 0, 4 );
-	}
-
-	if( IsClientTooOld( $CLIENT, $VERSION ) )
-		die("ERROR: Client too old - Request rejected\r\n");
-
-	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL)
-	{
-		UpdateStats("other");
-		if(LOG_ERRORS)
-			Logging("invalid", $CLIENT, $VERSION, $NET);
-		die("ERROR: Invalid command - Request rejected\r\n");
-	}
-
 	if($NET == NULL)
 		$NET = "gnutella";
-
+	header("X-Remote-IP: ".$REMOTE_IP);
 
 	if($PING)
 		Pong($MULTI, $NET, $CLIENT);
-
 	if($SUPPORT)
 		Support($SUPPORTED_NETWORKS);
 
