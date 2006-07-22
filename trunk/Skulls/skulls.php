@@ -32,9 +32,19 @@ if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 	die("ERROR: Service disabled\r\n");
 }
 
+if($_SERVER["REMOTE_ADDR"] == "196.31.80.247")
+{
+	header("Status: 404 Not Found");
+	print "Error 404\r\n";
+
+	include "log.php";
+	Logging("hammering_clients", "", "", "");
+	die();
+}
+
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.1.9" );
+define( "SHORT_VER", "0.2.0" );
 define( "VER", SHORT_VER." Beta" );
 
 $SUPPORTED_NETWORKS[] = "Gnutella";
@@ -78,7 +88,10 @@ function Inizialize($supported_networks){
 	{
 		$file = fopen(DATA_DIR."/blocked_caches.dat", "x");
 		flock($file, 2);
-		fwrite($file, "http://gwc.wodi.org/g2/bazooka"."\r\n");
+		// Lynn Cache 0.4 - Bad webcache: it ignore net parameter, it is outdated, it doesn't clean urls and it also doesn't identify itself when it ping other webcaches so url update doesn't work.
+		fwrite($file, "http://www.exactmobile.co.za/cache.asp"."\r\n");
+		fwrite($file, "http://www.exactmobile.co.za/cache.asp/"."\r\n");
+		fwrite($file, "http://www.sexymobile.co.za/cache.asp"."\r\n");
 		flock($file, 3);
 		fclose($file);
 	}
@@ -118,17 +131,24 @@ function NetsToString()
 	return $nets;
 }
 
-function Pong($multi, $net, $client){
-	$nets = strtolower(NetsToString());
-
+function Pong($multi, $net, $client, $supported_networks){
 	if($_SERVER["REMOTE_ADDR"] == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
 		die();
+
+	$nets = strtolower(NetsToString());
 
 	if( !$multi && $net == "gnutella2" && $client == "TEST" )
 		print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with GWCv2 specs
 	else
 	{
-		print "PONG ".NAME." ".VER."\r\n";
+		if( CheckNetworkString($supported_networks, "gnutella") )
+			print "PONG ".NAME." ".VER."\r\n";
+		elseif(!$multi && $net == "gnutella")
+		{
+			print "ERROR: Network not supported\r\n";
+			return;
+		}
+
 		print "I|pong|".NAME." ".VER."|".$nets."|TCP\r\n";
 	}
 }
@@ -166,7 +186,7 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 	if(LOG_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("unsupported_net", $CLIENT, $VERSION, $NET);
+		Logging("unsupported_nets", $CLIENT, $VERSION, $NET);
 	}
 
 	return FALSE;
@@ -193,7 +213,7 @@ function CheckIPValidity($remote_ip, $ip){
 	if(LOG_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("invalid_ip", $CLIENT, $VERSION, $NET);
+		Logging("invalid_ips", $CLIENT, $VERSION, $NET);
 	}
 
 	return FALSE;
@@ -210,7 +230,7 @@ function CheckURLValidity($cache){
 	if(LOG_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("invalid_url", $CLIENT, $VERSION, $NET);
+		Logging("invalid_urls", $CLIENT, $VERSION, $NET);
 	}
 
 	return FALSE;
@@ -593,7 +613,7 @@ function HostFile($net){
 function UrlFile($net){
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
-	for( $i = 0, $n = 0; $n < MAX_CACHES_OUT && $i < $count_cache; $i++ )
+	for( $n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i-- )
 	{
 		list ( $cache, , $cache_net, ) = explode("|", $cache_file[$i], 4);
 
@@ -852,7 +872,7 @@ else
 	if( $CLIENT == NULL )
 	{
 		if(LOG_ERRORS)
-			Logging("unidentified", $CLIENT, $VERSION, $NET);
+			Logging("unidentified_clients", $CLIENT, $VERSION, $NET);
 		header("Status: 404 Not Found");
 		die("ERROR: Client unknown - Request rejected\r\n");
 	}
@@ -864,13 +884,22 @@ else
 	}
 
 	if( IsClientTooOld( $CLIENT, $VERSION ) )
+	{
+		if($CACHE != NULL || $IP != NULL)
+			UpdateStats("update");
+		else
+			UpdateStats("other");
+
+		if(LOG_ERRORS)
+			Logging("old_clients", $CLIENT, $VERSION, $NET);
 		die("ERROR: Client too old - Request rejected\r\n");
-	
+	}
+
 	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL)
 	{
 		UpdateStats("other");
 		if(LOG_ERRORS)
-			Logging("invalid", $CLIENT, $VERSION, $NET);
+			Logging("invalid_queries", $CLIENT, $VERSION, $NET);
 		die("ERROR: Invalid command - Request rejected\r\n");
 	}
 
@@ -925,7 +954,7 @@ else
 	header("X-Remote-IP: ".$REMOTE_IP);
 
 	if($PING)
-		Pong($MULTI, $NET, $CLIENT);
+		Pong($MULTI, $NET, $CLIENT, $SUPPORTED_NETWORKS);
 	if($SUPPORT)
 		Support($SUPPORTED_NETWORKS);
 
