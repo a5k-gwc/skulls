@@ -1,12 +1,13 @@
 <?php
 $ENABLED =						1;
 
-define( "PING_WEBCACHES",		1 );	// Disable ONLY if the server have FSOCKOPEN disabled
+define( "FSOCKOPEN",			1 );	// Disable ONLY if the server have FSOCKOPEN disabled
 define( "STATS_ENABLED",		1 );
 define( "KICK_START_ENABLED",	0 );	// KickStart should be DISABLED after populating the webcache
 
-define( "LOG_ENABLED",			0 );	// Enable logging of all requests (ONLY for debugging)
-define( "LOG_ERRORS",			0 );	// Enable logging of invalid requests (ONLY for debugging)
+define( "LOG_MAJOR_ERRORS",		1 );	// Enable logging of major errors
+define( "LOG_MINOR_ERRORS",		0 );	// Enable logging of minor errors (ONLY for debugging)
+define( "LOG_HAMMERING_CLIENTS",0 );
 
 define( "MAX_HOSTS",			25 );	// Maximum number of host stored for EACH network (If there are 2 networks and this value is 25 -> 25 x 2 = 50)
 define( "MAX_HOSTS_OUT",		20 );	// Maximum number of host sent in each request

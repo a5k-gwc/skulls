@@ -35,10 +35,11 @@ if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 if($_SERVER["REMOTE_ADDR"] == "196.31.80.247")
 {
 	header("Status: 404 Not Found");
-	print "Error 404\r\n";
-
-	include "log.php";
-	Logging("hammering_clients", "", "", "");
+	if(LOG_HAMMERING_CLIENTS)
+	{
+		include "log.php";
+		Logging("hammering_clients", "", "", "");
+	}
 	die();
 }
 
@@ -183,7 +184,7 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 			return TRUE;
 	}
 
-	if(LOG_ERRORS)
+	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
 		Logging("unsupported_nets", $CLIENT, $VERSION, $NET);
@@ -210,7 +211,7 @@ function CheckIPValidity($remote_ip, $ip){
 	)
 		return TRUE;
 
-	if(LOG_ERRORS)
+	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
 		Logging("invalid_ips", $CLIENT, $VERSION, $NET);
@@ -220,14 +221,11 @@ function CheckIPValidity($remote_ip, $ip){
 }
 
 function CheckURLValidity($cache){
-	if( !PING_WEBCACHES && strpos($cache, "*") > -1 )
-		$cache = "";
-
 	if( strlen($cache) > 10 && !(strpos($cache, "|") > -1) )
 		if( substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://" )
 			return TRUE;
 
-	if(LOG_ERRORS)
+	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
 		Logging("invalid_urls", $CLIENT, $VERSION, $NET);
@@ -470,6 +468,9 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 }
 
 function WriteCacheFile($cache, $net, $client, $version){
+	if(!FSOCKOPEN)
+		return 7; // Cache adding disabled
+
 	list( , $url ) = explode("://", $cache, 2);
 	if( $url == $_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"] )	// It doesn't allow to insert itself in cache list
 		return 0; // Exists
@@ -498,28 +499,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 			return 0; // Exists
 		else
 		{
-			if( PING_WEBCACHES )
-				$cache_data = PingWebCache($cache);
-			else
-			{
-				global $SUPPORTED_NETWORKS;
-
-				if( CheckNetworkString($SUPPORTED_NETWORKS, $net, FALSE) )
-				{
-					list( $url ) = explode("/", $url);
-					list( $host_name ) = explode(":", $url);
-					$ip = gethostbyname($host_name);
-					if( $ip == $host_name || $ip == "127.0.0.1" )	// Block host that cannot be resolved to IP when PING_WEBCACHES = 0
-						$cache_data[0] = "FAILED";
-					else
-					{
-						$cache_data[0] = NULL;
-						$cache_data[1] = $net;
-					}
-				}
-				else
-					$cache_data[0] = "UNSUPPORTED";
-			}
+			$cache_data = PingWebCache($cache);
 
 			if( $cache_data[0] == "FAILED" )
 			{
@@ -540,34 +520,11 @@ function WriteCacheFile($cache, $net, $client, $version){
 	}
 	else
 	{
-		$blocked = CheckBlockedCache($cache);
-
-		if($blocked)
+		if(CheckBlockedCache($cache))
 			return 4; // Blocked URL
 		else
 		{
-			if( PING_WEBCACHES )
-				$cache_data = PingWebCache($cache);
-			else
-			{
-				global $SUPPORTED_NETWORKS;
-
-				if( CheckNetworkString($SUPPORTED_NETWORKS, $net, FALSE) )
-				{
-					list( $url ) = explode("/", $url);
-					list( $host_name ) = explode(":", $url);
-					$ip = gethostbyname($host_name);
-					if( $ip == $host_name || $ip == "127.0.0.1" )	// Block host that cannot be resolved to IP when PING_WEBCACHES = 0
-						$cache_data[0] = "FAILED";
-					else
-					{
-						$cache_data[0] = NULL;
-						$cache_data[1] = $net;
-					}
-				}
-				else
-					$cache_data[0] = "UNSUPPORTED";
-			}
+			$cache_data = PingWebCache($cache);
 
 			if( $cache_data[0] == "FAILED" )
 				return 5; // Ping failed
@@ -821,10 +778,8 @@ $REMOTE_IP = $_SERVER["REMOTE_ADDR"];
 
 if($NET == "gnutella1")
 	$NET = "gnutella";
-if(LOG_ENABLED || LOG_ERRORS)
+if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
 	include "log.php";
-if(LOG_ENABLED)
-	Logging(strtolower(NAME), $CLIENT, $VERSION, $NET);
 
 
 if( $SHOWINFO )
@@ -871,7 +826,7 @@ else
 
 	if( $CLIENT == NULL )
 	{
-		if(LOG_ERRORS)
+		if(LOG_MAJOR_ERRORS)
 			Logging("unidentified_clients", $CLIENT, $VERSION, $NET);
 		header("Status: 404 Not Found");
 		die("ERROR: Client unknown - Request rejected\r\n");
@@ -890,7 +845,7 @@ else
 		else
 			UpdateStats("other");
 
-		if(LOG_ERRORS)
+		if(LOG_MINOR_ERRORS)
 			Logging("old_clients", $CLIENT, $VERSION, $NET);
 		die("ERROR: Client too old - Request rejected\r\n");
 	}
@@ -898,7 +853,7 @@ else
 	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL)
 	{
 		UpdateStats("other");
-		if(LOG_ERRORS)
+		if(LOG_MAJOR_ERRORS)
 			Logging("invalid_queries", $CLIENT, $VERSION, $NET);
 		die("ERROR: Invalid command - Request rejected\r\n");
 	}
@@ -999,6 +954,8 @@ else
 					print "I|update|WARNING|Rejected: Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
 					print "I|update|WARNING|Rejected: Network of webcache not supported\r\n";
+				elseif( $result == 7 ) // Cache adding disabled
+					print "I|update|WARNING|Cache adding is disabled\r\n";
 			}
 			else // Invalid URL
 				print("I|update|WARNING|Rejected: Invalid URL"."\r\n");
@@ -1038,6 +995,8 @@ else
 					print "WARNING: Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
 					print "WARNING: Network of webcache not supported\r\n";
+				elseif( $result == 7 ) // Cache adding disabled
+					print "WARNING: Cache adding is disabled\r\n";
 			}
 			else // Invalid URL
 			{
