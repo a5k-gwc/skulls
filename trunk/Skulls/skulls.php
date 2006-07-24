@@ -38,7 +38,7 @@ if($_SERVER["REMOTE_ADDR"] == "196.31.80.247")
 	if(LOG_HAMMERING_CLIENTS)
 	{
 		include "log.php";
-		Logging("hammering_clients", "", "", "");
+		Logging("hammering_clients", NULL, NULL, NULL);
 	}
 	die();
 }
@@ -56,16 +56,13 @@ define( "NETWORKS_COUNT", $networks_count );
 
 function InizializeNetworkFiles($net){
 	$net = strtolower($net);
-
-	if( !file_exists(DATA_DIR."/hosts_".$net.".dat") )
-		fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "x") );
+	if( !file_exists(DATA_DIR."/hosts_".$net.".dat") ) fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "x") );
 }
 
 function Inizialize($supported_networks){
 	if( !file_exists(DATA_DIR."/runnig_since.dat") )
 	{
-		if( !file_exists(DATA_DIR."/") )
-			mkdir(DATA_DIR."/", 0777);
+		if( !file_exists(DATA_DIR."/") ) mkdir(DATA_DIR."/", 0777);
 
 		$file = fopen( DATA_DIR."/runnig_since.dat", "w" );
 		if( !$file )
@@ -77,45 +74,37 @@ function Inizialize($supported_networks){
 			flock($file, 3);
 			fclose($file);
 		}
-	}
 
-	if( !file_exists(DATA_DIR."/caches.dat") )
-		fclose( fopen(DATA_DIR."/caches.dat", "x") );
+		if( !file_exists(DATA_DIR."/caches.dat") ) fclose( fopen(DATA_DIR."/caches.dat", "x") );
 
-	for( $i=0; $i < NETWORKS_COUNT; $i++ )
-		InizializeNetworkFiles( $supported_networks[$i] );
-
-	if( !file_exists(DATA_DIR."/blocked_caches.dat") )
-	{
-		$file = fopen(DATA_DIR."/blocked_caches.dat", "x");
-		flock($file, 2);
-		// Lynn Cache 0.4 - Bad webcache: it ignore net parameter, it is outdated, it doesn't clean urls and it also doesn't identify itself when it ping other webcaches so url update doesn't work.
-		fwrite($file, "http://www.exactmobile.co.za/cache.asp"."\r\n");
-		fwrite($file, "http://www.exactmobile.co.za/cache.asp/"."\r\n");
-		fwrite($file, "http://www.sexymobile.co.za/cache.asp"."\r\n");
-		flock($file, 3);
-		fclose($file);
-	}
-
-	if(STATS_ENABLED)
-	{
-		if( !file_exists("stats/requests.dat") )
+		if( !file_exists(DATA_DIR."/blocked_caches.dat") )
 		{
-			if( !file_exists("stats/") )
-				mkdir("stats/", 0777);
-
-			$file = fopen( "stats/requests.dat", "x" );
+			$file = fopen(DATA_DIR."/blocked_caches.dat", "x");
 			flock($file, 2);
-			fwrite($file, "0");
+			// Lynn Cache 0.4 - Bad webcache: it ignore net parameter, it is outdated, it doesn't clean urls and it also doesn't identify itself when it ping other webcaches so url update doesn't work.
+			fwrite($file, "http://www.exactmobile.co.za/cache.asp"."\r\n");
+			fwrite($file, "http://www.exactmobile.co.za/cache.asp/"."\r\n");
+			fwrite($file, "http://www.sexymobile.co.za/cache.asp"."\r\n");
 			flock($file, 3);
 			fclose($file);
-
-			if( !file_exists("stats/update_requests_hour.dat") )
-				fclose( fopen("stats/update_requests_hour.dat", "x") );
-
-			if( !file_exists("stats/other_requests_hour.dat") )
-				fclose( fopen("stats/other_requests_hour.dat", "x") );
 		}
+	}
+
+	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
+		InizializeNetworkFiles( $supported_networks[$i] );
+
+	if( STATS_ENABLED && !file_exists("stats/requests.dat") )
+	{
+		if( !file_exists("stats/") ) mkdir("stats/", 0777);
+
+		$file = fopen( "stats/requests.dat", "x" );
+		flock($file, 2);
+		fwrite($file, "0");
+		flock($file, 3);
+		fclose($file);
+
+		if( !file_exists("stats/update_requests_hour.dat") ) fclose( fopen("stats/update_requests_hour.dat", "x") );
+		if( !file_exists("stats/other_requests_hour.dat") ) fclose( fopen("stats/other_requests_hour.dat", "x") );
 	}
 }
 
@@ -136,22 +125,20 @@ function Pong($multi, $net, $client, $supported_networks){
 	if($_SERVER["REMOTE_ADDR"] == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
 		die();
 
-	$nets = strtolower(NetsToString());
-
-	if( !$multi && $net == "gnutella2" && $client == "TEST" )
-		print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with GWCv2 specs
-	else
+	$supported = CheckNetworkString($supported_networks, $net, FALSE);
+	if( $multi || $supported )
 	{
-		if( CheckNetworkString($supported_networks, "gnutella") )
+		if($supported && $net == "gnutella")
 			print "PONG ".NAME." ".VER."\r\n";
-		elseif(!$multi && $net == "gnutella")
-		{
-			print "ERROR: Network not supported\r\n";
-			return;
-		}
 
-		print "I|pong|".NAME." ".VER."|".$nets."|TCP\r\n";
+		$nets = strtolower( NetsToString() );
+		if( !$multi && $net == "gnutella2" && $client == "TEST" )
+			print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with GWCv2 specs
+		else
+			print "I|pong|".NAME." ".VER."|".$nets."|TCP\r\n";
 	}
+	else
+		print "ERROR: Network not supported\r\n";
 }
 
 function Support($supported_networks)
@@ -285,7 +272,7 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 }
 
 function PingWebCache($cache){
-	global $SUPPORTED_NETWORKS, $TIMEOUT;
+	global $SUPPORTED_NETWORKS;
 
 	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from "cache" - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
@@ -299,7 +286,7 @@ function PingWebCache($cache){
 		$port = 80;
 	}
 
-	$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
+	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
 
 	if(!$fp)
 	{
@@ -364,7 +351,7 @@ function PingWebCache($cache){
 		}
 		elseif( strpos(strtolower($error), "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
 		{																	// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
-			$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
+			$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
 
 			if(!$fp)
 			{
@@ -422,7 +409,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 
 	if($leaves != NULL && $leaves < 15)
 	{
-		print "I|update|WARNING|Rejected: Leaf count too low\r\n";
+		print "I|update|WARNING|Leaf count too low\r\n";
 		return 4;
 	}
 	else
@@ -495,7 +482,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 		$time_diff = time() - ( @strtotime( $time ) + @date("Z") );	// GMT
 		$time_diff = floor($time_diff / 86400);	// Days
 
-		if( $time_diff < 10 )
+		if( $time_diff < RECHECK_CACHES )
 			return 0; // Exists
 		else
 		{
@@ -686,8 +673,6 @@ function KickStart($net, $cache){
 	if( !CheckURLValidity($cache) )
 		die("ERROR: The KickStart URL isn't valid\r\n");
 
-	global $TIMEOUT;
-
 	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from "cache" - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
 	$splitted_url = explode(":", $main_url[0], 2);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
@@ -700,7 +685,7 @@ function KickStart($net, $cache){
 		$port = 80;
 	}
 
-	$fp = @fsockopen( $host_name, $port, $errno, $errstr, $TIMEOUT );
+	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
 
 	if(!$fp)
 	{
@@ -904,10 +889,9 @@ else
 		$CACHE = $protocol."://".$host_name.$host_port."/".$other_part_url;
 	}
 
+	header("X-Remote-IP: ".$REMOTE_IP);
 	if($NET == NULL)
 		$NET = "gnutella";
-	header("X-Remote-IP: ".$REMOTE_IP);
-
 	if($PING)
 		Pong($MULTI, $NET, $CLIENT, $SUPPORTED_NETWORKS);
 	if($SUPPORT)
@@ -931,7 +915,7 @@ else
 					print "ERROR: Network not supported\r\n";
 			}
 			else // Invalid IP
-				print "I|update|WARNING|Rejected: Invalid IP"."\r\n";
+				print "I|update|WARNING|Invalid IP"."\r\n";
 		}
 
 		if( $CACHE != NULL )
@@ -941,7 +925,7 @@ else
 				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
 
 				if( $result == 0 ) // Exists
-					print "I|update|OK|Cache already exists and it is already updated\r\n";
+					print "I|update|OK|Cache already updated\r\n";
 				elseif( $result == 1 ) // Updated timestamp
 					print "I|update|OK|Updated cache timestamp\r\n";
 				elseif( $result == 2 ) // OK
@@ -951,14 +935,14 @@ else
 				elseif( $result == 4 ) // Blocked URL
 					print "I|update|OK|Blocked URL\r\n";
 				elseif( $result == 5 ) // Ping failed
-					print "I|update|WARNING|Rejected: Ping of ".$CACHE." failed\r\n";
+					print "I|update|WARNING|Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
-					print "I|update|WARNING|Rejected: Network of webcache not supported\r\n";
+					print "I|update|WARNING|Network of webcache not supported\r\n";
 				elseif( $result == 7 ) // Cache adding disabled
 					print "I|update|WARNING|Cache adding is disabled\r\n";
 			}
 			else // Invalid URL
-				print("I|update|WARNING|Rejected: Invalid URL"."\r\n");
+				print("I|update|WARNING|Invalid URL"."\r\n");
 		}
 	}
 	else
