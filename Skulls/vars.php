@@ -15,7 +15,8 @@ define( "MAX_HOSTS_OUT",		20 );	// Maximum number of host sent in each request
 define( "MAX_CACHES",			50 );	// Maximum number of cache stored for ALL networks
 define( "MAX_CACHES_OUT",		15 );	// Maximum number of cache sent in each request
 
-$TIMEOUT =						20;		// Sockets time out
+define( "RECHECK_CACHES",		14 );	// Days to recheck a cache
+define( "TIMEOUT",				20 );	// Sockets time out
 
 define( "DATA_DIR", "data" );
 ?>

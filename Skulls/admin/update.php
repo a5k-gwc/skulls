@@ -186,8 +186,4 @@ elseif($updated)
 	echo "<br>Updated correctly.";
 else
 	echo "Already updated.";
-
-// Remove self url
-// Check duplicate ip in update.php and in skulls.php
-// Reduce file usage by elaborate data before open it.
 ?>
