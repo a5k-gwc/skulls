@@ -45,7 +45,7 @@ if($_SERVER["REMOTE_ADDR"] == "196.31.80.247")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.0" );
+define( "SHORT_VER", "0.2.1" );
 define( "VER", SHORT_VER." Beta" );
 
 $SUPPORTED_NETWORKS[] = "Gnutella";
@@ -132,8 +132,10 @@ function Pong($multi, $net, $client, $supported_networks){
 			print "PONG ".NAME." ".VER."\r\n";
 
 		$nets = strtolower( NetsToString() );
-		if( !$multi && $net == "gnutella2" && $client == "TEST" )
-			print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with GWCv2 specs
+		if( $client == "TEST" && !$multi && $net == "gnutella2" )
+			print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with Bazooka
+		elseif( $client == "GCII" && !$multi && $net == "gnutella2" )
+			print "I|pong|".NAME." ".VER."||COMPAT|".$nets."|TCP\r\n";			// Workaround for compatibility with PHPGnuCacheII
 		else
 			print "I|pong|".NAME." ".VER."|".$nets."|TCP\r\n";
 	}
@@ -323,16 +325,21 @@ function PingWebCache($cache){
 			$received_data = explode( "|", $pong );
 			$cache_data[0] = trim($received_data[2]);
 
-			if( count($received_data) >= 4 && substr($received_data[3], 0, 4) != "http" )
+			if(count($received_data) > 3)
 			{
-				$nets = trim($received_data[3]);
-				if( $nets == "multi" )
-					$nets = "gnutella-gnutella2";
-
-				if( CheckNetworkString($SUPPORTED_NETWORKS, $nets) )
-					$cache_data[1] = strtolower($nets);
+				if(substr($received_data[3], 0, 4) == "http")	// Workaround for compatibility
+					$cache_data[1] = "gnutella-gnutella2";
 				else
-					$cache_data[0] = "UNSUPPORTED";
+				{
+					$nets = trim($received_data[3]);
+					if( $nets == "multi" )
+						$nets = "gnutella-gnutella2";
+
+					if( CheckNetworkString($SUPPORTED_NETWORKS, $nets) )
+						$cache_data[1] = strtolower($nets);
+					else
+						$cache_data[0] = "UNSUPPORTED";
+				}
 			}
 			elseif( !empty($oldpong) )
 				$cache_data[1] = "gnutella-gnutella2";
@@ -341,11 +348,12 @@ function PingWebCache($cache){
 		}
 		elseif( !empty($oldpong) )
 		{
-			if( CheckNetworkString($SUPPORTED_NETWORKS, "gnutella") )
-			{
-				$cache_data[0] = trim( substr( $oldpong, 5, strlen($oldpong) - 5 ) );
+			$cache_data[0] = trim( substr($oldpong, 5) );
+
+			if(substr($cache_data[0], 0, 13) == "PHPGnuCacheII")			// Workaround for compatibility with PHPGnuCacheII
+				$cache_data[1] = "gnutella-gnutella2";
+			elseif( CheckNetworkString($SUPPORTED_NETWORKS, "gnutella") )
 				$cache_data[1] = "gnutella";
-			}
 			else
 				$cache_data[0] = "UNSUPPORTED";
 		}
@@ -795,8 +803,11 @@ elseif( $KICK_START )
 }
 else
 {
-	header("Content-Type: text/plain");
 	header("Connection: close");
+	if(!CONTENT_TYPE_WORKAROUND)
+		header("Content-Type: text/plain");
+	else
+		header("Content-Type: application/octet-stream");
 
 	if(STATS_ENABLED)
 	{
@@ -811,7 +822,7 @@ else
 
 	if( $CLIENT == NULL )
 	{
-		if(LOG_MAJOR_ERRORS)
+		if(LOG_MINOR_ERRORS)
 			Logging("unidentified_clients", $CLIENT, $VERSION, $NET);
 		header("Status: 404 Not Found");
 		die("ERROR: Client unknown - Request rejected\r\n");
