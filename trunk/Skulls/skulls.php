@@ -681,7 +681,7 @@ function Get($net, $pv){
 		print("I|NO-HOSTS\r\n");
 }
 
-function ClearStats($stat_file, $file_count, $request){
+function CleanStats($stat_file, $file_count, $request){
 	$file = fopen("stats/".$request."_requests_hour.dat", "w");
 	flock($file, 2);
 
@@ -716,7 +716,7 @@ function ReadStats($request){
 			$old++;
 	}
 
-	if($old > $requests * 3 && $requests > 0) ClearStats($stat_file, $file_count, $request);
+	if($old > $requests * 2 && $requests > 0) CleanStats($stat_file, $file_count, $request);
 	return $requests;
 }
 
