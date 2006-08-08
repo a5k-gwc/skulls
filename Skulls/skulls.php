@@ -77,6 +77,7 @@ function Inizialize($supported_networks){
 
 		if( !file_exists(DATA_DIR."/caches.dat") ) fclose( fopen(DATA_DIR."/caches.dat", "x") );
 
+		if( !file_exists(DATA_DIR."/failed_urls.dat") ) fclose( fopen(DATA_DIR."/failed_urls.dat", "x") );
 		if( !file_exists(DATA_DIR."/blocked_caches.dat") )
 		{
 			$file = fopen(DATA_DIR."/blocked_caches.dat", "x");
@@ -121,14 +122,13 @@ function NetsToString()
 	return $nets;
 }
 
-function Pong($multi, $net, $client, $supported_networks){
+function Pong($multi, $net, $client, $supported_net){
 	if($_SERVER["REMOTE_ADDR"] == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
 		die();
 
-	$supported = CheckNetworkString($supported_networks, $net, FALSE);
-	if( $multi || $supported )
+	if( $multi || $supported_net )
 	{
-		if($supported && $net == "gnutella")
+		if($supported_net && $net == "gnutella")
 			print "PONG ".NAME." ".VER."\r\n";
 
 		$nets = strtolower( NetsToString() );
@@ -139,8 +139,6 @@ function Pong($multi, $net, $client, $supported_networks){
 		else
 			print "I|pong|".NAME." ".VER."|".$nets."|TCP\r\n";
 	}
-	else
-		print "ERROR: Network not supported\r\n";
 }
 
 function Support($supported_networks)
@@ -224,10 +222,11 @@ function CheckURLValidity($cache){
 }
 
 function CheckBlockedCache($cache){
-	$blocked_cache_file = file(DATA_DIR."/blocked_caches.dat");
+	$file = file(DATA_DIR."/blocked_caches.dat");
+	$file_count = count($file);
 
-	for( $i = 0; $i < count($blocked_cache_file); $i++ )
-		if( strtolower($cache) == strtolower( trim($blocked_cache_file[$i]) ) )
+	for( $i = 0; $i < $file_count; $i++ )
+		if( strtolower($cache) == strtolower( trim($file[$i]) ) )
 			return TRUE;
 
 	return FALSE;
@@ -248,6 +247,29 @@ function IsClientTooOld($client, $version){
     }
 
 	return FALSE;
+}
+
+function CheckFailedUrl($url){
+	$file = file(DATA_DIR."/failed_urls.dat");
+	$file_count = count($file);
+
+	for ($i = 0; $i < $file_count; $i++)
+	{
+		list($read, ) = explode("|", $file[$i]);
+
+		if( strtolower($url) == strtolower($read) )
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+function AddFailedUrl($url){
+	$file = fopen(DATA_DIR."/failed_urls.dat", "a");
+	flock($file, 2);
+	fwrite($file, $url."|".gmdate("Y/m/d h:i:s A")."\r\n");
+	flock($file, 3);
+	fclose($file);
 }
 
 function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version){
@@ -280,7 +302,7 @@ function PingWebCache($cache){
 	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
 	$splitted_url = explode(":", $main_url[0], 2);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
 
-	if(count($splitted_url) > 1)
+	if( count($splitted_url) > 1 )
 		list($host_name, $port) = $splitted_url;
 	else
 	{
@@ -412,9 +434,6 @@ function PingWebCache($cache){
 function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	global $SUPPORTED_NETWORKS;
 
-	if( !CheckNetworkString($SUPPORTED_NETWORKS, $net, FALSE) )
-		return 6; // Unsupported network
-
 	if($leaves != NULL && $leaves < 15)
 	{
 		print "I|update|WARNING|Leaf count too low\r\n";
@@ -423,10 +442,10 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	else
 	{
 		$host_file = file(DATA_DIR."/hosts_".$net.".dat");
-
+		$file_count = count($host_file);
 		$host_exists = FALSE;
 
-		for ($i = 0; $i < count($host_file); $i++)
+		for ($i = 0; $i < $file_count; $i++)
 		{
 			list( $read, ) = explode("|", $host_file[$i], 2);
 
@@ -444,7 +463,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 		}
 		else
 		{
-			if( count($host_file) >= MAX_HOSTS )
+			if( $file_count >= MAX_HOSTS )
 			{
 				ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version);
 				return 3; // OK, pushed old data
@@ -463,23 +482,24 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 }
 
 function WriteCacheFile($cache, $net, $client, $version){
-	if(!FSOCKOPEN)
-		return 7; // Cache adding disabled
-
 	list( , $url ) = explode("://", $cache, 2);
 	if( $url == $_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"] )	// It doesn't allow to insert itself in cache list
 		return 0; // Exists
 
+	if(CheckFailedUrl($cache))
+		return 4; // Failed URL
+
 	$cache_file = file(DATA_DIR."/caches.dat");
+	$file_count = count($cache_file);
 	$cache_exists = FALSE;
 
-	for ($i = 0; $i < count($cache_file); $i++)
+	for ($i = 0; $i < $file_count; $i++)
 	{
-		list ($read, ) = explode("|", $cache_file[$i], 2);
+		list($read, ) = explode("|", $cache_file[$i], 2);
 
 		if( strtolower($cache) == strtolower($read) )
 		{
-			list ( , , , , , $time ) = explode("|", trim($cache_file[$i]));
+			list( , , , , , $time ) = explode("|", trim($cache_file[$i]));
 			$cache_exists = TRUE;
 			break;
 		}
@@ -498,11 +518,13 @@ function WriteCacheFile($cache, $net, $client, $version){
 
 			if( $cache_data[0] == "FAILED" )
 			{
+				AddFailedUrl($cache);
 				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
 				return 5; // Ping failed
 			}
 			elseif( $cache_data[0] == "UNSUPPORTED" )
 			{
+				AddFailedUrl($cache);
 				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
 				return 6; // Unsupported network
 			}
@@ -522,12 +544,18 @@ function WriteCacheFile($cache, $net, $client, $version){
 			$cache_data = PingWebCache($cache);
 
 			if( $cache_data[0] == "FAILED" )
+			{
+				AddFailedUrl($cache);
 				return 5; // Ping failed
+			}
 			elseif( $cache_data[0] == "UNSUPPORTED" )
+			{
+				AddFailedUrl($cache);
 				return 6; // Unsupported network
+			}
 			else
 			{
-				if( count($cache_file) >= MAX_CACHES )
+				if( $file_count >= MAX_CACHES )
 				{
 					ReplaceCache( $cache_file, 0, $cache, $cache_data, $client, $version );
 					return 3; // OK, pushed old data
@@ -557,7 +585,7 @@ function HostFile($net){
 
 	for( $i = 0; $i < $max_hosts; $i++ )
 	{
-		list ( $host, ) = explode("|", $host_file[($count_host - 1) - $i], 2);
+		list( $host, ) = explode("|", $host_file[$count_host - 1 - $i], 2);
 		print($host."\r\n");
 	}
 }
@@ -565,9 +593,10 @@ function HostFile($net){
 function UrlFile($net){
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
+
 	for( $n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i-- )
 	{
-		list ( $cache, , $cache_net, ) = explode("|", $cache_file[$i], 4);
+		list( $cache, , $cache_net, ) = explode("|", $cache_file[$i], 4);
 
 		$show = FALSE;
 		if( strpos($cache_net, "-") > -1 )
@@ -605,7 +634,7 @@ function Get($net, $pv){
 
 	for( $i=0; $i<$max_hosts; $i++ )
 	{
-		list ( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[($count_host - 1) - $i]);
+		list( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[$count_host - 1 - $i]);
 		$out = "H|".$host."|".TimeSinceSubmissionInSeconds( $time )."|".$cluster;
 		if( $pv >= 4 )
 			$out .= "||".$leaves;
@@ -617,7 +646,7 @@ function Get($net, $pv){
 	$count_cache = count($cache_file);
 	for( $n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i-- )
 	{
-		list ( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
+		list( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
 
 		$show = FALSE;
 		if( strpos($cache_net, "-") > -1 )
@@ -657,10 +686,11 @@ function Get($net, $pv){
 
 function UpdateStats($request, $add = TRUE){
 	$stat_file = file("stats/".$request."_requests_hour.dat");
+	$file_count = count($stat_file);
 	$file = fopen("stats/".$request."_requests_hour.dat", "w");
 	flock($file, 2);
 
-	for($i = 0; $i < count($stat_file); $i++)
+	for($i = 0; $i < $file_count; $i++)
 	{
 		$stat_file[$i] = trim($stat_file[$i]);
 		$time_diff = time() - ( @strtotime( $stat_file[$i] ) + @date("Z") );	// GMT
@@ -903,14 +933,22 @@ else
 	header("X-Remote-IP: ".$REMOTE_IP);
 	if($NET == NULL)
 		$NET = "gnutella";
+	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
+		$supported_net = TRUE;
+	else
+	{
+		$supported_net = FALSE;
+		if(!$MULTI && !$SUPPORT) print "ERROR: Network not supported\r\n";
+	}
+
 	if($PING)
-		Pong($MULTI, $NET, $CLIENT, $SUPPORTED_NETWORKS);
+		Pong($MULTI, $NET, $CLIENT, $supported_net);
 	if($SUPPORT)
 		Support($SUPPORTED_NETWORKS);
 
 	if($UPDATE)
 	{
-		if( $IP != NULL )
+		if( $IP != NULL && $supported_net )
 		{
 			if( CheckIPValidity($REMOTE_IP, $IP) )
 			{
@@ -922,8 +960,6 @@ else
 					print "I|update|OK|Host added successfully\r\n";
 				elseif( $result == 3 ) // OK, pushed old data
 					print "I|update|OK|Host added successfully - pushed old data\r\n";
-				elseif( $result == 6 ) // Unsupported network
-					print "ERROR: Network not supported\r\n";
 			}
 			else // Invalid IP
 				print "I|update|WARNING|Invalid IP"."\r\n";
@@ -931,7 +967,9 @@ else
 
 		if( $CACHE != NULL )
 		{
-			if( CheckURLValidity($CACHE) )
+			if(!FSOCKOPEN) // Cache adding disabled
+				print "I|update|WARNING|Cache adding is disabled\r\n";
+			elseif( CheckURLValidity($CACHE) )
 			{
 				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
 
@@ -943,14 +981,12 @@ else
 					print "I|update|OK|Cache added successfully\r\n";
 				elseif( $result == 3 ) // OK, pushed old data
 					print "I|update|OK|Cache added successfully - pushed old data\r\n";
-				elseif( $result == 4 ) // Blocked URL
+				elseif( $result == 4 ) // Blocked or failed URL
 					print "I|update|OK|Blocked URL\r\n";
 				elseif( $result == 5 ) // Ping failed
 					print "I|update|WARNING|Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
 					print "I|update|WARNING|Network of webcache not supported\r\n";
-				elseif( $result == 7 ) // Cache adding disabled
-					print "I|update|WARNING|Cache adding is disabled\r\n";
 			}
 			else // Invalid URL
 				print("I|update|WARNING|Invalid URL"."\r\n");
@@ -958,77 +994,53 @@ else
 	}
 	else
 	{
-		$error = 0;
+		if( $supported_net && ( $IP != NULL || (FSOCKOPEN && $CACHE != NULL) ) )
+			print "OK\r\n";
 
-		if( $IP != NULL )
+		if( $IP != NULL && $supported_net )
+		{
 			if( CheckIPValidity($REMOTE_IP, $IP) )
-			{
 				$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
-
-				if( $result >= 4 )
-					$error = 1;
-
-				if( $result == 6 ) // Unsupported network
-					print "ERROR: Network not supported\r\n";
-			}
 			else // Invalid IP
-			{
-				$error = 1;
 				print "WARNING: Invalid IP"."\r\n";
-			}
+		}
 
 		if( $CACHE != NULL )
 		{
-			if( CheckURLValidity($CACHE) )
+			if(!FSOCKOPEN) // Cache adding disabled
+				print "WARNING: Cache adding is disabled\r\n";
+			elseif( CheckURLValidity($CACHE) )
 			{
 				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
-
-				if( $result >= 5 )
-					$error = 1;
 
 				if( $result == 5 ) // Ping failed
 					print "WARNING: Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
 					print "WARNING: Network of webcache not supported\r\n";
-				elseif( $result == 7 ) // Cache adding disabled
-					print "WARNING: Cache adding is disabled\r\n";
 			}
 			else // Invalid URL
-			{
-				$error = 1;
-				print("WARNING: Invalid URL"."\r\n");
-			}
+				print "WARNING: Invalid URL"."\r\n";
 		}
-
-		if( ( $IP != NULL || $CACHE != NULL ) && !$error )
-			print "OK\r\n";
 	}
 
 	if($GET)
 	{
-		if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
+		if( $supported_net )
+		{
 			Get($NET, $PV);
-		else
-			print "ERROR: Network not supported\r\n";
-
-		if( $PV >= 4 )
-			print("I|nets|".strtolower(NetsToString())."\r\n");
+			if( $PV >= 4 )
+				print("I|nets|".strtolower(NetsToString())."\r\n");
+		}
 	}
 	else
 	{
-		if($HOSTFILE)
-			if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
-				HostFile($NET);
-			else
-				print "ERROR: Network not supported\r\n";
+		if($HOSTFILE && $supported_net)
+			HostFile($NET);
 
-		if($URLFILE)
-			if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
-				UrlFile($NET);
-			else
-				print "ERROR: Network not supported\r\n";
+		if($URLFILE && $supported_net)
+			UrlFile($NET);
 
-		if($PV >= 4 && ($HOSTFILE || $URLFILE) )
+		if($PV >= 4 && ($HOSTFILE || $URLFILE) && $supported_net)
 			print("nets: ".strtolower(NetsToString())."\r\n");
 	}
 
