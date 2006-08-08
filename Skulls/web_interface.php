@@ -230,8 +230,8 @@ function ShowHtmlPage($num){
 			{
 				if(STATS_ENABLED)
 				{
-					UpdateStats("update", FALSE);
-					UpdateStats("other", FALSE);
+					$other_requests = ReadStats("other");
+					$update_requests = ReadStats("update");
 				}
 				?>
 				<tr bgcolor="#CCFF99"> 
@@ -259,10 +259,7 @@ function ShowHtmlPage($num){
 								<td style="color: #994433;">
 								<?php
 									if(STATS_ENABLED)
-									{
-										$requests = count( file("stats/other_requests_hour.dat") ) + count( file("stats/update_requests_hour.dat") );
-										echo $requests;
-									}
+										echo $other_requests + $update_requests;
 									else
 										echo "Disabled";
 								?>
@@ -273,10 +270,7 @@ function ShowHtmlPage($num){
 								<td style="color: #994433;">
 								<?php
 									if(STATS_ENABLED)
-									{
-										$requests = count( file("stats/update_requests_hour.dat") );
-										echo $requests;
-									}
+										echo $update_requests;
 									else
 										echo "Disabled";
 								?>

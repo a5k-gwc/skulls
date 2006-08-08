@@ -45,7 +45,7 @@ if($_SERVER["REMOTE_ADDR"] == "196.31.80.247")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.1" );
+define( "SHORT_VER", "0.2.2" );
 define( "VER", SHORT_VER." Beta" );
 
 $SUPPORTED_NETWORKS[] = "Gnutella";
@@ -76,19 +76,7 @@ function Inizialize($supported_networks){
 		}
 
 		if( !file_exists(DATA_DIR."/caches.dat") ) fclose( fopen(DATA_DIR."/caches.dat", "x") );
-
 		if( !file_exists(DATA_DIR."/failed_urls.dat") ) fclose( fopen(DATA_DIR."/failed_urls.dat", "x") );
-		if( !file_exists(DATA_DIR."/blocked_caches.dat") )
-		{
-			$file = fopen(DATA_DIR."/blocked_caches.dat", "x");
-			flock($file, 2);
-			// Lynn Cache 0.4 - Bad webcache: it ignore net parameter, it is outdated, it doesn't clean urls and it also doesn't identify itself when it ping other webcaches so url update doesn't work.
-			fwrite($file, "http://www.exactmobile.co.za/cache.asp"."\r\n");
-			fwrite($file, "http://www.exactmobile.co.za/cache.asp/"."\r\n");
-			fwrite($file, "http://www.sexymobile.co.za/cache.asp"."\r\n");
-			flock($file, 3);
-			fclose($file);
-		}
 	}
 
 	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
@@ -124,7 +112,7 @@ function NetsToString()
 
 function Pong($multi, $net, $client, $supported_net){
 	if($_SERVER["REMOTE_ADDR"] == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
-		die();
+		return;
 
 	if( $multi || $supported_net )
 	{
@@ -180,9 +168,9 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 	return FALSE;
 }
 
-function TimeSinceSubmissionInSeconds($time_of_submission){
+function TimeSinceSubmissionInSeconds($now, $time_of_submission, $offset){
 	$time_of_submission = trim($time_of_submission);
-	return time() - ( @strtotime($time_of_submission) + @date("Z") );	// GMT
+	return $now - ( @strtotime($time_of_submission) + $offset );	// GMT
 }
 
 function CheckIPValidity($remote_ip, $ip){
@@ -222,12 +210,14 @@ function CheckURLValidity($cache){
 }
 
 function CheckBlockedCache($cache){
-	$file = file(DATA_DIR."/blocked_caches.dat");
-	$file_count = count($file);
-
-	for( $i = 0; $i < $file_count; $i++ )
-		if( strtolower($cache) == strtolower( trim($file[$i]) ) )
-			return TRUE;
+	$cache = strtolower($cache);
+	// Lynn Cache 0.4 - Bad webcache: it ignore net parameter, it is outdated, it doesn't clean urls and it also doesn't identify itself when it ping other webcaches so url update doesn't work.
+	if(
+		$cache == "http://www.exactmobile.co.za/cache.asp" ||
+		$cache == "http://www.exactmobile.co.za/cache.asp/" ||
+		$cache == "http://www.sexymobile.co.za/cache.asp"
+	)
+		return TRUE;
 
 	return FALSE;
 }
@@ -253,12 +243,17 @@ function CheckFailedUrl($url){
 	$file = file(DATA_DIR."/failed_urls.dat");
 	$file_count = count($file);
 
-	for ($i = 0; $i < $file_count; $i++)
+	for ($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
 	{
-		list($read, ) = explode("|", $file[$i]);
+		$read = explode("|", $file[$i]);
+		if( strtolower($url) == strtolower($read[0]) )
+		{
+			$read[1] = trim($read[1]);
+			$time_diff = $now - ( @strtotime( $read[1] ) + $offset );	// GMT
+			$time_diff = floor($time_diff / 86400);	// Days
 
-		if( strtolower($url) == strtolower($read) )
-			return TRUE;
+			if( $time_diff < 2 ) return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -495,7 +490,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 
 	for ($i = 0; $i < $file_count; $i++)
 	{
-		list($read, ) = explode("|", $cache_file[$i], 2);
+		list( $read, ) = explode("|", $cache_file[$i], 2);
 
 		if( strtolower($cache) == strtolower($read) )
 		{
@@ -626,6 +621,8 @@ function UrlFile($net){
 function Get($net, $pv){
 	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
 	$count_host = count($host_file);
+	$now = time();
+	$offset = @date("Z");
 
 	if($count_host <= MAX_HOSTS_OUT)
 		$max_hosts = $count_host;
@@ -635,7 +632,7 @@ function Get($net, $pv){
 	for( $i=0; $i<$max_hosts; $i++ )
 	{
 		list( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[$count_host - 1 - $i]);
-		$out = "H|".$host."|".TimeSinceSubmissionInSeconds( $time )."|".$cluster;
+		$out = "H|".$host."|".TimeSinceSubmissionInSeconds( $now, $time, $offset )."|".$cluster;
 		if( $pv >= 4 )
 			$out .= "||".$leaves;
 
@@ -667,7 +664,7 @@ function Get($net, $pv){
 
 		if( $show )
 		{
-			$out = "U|".$cache."|".TimeSinceSubmissionInSeconds( $time );
+			$out = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, $time, $offset );
 			if( $pv >= 4 )
 				$out .= "|".( $cache_net != $net ? $cache_net : "" );
 
@@ -684,25 +681,51 @@ function Get($net, $pv){
 		print("I|NO-HOSTS\r\n");
 }
 
-function UpdateStats($request, $add = TRUE){
-	$stat_file = file("stats/".$request."_requests_hour.dat");
-	$file_count = count($stat_file);
+function ClearStats($stat_file, $file_count, $request){
 	$file = fopen("stats/".$request."_requests_hour.dat", "w");
 	flock($file, 2);
 
-	for($i = 0; $i < $file_count; $i++)
+	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
 	{
 		$stat_file[$i] = trim($stat_file[$i]);
-		$time_diff = time() - ( @strtotime( $stat_file[$i] ) + @date("Z") );	// GMT
+		$time_diff = $now - ( @strtotime( $stat_file[$i] ) + $offset );	// GMT
+		$time_diff = floor($time_diff / 3600);	// Hours
+
+		if( $time_diff < 1 ) fwrite($file, $stat_file[$i]."\r\n");
+	}
+
+	flock($file, 3);
+	fclose($file);
+}
+
+function ReadStats($request){
+	$stat_file = file("stats/".$request."_requests_hour.dat");
+	$file_count = count($stat_file);
+
+	$requests = 0;
+	$old = 0;
+	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
+	{
+		$stat_file[$i] = trim($stat_file[$i]);
+		$time_diff = $now - ( @strtotime( $stat_file[$i] ) + $offset );	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 
 		if( $time_diff < 1 )
-			fwrite($file, $stat_file[$i]."\r\n");
+			$requests++;
+		else
+			$old++;
 	}
 
-	if( $add == TRUE )
-		fwrite($file, gmdate("Y/m/d h:i A")."\r\n");
+	if($old > $requests * 3 && $requests > 0) ClearStats($stat_file, $file_count, $request);
+	return $requests;
+}
 
+function UpdateStats($request){
+	if(!STATS_ENABLED) return;
+
+	$file = fopen("stats/".$request."_requests_hour.dat", "a");
+	flock($file, 2);
+	fwrite($file, gmdate("Y/m/d h:i A")."\r\n");
 	flock($file, 3);
 	fclose($file);
 }
@@ -844,18 +867,25 @@ else
 		$request = file("stats/requests.dat");
 
 		$file = fopen("stats/requests.dat", "w");
+		$requests = trim($request[0]) + 1;
 		flock($file, 2);
-		fwrite($file, $request[0] + 1);
+		fwrite($file, $requests);
 		flock($file, 3);
 		fclose($file);
 	}
 
 	if( $CLIENT == NULL )
 	{
-		if(LOG_MINOR_ERRORS)
-			Logging("unidentified_clients", $CLIENT, $VERSION, $NET);
 		header("Status: 404 Not Found");
-		die("ERROR: Client unknown - Request rejected\r\n");
+		print "ERROR: Client unknown - Request rejected\r\n";
+		if(LOG_MINOR_ERRORS) Logging("unidentified_clients", $CLIENT, $VERSION, $NET);
+
+		if($CACHE != NULL || $IP != NULL)
+			UpdateStats("update");
+		else
+			UpdateStats("other");
+
+		die();
 	}
 
 	if($VERSION == NULL && strlen($CLIENT) > 4)
@@ -866,22 +896,23 @@ else
 
 	if( IsClientTooOld( $CLIENT, $VERSION ) )
 	{
+		print "ERROR: Client too old - Request rejected\r\n";
+		if(LOG_MINOR_ERRORS) Logging("old_clients", $CLIENT, $VERSION, $NET);
+
 		if($CACHE != NULL || $IP != NULL)
 			UpdateStats("update");
 		else
 			UpdateStats("other");
 
-		if(LOG_MINOR_ERRORS)
-			Logging("old_clients", $CLIENT, $VERSION, $NET);
-		die("ERROR: Client too old - Request rejected\r\n");
+		die();
 	}
 
 	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL)
 	{
+		print "ERROR: Invalid command - Request rejected\r\n";
+		if(LOG_MAJOR_ERRORS) Logging("invalid_queries", $CLIENT, $VERSION, $NET);
 		UpdateStats("other");
-		if(LOG_MAJOR_ERRORS)
-			Logging("invalid_queries", $CLIENT, $VERSION, $NET);
-		die("ERROR: Invalid command - Request rejected\r\n");
+		die();
 	}
 
 	if( $CACHE != NULL && strpos($CACHE, "://") > -1 )
@@ -1054,13 +1085,10 @@ else
 		if(STATS_ENABLED)
 		{
 			$requests = file("stats/requests.dat");
-			print $requests[0]."\r\n";
+			print trim($requests[0])."\r\n";
 
-			$file = file("stats/other_requests_hour.dat");
-			$other_requests = count( $file );
-
-			$file = file("stats/update_requests_hour.dat");
-			$update_requests = count( $file );
+			$other_requests = ReadStats("other");
+			$update_requests = ReadStats("update");
 
 			print ( $other_requests + $update_requests )."\r\n";
 			print $update_requests."\r\n";
