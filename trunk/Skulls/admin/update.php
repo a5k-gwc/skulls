@@ -1,7 +1,7 @@
 <?php
 header("Pragma: no-cache");
 
-define( "REVISION", 3 );
+define( "REVISION", 4 );
 if( !file_exists("revision.dat") )
 {
 	$file = fopen("revision.dat", "x");
@@ -12,7 +12,7 @@ if( !file_exists("revision.dat") )
 }
 $file_content = file("revision.dat");
 if($file_content[0] >= REVISION)
-	die("There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.<br>\r\n");
+	die("There is no need to update it.<br/>\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.<br/>\r\n");
 
 
 $log = "";
@@ -26,11 +26,11 @@ function check($result)
 	$updated = TRUE;
 
 	if($result)
-		return "<b>OK</b><br>\r\n";
+		return "<font color=\"green\"><b>OK</b></font><br/>\r\n";
 	else
 	{
 		$errors++;
-		return "<b>ERROR</b><br>\r\n";
+		return "<font color=\"red\"><b>ERROR</b></font><br/>\r\n";
 	}
 }
 
@@ -113,7 +113,7 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 
 	if($changed)
 	{
-		$log .= "Internal structure updated in caches.dat.<br>\r\n";
+		$log .= "Internal structure updated in caches.dat.<br/>\r\n";
 		$updated = TRUE;
 	}
 }
@@ -160,9 +160,25 @@ if( file_exists("../".DATA_DIR."/blocked_caches.dat") )
 
 	if($changed)
 	{
-		$log .= "blocked_caches.dat updated.<br>\r\n";
+		$log .= "blocked_caches.dat updated.<br/>\r\n";
 		$updated = TRUE;
 	}
+}
+
+if( !file_exists("../".DATA_DIR."/failed_urls.dat") )
+{
+	$log .= "Creating ".DATA_DIR."/failed_urls.dat: ";
+
+	$file = fopen( "../".DATA_DIR."/failed_urls.dat", "w" );
+	if( !$file )
+		$result = FALSE;
+	else
+	{
+		fclose($file);
+		$result = TRUE;
+	}
+
+	$log .= check($result);
 }
 
 if( file_exists("../log/skulls.log") )
@@ -172,18 +188,26 @@ if( file_exists("../log/skulls.log") )
 	$log .= check($result);
 }
 
-$file = fopen("revision.dat", "w");
-flock($file, 2);
-fwrite($file, REVISION);
-flock($file, 3);
-fclose($file);
+echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\r\n";
+echo "<html><head><title>Update</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
 
 echo $log;
 
 if($errors)
-	echo "<br>".$errors." errors.";
-elseif($updated)
-	echo "<br>Updated correctly.";
+	echo "<br/><font color=\"red\"><b>".$errors." ERRORS.</b></font>";
 else
-	echo "Already updated.";
+{
+	$file = fopen("revision.dat", "w");
+	flock($file, 2);
+	fwrite($file, REVISION);
+	flock($file, 3);
+	fclose($file);
+
+	if($updated)
+		echo "<br/><font color=\"green\"><b>Updated correctly.</b></font>";
+	else
+		echo "<font color=\"green\"><b>Already updated.</b></font>";
+}
+
+echo "</body></html>";
 ?>
