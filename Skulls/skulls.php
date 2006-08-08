@@ -716,7 +716,7 @@ function ReadStats($request){
 			$old++;
 	}
 
-	if($old > $requests * 2 && $requests > 0) CleanStats($stat_file, $file_count, $request);
+	if($old + $requests > $requests * 2 && $requests > 0) CleanStats($stat_file, $file_count, $request);
 	return $requests;
 }
 
