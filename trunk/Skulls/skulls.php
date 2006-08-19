@@ -318,7 +318,7 @@ function PingWebCache($cache){
 		$oldpong = "";
 		$error = "";
 
-		$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cachename=".NAME;
+		$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1";
 		if( $main_url[count($main_url)-1] == "bazooka.php" )	// Workaround for Bazooka WebCache
 			$query .= "&net=gnutella2";
 
@@ -388,7 +388,7 @@ function PingWebCache($cache){
 				$pong = "";
 				$oldpong = "";
 
-				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cachename=".NAME."&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 				while( !feof($fp) )
 				{
 					$line = fgets($fp, 1024);
@@ -755,7 +755,7 @@ function KickStart($net, $cache){
 	}
 	else
 	{
-		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&client=".VENDOR."&version=".SHORT_VER."&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n" );
+		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n" );
 		while( !feof($fp) )
 		{
 			$line = fgets( $fp, 1024 );
