@@ -45,7 +45,7 @@ if($_SERVER["REMOTE_ADDR"] == "196.31.80.247")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.2" );
+define( "SHORT_VER", "0.2.3" );
 define( "VER", SHORT_VER." Beta" );
 
 $SUPPORTED_NETWORKS[] = "Gnutella";
@@ -211,11 +211,13 @@ function CheckURLValidity($cache){
 
 function CheckBlockedCache($cache){
 	$cache = strtolower($cache);
-	// Lynn Cache 0.4 - Bad webcache: it ignore net parameter, it is outdated, it doesn't clean urls and it also doesn't identify itself when it ping other webcaches so url update doesn't work.
 	if(
-		$cache == "http://www.exactmobile.co.za/cache.asp" ||
-		$cache == "http://www.exactmobile.co.za/cache.asp/" ||
-		$cache == "http://www.sexymobile.co.za/cache.asp"
+		// Lynn Cache 0.4 - Bad webcache: it ignore net parameter, it is outdated, it doesn't clean urls and it also doesn't identify itself when it ping other webcaches so url update doesn't work.
+		$cache == "http://www.exactmobile.co.za/cache.asp"
+		|| $cache == "http://www.exactmobile.co.za/cache.asp/"
+		|| $cache == "http://www.sexymobile.co.za/cache.asp"
+		// It doesn't return any result and update doesn't work.
+		|| $cache == "http://www.xolox.nl/gwebcache/"
 	)
 		return TRUE;
 
@@ -920,33 +922,36 @@ else
 		list( $protocol, $url ) = explode("://", $CACHE, 2);
 
 		if( strpos($url, "/") > -1 )
-			list( $url, $other_part_url ) = explode("/", $url, 2);
+			list( $host, $path ) = explode("/", $url, 2);
 		else
-			$other_part_url = "";
+		{
+			$host = $url;
+			$path = "";
+		}
 
-		$other_part_url = str_replace( "./", "", $other_part_url );		// Remove "./" from $other_part_url if present
+		$path = str_replace( "./", "", $path );		// Remove "./" from $path if present
 
 		$slash = FALSE;
-		while( substr( $other_part_url, strlen($other_part_url) - 1, 1 ) == "/" )
+		while( substr( $path, strlen($path) - 1, 1 ) == "/" )
 		{
-			$other_part_url = substr( $other_part_url, 0, strlen($other_part_url) - 1 );
+			$path = substr( $path, 0, strlen($path) - 1 );
 			$slash = TRUE;
 		}
 
-		if( substr( $other_part_url, strlen($other_part_url) - 1, 1 ) == "." )
-			$other_part_url = substr( $other_part_url, 0, strlen($other_part_url) - 1 );	// Remove dot at the end of $other_part_url if present
+		if( substr( $path, strlen($path) - 1, 1 ) == "." )
+			$path = substr( $path, 0, strlen($path) - 1 );	// Remove dot at the end of $path if present
 
-		if( strlen($other_part_url) && $slash )
-			$other_part_url .= "/";
+		if( strlen($path) && $slash )
+			$path .= "/";
 
-		if( strpos($url, ":") > -1 )
+		if( strpos($host, ":") > -1 )
 		{
-			list( $host_name, $host_port ) = explode(":", $url, 2);
+			list( $host_name, $host_port ) = explode(":", $host, 2);
 			$host_port = (int)$host_port;
 		}
 		else
 		{
-			$host_name = $url;
+			$host_name = $host;
 			$host_port = 80;
 		}
 
@@ -958,7 +963,10 @@ else
 		else
 			$host_port = ":".$host_port;
 
-		$CACHE = $protocol."://".$host_name.$host_port."/".$other_part_url;
+		if( substr($host_name, -9) == ".xolox.nl" )
+			$CACHE = "http://www.xolox.nl/gwebcache/";
+		else
+			$CACHE = $protocol."://".$host_name.$host_port."/".$path;
 	}
 
 	header("X-Remote-IP: ".$REMOTE_IP);
