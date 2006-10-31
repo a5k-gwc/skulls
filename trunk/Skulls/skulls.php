@@ -25,6 +25,12 @@ include "vars.php";
 if( !defined("DATA_DIR") && !file_exists("vars.php") )
 	die("ERROR: The file vars.php is missing.");
 
+if( !isset($_GET) )
+{
+	$_SERVER = &$HTTP_SERVER_VARS;
+	$_GET = &$HTTP_GET_VARS;
+}
+	
 if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 {
 	header("Status: 404 Not Found");
@@ -32,14 +38,11 @@ if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 	die("ERROR: Service disabled\r\n");
 }
 
-if($_SERVER["REMOTE_ADDR"] == "196.31.80.247")
+$REMOTE_IP = $_SERVER["REMOTE_ADDR"];
+
+if($REMOTE_IP == "196.31.80.247")
 {
 	header("Status: 404 Not Found");
-	if(LOG_HAMMERING_CLIENTS)
-	{
-		include "log.php";
-		Logging("hammering_clients", NULL, NULL, NULL);
-	}
 	die();
 }
 
@@ -176,15 +179,29 @@ function TimeSinceSubmissionInSeconds($now, $time_of_submission, $offset){
 function CheckIPValidity($remote_ip, $ip){
 	$ip_port = explode(":", $ip);	// $ip_port[0] = IP	$ip_port[1] = Port
 
-	if( count($ip_port) == 2 &&
-		is_numeric($ip_port[1]) &&
-		$ip_port[1] > 0 &&
-		$ip_port[1] < 65536 &&
-		strlen($ip_port[0]) >= 7 &&
-		$ip_port[0] == $remote_ip &&
-		ip2long($ip_port[0]) == ip2long($remote_ip)
+	$ip_array = explode(".", $ip_port[0]);
+	// http://www.rfc-editor.org/rfc/rfc3330.txt
+
+	if(
+		!(	// Check if it isn't a reserved address
+			$ip_array[0] == 0		// "This" Network
+			|| $ip_array[0] == 10	// Private Network
+			|| $ip_array[0] == 127	// Loopback
+			|| $ip_array[0] == 172 && ( $ip_array[1] >= 16 && $ip_array[1] <= 31 )	// Private Network
+			|| $ip_array[0] == 192 && $ip_array[1] == 168	// Private Network
+		)
 	)
-		return TRUE;
+	{
+		if( count($ip_port) == 2 &&
+			is_numeric($ip_port[1]) &&
+			$ip_port[1] > 0 &&
+			$ip_port[1] < 65536 &&
+			count($ip_array) == 4 &&
+			$ip_port[0] == $remote_ip &&
+			ip2long($ip_port[0]) == ip2long($remote_ip)
+		)
+			return TRUE;
+	}
 
 	if(LOG_MINOR_ERRORS)
 	{
@@ -209,15 +226,12 @@ function CheckURLValidity($cache){
 	return FALSE;
 }
 
+// When bugs of caches are fixed, ask here http://sourceforge.net/tracker/?atid=797138&group_id=155771&func=browse and the caches will be unlocked
 function CheckBlockedCache($cache){
 	$cache = strtolower($cache);
 	if(
-		// Lynn Cache 0.4 - Bad webcache: it ignore net parameter, it is outdated, it doesn't clean urls and it also doesn't identify itself when it ping other webcaches so url update doesn't work.
-		$cache == "http://www.exactmobile.co.za/cache.asp"
-		|| $cache == "http://www.exactmobile.co.za/cache.asp/"
-		|| $cache == "http://www.sexymobile.co.za/cache.asp"
-		// It doesn't return any result and update doesn't work.
-		|| $cache == "http://www.xolox.nl/gwebcache/"
+		// GWebCache/ASP 0.7.4 - It doesn't return any result and update doesn't work.
+		$cache == "http://www.xolox.nl/gwebcache/"
 	)
 		return TRUE;
 
@@ -583,7 +597,11 @@ function HostFile($net){
 	for( $i = 0; $i < $max_hosts; $i++ )
 	{
 		list( $host, ) = explode("|", $host_file[$count_host - 1 - $i], 2);
-		print($host."\r\n");
+		$host = trim($host);
+		if($host != "")
+			print($host."\r\n");
+		elseif($max_hosts < $count_host)
+			$max_hosts++;
 	}
 }
 
@@ -634,11 +652,15 @@ function Get($net, $pv){
 	for( $i=0; $i<$max_hosts; $i++ )
 	{
 		list( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[$count_host - 1 - $i]);
+		$host = trim($host);
 		$out = "H|".$host."|".TimeSinceSubmissionInSeconds( $now, $time, $offset )."|".$cluster;
 		if( $pv >= 4 )
 			$out .= "||".$leaves;
 
-		print($out."\r\n");
+		if($host != "")
+			print($out."\r\n");
+		elseif($max_hosts < $count_host)
+			$max_hosts++;
 	}
 
 	$cache_file = file(DATA_DIR."/caches.dat");
@@ -818,11 +840,6 @@ if( empty($_SERVER["QUERY_STRING"]) )
 	$SHOWINFO = 1;
 
 $KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter.
-
-if( !isset($_SERVER) )
-	$_SERVER = $HTTP_SERVER_VARS;
-
-$REMOTE_IP = $_SERVER["REMOTE_ADDR"];
 
 if($NET == "gnutella1")
 	$NET = "gnutella";
