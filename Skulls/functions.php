@@ -8,7 +8,7 @@ function ReplaceVendorCode($client, $version){
 		$cache = 1;
 	}
 
-    switch($client)
+	switch($client)
 	{
 		case "ACQL":
 			$client_name = "Acqlite";
@@ -62,7 +62,7 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "iMesh";
 			$url = "http://www.imesh.com/";
 			break;
-        case "MLDK":
+		case "MLDK":
 			$client_name = "MLDonkey";
 			$url = "http://www.mldonkey.net/";
 			break;
@@ -119,20 +119,20 @@ function ReplaceVendorCode($client, $version){
 			$url = "http://www.xolox.nl/";
 			break;
 
-        case "PGDBScan":
+		case "PGDBScan":
 			$client_name = "Jonatkins scan";
 			$url = "http://gcachescan.jonatkins.com/";
 			break;
-        case "KICKSTART":
+		case "KICKSTART":
 			$client_name = "KickStart";
 			$url = "";
 			break;
-        case "TEST":
+		case "TEST":
 			$client_name = "WebCache";
 			$url = "";
 			break;
 
-        case "BAZK":
+		case "BAZK":
 			$client_name = "Bazooka (WebCache)";
 			$url = "http://rocketx.port5.com/";
 			break;
@@ -145,7 +145,7 @@ function ReplaceVendorCode($client, $version){
 			$url = "http://ale5000.altervista.org/software.htm";
 			break;
 
-        default:
+		default:
 			if($cache == 1)
 				$client_name = "WebCache (".$client.")";
 			elseif( $client != "" )
@@ -154,7 +154,7 @@ function ReplaceVendorCode($client, $version){
 				$client_name = "Unknown client";
 
 			$url = "";
-    }
+	}
 
 	if( $url != "" )
 		return "<a href=\"".$url."\" target=\"_blank\">".$client_name." ".$version."</a>";
