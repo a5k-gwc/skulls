@@ -4,14 +4,14 @@ header("Pragma: no-cache");
 define( "REVISION", 4.1 );
 if( !file_exists("revision.dat") )
 {
-	$file = fopen("revision.dat", "x");
+	$file = fopen("revision.dat", "xb");
 	flock($file, 2);
 	fwrite($file, "1");
 	flock($file, 3);
 	fclose($file);
 }
 $file_content = file("revision.dat");
-if(trim($file_content[0]) >= REVISION)
+if(rtrim($file_content[0]) >= REVISION)
 {
 	header("Content-Type: text/plain");
 	die("There is no need to update it.\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.\r\n");
@@ -107,7 +107,7 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 		$data[$i] = implode("|", $line);
 	}
 
-	$file = fopen("../".DATA_DIR."/caches.dat", "w");
+	$file = fopen("../".DATA_DIR."/caches.dat", "wb");
 	flock($file, 2);
 	for($i = 0; $i < $count_cache; $i++)
 		fwrite($file, $data[$i]."\r\n");
@@ -132,7 +132,7 @@ if( !file_exists("../".DATA_DIR."/failed_urls.dat") )
 {
 	$log .= "Creating ".DATA_DIR."/failed_urls.dat: ";
 
-	$file = fopen( "../".DATA_DIR."/failed_urls.dat", "w" );
+	$file = fopen( "../".DATA_DIR."/failed_urls.dat", "wb" );
 	if( !$file )
 		$result = FALSE;
 	else
@@ -160,7 +160,7 @@ if($errors)
 	echo "<br/><font color=\"red\"><b>".$errors." ERRORS.</b></font>";
 else
 {
-	$file = fopen("revision.dat", "w");
+	$file = fopen("revision.dat", "wb");
 	flock($file, 2);
 	fwrite($file, REVISION);
 	flock($file, 3);

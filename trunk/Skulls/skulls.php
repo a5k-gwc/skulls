@@ -59,7 +59,7 @@ define( "NETWORKS_COUNT", $networks_count );
 
 function InizializeNetworkFiles($net){
 	$net = strtolower($net);
-	if( !file_exists(DATA_DIR."/hosts_".$net.".dat") ) fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "x") );
+	if( !file_exists(DATA_DIR."/hosts_".$net.".dat") ) fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "xb") );
 }
 
 function Inizialize($supported_networks){
@@ -67,7 +67,7 @@ function Inizialize($supported_networks){
 	{
 		if( !file_exists(DATA_DIR."/") ) mkdir(DATA_DIR."/", 0777);
 
-		$file = fopen( DATA_DIR."/runnig_since.dat", "w" );
+		$file = fopen( DATA_DIR."/runnig_since.dat", "wb" );
 		if( !$file )
 			die("ERROR: Writing file failed\r\n");
 		else
@@ -78,8 +78,8 @@ function Inizialize($supported_networks){
 			fclose($file);
 		}
 
-		if( !file_exists(DATA_DIR."/caches.dat") ) fclose( fopen(DATA_DIR."/caches.dat", "x") );
-		if( !file_exists(DATA_DIR."/failed_urls.dat") ) fclose( fopen(DATA_DIR."/failed_urls.dat", "x") );
+		if( !file_exists(DATA_DIR."/caches.dat") ) fclose( fopen(DATA_DIR."/caches.dat", "xb") );
+		if( !file_exists(DATA_DIR."/failed_urls.dat") ) fclose( fopen(DATA_DIR."/failed_urls.dat", "xb") );
 	}
 
 	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
@@ -89,14 +89,14 @@ function Inizialize($supported_networks){
 	{
 		if( !file_exists("stats/") ) mkdir("stats/", 0777);
 
-		$file = fopen( "stats/requests.dat", "x" );
+		$file = fopen( "stats/requests.dat", "xb" );
 		flock($file, 2);
 		fwrite($file, "0");
 		flock($file, 3);
 		fclose($file);
 
-		if( !file_exists("stats/update_requests_hour.dat") ) fclose( fopen("stats/update_requests_hour.dat", "x") );
-		if( !file_exists("stats/other_requests_hour.dat") ) fclose( fopen("stats/other_requests_hour.dat", "x") );
+		if( !file_exists("stats/update_requests_hour.dat") ) fclose( fopen("stats/update_requests_hour.dat", "xb") );
+		if( !file_exists("stats/other_requests_hour.dat") ) fclose( fopen("stats/other_requests_hour.dat", "xb") );
 	}
 }
 
@@ -230,8 +230,9 @@ function CheckURLValidity($cache){
 function CheckBlockedCache($cache){
 	$cache = strtolower($cache);
 	if(
-		// GWebCache/ASP 0.7.4 - It doesn't return any result and update doesn't work.
-		$cache == "http://www.xolox.nl/gwebcache/"
+		// Deepnet Webcache - It doesn't return any result and update doesn't work.
+		$cache == "http://www.deepnetexplorer.co.uk/webcache/"
+		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
 	)
 		return TRUE;
 
@@ -276,7 +277,7 @@ function CheckFailedUrl($url){
 }
 
 function AddFailedUrl($url){
-	$file = fopen(DATA_DIR."/failed_urls.dat", "a");
+	$file = fopen(DATA_DIR."/failed_urls.dat", "ab");
 	flock($file, 2);
 	fwrite($file, $url."|".gmdate("Y/m/d h:i:s A")."\r\n");
 	flock($file, 3);
@@ -286,7 +287,7 @@ function AddFailedUrl($url){
 function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version){
 	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($line + 1) ) ) );
 
-	$file = fopen(DATA_DIR."/hosts_".$net.".dat", "w");
+	$file = fopen(DATA_DIR."/hosts_".$net.".dat", "wb");
 	flock($file, 2);
 	fwrite($file, $new_host_file.$ip."|".$leaves."|".$cluster."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 	flock($file, 3);
@@ -296,7 +297,7 @@ function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $
 function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version){
 	$new_cache_file = implode("", array_merge( array_slice($cache_file, 0, $line), array_slice( $cache_file, ($line + 1) ) ) );
 
-	$file = fopen(DATA_DIR."/caches.dat", "w");
+	$file = fopen(DATA_DIR."/caches.dat", "wb");
 	flock($file, 2);
 	if($cache != NULL)
 		fwrite($file, $new_cache_file.$cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
@@ -335,7 +336,7 @@ function PingWebCache($cache){
 		$error = "";
 
 		$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1";
-		if( $main_url[count($main_url)-1] == "bazooka.php" )	// Workaround for Bazooka WebCache
+		if( $main_url[count($main_url)-1] == "bazooka.php" )	// Workaround for compatibility with Bazooka
 			$query .= "&net=gnutella2";
 
 		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
@@ -360,7 +361,7 @@ function PingWebCache($cache){
 
 			if(count($received_data) > 3)
 			{
-				if(substr($received_data[3], 0, 4) == "http")	// Workaround for compatibility
+				if(substr($received_data[3], 0, 4) == "http")	// Workaround for compatibility with PHPGnuCacheII
 					$cache_data[1] = "gnutella-gnutella2";
 				else
 				{
@@ -481,7 +482,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 			}
 			else
 			{
-				$file = fopen(DATA_DIR."/hosts_".$net.".dat", "a");
+				$file = fopen(DATA_DIR."/hosts_".$net.".dat", "ab");
 				flock($file, 2);
 				fwrite($file, $ip."|".$leaves."|".$cluster."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 				flock($file, 3);
@@ -573,7 +574,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 				}
 				else
 				{
-					$file = fopen(DATA_DIR."/caches.dat", "a");
+					$file = fopen(DATA_DIR."/caches.dat", "ab");
 					flock($file, 2);
 					fwrite($file, $cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 					flock($file, 3);
@@ -706,7 +707,7 @@ function Get($net, $pv){
 }
 
 function CleanStats($stat_file, $file_count, $request){
-	$file = fopen("stats/".$request."_requests_hour.dat", "w");
+	$file = fopen("stats/".$request."_requests_hour.dat", "wb");
 	flock($file, 2);
 
 	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
@@ -747,7 +748,7 @@ function ReadStats($request){
 function UpdateStats($request){
 	if(!STATS_ENABLED) return;
 
-	$file = fopen("stats/".$request."_requests_hour.dat", "a");
+	$file = fopen("stats/".$request."_requests_hour.dat", "ab");
 	flock($file, 2);
 	fwrite($file, gmdate("Y/m/d h:i A")."\r\n");
 	flock($file, 3);
@@ -885,7 +886,7 @@ else
 	{
 		$request = file("stats/requests.dat");
 
-		$file = fopen("stats/requests.dat", "w");
+		$file = fopen("stats/requests.dat", "wb");
 		$requests = trim($request[0]) + 1;
 		flock($file, 2);
 		fwrite($file, $requests);
