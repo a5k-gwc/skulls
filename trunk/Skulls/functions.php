@@ -1,10 +1,11 @@
 <?php
 function ReplaceVendorCode($client, $version){
+	$cache = 0;
 	if( $client == "TEST" && (float)$version == 0 && substr($version, 0, 1) != "0" )
 	{
 		$client = $version;
 		$version = "";
-		$test = 1;
+		$cache = 1;
 	}
 
     switch($client)
@@ -28,6 +29,10 @@ function ReplaceVendorCode($client, $version){
 		case "COCO":
 			$client_name = "CocoGnut";
 			$url = "http://www.alpha-programming.co.uk/software/cocognut/";
+			break;
+		case "DNET":
+			$client_name = "Deepnet Explorer";
+			$url = "http://www.deepnetexplorer.com/";
 			break;
 		case "GDNA":
 			$client_name = "GnucDNA";
@@ -141,10 +146,10 @@ function ReplaceVendorCode($client, $version){
 			break;
 
         default:
-			if(isset($test))
+			if($cache == 1)
 				$client_name = "WebCache (".$client.")";
 			elseif( $client != "" )
-				$client_name = "Unknown client (".$client.")";
+				$client_name = $client;
 			else
 				$client_name = "Unknown client";
 
@@ -155,5 +160,46 @@ function ReplaceVendorCode($client, $version){
 		return "<a href=\"".$url."\" target=\"_blank\">".$client_name." ".$version."</a>";
 	else
 		return $client_name." ".$version;
+}
+
+function InitializeNetworkFile($net){
+	$net = strtolower($net);
+	if( !file_exists(DATA_DIR."/hosts_".$net.".dat") ) fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "xb") );
+}
+
+function Initialize($supported_networks){
+	if( !file_exists(DATA_DIR."/runnig_since.dat") )
+	{
+		$file = fopen( DATA_DIR."/runnig_since.dat", "wb" );
+		if( !$file )
+			die("ERROR: Writing file failed.\r\n");
+		else
+		{
+			flock($file, 2);
+			fwrite($file, gmdate("Y/m/d h:i:s A"));
+			flock($file, 3);
+			fclose($file);
+		}
+	}
+	if( !file_exists(DATA_DIR."/caches.dat") ) fclose( fopen(DATA_DIR."/caches.dat", "xb") );
+	if( !file_exists(DATA_DIR."/failed_urls.dat") ) fclose( fopen(DATA_DIR."/failed_urls.dat", "xb") );
+
+	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
+		InitializeNetworkFile( $supported_networks[$i] );
+
+	if( STATS_ENABLED )
+	{
+		if( !file_exists("stats/") ) mkdir("stats/", 0777);
+		if( !file_exists("stats/requests.dat") )
+		{
+			$file = fopen( "stats/requests.dat", "xb" );
+			flock($file, 2);
+			fwrite($file, "0");
+			flock($file, 3);
+			fclose($file);
+		}
+		if( !file_exists("stats/update_requests_hour.dat") ) fclose( fopen("stats/update_requests_hour.dat", "xb") );
+		if( !file_exists("stats/other_requests_hour.dat") ) fclose( fopen("stats/other_requests_hour.dat", "xb") );
+	}
 }
 ?>
