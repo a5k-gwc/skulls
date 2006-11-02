@@ -1,7 +1,10 @@
 <?php
 function ShowHtmlPage($num){
 	global $NET;
-	include "vendor_code.php";
+	if( !function_exists("ReplaceVendorCode") )
+	{
+		include "functions.php";
+	}
 
 	if($NET == NULL)
 		$NET = "all";

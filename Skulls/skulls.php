@@ -57,49 +57,6 @@ $SUPPORTED_NETWORKS[] = "Gnutella2";
 $networks_count = count($SUPPORTED_NETWORKS);
 define( "NETWORKS_COUNT", $networks_count );
 
-function InizializeNetworkFiles($net){
-	$net = strtolower($net);
-	if( !file_exists(DATA_DIR."/hosts_".$net.".dat") ) fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "xb") );
-}
-
-function Inizialize($supported_networks){
-	if( !file_exists(DATA_DIR."/runnig_since.dat") )
-	{
-		if( !file_exists(DATA_DIR."/") ) mkdir(DATA_DIR."/", 0777);
-
-		$file = fopen( DATA_DIR."/runnig_since.dat", "wb" );
-		if( !$file )
-			die("ERROR: Writing file failed\r\n");
-		else
-		{
-			flock($file, 2);
-			fwrite($file, gmdate("Y/m/d h:i:s A"));
-			flock($file, 3);
-			fclose($file);
-		}
-
-		if( !file_exists(DATA_DIR."/caches.dat") ) fclose( fopen(DATA_DIR."/caches.dat", "xb") );
-		if( !file_exists(DATA_DIR."/failed_urls.dat") ) fclose( fopen(DATA_DIR."/failed_urls.dat", "xb") );
-	}
-
-	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
-		InizializeNetworkFiles( $supported_networks[$i] );
-
-	if( STATS_ENABLED && !file_exists("stats/requests.dat") )
-	{
-		if( !file_exists("stats/") ) mkdir("stats/", 0777);
-
-		$file = fopen( "stats/requests.dat", "xb" );
-		flock($file, 2);
-		fwrite($file, "0");
-		flock($file, 3);
-		fclose($file);
-
-		if( !file_exists("stats/update_requests_hour.dat") ) fclose( fopen("stats/update_requests_hour.dat", "xb") );
-		if( !file_exists("stats/other_requests_hour.dat") ) fclose( fopen("stats/other_requests_hour.dat", "xb") );
-	}
-}
-
 function NetsToString()
 {
 	global $SUPPORTED_NETWORKS;
@@ -366,9 +323,6 @@ function PingWebCache($cache){
 				else
 				{
 					$nets = trim($received_data[3]);
-					if( $nets == "multi" )
-						$nets = "gnutella-gnutella2";
-
 					if( CheckNetworkString($SUPPORTED_NETWORKS, $nets) )
 						$cache_data[1] = strtolower($nets);
 					else
@@ -801,8 +755,6 @@ function KickStart($net, $cache){
 }
 
 
-Inizialize($SUPPORTED_NETWORKS);
-
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 
 $PV = !empty($_GET["pv"]) ? $_GET["pv"] : 0;
@@ -841,6 +793,28 @@ if( empty($_SERVER["QUERY_STRING"]) )
 	$SHOWINFO = 1;
 
 $KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter.
+
+$USER_AGENT = $_SERVER["HTTP_USER_AGENT"];
+$USER_AGENT = str_replace("/", " ", $USER_AGENT);
+
+if( !file_exists(DATA_DIR."/last_action.dat") )
+{
+	if( !file_exists(DATA_DIR."/") ) mkdir(DATA_DIR."/", 0777);
+
+	$file = fopen( DATA_DIR."/last_action.dat", "xb" );
+	if( !$file )
+		die("ERROR: Writing file failed.\r\n");
+	else
+	{
+		flock($file, 2);
+		fwrite($file, SHORT_VER."|".STATS_ENABLED."|0|".gmdate("Y/m/d h:i A"));
+		flock($file, 3);
+		fclose($file);
+	}
+
+	include "functions.php";
+	Initialize($SUPPORTED_NETWORKS);
+}
 
 if($NET == "gnutella1")
 	$NET = "gnutella";
@@ -884,11 +858,11 @@ else
 
 	if(STATS_ENABLED)
 	{
-		$request = file("stats/requests.dat");
-
-		$file = fopen("stats/requests.dat", "wb");
-		$requests = trim($request[0]) + 1;
+		$file = fopen("stats/requests.dat", "r+b");
 		flock($file, 2);
+		$requests = fgets($file);
+		$requests++;
+		rewind($file);
 		fwrite($file, $requests);
 		flock($file, 3);
 		fclose($file);
@@ -913,6 +887,10 @@ else
 		$VERSION = substr( $CLIENT, 4 );
 		$CLIENT = substr( $CLIENT, 0, 4 );
 	}
+
+	list($name, ) = explode(" ", $USER_AGENT);
+	if( $name == "Etomi" || $name == "360Share" )
+		$CLIENT = $name;
 
 	if( IsClientTooOld( $CLIENT, $VERSION ) )
 	{
