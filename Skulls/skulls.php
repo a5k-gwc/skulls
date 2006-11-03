@@ -660,7 +660,9 @@ function Get($net, $pv){
 		print("I|NO-HOSTS\r\n");
 }
 
-function CleanStats($stat_file, $file_count, $request){
+function CleanStats($request){
+	$stat_file = file("stats/".$request."_requests_hour.dat");
+	$file_count = count($stat_file);
 	$file = fopen("stats/".$request."_requests_hour.dat", "wb");
 	flock($file, 2);
 
@@ -680,10 +682,9 @@ function CleanStats($stat_file, $file_count, $request){
 function ReadStats($request){
 	$stat_file = file("stats/".$request."_requests_hour.dat");
 	$file_count = count($stat_file);
-
-	$requests = 0;
-	$old = 0;
-	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
+	$now = time();
+	$offset = @date("Z");
+	for($i = $file_count - 1, $requests = 0; $i >= 0; $i--)
 	{
 		$stat_file[$i] = trim($stat_file[$i]);
 		$time_diff = $now - ( @strtotime( $stat_file[$i] ) + $offset );	// GMT
@@ -692,10 +693,9 @@ function ReadStats($request){
 		if( $time_diff < 1 )
 			$requests++;
 		else
-			$old++;
+			break;
 	}
 
-	if($old + $requests > $requests * 2) CleanStats($stat_file, $file_count, $request);
 	return $requests;
 }
 
@@ -819,7 +819,9 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 if($NET == "gnutella1")
 	$NET = "gnutella";
 if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
+{
 	include "log.php";
+}
 
 
 if( $SHOWINFO )
@@ -878,7 +880,6 @@ else
 			UpdateStats("update");
 		else
 			UpdateStats("other");
-
 		die();
 	}
 
@@ -892,7 +893,7 @@ else
 	if( $name == "Etomi" || $name == "360Share" )
 		$CLIENT = $name;
 
-	if( IsClientTooOld( $CLIENT, $VERSION ) )
+	if( IsClientTooOld($CLIENT, $VERSION) )
 	{
 		print "ERROR: Client too old - Request rejected\r\n";
 		if(LOG_MINOR_ERRORS) Logging("old_clients", $CLIENT, $VERSION, $NET);
@@ -901,7 +902,6 @@ else
 			UpdateStats("update");
 		else
 			UpdateStats("other");
-
 		die();
 	}
 
@@ -1089,16 +1089,68 @@ else
 		if(STATS_ENABLED)
 		{
 			$requests = file("stats/requests.dat");
-			print trim($requests[0])."\r\n";
+			echo $requests[0]."\r\n";
 
 			$other_requests = ReadStats("other");
 			$update_requests = ReadStats("update");
 
-			print ( $other_requests + $update_requests )."\r\n";
-			print $update_requests."\r\n";
+			echo ( $other_requests + $update_requests )."\r\n";
+			echo $update_requests."\r\n";
 		}
 		else
-			print "WARNING: Statfile disabled\r\n";
+			echo "WARNING: Statfile disabled\r\n";
 	}
+
+	$clean_stats = 0;
+	$clean_failed_urls = 0;
+	$changed = 0;
+	$file = fopen( DATA_DIR."/last_action.dat", "r+b" );
+	flock($file, 2);
+	$last_action_string = fgets($file);
+	list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
+
+	$time_diff = time() - ( @strtotime( $last_action_date ) + @date("Z") );	// GMT
+	$time_diff = floor($time_diff / 3600);	// Hours
+	if($time_diff >= 1)
+	{
+		$last_action_date = gmdate("Y/m/d h:i A");
+		switch($last_action)
+		{
+			case 0:
+				$clean_stats = 1;
+				$clean_type = "other";
+				break;
+			case 1:
+				$clean_stats = 1;
+				$clean_type = "update";
+				break;
+			case 2:
+				$clean_failed_urls = 1;
+			default:
+				$last_action = -1;
+		}
+		$changed = 1;
+	}
+	if($last_ver != SHORT_VER || $last_stats_status != STATS_ENABLED)
+	{
+		if( !function_exists("Initialize") )
+		{
+			include "functions.php";
+		}
+		Initialize($SUPPORTED_NETWORKS);
+		$changed = 1;
+	}
+	if($changed)
+	{
+		rewind($file);
+		fwrite($file, SHORT_VER."|".STATS_ENABLED."|".($last_action + 1)."|".$last_action_date);
+	}
+	flock($file, 3);
+	fclose($file);
+
+	if($clean_stats)
+		CleanStats($clean_type);
+	elseif($clean_failed_urls)
+		;
 }
 ?>
