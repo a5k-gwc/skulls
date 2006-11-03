@@ -1,7 +1,7 @@
 <?php
 header("Pragma: no-cache");
 
-define( "REVISION", 4.1 );
+define( "REVISION", 4.2 );
 if( !file_exists("revision.dat") )
 {
 	$file = fopen("revision.dat", "xb");
@@ -74,6 +74,13 @@ if( file_exists("../webcachedata/") )
 	}
 }
 
+if( !file_exists("../".DATA_DIR."/") )
+{
+	$result = mkdir("../".DATA_DIR."/", 0777);
+	$log .= "Creating ".DATA_DIR."/: ";
+	$log .= check($result);
+}
+
 if( file_exists("../".DATA_DIR."/hosts_gnutella1.dat") )
 {
 	if( !file_exists("../".DATA_DIR."/hosts_gnutella.dat") )
@@ -144,6 +151,13 @@ if( !file_exists("../".DATA_DIR."/failed_urls.dat") )
 	$log .= check($result);
 }
 
+if( file_exists("../vendor_code.php") )
+{
+	$result = unlink("../vendor_code.php");
+	$log .= "Deleting vendor_code.php: ";
+	$log .= check($result);
+}
+
 if( file_exists("../log/skulls.log") )
 {
 	$result = unlink("../log/skulls.log");
@@ -157,7 +171,15 @@ echo "<html><head><title>Update</title><meta http-equiv=\"Content-Type\" content
 echo $log;
 
 if($errors)
-	echo "<br/><font color=\"red\"><b>".$errors." ERRORS.</b></font>";
+{
+	echo "<br/><font color=\"red\"><b>".$errors." ";
+	if($errors == 1)
+		echo "ERROR";
+	else
+		echo "ERRORS";
+	echo ".</b></font><br/>";
+	echo "<b>You must execute the failed actions manually.</b>";
+}
 else
 {
 	$file = fopen("revision.dat", "wb");

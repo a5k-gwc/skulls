@@ -146,7 +146,7 @@ function ReplaceVendorCode($client, $version){
 			break;
 
 		default:
-			if($cache == 1)
+			if($cache)
 				$client_name = "WebCache (".$client.")";
 			elseif( $client != "" )
 				$client_name = $client;
