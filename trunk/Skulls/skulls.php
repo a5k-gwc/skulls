@@ -187,9 +187,8 @@ function CheckURLValidity($cache){
 function CheckBlockedCache($cache){
 	$cache = strtolower($cache);
 	if(
-		// Deepnet Webcache - It doesn't return any result and update doesn't work.
-		$cache == "http://www.deepnetexplorer.co.uk/webcache/"
-		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
+		// It is the same of http://www.deepnetexplorer.co.uk/webcache/
+		$cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
 	)
 		return TRUE;
 
@@ -211,6 +210,28 @@ function IsClientTooOld($client, $version){
     }
 
 	return FALSE;
+}
+
+function CleanFailedUrls(){
+	$failed_urls_file = file("data/failed_urls.dat");
+	$file_count = count($failed_urls_file);
+	$file = fopen("data/failed_urls.dat", "wb");
+	flock($file, 2);
+
+	$now = time();
+	$offset = @date("Z");
+	for($i = 0; $i < $file_count; $i++)
+	{
+		$failed_urls_file[$i] = rtrim($failed_urls_file[$i]);
+		list( , $failed_time) = explode("|", $failed_urls_file[$i]);
+		$time_diff = $now - ( @strtotime( $failed_time ) + $offset );	// GMT
+		$time_diff = floor($time_diff / 86400);	// Days
+
+		if( $time_diff < 2 ) fwrite($file, $failed_urls_file[$i]."\r\n");
+	}
+
+	flock($file, 3);
+	fclose($file);
 }
 
 function CheckFailedUrl($url){
@@ -236,7 +257,7 @@ function CheckFailedUrl($url){
 function AddFailedUrl($url){
 	$file = fopen(DATA_DIR."/failed_urls.dat", "ab");
 	flock($file, 2);
-	fwrite($file, $url."|".gmdate("Y/m/d h:i:s A")."\r\n");
+	fwrite($file, $url."|".gmdate("Y/m/d h:i A")."\r\n");
 	flock($file, 3);
 	fclose($file);
 }
@@ -598,6 +619,7 @@ function Get($net, $pv){
 	$count_host = count($host_file);
 	$now = time();
 	$offset = @date("Z");
+	$output = "";
 
 	if($count_host <= MAX_HOSTS_OUT)
 		$max_hosts = $count_host;
@@ -607,20 +629,19 @@ function Get($net, $pv){
 	for( $i=0; $i<$max_hosts; $i++ )
 	{
 		list( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[$count_host - 1 - $i]);
-		$host = trim($host);
-		$out = "H|".$host."|".TimeSinceSubmissionInSeconds( $now, $time, $offset )."|".$cluster;
-		if( $pv >= 4 )
-			$out .= "||".$leaves;
-
-		if($host != "")
-			print($out."\r\n");
-		elseif($max_hosts < $count_host)
-			$max_hosts++;
+		if($host == "")
+		{
+			if($max_hosts < $count_host) $max_hosts++;
+			continue;
+		}
+		$host = "H|".$host."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset )."|".$cluster;
+		if( $pv >= 4 ) $host .= "|".$leaves;
+		$output .= $host."\r\n";
 	}
 
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
-	for( $n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i-- )
+	for( $n=0, $i=$count_cache-1; $n<MAX_CACHES_OUT && $i>=0; $i-- )
 	{
 		list( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
 
@@ -643,21 +664,24 @@ function Get($net, $pv){
 
 		if( $show )
 		{
-			$out = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, $time, $offset );
-			if( $pv >= 4 )
-				$out .= "|".( $cache_net != $net ? $cache_net : "" );
-
-			print($out."\r\n");
+			$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
+			if( $pv >= 4 ) $cache .= "|".( $cache_net != $net ? $cache_net : "" );
+			$output .= $cache."\r\n";
 			$n++;
 		}
 	}
 
 	if( $count_host == 0 && $count_cache == 0 )
-		print("I|NO-URL-NO-HOSTS\r\n");
+		$output .= "I|NO-URL-NO-HOSTS\r\n";
 	elseif( $count_cache == 0 )
-		print("I|NO-URL\r\n");
+		$output .= "I|NO-URL\r\n";
 	elseif( $count_host == 0 )
-		print("I|NO-HOSTS\r\n");
+		$output .= "I|NO-HOSTS\r\n";
+
+	if( $pv >= 4 )
+		$output .= "I|nets|".strtolower(NetsToString())."\r\n";
+
+	return $output;
 }
 
 function CleanStats($request){
@@ -666,7 +690,9 @@ function CleanStats($request){
 	$file = fopen("stats/".$request."_requests_hour.dat", "wb");
 	flock($file, 2);
 
-	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
+	$now = time();
+	$offset = @date("Z");
+	for($i = 0; $i < $file_count; $i++)
 	{
 		$stat_file[$i] = trim($stat_file[$i]);
 		$time_diff = $now - ( @strtotime( $stat_file[$i] ) + $offset );	// GMT
@@ -760,7 +786,9 @@ $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 $PV = !empty($_GET["pv"]) ? $_GET["pv"] : 0;
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
 $NETS = !empty($_GET["nets"]) ? strtolower($_GET["nets"]) : NULL;	// Currently unsupported
-$MULTI = !empty($_GET["multi"]) ? strtolower($_GET["multi"]) : 0;
+$MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
+$COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
+$DATA = !empty($_GET["data"]) ? $_GET["data"] : 0;
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
@@ -870,7 +898,7 @@ else
 		fclose($file);
 	}
 
-	if( $CLIENT == NULL )
+	if($CLIENT == NULL || $CLIENT == "MUTE")
 	{
 		header("Status: 404 Not Found");
 		print "ERROR: Client unknown - Request rejected\r\n";
@@ -905,7 +933,7 @@ else
 		die();
 	}
 
-	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL)
+	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$DATA)
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
 		if(LOG_MAJOR_ERRORS) Logging("invalid_queries", $CLIENT, $VERSION, $NET);
@@ -1062,9 +1090,11 @@ else
 	{
 		if( $supported_net )
 		{
-			Get($NET, $PV);
-			if( $PV >= 4 )
-				print("I|nets|".strtolower(NetsToString())."\r\n");
+			$output = Get($NET, $PV);
+			if($COMPRESSION == "deflate")
+				echo gzdeflate($output)."\r\n";
+			else
+				echo $output;
 		}
 	}
 	else
@@ -1101,6 +1131,14 @@ else
 			echo "WARNING: Statfile disabled\r\n";
 	}
 
+	if($DATA)
+	{
+		if(EMAIL != "pippo AT excite DOT it")
+			echo "E-mail: ".EMAIL."\r\n\r\n";
+		echo "This is Skulls! Multi-Network WebCache ".VER."\r\n";
+		echo "The sources can be downloaded here: http://sourceforge.net/projects/skulls/\r\n";
+	}
+
 	$clean_stats = 0;
 	$clean_failed_urls = 0;
 	$changed = 0;
@@ -1129,6 +1167,7 @@ else
 			default:
 				$last_action = -1;
 		}
+		if(!STATS_ENABLED) $clean_stats = 0;
 		$changed = 1;
 	}
 	if($last_ver != SHORT_VER || $last_stats_status != STATS_ENABLED)
@@ -1151,6 +1190,6 @@ else
 	if($clean_stats)
 		CleanStats($clean_type);
 	elseif($clean_failed_urls)
-		;
+		CleanFailedUrls();
 }
 ?>
