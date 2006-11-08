@@ -30,7 +30,7 @@ if( !isset($_GET) )
 	$_SERVER = &$HTTP_SERVER_VARS;
 	$_GET = &$HTTP_GET_VARS;
 }
-	
+
 if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 {
 	header("Status: 404 Not Found");
@@ -51,7 +51,6 @@ define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.3" );
 define( "VER", SHORT_VER." Beta" );
 
-$SUPPORTED_NETWORKS[] = "Gnutella";
 $SUPPORTED_NETWORKS[] = "Gnutella2";
 
 $networks_count = count($SUPPORTED_NETWORKS);
@@ -189,6 +188,8 @@ function CheckBlockedCache($cache){
 	if(
 		// It is the same of http://www.deepnetexplorer.co.uk/webcache/
 		$cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
+		// It doesn't work
+		|| $cache == "http://www.xolox.nl/gwebcache/"
 	)
 		return TRUE;
 
@@ -257,7 +258,7 @@ function CheckFailedUrl($url){
 function AddFailedUrl($url){
 	$file = fopen(DATA_DIR."/failed_urls.dat", "ab");
 	flock($file, 2);
-	fwrite($file, $url."|".gmdate("Y/m/d h:i A")."\r\n");
+	fwrite($file, $url."|".gmdate("Y/m/d H:i")."\r\n");
 	flock($file, 3);
 	fclose($file);
 }
@@ -360,9 +361,14 @@ function PingWebCache($cache){
 			$cache_data[0] = trim( substr($oldpong, 5) );
 
 			if(substr($cache_data[0], 0, 13) == "PHPGnuCacheII")			// Workaround for compatibility with PHPGnuCacheII
-				$cache_data[1] = "gnutella-gnutella2";
-			elseif( CheckNetworkString($SUPPORTED_NETWORKS, "gnutella") )
-				$cache_data[1] = "gnutella";
+				$nets = "gnutella-gnutella2";
+			elseif(substr($cache_data[0], 0, 9) == "MWebCache")
+				$nets = "mute";
+			else
+				$nets = "gnutella";
+
+			if(CheckNetworkString($SUPPORTED_NETWORKS, $nets))
+				$cache_data[1] = $nets;
 			else
 				$cache_data[0] = "UNSUPPORTED";
 		}
@@ -730,7 +736,7 @@ function UpdateStats($request){
 
 	$file = fopen("stats/".$request."_requests_hour.dat", "ab");
 	flock($file, 2);
-	fwrite($file, gmdate("Y/m/d h:i A")."\r\n");
+	fwrite($file, gmdate("Y/m/d H:i")."\r\n");
 	flock($file, 3);
 	fclose($file);
 }
@@ -788,7 +794,7 @@ $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
 $NETS = !empty($_GET["nets"]) ? strtolower($_GET["nets"]) : NULL;	// Currently unsupported
 $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
-$DATA = !empty($_GET["data"]) ? $_GET["data"] : 0;
+$INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
@@ -805,8 +811,9 @@ $STATFILE = !empty($_GET["statfile"]) ? $_GET["statfile"] : 0;
 $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 
-$CLIENT = !empty($_GET["client"]) ? $_GET["client"] : NULL;
-$CLIENT = str_replace( "|", "", $CLIENT );
+$CLIENT = !empty($_GET["client"]) ? strtoupper($_GET["client"]) : NULL;
+if($CLIENT == "MUTE") $NET = "mute";
+else $CLIENT = str_replace( "|", "", $CLIENT );
 $VERSION = !empty($_GET["version"]) ? $_GET["version"] : NULL;
 $VERSION = str_replace( "|", "", $VERSION );
 
@@ -816,6 +823,7 @@ $SHOWINFO = !empty($_GET["showinfo"]) ? $_GET["showinfo"] : 0;
 $SHOWHOSTS = !empty($_GET["showhosts"]) ? $_GET["showhosts"] : 0;
 $SHOWCACHES = !empty($_GET["showurls"]) ? $_GET["showurls"] : 0;
 $SHOWSTATS = !empty($_GET["stats"]) ? $_GET["stats"] : 0;
+$SHOWDATA = !empty($_GET["data"]) ? $_GET["data"] : 0;
 
 if( empty($_SERVER["QUERY_STRING"]) )
 	$SHOWINFO = 1;
@@ -835,7 +843,7 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 	else
 	{
 		flock($file, 2);
-		fwrite($file, SHORT_VER."|".STATS_ENABLED."|0|".gmdate("Y/m/d h:i A"));
+		fwrite($file, SHORT_VER."|".STATS_ENABLED."|0|".gmdate("Y/m/d H:i"));
 		flock($file, 3);
 		fclose($file);
 	}
@@ -858,7 +866,7 @@ elseif( $SHOWHOSTS )
 	$web = 2;
 elseif( $SHOWCACHES )
 	$web = 3;
-elseif( $SHOWSTATS )
+elseif( $SHOWSTATS || $SHOWDATA )
 	$web = 4;
 else
 	$web = 0;
@@ -898,7 +906,7 @@ else
 		fclose($file);
 	}
 
-	if($CLIENT == NULL || $CLIENT == "MUTE")
+	if($CLIENT == NULL)
 	{
 		header("Status: 404 Not Found");
 		print "ERROR: Client unknown - Request rejected\r\n";
@@ -933,7 +941,7 @@ else
 		die();
 	}
 
-	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$DATA)
+	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
 		if(LOG_MAJOR_ERRORS) Logging("invalid_queries", $CLIENT, $VERSION, $NET);
@@ -1028,7 +1036,7 @@ else
 				print "I|update|WARNING|Invalid IP"."\r\n";
 		}
 
-		if( $CACHE != NULL )
+		if( $CACHE != NULL && $supported_net )
 		{
 			if(!FSOCKOPEN) // Cache adding disabled
 				print "I|update|WARNING|Cache adding is disabled\r\n";
@@ -1068,7 +1076,7 @@ else
 				print "WARNING: Invalid IP"."\r\n";
 		}
 
-		if( $CACHE != NULL )
+		if( $CACHE != NULL && $supported_net )
 		{
 			if(!FSOCKOPEN) // Cache adding disabled
 				print "WARNING: Cache adding is disabled\r\n";
@@ -1131,10 +1139,10 @@ else
 			echo "WARNING: Statfile disabled\r\n";
 	}
 
-	if($DATA)
+	if($INFO)
 	{
 		if(EMAIL != "pippo AT excite DOT it")
-			echo "E-mail: ".EMAIL."\r\n\r\n";
+			echo EMAIL."\r\n\r\n";
 		echo "This is Skulls! Multi-Network WebCache ".VER."\r\n";
 		echo "The sources can be downloaded here: http://sourceforge.net/projects/skulls/\r\n";
 	}
@@ -1146,12 +1154,11 @@ else
 	flock($file, 2);
 	$last_action_string = fgets($file);
 	list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
-
 	$time_diff = time() - ( @strtotime( $last_action_date ) + @date("Z") );	// GMT
 	$time_diff = floor($time_diff / 3600);	// Hours
 	if($time_diff >= 1)
 	{
-		$last_action_date = gmdate("Y/m/d h:i A");
+		$last_action_date = gmdate("Y/m/d H:i");
 		switch($last_action)
 		{
 			case 0:
@@ -1164,6 +1171,8 @@ else
 				break;
 			case 2:
 				$clean_failed_urls = 1;
+				$last_action = -1;
+				break;
 			default:
 				$last_action = -1;
 		}

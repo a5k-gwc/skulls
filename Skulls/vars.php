@@ -14,7 +14,7 @@ define( "MAX_HOSTS",				25 );	// Maximum number of host stored for EACH network 
 define( "MAX_HOSTS_OUT",			20 );	// Maximum number of host sent in each request (By setting this value too high you can WASTE BANDWIDTH, by setting too low you can increase the number of requests)
 
 define( "MAX_CACHES",				50 );	// Maximum number of cache stored for ALL networks (Setting this value too high DECREASE SPEED of the webcache)
-define( "MAX_CACHES_OUT",			15 );	// Maximum number of cache sent in each request (By setting this value too high you can WASTE BANDWIDTH, by setting too low you can increase the number of requests)
+define( "MAX_CACHES_OUT",			10 );	// Maximum number of cache sent in each request (By setting this value too high you can WASTE BANDWIDTH, by setting too low you can increase the number of requests)
 
 define( "RECHECK_CACHES",			10 );	// Days to recheck a cache
 define( "TIMEOUT",					20 );	// Sockets time out
@@ -23,4 +23,7 @@ define( "DATA_DIR", "data" );
 
 // The following field is optional
 define( "EMAIL", "pippo AT excite DOT it" );	// Your e-mail in that format "name AT server DOT com". Example: pippo@excite.it => pippo AT excite DOT it
+
+//$SUPPORTED_NETWORKS[] = "MUTE";
+$SUPPORTED_NETWORKS[] = "Gnutella";
 ?>
