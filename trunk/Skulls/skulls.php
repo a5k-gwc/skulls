@@ -33,7 +33,7 @@ if( !isset($_GET) )
 
 if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
 {
-	header("Status: 404 Not Found");
+	header("HTTP/1.0 404 Not Found");
 	header("Content-Type: text/plain");
 	die("ERROR: Service disabled\r\n");
 }
@@ -42,14 +42,14 @@ $REMOTE_IP = $_SERVER["REMOTE_ADDR"];
 
 if($REMOTE_IP == "196.31.80.247")
 {
-	header("Status: 404 Not Found");
+	header("HTTP/1.0 404 Not Found");
 	die();
 }
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.3" );
-define( "VER", SHORT_VER." Beta" );
+define( "SHORT_VER", "0.2.4" );
+define( "VER", SHORT_VER."" );
 
 $SUPPORTED_NETWORKS[] = "Gnutella2";
 
@@ -796,6 +796,9 @@ $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;
 
+$USER_AGENT = $_SERVER["HTTP_USER_AGENT"];
+$USER_AGENT = str_replace("/", " ", $USER_AGENT);
+
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
 $LEAVES = !empty($_GET["x_leaves"]) ? $_GET["x_leaves"] : NULL;
@@ -812,7 +815,17 @@ $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 
 $CLIENT = !empty($_GET["client"]) ? strtoupper($_GET["client"]) : NULL;
-if($CLIENT == "MUTE") $NET = "mute";
+// There is MUTE (MUTE network client) and Mutella (Gnutella network client).
+// Both identifying itself as MUTE.
+if($CLIENT == "MUTE")
+{
+	list($name, ) = explode(" ", $USER_AGENT);
+	if($name != "Mutella")
+	{
+		$CLIENT = "MUTE-NET";
+		$NET = "mute";
+	}
+}
 else $CLIENT = str_replace( "|", "", $CLIENT );
 $VERSION = !empty($_GET["version"]) ? $_GET["version"] : NULL;
 $VERSION = str_replace( "|", "", $VERSION );
@@ -825,13 +838,10 @@ $SHOWCACHES = !empty($_GET["showurls"]) ? $_GET["showurls"] : 0;
 $SHOWSTATS = !empty($_GET["stats"]) ? $_GET["stats"] : 0;
 $SHOWDATA = !empty($_GET["data"]) ? $_GET["data"] : 0;
 
-if( empty($_SERVER["QUERY_STRING"]) )
-	$SHOWINFO = 1;
-
 $KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter.
 
-$USER_AGENT = $_SERVER["HTTP_USER_AGENT"];
-$USER_AGENT = str_replace("/", " ", $USER_AGENT);
+if( empty($_SERVER["QUERY_STRING"]) )
+	$SHOWINFO = 1;
 
 if( !file_exists(DATA_DIR."/last_action.dat") )
 {
@@ -908,7 +918,7 @@ else
 
 	if($CLIENT == NULL)
 	{
-		header("Status: 404 Not Found");
+		header("HTTP/1.0 404 Not Found");
 		print "ERROR: Client unknown - Request rejected\r\n";
 		if(LOG_MINOR_ERRORS) Logging("unidentified_clients", $CLIENT, $VERSION, $NET);
 
@@ -931,7 +941,8 @@ else
 
 	if( IsClientTooOld($CLIENT, $VERSION) )
 	{
-		print "ERROR: Client too old - Request rejected\r\n";
+		header("HTTP/1.0 404 Not Found");
+
 		if(LOG_MINOR_ERRORS) Logging("old_clients", $CLIENT, $VERSION, $NET);
 
 		if($CACHE != NULL || $IP != NULL)
