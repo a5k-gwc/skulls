@@ -13,7 +13,7 @@ function ShowHtmlPage($num){
 <html>
 <head>
 	<title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER; ?></title>
-	<meta name="robots" content="noindex,nofollow,nocache">
+	<meta name="robots" content="noindex,nofollow,noarchive">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 	<style type="text/css">
