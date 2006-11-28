@@ -20,6 +20,7 @@
 //   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+$SUPPORTED_NETWORKS = NULL;
 include "vars.php";
 
 if( !defined("DATA_DIR") && !file_exists("vars.php") )
@@ -31,20 +32,21 @@ if( !isset($_GET) )
 	$_GET = &$HTTP_GET_VARS;
 }
 
-if(!$ENABLED || basename($_SERVER["PHP_SELF"]) == "index.php")
+$PHP_SELF = $_SERVER["PHP_SELF"];
+$REMOTE_IP = $_SERVER["REMOTE_ADDR"];
+
+if(!$ENABLED || basename($PHP_SELF) == "index.php")
 {
 	header("HTTP/1.0 404 Not Found");
 	header("Content-Type: text/plain");
 	die("ERROR: Service disabled\r\n");
 }
 
-$REMOTE_IP = $_SERVER["REMOTE_ADDR"];
-
-if($REMOTE_IP == "196.31.80.247")
+/*if($REMOTE_IP == "...")
 {
 	header("HTTP/1.0 404 Not Found");
 	die();
-}
+}*/
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
@@ -69,8 +71,8 @@ function NetsToString()
 	return $nets;
 }
 
-function Pong($multi, $net, $client, $supported_net){
-	if($_SERVER["REMOTE_ADDR"] == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
+function Pong($multi, $net, $client, $supported_net, $remote_ip){
+	if($remote_ip == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
 		return;
 
 	if( $multi || $supported_net )
@@ -205,7 +207,7 @@ function IsClientTooOld($client, $version){
     switch($client)
 	{
 		case "RAZA":
-			if( $version < 2 )
+			if( $version < 2.0 )
 				return TRUE;
 			break;
     }
@@ -360,7 +362,8 @@ function PingWebCache($cache){
 		{
 			$cache_data[0] = trim( substr($oldpong, 5) );
 
-			if(substr($cache_data[0], 0, 13) == "PHPGnuCacheII")			// Workaround for compatibility with PHPGnuCacheII
+			if( substr($cache_data[0], 0, 13) == "PHPGnuCacheII" ||			// Workaround for compatibility with PHPGnuCacheII
+				substr($cache_data[0], 0, 10) == "perlgcache" )				// Workaround for compatibility with perlgcache
 				$nets = "gnutella-gnutella2";
 			elseif(substr($cache_data[0], 0, 9) == "MWebCache")
 				$nets = "mute";
@@ -1024,7 +1027,7 @@ else
 	}
 
 	if($PING)
-		Pong($MULTI, $NET, $CLIENT, $supported_net);
+		Pong($MULTI, $NET, $CLIENT, $supported_net, $REMOTE_IP);
 	if($SUPPORT)
 		Support($SUPPORTED_NETWORKS);
 
