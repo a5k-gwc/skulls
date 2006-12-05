@@ -24,6 +24,7 @@ define( "DATA_DIR", "data" );
 // The following field is optional
 define( "EMAIL", "pippo AT excite DOT it" );	// Your e-mail in that format "name AT server DOT com". Example: pippo@excite.it => pippo AT excite DOT it
 
-// You can add or remove networks, but after you changed them delete last_action.dat in data directory to initialize the changes.
+// You can add or remove any network, but after you changed them delete last_action.dat in data directory to initialize the changes.
 $SUPPORTED_NETWORKS[] = "Gnutella";
+$SUPPORTED_NETWORKS[] = "Gnutella2";
 ?>

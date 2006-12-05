@@ -50,10 +50,11 @@ if(!$ENABLED || basename($PHP_SELF) == "index.php")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.4" );
+define( "SHORT_VER", "0.2.5" );
 define( "VER", SHORT_VER."" );
 
-$SUPPORTED_NETWORKS[] = "Gnutella2";
+if($SUPPORTED_NETWORKS == NULL)
+	die("ERROR: No network is supported.");
 
 $networks_count = count($SUPPORTED_NETWORKS);
 define( "NETWORKS_COUNT", $networks_count );
@@ -75,18 +76,23 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 	if($remote_ip == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
 		return;
 
+	global $SUPPORTED_NETWORKS;
+
 	if( $multi || $supported_net )
 	{
-		if($supported_net && $net == "gnutella")
+		if(!$multi && $supported_net && $net == "gnutella")
 			print "PONG ".NAME." ".VER."\r\n";
 
-		$nets = strtolower( NetsToString() );
-		if( $client == "TEST" && !$multi && $net == "gnutella2" )
-			print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with Bazooka
-		elseif( $client == "GCII" && !$multi && $net == "gnutella2" )
-			print "I|pong|".NAME." ".VER."||COMPAT|".$nets."|TCP\r\n";			// Workaround for compatibility with PHPGnuCacheII
-		else
-			print "I|pong|".NAME." ".VER."|".$nets."|TCP\r\n";
+		if(NETWORKS_COUNT > 1 || strtolower($SUPPORTED_NETWORKS[0]) != "gnutella" || $multi)
+		{
+			$nets = strtolower( NetsToString() );
+			if($client == "TEST" && $net == "gnutella2" && $supported_net && !$multi)
+				print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with Bazooka
+			elseif($client == "GCII" && $net == "gnutella2" && $supported_net && !$multi)
+				print "I|pong|".NAME." ".VER."||COMPAT|".$nets."|TCP\r\n";			// Workaround for compatibility with PHPGnuCacheII
+			else
+				print "I|pong|".NAME." ".VER."|".$nets."|TCP\r\n";
+		}
 	}
 }
 
@@ -188,10 +194,13 @@ function CheckURLValidity($cache){
 function CheckBlockedCache($cache){
 	$cache = strtolower($cache);
 	if(
-		// It is the same of http://www.deepnetexplorer.co.uk/webcache/
-		$cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
 		// It doesn't work
-		|| $cache == "http://www.xolox.nl/gwebcache/"
+		$cache == "http://www.xolox.nl/gwebcache/"
+		// Deepnet Webcache never works good
+		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
+		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/"
+		// It is the same of http://gwebcache.alpha64.info/
+		|| $cache == "http://gwebcache.alpha64.info/index.php"
 	)
 		return TRUE;
 
@@ -304,11 +313,11 @@ function PingWebCache($cache){
 	}
 
 	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
+	$cache_data[0] = "FAILED";
 
 	if(!$fp)
 	{
 		//echo "Error ".$errno."\r\n";
-		$cache_data[0] = "FAILED";
 	}
 	else
 	{
@@ -343,20 +352,14 @@ function PingWebCache($cache){
 			if(count($received_data) > 3)
 			{
 				if(substr($received_data[3], 0, 4) == "http")	// Workaround for compatibility with PHPGnuCacheII
-					$cache_data[1] = "gnutella-gnutella2";
+					$nets = "gnutella-gnutella2";
 				else
-				{
-					$nets = trim($received_data[3]);
-					if( CheckNetworkString($SUPPORTED_NETWORKS, $nets) )
-						$cache_data[1] = strtolower($nets);
-					else
-						$cache_data[0] = "UNSUPPORTED";
-				}
+					$nets = strtolower( trim($received_data[3]) );
 			}
 			elseif( !empty($oldpong) )
-				$cache_data[1] = "gnutella-gnutella2";
+				$nets = "gnutella-gnutella2";
 			else
-				$cache_data[1] = "gnutella2";
+				$nets = "gnutella2";
 		}
 		elseif( !empty($oldpong) )
 		{
@@ -369,11 +372,6 @@ function PingWebCache($cache){
 				$nets = "mute";
 			else
 				$nets = "gnutella";
-
-			if(CheckNetworkString($SUPPORTED_NETWORKS, $nets))
-				$cache_data[1] = $nets;
-			else
-				$cache_data[0] = "UNSUPPORTED";
 		}
 		elseif( strpos(strtolower($error), "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
 		{																	// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
@@ -382,7 +380,6 @@ function PingWebCache($cache){
 			if(!$fp)
 			{
 				//echo "Error ".$errno."\r\n";
-				$cache_data[0] = "FAILED";
 			}
 			else
 			{
@@ -408,7 +405,7 @@ function PingWebCache($cache){
 
 				fclose ($fp);
 
-				$cache_data[1] = "gnutella2";
+				$nets = "gnutella2";
 				if( !empty($pong) )
 				{
 					list( , , $cache_data[0] ) = explode( "|", $pong );
@@ -416,12 +413,16 @@ function PingWebCache($cache){
 				}
 				elseif( !empty($oldpong) )
 					$cache_data[0] = trim( substr($oldpong, 5) );
-				else
-					$cache_data[0] = "FAILED";
 			}
 		}
+	}
+
+	if($cache_data[0] != "FAILED")
+	{
+		if(CheckNetworkString($SUPPORTED_NETWORKS, $nets))
+			$cache_data[1] = $nets;
 		else
-			$cache_data[0] = "FAILED";
+			$cache_data[0] = "UNSUPPORTED";
 	}
 
 	return $cache_data;
