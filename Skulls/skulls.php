@@ -312,8 +312,8 @@ function PingWebCache($cache){
 		$port = 80;
 	}
 
-	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
 	$cache_data[0] = "FAILED";
+	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
 
 	if(!$fp)
 	{
