@@ -46,6 +46,10 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "Gnucleus";
 			$url = "http://www.gnucleus.com/Gnucleus/";
 			break;
+		case "GNZL":
+			$client_name = "Gnoozle";
+			$url = "";
+			break;
 		case "GPUX":
 			$client_name = "GPU";
 			$url = "http://sourceforge.net/projects/gpu/";
@@ -67,9 +71,6 @@ function ReplaceVendorCode($client, $version){
 			$url = "http://www.mldonkey.net/";
 			break;
 		case "MMMM":
-			$client_name = "Morpheus";
-			$url = "http://www.morpheus.com/";
-			break;
 		case "MRPH":
 			$client_name = "Morpheus";
 			$url = "http://www.morpheus.com/";
