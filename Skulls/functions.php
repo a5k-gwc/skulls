@@ -50,6 +50,10 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "Gnoozle";
 			$url = "";
 			break;
+		case "GOLD":
+			$client_name = "Ares Gold";
+			$url = "";
+			break;
 		case "GPUX":
 			$client_name = "GPU";
 			$url = "http://sourceforge.net/projects/gpu/";
