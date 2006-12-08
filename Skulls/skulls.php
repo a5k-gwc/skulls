@@ -208,16 +208,19 @@ function CheckBlockedCache($cache){
 }
 
 function IsClientTooOld($client, $version){
-	if( $version == "" )
-		return FALSE;
-
-	$version = (float)$version;
-
     switch($client)
 	{
 		case "RAZA":
-			if( $version < 2.0 )
+			if((float)$version < 2.0)
 				return TRUE;
+			break;
+		case "BEAR":
+			if((float)$version < 6.1)
+			{
+				$short_ver = substr($version, 0, 5);
+				if($short_ver != "5.1.0" && $short_ver != "5.2.1" )
+					return TRUE;
+			}
 			break;
     }
 
@@ -920,10 +923,16 @@ else
 		fclose($file);
 	}
 
-	if($CLIENT == NULL)
+	if($VERSION == NULL && strlen($CLIENT) > 4)
+	{
+		$VERSION = substr( $CLIENT, 4 );
+		$CLIENT = substr( $CLIENT, 0, 4 );
+	}
+
+	if($CLIENT == NULL || $VERSION == NULL)
 	{
 		header("HTTP/1.0 404 Not Found");
-		print "ERROR: Client unknown - Request rejected\r\n";
+		print "ERROR: Client or version unknown - Request rejected\r\n";
 		if(LOG_MINOR_ERRORS) Logging("unidentified_clients", $CLIENT, $VERSION, $NET);
 
 		if($CACHE != NULL || $IP != NULL)
@@ -931,12 +940,6 @@ else
 		else
 			UpdateStats("other");
 		die();
-	}
-
-	if($VERSION == NULL && strlen($CLIENT) > 4)
-	{
-		$VERSION = substr( $CLIENT, 4 );
-		$CLIENT = substr( $CLIENT, 0, 4 );
 	}
 
 	list($name, ) = explode(" ", $USER_AGENT);
