@@ -942,9 +942,20 @@ else
 		die();
 	}
 
-	list($name, ) = explode(" ", $USER_AGENT);
-	if( $name == "Etomi" || $name == "360Share" )
+	list($name, $name2, ) = explode(" ", $USER_AGENT);
+	if($name == "eTomi" || $name == "360Share" || $name == "MP3Rocket")
 		$CLIENT = $name;
+	elseif($CLIENT == "RAZA")
+	{
+		if($name == "Etomi")
+			$CLIENT = $name;
+		elseif( ($name == "Bearshare" && $name2 == "MP3") || ($name == "WinMX" && $name2 == "MP3") || ($name == "Morpheus" && $name2 == "Music"))
+			$CLIENT = $name." ".$name2;
+		elseif($name == "Shareaza" && $name2 == "PRO")
+			$CLIENT = "Shareaza PRO (rippoff)";
+	}
+	unset($name);
+	unset($name2);
 
 	if( IsClientTooOld($CLIENT, $VERSION) )
 	{
