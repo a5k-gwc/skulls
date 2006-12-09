@@ -211,7 +211,7 @@ function IsClientTooOld($client, $version){
     switch($client)
 	{
 		case "RAZA":
-			if((float)$version < 2.0)
+			if((float)$version < 2.1)
 				return TRUE;
 			break;
 		case "BEAR":
@@ -942,22 +942,21 @@ else
 		die();
 	}
 
+	$blocked = 0;
 	list($name, $name2, ) = explode(" ", $USER_AGENT);
 	if($name == "eTomi" || $name == "360Share" || $name == "MP3Rocket")
 		$CLIENT = $name;
 	elseif($CLIENT == "RAZA")
 	{
-		if($name == "Etomi")
-			$CLIENT = $name;
+		if( $name == "Etomi" || ($name == "Shareaza" && $name2 == "PRO") )	// They are ripp-off of Shareaza
+			$blocked = 1;
 		elseif( ($name == "Bearshare" && $name2 == "MP3") || ($name == "WinMX" && $name2 == "MP3") || ($name == "Morpheus" && $name2 == "Music"))
 			$CLIENT = $name." ".$name2;
-		elseif($name == "Shareaza" && $name2 == "PRO")
-			$CLIENT = "Shareaza PRO (rippoff)";
 	}
 	unset($name);
 	unset($name2);
 
-	if( IsClientTooOld($CLIENT, $VERSION) )
+	if( $blocked || IsClientTooOld($CLIENT, $VERSION) )
 	{
 		header("HTTP/1.0 404 Not Found");
 
@@ -1031,8 +1030,8 @@ else
 	}
 
 	header("X-Remote-IP: ".$REMOTE_IP);
-	if($NET == NULL)
-		$NET = "gnutella";
+	if($NET == NULL) $NET = "gnutella";
+
 	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		$supported_net = TRUE;
 	else
