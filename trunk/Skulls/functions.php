@@ -1,172 +1,4 @@
 <?php
-function ReplaceVendorCode($client, $version){
-	$cache = 0;
-	if( $client == "TEST" && (float)$version == 0 && substr($version, 0, 1) != "0" )
-	{
-		$client = $version;
-		$version = "";
-		$cache = 1;
-	}
-
-	switch($client)
-	{
-		case "ACQL":
-			$client_name = "Acqlite";
-			$url = "http://acqlite.sourceforge.net/";
-			break;
-		case "ACQX":
-			$client_name = "Acquisition";
-			$url = "http://www.acquisitionx.com/";
-			break;
-		case "AGIO":
-			$client_name = "Adagio";
-			$url = "http://sourceforge.net/projects/agio/";
-			break;
-		case "BEAR":
-			$client_name = "BearShare";
-			$url = "http://www.bearshare.com/";
-			break;
-		case "COCO":
-			$client_name = "CocoGnut";
-			$url = "http://www.alpha-programming.co.uk/software/cocognut/";
-			break;
-		case "DNET":
-			$client_name = "Deepnet Explorer";
-			$url = "http://www.deepnetexplorer.com/";
-			break;
-		case "GDNA":
-			$client_name = "GnucDNA";
-			$url = "http://www.gnucleus.com/GnucDNA/";
-			break;
-		case "GIFT":
-			$client_name = "giFT";
-			$url = "http://gift.sourceforge.net/";
-			break;
-		case "GNUC":
-			$client_name = "Gnucleus";
-			$url = "http://www.gnucleus.com/Gnucleus/";
-			break;
-		case "GNZL":
-			$client_name = "Gnoozle";
-			$url = "";
-			break;
-		case "GOLD":
-			$client_name = "Ares Gold";
-			$url = "";
-			break;
-		case "GPUX":
-			$client_name = "GPU";
-			$url = "http://sourceforge.net/projects/gpu/";
-			break;
-		case "GTKG":
-			$client_name = "GTK Gnutella";
-			$url = "http://gtk-gnutella.sourceforge.net/";
-			break;
-		case "LIME":
-			$client_name = "LimeWire";
-			$url = "http://www.limewire.com/";
-			break;
-		case "MESH":
-			$client_name = "iMesh";
-			$url = "http://www.imesh.com/";
-			break;
-		case "MLDK":
-			$client_name = "MLDonkey";
-			$url = "http://www.mldonkey.net/";
-			break;
-		case "MMMM":
-		case "MRPH":
-			$client_name = "Morpheus";
-			$url = "http://www.morpheus.com/";
-			break;
-		case "MNAP":
-			$client_name = "MyNapster";
-			$url = "http://www.mynapster.com/";
-			break;
-		case "MUTE":
-			$client_name = "Mutella";
-			$url = "http://mutella.sourceforge.net/";
-			break;
-		case "MXIE":
-			$client_name = "mxie";
-			$url = "http://www.mxie.com/";
-			break;
-		case "NOVA":
-			$client_name = "Nova";
-			$url = "http://novap2p.sourceforge.net/";
-			break;
-		case "PHEX":
-			$client_name = "Phex";
-			$url = "http://phex.kouk.de/mambo/";
-			break;
-		case "RAZA":
-			$client_name = "Shareaza";
-			$url = "http://www.shareaza.com/";
-			break;
-		case "RAZB":
-			$client_name = "SBeta (Shareaza beta)";		// Beta version of Shareaza
-			$url = "http://www.shareaza.com/beta/";
-			break;
-		case "SNOW":
-			$client_name = "FrostWire";
-			$url = "http://www.frostwire.com/";
-			break;
-		case "SWAP":
-			$client_name = "Swapper";
-			$url = "http://www.revolutionarystuff.com/swapper/";
-			break;
-		case "TFLS":
-			$client_name = "TrustyFiles";
-			$url = "http://www.trustyfiles.com/";
-			break;
-		case "XOLO":
-			$client_name = "XoloX";
-			$url = "http://www.xolox.nl/";
-			break;
-
-		case "PGDBScan":
-			$client_name = "Jonatkins scan";
-			$url = "http://gcachescan.jonatkins.com/";
-			break;
-		case "KICKSTART":
-			$client_name = "KickStart";
-			$url = "";
-			break;
-		case "TEST":
-			$client_name = "WebCache";
-			$url = "";
-			break;
-
-		case "BAZK":
-			$client_name = "Bazooka (WebCache)";
-			$url = "http://rocketx.port5.com/";
-			break;
-		case "GCII":
-			$client_name = "PHPGnuCacheII (WebCache)";
-			$url = "http://gwcii.sourceforge.net/";
-			break;
-		case "SKLL":
-			$client_name = "Skulls (WebCache)";
-			$url = "http://ale5000.altervista.org/software.htm";
-			break;
-
-		default:
-			if($cache)
-				$client_name = "WebCache (".$client.")";
-			elseif( $client != "" )
-				$client_name = $client;
-			else
-				$client_name = "Unknown client";
-
-			$url = "";
-	}
-
-	if( $url != "" )
-		return "<a href=\"".$url."\" target=\"_blank\">".$client_name." ".$version."</a>";
-	else
-		return $client_name." ".$version;
-}
-
 function InitializeNetworkFile($net){
 	$net = strtolower($net);
 	if( !file_exists(DATA_DIR."/hosts_".$net.".dat") ) fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "xb") );
@@ -205,6 +37,86 @@ function Initialize($supported_networks){
 		}
 		if( !file_exists("stats/update_requests_hour.dat") ) fclose( fopen("stats/update_requests_hour.dat", "xb") );
 		if( !file_exists("stats/other_requests_hour.dat") ) fclose( fopen("stats/other_requests_hour.dat", "xb") );
+	}
+}
+
+function KickStart($net, $cache){
+	if( !CheckURLValidity($cache) )
+		die("ERROR: The KickStart URL isn't valid\r\n");
+
+	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from "cache" - $cache = www.test.com:80/page.php
+	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
+	$splitted_url = explode(":", $main_url[0], 2);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
+
+	if(count($splitted_url) == 2)
+		list($host_name, $port) = $splitted_url;
+	else
+	{
+		$host_name = $main_url[0];
+		$port = 80;
+	}
+
+	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
+
+	if(!$fp)
+	{
+		echo "<font color=\"red\"><b>Error ".$errno."</b></font><br>\r\n";
+		return;
+	}
+	else
+	{
+		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n" );
+		while( !feof($fp) )
+		{
+			$is_host = FALSE;
+			$line = rtrim(fgets($fp, 1024));
+			echo $line."<br>";
+
+			if(strtolower(substr($line, 0, 2)) == "h|")		// Host
+			{
+				unset($host);
+				$host = explode("|", $line);
+				$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
+				if(CheckIPValidity($ip_port[0], $host[1]))
+					$is_host = TRUE;
+			}
+			elseif(strtolower(substr($line, 0, 2)) == "u|")	// Cache
+			{
+			}
+			elseif(strtolower(substr($line, 0, 2)) == "i|")	// Info
+			{
+			}
+			elseif(strpos($line, ":") > -1)					// Host (old method)
+			{
+				unset($host);
+				$host[1] = $line;
+				$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
+				if(CheckIPValidity($ip_port[0], $host[1]))
+					$is_host = TRUE;
+			}
+
+			if($is_host)
+			{
+				if(isset($host[3]) && strlen($host[3]) <= 256) // Cluster
+					$cluster = RemoveGarbage($host[3]);
+				else
+					$cluster = NULL;
+				$result = WriteHostFile( rtrim($host[1]), NULL, $net, $cluster, "KICKSTART", "1.0" );
+
+				if( $result == 1 ) // Updated timestamp
+					echo "<b>I|update|OK|Updated host timestamp</b><br>\r\n";
+				elseif( $result == 2 ) // OK
+					echo "<b>I|update|OK|Host added successfully</b><br>\r\n";
+				elseif( $result == 3 ) // OK, pushed old data
+				{
+					echo "<b>I|update|OK|Host added successfully - pushed old data</b><br>\r\n";
+					break;
+				}
+				else
+					echo "<font color=\"red\"><b>I|error</b></font><br>\r\n";
+			}
+		}
+		fclose ($fp);
 	}
 }
 ?>

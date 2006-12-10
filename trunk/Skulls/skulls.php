@@ -50,7 +50,7 @@ if(!$ENABLED || basename($PHP_SELF) == "index.php")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.5" );
+define( "SHORT_VER", "0.2.6" );
 define( "VER", SHORT_VER."" );
 
 if($SUPPORTED_NETWORKS == NULL)
@@ -72,26 +72,39 @@ function NetsToString()
 	return $nets;
 }
 
+function RemoveGarbage($value){
+	$value = str_replace("|", "", $value);
+	$value = str_replace("\r", "", $value);
+	$value = str_replace("\n", "", $value);
+	return str_replace("\0", "", $value);
+}
+
 function Pong($multi, $net, $client, $supported_net, $remote_ip){
 	if($remote_ip == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
 		return;
 
-	global $SUPPORTED_NETWORKS;
+	$pong = "I|pong|".NAME." ".VER;
 
-	if( $multi || $supported_net )
+	if($multi)
 	{
-		if(!$multi && $supported_net && $net == "gnutella")
-			print "PONG ".NAME." ".VER."\r\n";
+		$nets = strtolower(NetsToString());
+		echo $pong."|".$nets."|TCP\r\n";
+	}
+	elseif($supported_net)
+	{
+		if($net == "gnutella")
+			echo "PONG ".NAME." ".VER."\r\n";
 
-		if(NETWORKS_COUNT > 1 || strtolower($SUPPORTED_NETWORKS[0]) != "gnutella" || $multi)
+		global $SUPPORTED_NETWORKS;
+		if(NETWORKS_COUNT > 1 || strtolower($SUPPORTED_NETWORKS[0]) != "gnutella")
 		{
-			$nets = strtolower( NetsToString() );
-			if($client == "TEST" && $net == "gnutella2" && $supported_net && !$multi)
-				print "I|pong|".NAME." ".VER."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with Bazooka
-			elseif($client == "GCII" && $net == "gnutella2" && $supported_net && !$multi)
-				print "I|pong|".NAME." ".VER."||COMPAT|".$nets."|TCP\r\n";			// Workaround for compatibility with PHPGnuCacheII
+			$nets = strtolower(NetsToString());
+			if($client == "TEST" && $net == "gnutella2")
+				echo $pong."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with Bazooka
+			elseif($client == "GCII" && $net == "gnutella2")
+				echo $pong."||COMPAT|".$nets."|TCP\r\n";			// Workaround for compatibility with PHPGnuCacheII
 			else
-				print "I|pong|".NAME." ".VER."|".$nets."|TCP\r\n";
+				echo $pong."|".$nets."|TCP\r\n";
 		}
 	}
 }
@@ -177,7 +190,7 @@ function CheckIPValidity($remote_ip, $ip){
 }
 
 function CheckURLValidity($cache){
-	if( strlen($cache) > 10 && !(strpos($cache, "|") > -1) )
+	if(strlen($cache) > 10)
 		if( substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://" )
 			return TRUE;
 
@@ -196,6 +209,7 @@ function CheckBlockedCache($cache){
 	if(
 		// It doesn't work
 		$cache == "http://www.xolox.nl/gwebcache/"
+		|| $cache == "http://www.xolox.nl/gwebcache/Default.asp"
 		// Deepnet Webcache never works good
 		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
 		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/"
@@ -338,11 +352,11 @@ function PingWebCache($cache){
 			$line = fgets( $fp, 1024 );
 
 			if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
-				$pong = $line;
+				$pong = rtrim($line);
 			elseif( substr($line, 0, 4) == "PONG" )
-				$oldpong = $line;
+				$oldpong = rtrim($line);
 			elseif( substr($line, 0, 5) == "ERROR" )
-				$error = $line;
+				$error = rtrim($line);
 		}
 
 		fclose ($fp);
@@ -350,14 +364,14 @@ function PingWebCache($cache){
 		if( !empty($pong) )
 		{
 			$received_data = explode( "|", $pong );
-			$cache_data[0] = trim($received_data[2]);
+			$cache_data[0] = $received_data[2];
 
 			if(count($received_data) > 3)
 			{
 				if(substr($received_data[3], 0, 4) == "http")	// Workaround for compatibility with PHPGnuCacheII
 					$nets = "gnutella-gnutella2";
 				else
-					$nets = strtolower( trim($received_data[3]) );
+					$nets = strtolower($received_data[3]);
 			}
 			elseif( !empty($oldpong) )
 				$nets = "gnutella-gnutella2";
@@ -366,7 +380,7 @@ function PingWebCache($cache){
 		}
 		elseif( !empty($oldpong) )
 		{
-			$cache_data[0] = trim( substr($oldpong, 5) );
+			$cache_data[0] = substr($oldpong, 5);
 
 			if( substr($cache_data[0], 0, 13) == "PHPGnuCacheII" ||			// Workaround for compatibility with PHPGnuCacheII
 				substr($cache_data[0], 0, 10) == "perlgcache" )				// Workaround for compatibility with perlgcache
@@ -394,16 +408,8 @@ function PingWebCache($cache){
 				{
 					$line = fgets($fp, 1024);
 
-					if( strtolower(substr($line, 0, 7)) == "i|pong|" )
-					{
-						$pong = $line;
-						break;
-					}
-					elseif( substr($line, 0, 4) == "PONG" )
-					{
-						$oldpong = $line;
-						break;
-					}
+					if(strtolower(substr($line, 0, 7)) == "i|pong|") { $pong = rtrim($line); break; }
+					elseif(substr($line, 0, 4) == "PONG") { $oldpong = rtrim($line); break; }
 				}
 
 				fclose ($fp);
@@ -412,10 +418,10 @@ function PingWebCache($cache){
 				if( !empty($pong) )
 				{
 					list( , , $cache_data[0] ) = explode( "|", $pong );
-					$cache_data[0] = trim($cache_data[0]);
+					$cache_data[0] = $cache_data[0];
 				}
 				elseif( !empty($oldpong) )
-					$cache_data[0] = trim( substr($oldpong, 5) );
+					$cache_data[0] = substr($oldpong, 5);
 			}
 		}
 	}
@@ -423,7 +429,10 @@ function PingWebCache($cache){
 	if($cache_data[0] != "FAILED")
 	{
 		if(CheckNetworkString($SUPPORTED_NETWORKS, $nets))
+		{
+			$cache_data[0] = RemoveGarbage($cache_data[0]);
 			$cache_data[1] = $nets;
+		}
 		else
 			$cache_data[0] = "UNSUPPORTED";
 	}
@@ -441,6 +450,8 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	}
 	else
 	{
+		$client = RemoveGarbage($client);
+		$version = RemoveGarbage($version);
 		$host_file = file(DATA_DIR."/hosts_".$net.".dat");
 		$file_count = count($host_file);
 		$host_exists = FALSE;
@@ -486,9 +497,12 @@ function WriteCacheFile($cache, $net, $client, $version){
 	if( $url == $_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"] )	// It doesn't allow to insert itself in cache list
 		return 0; // Exists
 
+	$cache = RemoveGarbage($cache);
 	if(CheckFailedUrl($cache))
 		return 4; // Failed URL
 
+	$client = RemoveGarbage($client);
+	$version = RemoveGarbage($version);
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$file_count = count($cache_file);
 	$cache_exists = FALSE;
@@ -587,10 +601,7 @@ function HostFile($net){
 	{
 		list( $host, ) = explode("|", $host_file[$count_host - 1 - $i], 2);
 		$host = trim($host);
-		if($host != "")
-			print($host."\r\n");
-		elseif($max_hosts < $count_host)
-			$max_hosts++;
+		print($host."\r\n");
 	}
 }
 
@@ -642,11 +653,6 @@ function Get($net, $pv){
 	for( $i=0; $i<$max_hosts; $i++ )
 	{
 		list( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[$count_host - 1 - $i]);
-		if($host == "")
-		{
-			if($max_hosts < $count_host) $max_hosts++;
-			continue;
-		}
 		$host = "H|".$host."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset )."|".$cluster;
 		if( $pv >= 4 ) $host .= "|".$leaves;
 		$output .= $host."\r\n";
@@ -748,51 +754,6 @@ function UpdateStats($request){
 	fclose($file);
 }
 
-function KickStart($net, $cache){
-	if( !CheckURLValidity($cache) )
-		die("ERROR: The KickStart URL isn't valid\r\n");
-
-	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from "cache" - $cache = www.test.com:80/page.php
-	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
-	$splitted_url = explode(":", $main_url[0], 2);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
-
-	if(count($splitted_url) == 2)
-		list($host_name, $port) = $splitted_url;
-	else
-	{
-		$host_name = $main_url[0];
-		$port = 80;
-	}
-
-	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
-
-	if(!$fp)
-	{
-		echo "Error ".$errno;
-		return;
-	}
-	else
-	{
-		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n" );
-		while( !feof($fp) )
-		{
-			$line = fgets( $fp, 1024 );
-			if( strtolower( substr($line, 1, 1) ) == "|" )
-				echo "<br>";
-			echo $line."<br>";
-
-			if( strtolower( substr($line, 0, 2) ) == "h|" )
-			{
-				$host = explode( "|", $line, 5 );
-				if( !isset($host[3]) ) // Cluster
-					$host[3] = NULL;
-				WriteHostFile( trim($host[1]), NULL, $net, $host[3], "KICKSTART", NULL );
-			}
-		}
-		fclose ($fp);
-	}
-}
-
 
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 
@@ -803,16 +764,13 @@ $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;
 
-$USER_AGENT = $_SERVER["HTTP_USER_AGENT"];
+$USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : NULL;
 $USER_AGENT = str_replace("/", " ", $USER_AGENT);
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
 $LEAVES = !empty($_GET["x_leaves"]) ? $_GET["x_leaves"] : NULL;
-if( $LEAVES != NULL ) $LEAVES = str_replace( "|", "", $LEAVES );
 $CLUSTER = !empty($_GET["cluster"]) ? $_GET["cluster"] : NULL;
-if( strlen($CLUSTER) > 256 ) $CLUSTER = NULL;
-elseif( $CLUSTER != NULL ) $CLUSTER = str_replace( "|", "", $CLUSTER );
 
 $HOSTFILE = !empty($_GET["hostfile"]) ? $_GET["hostfile"] : 0;
 $URLFILE = !empty($_GET["urlfile"]) ? $_GET["urlfile"] : 0;
@@ -833,9 +791,7 @@ if($CLIENT == "MUTE")
 		$NET = "mute";
 	}
 }
-else $CLIENT = str_replace( "|", "", $CLIENT );
 $VERSION = !empty($_GET["version"]) ? $_GET["version"] : NULL;
-$VERSION = str_replace( "|", "", $VERSION );
 
 $SUPPORT = !empty($_GET["support"]) ? $_GET["support"] : 0;
 
@@ -901,6 +857,10 @@ elseif( $KICK_START )
 	if( !CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		die("ERROR: Network not supported\r\n");
 
+	if( !function_exists("KickStart") )
+	{
+		include "functions.php";
+	}
 	KickStart($NET, $CACHE);
 }
 else
@@ -960,7 +920,7 @@ else
 	{
 		header("HTTP/1.0 404 Not Found");
 
-		if(LOG_MINOR_ERRORS) Logging("old_clients", $CLIENT, $VERSION, $NET);
+		//if(LOG_MINOR_ERRORS) Logging("old_clients", $CLIENT, $VERSION, $NET);
 
 		if($CACHE != NULL || $IP != NULL)
 			UpdateStats("update");
@@ -975,6 +935,20 @@ else
 		if(LOG_MAJOR_ERRORS) Logging("invalid_queries", $CLIENT, $VERSION, $NET);
 		UpdateStats("other");
 		die();
+	}
+
+	if($LEAVES != NULL && !is_numeric($LEAVES))
+	{
+		$LEAVES = NULL;
+		if(LOG_MAJOR_ERRORS) Logging("invalid_leaves", $CLIENT, $VERSION, $NET);
+	}
+
+	if($CLUSTER != NULL)
+	{
+		if( strlen($CLUSTER) > 256 )
+			$CLUSTER = NULL;
+		else
+			$CLUSTER = RemoveGarbage($value);
 	}
 
 	if( $CACHE != NULL && strpos($CACHE, "://") > -1 )
@@ -1023,9 +997,10 @@ else
 		else
 			$host_port = ":".$host_port;
 
-		if( substr($host_name, -9) == ".xolox.nl" )
+		// Problem with wildcard dns on .xolox.nl is fixed
+		/*if( substr($host_name, -9) == ".xolox.nl" )
 			$CACHE = "http://www.xolox.nl/gwebcache/";
-		else
+		else*/
 			$CACHE = $protocol."://".$host_name.$host_port."/".$path;
 	}
 
