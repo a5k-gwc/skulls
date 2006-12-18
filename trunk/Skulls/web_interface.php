@@ -167,9 +167,148 @@ function ReplaceVendorCode($client, $version){
 		return $client_name." ".$version;
 }
 
+function CheckUpdates($url = "http://skulls.sourceforge.net/latest_ver.php", $came_from = NULL){
+	$debug = FALSE;
+	global $PHP_SELF;
+	$SERVER_NAME = $_SERVER["SERVER_NAME"];
+
+	$relayed = FALSE;
+	$connection_error = FALSE;
+	if( file_exists(DATA_DIR."/update_check.dat") )
+	{
+		$file = file(DATA_DIR."/update_check.dat");
+		list($status, $latest_version, $latest_check) = explode("|", $file[0]);
+		if(strpos($status, "Error") > -1) $connection_error = TRUE;
+
+		$time_diff = time() - ( @strtotime( $latest_check ) + @date("Z") );	// GMT
+		if($connection_error || $status == "INCORRECT")
+			$time_diff = floor($time_diff / 3600);	// Hours
+		else
+			$time_diff = floor($time_diff / 86400);	// Days
+	}
+	else
+		$time_diff = 999;
+
+	if($time_diff < 2)
+		$cached = TRUE;
+	else
+	{
+		if($SERVER_NAME == "localhost" || $SERVER_NAME == "127.0.0.1")
+		{
+			echo "<font color=\"gold\"><b>Update check not allowed from localhost</b></font><br>";
+			return NULL;
+		}
+		$connection_error = FALSE;
+		$cached = FALSE;
+		list( , $url ) = explode("://", $url, 2);		// It remove "http://" from "cache" - $url = www.test.com:80/page.php
+		$main_url = explode("/", $url);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
+		$splitted_url = explode(":", $main_url[0], 2);	// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
+
+		if( count($splitted_url) > 1 )
+			list($host_name, $port) = $splitted_url;
+		else
+		{
+			$host_name = $main_url[0];
+			$port = 80;
+		}
+
+		$fp = @fsockopen( $host_name, $port, $errno, $errstr, 20 );
+		$latest_version = NULL;
+		$status = NULL;
+
+		if(!$fp)
+		{
+			$connection_error = TRUE;
+			$status = "Error ".$errno;
+		}
+		else
+		{
+			$alternate_url = NULL;
+			$query = "update_check=1&client=".VENDOR."&url=http://".$SERVER_NAME.$PHP_SELF."&cache=1";
+
+			fputs( $fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+			while ( !feof($fp) )
+			{
+				$line = fgets( $fp, 1024 );
+				if($debug) echo $line."<br>";
+
+				if( strtolower( substr( $line, 0, 2 ) ) == "v|" )
+				{
+					$latest_version = rtrim($line);
+					list( , $latest_version) = explode("|", $latest_version);
+					break;
+				}
+				elseif( strtolower( substr( $line, 0, 2 ) ) == "a|" )
+				{
+					$alternate_url = rtrim($line);
+					list( , $alternate_url) = explode("|", $alternate_url);
+					if($alternate_url != $url)
+					{
+						$latest_version = CheckUpdates($alternate_url, $url);
+						$relayed = TRUE;
+						break;
+					}
+				}
+				elseif(strpos($line, "404 Not Found") > -1)
+				{
+					$status = "404";
+					break;
+				}
+			}
+
+			fclose ($fp);
+		}
+	}
+
+	if(!$relayed)
+	{
+		if($connection_error)
+			echo "<font color=\"red\"><b>".$status."</b></font><br>\r\n";
+		elseif($status == "404")
+			echo "<font color=\"red\"><b>Invalid query or file deleted</b></font><br>\r\n";
+		elseif($status == "INCORRECT" || empty($latest_version))
+		{
+			echo "<font color=\"red\"><b>Server response incorrect, maybe there are problems in the update server</b></font><br>\r\n";
+			$status = "INCORRECT";
+			$latest_version = NULL;
+		}
+		else
+		{
+			echo "<font color=\"green\"><b>OK</b></font><br>\r\n";
+			$status = "OK";
+		}
+
+		if(!$cached)
+		{
+			$file = fopen(DATA_DIR."/update_check.dat", "wb");
+			if($file)
+			{
+				flock($file, 2);
+				fwrite($file, RemoveGarbage($status)."|".RemoveGarbage($latest_version)."|".gmdate("Y/m/d H:i")."\r\n");
+				flock($file, 3);
+				fclose($file);
+			}
+			else
+			{
+				echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."/update_check.dat</b></font><br>";
+				echo "<b>You must create the file manually, and give to the file the correct permissions.</b><br><br>";
+			}
+		}
+	}
+
+	return $latest_version;
+}
+
 function ShowHtmlPage($num){
 	global $NET;
 	if($NET == NULL) $NET = "all";
+
+	if(!function_exists("Initialize"))
+	{
+		global $SUPPORTED_NETWORKS;
+		include "functions.php";
+		Initialize($SUPPORTED_NETWORKS, TRUE);
+	}
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -187,13 +326,13 @@ function ShowHtmlPage($num){
 <body bgcolor="#FFFF00"><br>
 
 <table align="center">
-	<tr> 
+	<tr>
 		<td bgcolor="#FF3300">
 			<table width="100%" cellspacing="0" cellpadding="5">
-				<tr> 
+				<tr>
 					<td bgcolor="#FFFFFF" style="font-size: 16px;"><b><span style="color: #008000"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></b></td>
 				</tr>
-				<tr> 
+				<tr>
 					<td height="30" valign="top" bgcolor="#FFFFFF">
 						<a href="?showinfo=1">General Details</a> /
 						<a href="?showhosts=1&amp;net=<?php echo $NET; ?>">Hosts</a> /
@@ -208,10 +347,10 @@ function ShowHtmlPage($num){
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF;"><b>Cache Info</b></td>
 				</tr>
-				<tr> 
+				<tr>
 					<td bgcolor="#FFFFFF">
 						<table width="100%" cellspacing="0">
-							<tr> 
+							<tr>
 								<td width="150">- Running since:</td>
 								<td style="color: #994433;">
 								<?php
@@ -223,11 +362,11 @@ function ShowHtmlPage($num){
 								?>
 								</td>
 							</tr>
-							<tr> 
+							<tr>
 								<td width="150">- Version:</td>
 								<td style="color: #008000;"><b><?php echo VER; ?></b></td>
 							</tr>
-							<tr> 
+							<tr>
 								<td width="150">- Supported networks:</td>
 								<td style="color: #994433;">
 								<?php
@@ -284,7 +423,7 @@ function ShowHtmlPage($num){
 				<tr>
 					<td bgcolor="#FFFFFF">
 						<table width="100%" cellspacing="0">
-							<tr> 
+							<tr>
 								<td bgcolor="#CCCCDD">
 									<table width="100%" cellspacing="0" cellpadding="4">
 										<tr bgcolor="#C6E6E6"> 
@@ -335,10 +474,10 @@ function ShowHtmlPage($num){
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF"><b>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</b></td>
 				</tr>
-				<tr> 
+				<tr>
 					<td bgcolor="#FFFFFF">
 						<table width="100%" cellspacing="0">
-							<tr> 
+							<tr>
 								<td bgcolor="#CCCCDD">
 									<table width="100%" cellspacing="0" cellpadding="4">
 										<tr bgcolor="#C6E6E6"> 
@@ -413,10 +552,10 @@ function ShowHtmlPage($num){
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF;"><b>Statistics</b></td>
 				</tr>
-				<tr> 
+				<tr>
 					<td bgcolor="#FFFFFF">
 						<table width="100%" cellspacing="0">
-							<tr> 
+							<tr>
 								<td width="150">- Total requests:</td>
 								<td style="color: #994433;">
 								<?php
@@ -430,7 +569,7 @@ function ShowHtmlPage($num){
 								?>
 								</td>
 							</tr>
-							<tr> 
+							<tr>
 								<td width="150">- Requests this hour:</td>
 								<td style="color: #994433;">
 								<?php
@@ -441,7 +580,7 @@ function ShowHtmlPage($num){
 								?>
 								</td>
 							</tr>
-							<tr> 
+							<tr>
 								<td width="150">- Updates this hour:</td>
 								<td style="color: #994433;">
 								<?php
@@ -464,7 +603,51 @@ function ShowHtmlPage($num){
 			</table>
 		</td>
 	</tr>
+</table><br>
+
+<?php
+	if($num == 1)	// Info
+	{
+?>
+<table align="center">
+	<tr>
+		<td bgcolor="#FF3300">
+			<table width="100%" cellspacing="0" cellpadding="5">
+				<tr>
+					<td bgcolor="#FFFFFF">
+						<b>Update check process:</b> <?php $latest_version = CheckUpdates(); ?>
+						<?php
+							if($latest_version != NULL)
+							{
+								$need_update = FALSE;
+
+								if((float)SHORT_VER < (float)$latest_version)
+									$need_update = TRUE;
+								elseif((float)SHORT_VER == (float)$latest_version)
+								{
+									list( , , $last_digit) = explode(".", SHORT_VER);
+									list( , , $last_digit_of_latest_version) = explode(".", $latest_version);
+									if($last_digit < $last_digit_of_latest_version)
+										$need_update = TRUE;
+								}
+
+								if($need_update) $color = "red";
+								else $color = "green";
+								echo "<b>Latest version: <font color=\"green\">".$latest_version."</font></b><br>";
+								echo "<b>This version: <font color=\"".$color."\">".SHORT_VER."</font></b><br>";
+
+								if($need_update) echo "<font color=\"".$color."\"><b>There is a new version of Skulls, you should update it.</b></font><br>";
+							}
+						?>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
 </table>
+<?php
+	}
+?>
 
 </body>
 </html>

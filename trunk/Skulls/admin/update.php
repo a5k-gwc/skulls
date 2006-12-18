@@ -14,7 +14,7 @@ $file_content = file("revision.dat");
 if(rtrim($file_content[0]) >= REVISION)
 {
 	header("Content-Type: text/plain");
-	die("There is no need to update it.\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.\r\n");
+	die("There is no need to update it.\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.\r\nTo check if Skulls is updated you must go on skulls.php\r\n");
 }
 
 
@@ -178,7 +178,7 @@ if($errors)
 	else
 		echo "ERRORS";
 	echo ".</b></font><br/>";
-	echo "<b>You must execute the failed actions manually.</b>";
+	echo "<b>You must execute the failed actions manually.</b><br>";
 }
 else
 {
@@ -189,9 +189,12 @@ else
 	fclose($file);
 
 	if($updated)
-		echo "<br/><font color=\"green\"><b>Updated correctly.</b></font>";
+		echo "<br/><font color=\"green\"><b>Updated correctly.</b></font><br>";
 	else
-		echo "<font color=\"green\"><b>Already updated.</b></font>";
+	{
+		echo "<font color=\"green\"><b>Already updated.</b></font><br>";
+		echo "<b>This file checks only if data files are updated, it doesn't check if Skulls is updated.<br>To check if Skulls is updated you must go on skulls.php</b><br>";
+	}
 }
 
 echo "</body></html>";

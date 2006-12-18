@@ -1,42 +1,108 @@
 <?php
-function InitializeNetworkFile($net){
+function InitializeNetworkFile($net, $show_errors = FALSE){
 	$net = strtolower($net);
-	if( !file_exists(DATA_DIR."/hosts_".$net.".dat") ) fclose( fopen(DATA_DIR."/hosts_".$net.".dat", "xb") );
+	if(!file_exists(DATA_DIR."/hosts_".$net.".dat"))
+	{
+		$file = @fopen(DATA_DIR."/hosts_".$net.".dat", "xb");
+		if($file)
+			fclose($file);
+		elseif($show_errors)
+			echo "<font color=\"red\">Error during writing of ".DATA_DIR."/hosts_".$net.".dat</font><br>";
+	}
 }
 
-function Initialize($supported_networks){
-	if( !file_exists(DATA_DIR."/runnig_since.dat") )
+function Initialize($supported_networks, $show_errors = FALSE){
+	$initialized = TRUE;
+
+	if(!file_exists(DATA_DIR."/runnig_since.dat"))
 	{
-		$file = fopen( DATA_DIR."/runnig_since.dat", "wb" );
-		if( !$file )
-			die("ERROR: Writing file failed.\r\n");
-		else
+		$file = @fopen( DATA_DIR."/runnig_since.dat", "wb" );
+		if($file)
 		{
 			flock($file, 2);
 			fwrite($file, gmdate("Y/m/d h:i:s A"));
 			flock($file, 3);
 			fclose($file);
 		}
+		else
+		{
+			$initialized = FALSE;
+			if($show_errors) echo "<font color=\"red\">Error during writing of ".DATA_DIR."/runnig_since.dat</font><br>";
+		}
 	}
-	if( !file_exists(DATA_DIR."/caches.dat") ) fclose( fopen(DATA_DIR."/caches.dat", "xb") );
-	if( !file_exists(DATA_DIR."/failed_urls.dat") ) fclose( fopen(DATA_DIR."/failed_urls.dat", "xb") );
+	if(!file_exists(DATA_DIR."/caches.dat"))
+	{
+		$file = @fopen(DATA_DIR."/caches.dat", "xb");
+		if($file)
+			fclose($file);
+		else
+		{
+			$initialized = FALSE;
+			if($show_errors) echo "<font color=\"red\">Error during writing of ".DATA_DIR."/caches.dat</font><br>";
+		}
+	}
+	if(!file_exists(DATA_DIR."/failed_urls.dat"))
+	{
+		$file = @fopen(DATA_DIR."/failed_urls.dat", "xb");
+		if($file)
+			fclose($file);
+		else
+		{
+			$initialized = FALSE;
+			if($show_errors) echo "<font color=\"red\">Error during writing of ".DATA_DIR."/failed_urls.dat</font><br>";
+		}
+	}
 
 	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
-		InitializeNetworkFile( $supported_networks[$i] );
+		InitializeNetworkFile($supported_networks[$i], $show_errors);
 
-	if( STATS_ENABLED )
+	if(STATS_ENABLED)
 	{
-		if( !file_exists("stats/") ) mkdir("stats/", 0777);
-		if( !file_exists("stats/requests.dat") )
+		if(!file_exists("stats/")) mkdir("stats/", 0777);
+		if(!file_exists("stats/requests.dat"))
 		{
-			$file = fopen( "stats/requests.dat", "xb" );
-			flock($file, 2);
-			fwrite($file, "0");
-			flock($file, 3);
-			fclose($file);
+			$file = @fopen("stats/requests.dat", "xb");
+			if($file)
+			{
+				flock($file, 2);
+				fwrite($file, "1");
+				flock($file, 3);
+				fclose($file);
+			}
+			else
+			{
+				$initialized = FALSE;
+				if($show_errors) echo "<font color=\"red\">Error during writing of stats/requests.dat</font><br>";
+			}
 		}
-		if( !file_exists("stats/update_requests_hour.dat") ) fclose( fopen("stats/update_requests_hour.dat", "xb") );
-		if( !file_exists("stats/other_requests_hour.dat") ) fclose( fopen("stats/other_requests_hour.dat", "xb") );
+		if(!file_exists("stats/update_requests_hour.dat"))
+		{
+			$file = @fopen("stats/update_requests_hour.dat", "xb");
+			if($file)
+				fclose($file);
+			else
+			{
+				$initialized = FALSE;
+				if($show_errors) echo "<font color=\"red\">Error during writing of stats/update_requests_hour.dat</font><br>";
+			}
+		}
+		if(!file_exists("stats/other_requests_hour.dat"))
+		{
+			$file = @fopen("stats/other_requests_hour.dat", "xb");
+			if($file)
+				fclose($file);
+			else
+			{
+				$initialized = FALSE;
+				if($show_errors) echo "<font color=\"red\">Error during writing of stats/other_requests_hour.dat</font><br>";
+			}
+		}
+	}
+
+	if($show_errors && !$initialized)
+	{
+		echo "<br><b>You must create files manually, and give to them the correct permissions.</b><br>";
+		die();
 	}
 }
 
@@ -60,7 +126,7 @@ function KickStart($net, $cache){
 
 	if(!$fp)
 	{
-		echo "<font color=\"red\"><b>Error ".$errno."</b></font><br>\r\n";
+		echo "<font color=\"red\"><b>Error ".$errno.".</b></font><br>\r\n";
 		return;
 	}
 	else

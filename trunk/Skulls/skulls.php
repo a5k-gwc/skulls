@@ -88,7 +88,7 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 	if($multi)
 	{
 		$nets = strtolower(NetsToString());
-		echo $pong."|".$nets."|TCP\r\n";
+		echo $pong."|".$nets."|".FSOCKOPEN."|TCP\r\n";
 	}
 	elseif($supported_net)
 	{
@@ -99,12 +99,12 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 		if(NETWORKS_COUNT > 1 || strtolower($SUPPORTED_NETWORKS[0]) != "gnutella")
 		{
 			$nets = strtolower(NetsToString());
-			if($client == "TEST" && $net == "gnutella2")
-				echo $pong."|gnutella2|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with Bazooka
+			if($client == "TEST" && $net == "gnutella2" && $nets != "gnutella2")
+				echo $pong."|gnutella2|".FSOCKOPEN."|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with Bazooka
 			elseif($client == "GCII" && $net == "gnutella2")
-				echo $pong."||COMPAT|".$nets."|TCP\r\n";			// Workaround for compatibility with PHPGnuCacheII
+				echo $pong."||".FSOCKOPEN."|COMPAT|".$nets."|TCP\r\n";			// Workaround for compatibility with PHPGnuCacheII
 			else
-				echo $pong."|".$nets."|TCP\r\n";
+				echo $pong."|".$nets."|".FSOCKOPEN."|TCP\r\n";
 		}
 	}
 }
@@ -443,51 +443,44 @@ function PingWebCache($cache){
 function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	global $SUPPORTED_NETWORKS;
 
-	if($leaves != NULL && $leaves < 15)
+	// return 4; Unused
+	$client = RemoveGarbage($client);
+	$version = RemoveGarbage($version);
+	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
+	$file_count = count($host_file);
+	$host_exists = FALSE;
+
+	for ($i = 0; $i < $file_count; $i++)
 	{
-		print "I|update|WARNING|Leaf count too low\r\n";
-		return 4;
+		list( $read, ) = explode("|", $host_file[$i], 2);
+
+		if( $ip == $read )
+		{
+			$host_exists = TRUE;
+			break;
+		}
+	}
+
+	if($host_exists)
+	{
+		ReplaceHost($host_file, $i, $ip, $leaves, $net, $cluster, $client, $version);
+		return 1; // Updated timestamp
 	}
 	else
 	{
-		$client = RemoveGarbage($client);
-		$version = RemoveGarbage($version);
-		$host_file = file(DATA_DIR."/hosts_".$net.".dat");
-		$file_count = count($host_file);
-		$host_exists = FALSE;
-
-		for ($i = 0; $i < $file_count; $i++)
+		if( $file_count >= MAX_HOSTS )
 		{
-			list( $read, ) = explode("|", $host_file[$i], 2);
-
-			if( $ip == $read )
-			{
-				$host_exists = TRUE;
-				break;
-			}
-		}
-
-		if($host_exists)
-		{
-			ReplaceHost($host_file, $i, $ip, $leaves, $net, $cluster, $client, $version);
-			return 1; // Updated timestamp
+			ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version);
+			return 3; // OK, pushed old data
 		}
 		else
 		{
-			if( $file_count >= MAX_HOSTS )
-			{
-				ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version);
-				return 3; // OK, pushed old data
-			}
-			else
-			{
-				$file = fopen(DATA_DIR."/hosts_".$net.".dat", "ab");
-				flock($file, 2);
-				fwrite($file, $ip."|".$leaves."|".$cluster."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
-				flock($file, 3);
-				fclose($file);
-				return 2; // OK
-			}
+			$file = fopen(DATA_DIR."/hosts_".$net.".dat", "ab");
+			flock($file, 2);
+			fwrite($file, $ip."|".$leaves."|".$cluster."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
+			flock($file, 3);
+			fclose($file);
+			return 2; // OK
 		}
 	}
 }
@@ -658,37 +651,42 @@ function Get($net, $pv){
 		$output .= $host."\r\n";
 	}
 
-	$cache_file = file(DATA_DIR."/caches.dat");
-	$count_cache = count($cache_file);
-	for( $n=0, $i=$count_cache-1; $n<MAX_CACHES_OUT && $i>=0; $i-- )
+	if(FSOCKOPEN)
 	{
-		list( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
-
-		$show = FALSE;
-		if( strpos($cache_net, "-") > -1 )
+		$cache_file = file(DATA_DIR."/caches.dat");
+		$count_cache = count($cache_file);
+		for( $n=0, $i=$count_cache-1; $n<MAX_CACHES_OUT && $i>=0; $i-- )
 		{
-			$cache_networks = explode( "-", $cache_net );
-			$cache_nets_count = count($cache_networks);
-			for( $x=0; $x < $cache_nets_count; $x++ )
+			list( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
+
+			$show = FALSE;
+			if( strpos($cache_net, "-") > -1 )
 			{
-				if( $cache_networks[$x] == $net)
+				$cache_networks = explode( "-", $cache_net );
+				$cache_nets_count = count($cache_networks);
+				for( $x=0; $x < $cache_nets_count; $x++ )
 				{
-					$show = TRUE;
-					break;
+					if( $cache_networks[$x] == $net)
+					{
+						$show = TRUE;
+						break;
+					}
 				}
 			}
-		}
-		elseif( $cache_net == $net )
-			$show = TRUE;
+			elseif( $cache_net == $net )
+				$show = TRUE;
 
-		if( $show )
-		{
-			$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
-			if( $pv >= 4 ) $cache .= "|".( $cache_net != $net ? $cache_net : "" );
-			$output .= $cache."\r\n";
-			$n++;
+			if( $show )
+			{
+				$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
+				if( $pv >= 4 ) $cache .= "|".( $cache_net != $net ? $cache_net : "" );
+				$output .= $cache."\r\n";
+				$n++;
+			}
 		}
 	}
+	else
+		$count_cache = 0;
 
 	if( $count_host == 0 && $count_cache == 0 )
 		$output .= "I|NO-URL-NO-HOSTS\r\n";
@@ -810,19 +808,22 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 {
 	if( !file_exists(DATA_DIR."/") ) mkdir(DATA_DIR."/", 0777);
 
-	$file = fopen( DATA_DIR."/last_action.dat", "xb" );
-	if( !$file )
-		die("ERROR: Writing file failed.\r\n");
-	else
+	$file = @fopen( DATA_DIR."/last_action.dat", "xb" );
+	if($file)
 	{
 		flock($file, 2);
 		fwrite($file, SHORT_VER."|".STATS_ENABLED."|0|".gmdate("Y/m/d H:i"));
 		flock($file, 3);
 		fclose($file);
 	}
+	else
+	{
+		echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."/last_action.dat</b></font><br>";
+		echo "<b>You must create the file manually, and give to the file the correct permissions.</b><br><br>";
+	}
 
 	include "functions.php";
-	Initialize($SUPPORTED_NETWORKS);
+	Initialize($SUPPORTED_NETWORKS, TRUE);
 }
 
 if($NET == "gnutella1")
@@ -1068,7 +1069,7 @@ else
 	}
 	else
 	{
-		if( $supported_net && ( $IP != NULL || (FSOCKOPEN && $CACHE != NULL) ) )
+		if( $supported_net && ( $IP != NULL || $CACHE != NULL ) )
 			print "OK\r\n";
 
 		if( $IP != NULL && $supported_net )
@@ -1113,7 +1114,7 @@ else
 		if($HOSTFILE && $supported_net)
 			HostFile($NET);
 
-		if($URLFILE && $supported_net)
+		if($URLFILE && $supported_net && FSOCKOPEN)
 			UrlFile($NET);
 
 		if($PV >= 4 && ($HOSTFILE || $URLFILE) && $supported_net)
