@@ -173,23 +173,42 @@ function CheckUpdates($url = "http://skulls.sourceforge.net/latest_ver.php", $ca
 	$SERVER_NAME = $_SERVER["SERVER_NAME"];
 
 	$relayed = FALSE;
-	$connection_error = FALSE;
-	if( file_exists(DATA_DIR."/update_check.dat") )
+	$status = NULL;
+	if(!file_exists(DATA_DIR."/update_check.dat"))
 	{
-		$file = file(DATA_DIR."/update_check.dat");
+		$file = @fopen(DATA_DIR."/update_check.dat", "xb");
+		if($file)
+		{
+			flock($file, 2);
+			fwrite($file, "UNCHECKED||".gmdate("Y/m/d H:i", 1));
+			flock($file, 3);
+			fclose($file);
+		}
+		else
+		{
+			echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."/update_check.dat</b></font><br>";
+			echo "<b>You must create the file manually, and give to the file the correct permissions.</b><br><br>";
+			die();
+		}
+	}
+
+	$file = file(DATA_DIR."/update_check.dat");
+	if(count($file) > 0)
+	{
 		list($status, $latest_version, $latest_check) = explode("|", $file[0]);
-		if(strpos($status, "Error") > -1) $connection_error = TRUE;
 
 		$time_diff = time() - ( @strtotime( $latest_check ) + @date("Z") );	// GMT
-		if($connection_error || $status == "INCORRECT")
+		if(strpos($status, "Error") > -1)
 			$time_diff = floor($time_diff / 3600);	// Hours
 		else
 			$time_diff = floor($time_diff / 86400);	// Days
 	}
 	else
-		$time_diff = 999;
+		$time_diff = 100;
 
-	if($time_diff < 2)
+	if($status == "OK" && $time_diff < 7)
+		$cached = TRUE;
+	elseif($time_diff < 2)
 		$cached = TRUE;
 	else
 	{
@@ -198,7 +217,6 @@ function CheckUpdates($url = "http://skulls.sourceforge.net/latest_ver.php", $ca
 			echo "<font color=\"gold\"><b>Update check not allowed from localhost</b></font><br>";
 			return NULL;
 		}
-		$connection_error = FALSE;
 		$cached = FALSE;
 		list( , $url ) = explode("://", $url, 2);		// It remove "http://" from "cache" - $url = www.test.com:80/page.php
 		$main_url = explode("/", $url);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
@@ -218,7 +236,6 @@ function CheckUpdates($url = "http://skulls.sourceforge.net/latest_ver.php", $ca
 
 		if(!$fp)
 		{
-			$connection_error = TRUE;
 			$status = "Error ".$errno;
 		}
 		else
@@ -242,7 +259,7 @@ function CheckUpdates($url = "http://skulls.sourceforge.net/latest_ver.php", $ca
 				{
 					$alternate_url = rtrim($line);
 					list( , $alternate_url) = explode("|", $alternate_url);
-					if($alternate_url != $url)
+					if($alternate_url != $url && $alternate_url != $came_from && $alternate_url != NULL)
 					{
 						$latest_version = CheckUpdates($alternate_url, $url);
 						$relayed = TRUE;
@@ -262,7 +279,7 @@ function CheckUpdates($url = "http://skulls.sourceforge.net/latest_ver.php", $ca
 
 	if(!$relayed)
 	{
-		if($connection_error)
+		if(strpos($status, "Error") > -1)
 			echo "<font color=\"red\"><b>".$status."</b></font><br>\r\n";
 		elseif($status == "404")
 			echo "<font color=\"red\"><b>Invalid query or file deleted</b></font><br>\r\n";
@@ -284,7 +301,7 @@ function CheckUpdates($url = "http://skulls.sourceforge.net/latest_ver.php", $ca
 			if($file)
 			{
 				flock($file, 2);
-				fwrite($file, RemoveGarbage($status)."|".RemoveGarbage($latest_version)."|".gmdate("Y/m/d H:i")."\r\n");
+				fwrite($file, RemoveGarbage($status)."|".RemoveGarbage($latest_version)."|".gmdate("Y/m/d H:i"));
 				flock($file, 3);
 				fclose($file);
 			}

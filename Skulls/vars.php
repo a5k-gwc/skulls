@@ -4,7 +4,7 @@ $ENABLED =							1;
 define( "FSOCKOPEN",				1 );	// Disable ONLY if the server have FSOCKOPEN disabled, use admin/test.php to check
 define( "CONTENT_TYPE_WORKAROUND",	0 );	// Use admin/test.php to know the right value
 
-define( "STATS_ENABLED",			1 );
+define( "STATS_ENABLED",			1 );	// Enable collecting statistics
 define( "KICK_START_ENABLED",		0 );	// KickStart should be DISABLED after populating the webcache
 
 define( "LOG_MAJOR_ERRORS",			1 );	// Enable logging of major errors
@@ -16,12 +16,12 @@ define( "MAX_HOSTS_OUT",			20 );	// Maximum number of host sent in each request 
 define( "MAX_CACHES",				50 );	// Maximum number of cache stored for ALL networks (Setting this value too high DECREASE SPEED of the webcache)
 define( "MAX_CACHES_OUT",			10 );	// Maximum number of cache sent in each request (By setting this value too high you can WASTE BANDWIDTH, by setting too low you can increase the number of requests)
 
-define( "RECHECK_CACHES",			10 );	// Days to recheck a cache
-define( "TIMEOUT",					20 );	// Sockets time out
+define( "RECHECK_CACHES",			10 );	// Days to recheck a good cache
+define( "TIMEOUT",					20 );	// Socket time out for fsockopen
 
-define( "DATA_DIR", "data" );
+define( "DATA_DIR", "data" );				// Directory where data files are stored (you should use relative path, you can leave it as is by default)
 
-// The following field is optional
+// The following field is optional (you can leave it as is by default to doesn't show it)
 define( "EMAIL", "pippo AT excite DOT it" );	// Your e-mail in that format "name AT server DOT com". Example: pippo@excite.it => pippo AT excite DOT it
 
 
@@ -30,4 +30,6 @@ define( "EMAIL", "pippo AT excite DOT it" );	// Your e-mail in that format "name
 
 //$SUPPORTED_NETWORKS[] = "Gnutella";
 $SUPPORTED_NETWORKS[] = "Gnutella2";
+
+// Note -> The name of the network can't contains these characters:  | -
 ?>
