@@ -51,7 +51,7 @@ if(!$ENABLED || basename($PHP_SELF) == "index.php")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.6" );
-define( "VER", SHORT_VER."" );
+define( "VER", SHORT_VER."d" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -112,7 +112,10 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 function Support($supported_networks)
 {
 	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
-		print "I|support|".strtolower($supported_networks[$i])."\r\n";
+		echo "I|support|".strtolower($supported_networks[$i])."\r\n";
+	echo "I|url|".FSOCKOPEN."\r\n";
+	echo "I|compression|deflate\r\n";
+	echo "I|compression|zlib\r\n";
 }
 
 function CheckNetwork($supported_networks, $net){
@@ -209,7 +212,7 @@ function CheckBlockedCache($cache){
 	if(
 		// It doesn't work
 		$cache == "http://www.xolox.nl/gwebcache/"
-		|| $cache == "http://www.xolox.nl/gwebcache/Default.asp"
+		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
 		// Deepnet Webcache never works good
 		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
 		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/"
@@ -698,7 +701,7 @@ function Get($net, $pv){
 	if( $pv >= 4 )
 		$output .= "I|nets|".strtolower(NetsToString())."\r\n";
 
-	return $output;
+	echo $output;
 }
 
 function CleanStats($request){
@@ -759,7 +762,7 @@ $PV = !empty($_GET["pv"]) ? $_GET["pv"] : 0;
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
 $NETS = !empty($_GET["nets"]) ? strtolower($_GET["nets"]) : NULL;	// Currently unsupported
 $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
-$COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
+$COMPRESSION = !empty($_GET["compression"]) && (float)PHP_VERSION >= 4.1 ? strtolower($_GET["compression"]) : NULL;
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;
 
 $USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : NULL;
@@ -1005,6 +1008,20 @@ else
 			$CACHE = $protocol."://".$host_name.$host_port."/".$path;
 	}
 
+	if($COMPRESSION == "deflate")
+	{
+		$compressed = TRUE;
+		ob_start("gzdeflate");
+	}
+	elseif($COMPRESSION == "zlib")
+	{
+		$compressed = TRUE;
+		ob_start("gzcompress");
+	}
+	else
+		$compressed = FALSE;
+
+	if($compressed) header("Content-Encoding: deflate");
 	header("X-Remote-IP: ".$REMOTE_IP);
 	if($NET == NULL) $NET = "gnutella";
 
@@ -1101,13 +1118,7 @@ else
 	if($GET)
 	{
 		if( $supported_net )
-		{
-			$output = Get($NET, $PV);
-			if($COMPRESSION == "deflate")
-				echo gzdeflate($output)."\r\n";
-			else
-				echo $output;
-		}
+			Get($NET, $PV);
 	}
 	else
 	{
@@ -1150,6 +1161,8 @@ else
 		echo "This is Skulls! Multi-Network WebCache ".VER."\r\n";
 		echo "The sources can be downloaded here: http://sourceforge.net/projects/skulls/\r\n";
 	}
+
+	if($compressed) ob_end_flush();
 
 	$clean_stats = 0;
 	$clean_failed_urls = 0;
