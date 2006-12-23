@@ -83,7 +83,7 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "MyNapster";
 			$url = "http://www.mynapster.com/";
 			break;
-		case "MUTE":
+		case "MTLL":	// Vendor code of Mutella is changed to MTLL in the code to avoid confusion with MUTE network
 			$client_name = "Mutella";
 			$url = "http://mutella.sourceforge.net/";
 			break;

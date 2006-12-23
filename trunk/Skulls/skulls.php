@@ -51,7 +51,7 @@ if(!$ENABLED || basename($PHP_SELF) == "index.php")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.6" );
-define( "VER", SHORT_VER."d" );
+define( "VER", SHORT_VER."e" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -228,7 +228,8 @@ function IsClientTooOld($client, $version){
     switch($client)
 	{
 		case "RAZA":
-			if((float)$version < 2.1)
+		case "RAZB":
+			if((float)$version < 2.2)	// This also block Etomi that is based on Shareaza 2.1.0.0
 				return TRUE;
 			break;
 		case "BEAR":
@@ -783,14 +784,14 @@ $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 $CLIENT = !empty($_GET["client"]) ? strtoupper($_GET["client"]) : NULL;
 // There is MUTE (MUTE network client) and Mutella (Gnutella network client).
 // Both identifying itself as MUTE.
-if($CLIENT == "MUTE")
+if($CLIENT == "MUTE" && $NET == NULL)
 {
 	list($name, ) = explode(" ", $USER_AGENT);
-	if($name != "Mutella")
-	{
-		$CLIENT = "MUTE-NET";
+	if($name == "Mutella")
+		$CLIENT = "MTLL";
+	else
 		$NET = "mute";
-	}
+	unset($name);
 }
 $VERSION = !empty($_GET["version"]) ? $_GET["version"] : NULL;
 
@@ -906,19 +907,24 @@ else
 		die();
 	}
 
-	$blocked = 0;
-	list($name, $name2, ) = explode(" ", $USER_AGENT);
-	if($name == "eTomi" || $name == "360Share" || $name == "MP3Rocket")
-		$CLIENT = $name;
+	$blocked = FALSE;
+	$name = explode(" ", $USER_AGENT);
+
+	if($name[0] == "MP3Rocket")
+		$CLIENT = $name[0];
+	elseif($CLIENT == "LIME")
+	{
+		if($name[0] == "eTomi" || $name[0] == "360Share")
+			$CLIENT = $name[0];
+	}
 	elseif($CLIENT == "RAZA")
 	{
-		if( $name == "Etomi" || ($name == "Shareaza" && $name2 == "PRO") )	// They are ripp-off of Shareaza
-			$blocked = 1;
-		elseif( ($name == "Bearshare" && $name2 == "MP3") || ($name == "WinMX" && $name2 == "MP3") || ($name == "Morpheus" && $name2 == "Music"))
-			$CLIENT = $name." ".$name2;
+		if($name[0] == "Shareaza" && $name[1] == "PRO")	// Shareaza PRO 3.2.2.0 (It is a ripp-off of Shareaza)
+			$blocked = TRUE;
+		elseif( ($name[0] == "Bearshare" && $name[1] == "MP3") || ($name[0] == "WinMX" && $name[1] == "MP3") || ($name[0] == "Morpheus" && $name[1] == "Music"))
+			$CLIENT = $name[0]." ".$name[1];
 	}
 	unset($name);
-	unset($name2);
 
 	if( $blocked || IsClientTooOld($CLIENT, $VERSION) )
 	{
