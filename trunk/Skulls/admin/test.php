@@ -22,29 +22,38 @@ function CheckFunction($function_name)
 }
 
 echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\r\n";
-echo "<html><head><title>Test</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
+echo "<html><head><title>Test</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
 echo "<br><br>";
 
 $php_version = PHP_VERSION;
 if((float)$php_version >= 4)
-	echo "<b>PHP version: <font color=\"green\">".$php_version."</font></b>";
+	echo "<b>PHP version: <font color=\"green\">OK</font></b>";
 //elseif((float)$php_version >= 3)
 //	echo "<b>PHP version: <font color=\"gold\">".$php_version."</font> (Version of PHP is old, this script may work but it isn't guaranteed)</b>";
 else
-	echo "<b>PHP version: <font color=\"red\">".$php_version."</font> (Version of PHP is too old)</b>";
-
-echo "<br>\r\n";
-
-echo "<b>PING</b>: ";
-if( Ping("www.google.it") || Ping("www.libero.it") || Ping("sourceforge.net") )
-	echo "<b><font color=\"green\">OK</font> (Set FSOCKOPEN to 1 in vars.php)</b>";
-else
-	echo "<b><font color=\"red\">FAILED</font> (Set FSOCKOPEN to 0 in vars.php)</b>";
+	echo "<b>PHP version: <font color=\"red\">".$php_version."</font> (This version of PHP is too old)</b>";
 
 echo "<br><br>\r\n";
 
-echo "<b>If you see the box below empty you are OK otherwise you must set CONTENT_TYPE_WORKAROUND to 1 in vars.php.</b><br>\r\n";
-echo "<iframe src=\"inc.php\"></iframe><br><br>";
+if( Ping("www.google.it") || Ping("www.libero.it") || Ping("sourceforge.net") )
+	$ping = TRUE;
+else
+	$ping = FALSE;
+
+echo "<b><font color=\"blue\">Settings of vars.php</font></b>";
+echo "<blockquote>";
+
+echo "<b>FSOCKOPEN:</b> ";
+if($ping) echo "<b><font color=\"green\">1</font></b>";
+else echo "<b><font color=\"red\">0</font></b>";
+echo "<br>\r\n";
+echo "<b>CONTENT_TYPE_WORKAROUND:</b> If the box below is empty set the value to <b><font color=\"green\">0</font></b> otherwise you must set the value to <b><font color=\"red\">1</font></b><br>\r\n";
+echo "<iframe src=\"inc.php\" height=\"50\" width=\"90\"></iframe><br>\r\n";
+
+echo "</blockquote><br>\r\n";
+
+echo "<b><font color=\"blue\">Needed functions</font></b>";
+echo "<blockquote>";
 
 echo "<b>Function is_numeric:</b> ";
 CheckFunction("is_numeric");
@@ -109,6 +118,8 @@ CheckFunction("strtotime");
 echo "<b>Function floor:</b> ";
 CheckFunction("floor");
 echo "<br>";
+
+echo "</blockquote><br>\r\n";
 
 echo "</body></html>";
 ?>
