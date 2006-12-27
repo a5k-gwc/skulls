@@ -110,7 +110,7 @@ function KickStart($net, $cache){
 	if( !CheckURLValidity($cache) )
 		die("ERROR: The KickStart URL isn't valid\r\n");
 
-	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from "cache" - $cache = www.test.com:80/page.php
+	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
 	$splitted_url = explode(":", $main_url[0], 2);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
 

@@ -218,7 +218,7 @@ function CheckUpdates($url = "http://skulls.sourceforge.net/latest_ver.php", $ca
 			return NULL;
 		}
 		$cached = FALSE;
-		list( , $url ) = explode("://", $url, 2);		// It remove "http://" from "cache" - $url = www.test.com:80/page.php
+		list( , $url ) = explode("://", $url, 2);		// It remove "http://" from $url - $url = www.test.com:80/page.php
 		$main_url = explode("/", $url);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
 		$splitted_url = explode(":", $main_url[0], 2);	// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
 

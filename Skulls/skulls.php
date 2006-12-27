@@ -51,7 +51,7 @@ if(!$ENABLED || basename($PHP_SELF) == "index.php")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.6" );
-define( "VER", SHORT_VER."e" );
+define( "VER", SHORT_VER."g" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -271,7 +271,7 @@ function CheckFailedUrl($url){
 	$file = file(DATA_DIR."/failed_urls.dat");
 	$file_count = count($file);
 
-	for ($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
+	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
 	{
 		$read = explode("|", $file[$i]);
 		if( strtolower($url) == strtolower($read[0]) )
@@ -321,7 +321,7 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 function PingWebCache($cache){
 	global $SUPPORTED_NETWORKS;
 
-	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from "cache" - $cache = www.test.com:80/page.php
+	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
 	$splitted_url = explode(":", $main_url[0], 2);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
 
@@ -351,7 +351,7 @@ function PingWebCache($cache){
 			$query .= "&net=gnutella2";
 
 		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
-		while ( !feof($fp) )
+		while( !feof($fp) )
 		{
 			$line = fgets( $fp, 1024 );
 
@@ -363,7 +363,7 @@ function PingWebCache($cache){
 				$error = rtrim($line);
 		}
 
-		fclose ($fp);
+		fclose($fp);
 
 		if( !empty($pong) )
 		{
@@ -416,7 +416,7 @@ function PingWebCache($cache){
 					elseif(substr($line, 0, 4) == "PONG") { $oldpong = rtrim($line); break; }
 				}
 
-				fclose ($fp);
+				fclose($fp);
 
 				$nets = "gnutella2";
 				if( !empty($pong) )
@@ -454,7 +454,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	$file_count = count($host_file);
 	$host_exists = FALSE;
 
-	for ($i = 0; $i < $file_count; $i++)
+	for($i = 0; $i < $file_count; $i++)
 	{
 		list( $read, ) = explode("|", $host_file[$i], 2);
 
@@ -472,7 +472,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	}
 	else
 	{
-		if( $file_count >= MAX_HOSTS )
+		if($file_count >= MAX_HOSTS || $file_count >= 60)
 		{
 			ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version);
 			return 3; // OK, pushed old data
@@ -504,7 +504,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 	$file_count = count($cache_file);
 	$cache_exists = FALSE;
 
-	for ($i = 0; $i < $file_count; $i++)
+	for($i = 0; $i < $file_count; $i++)
 	{
 		list( $read, ) = explode("|", $cache_file[$i], 2);
 
@@ -519,21 +519,22 @@ function WriteCacheFile($cache, $net, $client, $version){
 	if($cache_exists)
 	{
 		$time_diff = time() - ( @strtotime( $time ) + @date("Z") );	// GMT
-		$time_diff = floor($time_diff / 86400);	// Days
+		$time_diff = floor($time_diff / 3600);	// Hours
+		if(RECHECK_CACHES < 8) $recheck_caches = 8; else $recheck_caches = RECHECK_CACHES;
 
-		if( $time_diff < RECHECK_CACHES )
+		if( $time_diff < $recheck_caches )
 			return 0; // Exists
 		else
 		{
 			$cache_data = PingWebCache($cache);
 
-			if( $cache_data[0] == "FAILED" )
+			if($cache_data[0] == "FAILED")
 			{
 				AddFailedUrl($cache);
 				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
 				return 5; // Ping failed
 			}
-			elseif( $cache_data[0] == "UNSUPPORTED" )
+			elseif($cache_data[0] == "UNSUPPORTED")
 			{
 				AddFailedUrl($cache);
 				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
@@ -554,19 +555,19 @@ function WriteCacheFile($cache, $net, $client, $version){
 		{
 			$cache_data = PingWebCache($cache);
 
-			if( $cache_data[0] == "FAILED" )
+			if($cache_data[0] == "FAILED")
 			{
 				AddFailedUrl($cache);
 				return 5; // Ping failed
 			}
-			elseif( $cache_data[0] == "UNSUPPORTED" )
+			elseif($cache_data[0] == "UNSUPPORTED")
 			{
 				AddFailedUrl($cache);
 				return 6; // Unsupported network
 			}
 			else
 			{
-				if( $file_count >= MAX_CACHES )
+				if($file_count >= MAX_CACHES || $file_count >= 80)
 				{
 					ReplaceCache( $cache_file, 0, $cache, $cache_data, $client, $version );
 					return 3; // OK, pushed old data
@@ -917,12 +918,10 @@ else
 		if($name[0] == "eTomi" || $name[0] == "360Share")
 			$CLIENT = $name[0];
 	}
-	elseif($CLIENT == "RAZA")
+	elseif($CLIENT == "RAZA" && isset($name[1]))
 	{
-		if($name[0] == "Shareaza" && $name[1] == "PRO")	// Shareaza PRO 3.2.2.0 (It is a ripp-off of Shareaza)
+		if( ($name[0] == "Shareaza" && $name[1] == "PRO") || ($name[0] == "Morpheus" && $name[1] == "Music") || ($name[0] == "Bearshare" && $name[1] == "MP3") || ($name[0] == "WinMX" && $name[1] == "MP3") )	// They are ripp-off of Shareaza
 			$blocked = TRUE;
-		elseif( ($name[0] == "Bearshare" && $name[1] == "MP3") || ($name[0] == "WinMX" && $name[1] == "MP3") || ($name[0] == "Morpheus" && $name[1] == "Music"))
-			$CLIENT = $name[0]." ".$name[1];
 	}
 	unset($name);
 
@@ -1055,36 +1054,36 @@ else
 				if( $result == 1 ) // Updated timestamp
 					print "I|update|OK|Updated host timestamp\r\n";
 				elseif( $result == 2 ) // OK
-					print "I|update|OK|Host added successfully\r\n";
+					print "I|update|OK|Host added\r\n";
 				elseif( $result == 3 ) // OK, pushed old data
-					print "I|update|OK|Host added successfully - pushed old data\r\n";
+					print "I|update|OK|Host added (pushed old data)\r\n";
 			}
 			else // Invalid IP
-				print "I|update|WARNING|Invalid IP"."\r\n";
+				print "I|update|WARNING|Invalid host"."\r\n";
 		}
 
 		if( $CACHE != NULL && $supported_net )
 		{
 			if(!FSOCKOPEN) // Cache adding disabled
-				print "I|update|WARNING|Cache adding is disabled\r\n";
+				print "I|update|WARNING|URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
 				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
 
 				if( $result == 0 ) // Exists
-					print "I|update|OK|Cache already updated\r\n";
+					print "I|update|OK|URL already updated\r\n";
 				elseif( $result == 1 ) // Updated timestamp
-					print "I|update|OK|Updated cache timestamp\r\n";
+					print "I|update|OK|Updated URL timestamp\r\n";
 				elseif( $result == 2 ) // OK
-					print "I|update|OK|Cache added successfully\r\n";
+					print "I|update|OK|URL added\r\n";
 				elseif( $result == 3 ) // OK, pushed old data
-					print "I|update|OK|Cache added successfully - pushed old data\r\n";
+					print "I|update|OK|URL added (pushed old data)\r\n";
 				elseif( $result == 4 ) // Blocked or failed URL
 					print "I|update|OK|Blocked URL\r\n";
 				elseif( $result == 5 ) // Ping failed
 					print "I|update|WARNING|Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
-					print "I|update|WARNING|Network of webcache not supported\r\n";
+					print "I|update|WARNING|Network of URL not supported\r\n";
 			}
 			else // Invalid URL
 				print("I|update|WARNING|Invalid URL"."\r\n");
@@ -1100,13 +1099,13 @@ else
 			if( CheckIPValidity($REMOTE_IP, $IP) )
 				$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
 			else // Invalid IP
-				print "WARNING: Invalid IP"."\r\n";
+				print "WARNING: Invalid host"."\r\n";
 		}
 
 		if( $CACHE != NULL && $supported_net )
 		{
 			if(!FSOCKOPEN) // Cache adding disabled
-				print "WARNING: Cache adding is disabled\r\n";
+				print "WARNING: URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
 				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
@@ -1114,7 +1113,7 @@ else
 				if( $result == 5 ) // Ping failed
 					print "WARNING: Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
-					print "WARNING: Network of webcache not supported\r\n";
+					print "WARNING: Network of URL not supported\r\n";
 			}
 			else // Invalid URL
 				print "WARNING: Invalid URL"."\r\n";
@@ -1153,7 +1152,7 @@ else
 			$other_requests = ReadStats("other");
 			$update_requests = ReadStats("update");
 
-			echo ( $other_requests + $update_requests )."\r\n";
+			echo ($other_requests + $update_requests)."\r\n";
 			echo $update_requests."\r\n";
 		}
 		else
@@ -1162,10 +1161,12 @@ else
 
 	if($INFO)
 	{
-		if(EMAIL != "pippo AT excite DOT it")
-			echo EMAIL."\r\n\r\n";
 		echo "This is Skulls! Multi-Network WebCache ".VER."\r\n";
-		echo "The sources can be downloaded here: http://sourceforge.net/projects/skulls/\r\n";
+		echo "The sources can be downloaded here: http://sourceforge.net/projects/skulls/\r\n\r\n";
+
+		echo "Maintainer: ".MAINTAINER_NICK."\r\n";
+		if(MAINTAINER_EMAIL != "name AT server DOT com")
+			echo MAINTAINER_EMAIL."\r\n";
 	}
 
 	if($compressed) ob_end_flush();
