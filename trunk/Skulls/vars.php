@@ -1,4 +1,6 @@
 <?php
+					/* You must read readme.txt in the admin directory to configure properly */
+
 $ENABLED =							1;
 
 define( "FSOCKOPEN",				1 );	// Disable ONLY if the server have FSOCKOPEN disabled, use admin/test.php to check
@@ -21,10 +23,9 @@ define( "TIMEOUT",					20 );	// Socket time out for fsockopen
 
 define( "DATA_DIR", "data" );				// Directory where data files are stored (you should use relative path, you can leave it as is by default)
 
-define( "MAINTAINER_NICK", "your nickname here" );	// Your nick
-// The following field is optional (you can leave it as is by default to doesn't show it)
-define( "MAINTAINER_EMAIL", "name AT server DOT com" );	// Your e-mail in that format "name AT server DOT com". Example: pippo@excite.it => pippo AT excite DOT it
-
+define( "MAINTAINER_NICK", "your nickname here" );				// Your nick
+define( "MAINTAINER_EMAIL", "name AT server DOT com" );			// Optional - Your e-mail in that format "name AT server DOT com". Example: pippo@excite.it => pippo AT excite DOT it
+define( "MAINTAINER_WEBSITE", "http://www.your-site.com/" );	// Optional - The address of your website
 
 // You can add or remove any network, but after you changed them you must delete last_action.dat in data directory to initialize the changes.
 // By default gnutella is disabled and gnutella2 is enabled.

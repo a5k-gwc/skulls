@@ -337,6 +337,8 @@ function ShowHtmlPage($num){
 	<style type="text/css">
 		body { font-family: Verdana; }
 		table { font-size: 10px; }
+		a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active { text-decoration: none; }
+		a.hover-underline:hover { text-decoration: underline; }
 	</style>
 </head>
 
@@ -397,6 +399,35 @@ function ShowHtmlPage($num){
 								?>
 								</td>
 							</tr>
+							<tr>
+								<td>&nbsp;</td>
+							</tr>
+							<tr>
+								<td width="150">- Maintainer:</td>
+								<td style="color: #0044FF;">
+									<?php
+										$mail = MAINTAINER_EMAIL;
+										if($mail == "name AT server DOT com") $mail = "";
+										echo "<b title=\"".$mail."\">".MAINTAINER_NICK."</b>";
+									?>
+								</td>
+							</tr>
+							<?php
+								if(MAINTAINER_WEBSITE != "http://www.your-site.com/")
+								{
+							?>
+									<tr>
+										<td width="150">- Maintainer website:</td>
+										<td style="color: #0044FF;">
+											<?php
+												$website = MAINTAINER_WEBSITE;
+												echo "<a href=\"".$website."\" target=\"_blank\">".$website."</a>";
+											?>
+										</td>
+									</tr>
+							<?php
+								}
+							?>
 						</table>
 					</td>
 				</tr>
@@ -528,23 +559,23 @@ function ShowHtmlPage($num){
 													echo "<td style=\"padding-right: 10pt;\">";
 													echo "<a href=\"".$cache_url."\" target=\"_blank\">";
 
-													list($protocol, $cache_url) = explode("://", $cache_url, 2);
+													list( , $cache_url) = explode("://", $cache_url, 2);
 													$max_length = 35;
 
-													if( strlen($cache_url) > $max_length )
-													{
-														$pos = strpos($cache_url, "/");
-														echo $protocol."://";
-														if($pos > 0 && $pos <= $max_length)
-															echo substr($cache_url, 0, $pos)."/...";
-														else
-															echo substr($cache_url, 0, $max_length)."...";
-													}
+													$pos = strpos($cache_url, "/");
+													if($pos > 0)
+														$cache_url = substr($cache_url, 0, $pos);
+
+													if(strlen($cache_url) > $max_length)
+														echo substr($cache_url, 0, $max_length)."...";
 													else
-														echo $protocol."://".$cache_url;
+														echo $cache_url;
 
 													echo "</a></td>";
-													echo "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
+													if(strpos($cache_name, "Skulls ") > -1)
+														echo "<td style=\"padding-right: 20pt;\"><a class=\"hover-underline\" style=\"color: black;\" href=\"http://sourceforge.net/projects/skulls/\" target=\"_blank\">".$cache_name."</a></td>";
+													else
+														echo "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
 													echo "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
 													echo "<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>";
 													echo "<td>".$time."</td></tr>";
@@ -614,8 +645,8 @@ function ShowHtmlPage($num){
 		        <?php
 			}
 				?>
-				<tr>
-					<td bgcolor="#FFFFFF" style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="http://sourceforge.net/projects/skulls/" target="_blank">http://sourceforge.net/projects/skulls/</a></b></td>
+				<tr bgcolor="#FFFFFF">
+					<td style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="http://sourceforge.net/projects/skulls/" target="_blank">http://sourceforge.net/projects/skulls/</a></b></td>
 				</tr>
 			</table>
 		</td>
