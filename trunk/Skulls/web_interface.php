@@ -421,7 +421,7 @@ function ShowHtmlPage($num){
 										<td style="color: #0044FF;">
 											<?php
 												$website = MAINTAINER_WEBSITE;
-												echo "<a href=\"".$website."\" target=\"_blank\">".$website."</a>";
+												echo "<a href=\"".$website."\" class=\"hover-underline\" target=\"_blank\">".$website."</a>";
 											?>
 										</td>
 									</tr>
@@ -573,7 +573,7 @@ function ShowHtmlPage($num){
 
 													echo "</a></td>";
 													if(strpos($cache_name, "Skulls ") > -1)
-														echo "<td style=\"padding-right: 20pt;\"><a class=\"hover-underline\" style=\"color: black;\" href=\"http://sourceforge.net/projects/skulls/\" target=\"_blank\">".$cache_name."</a></td>";
+														echo "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													else
 														echo "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
 													echo "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
@@ -684,7 +684,11 @@ function ShowHtmlPage($num){
 								echo "<b>Latest version: <font color=\"green\">".$latest_version."</font></b><br>";
 								echo "<b>This version: <font color=\"".$color."\">".SHORT_VER."</font></b><br>";
 
-								if($need_update) echo "<font color=\"".$color."\"><b>There is a new version of Skulls, you should update it.</b></font><br>";
+								if($need_update)
+								{
+									echo "<br><font color=\"".$color."\"><b>There is a new version of Skulls, ";
+									echo "please visit <a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" target=\"_blank\">skulls project page</a> to obtain the latest version.</b></font><br>";
+								}
 							}
 						?>
 					</td>

@@ -4,7 +4,16 @@ Skulls! Multi-Network WebCache
 skulls.php is the main file.
 
 admin/test.php can be used to verify settings that must be changed in vars.php.
-admin/update.php can be used to update data files (it doesn't check if Skulls is updated).
+admin/update.php can be used to update data files if you have installed an old version of this cache (it doesn't check if Skulls is updated).
+
+
+WARNING
+I STRONGLY SUGGEST you use a CNAME for the cache such as http://gwc.your-site.com/skulls.php
+So if you ever want to take it down all you will have to do is delete the CNAME.
+
+P2P clients have long memories, it takes a long time (maybe forever) until the name of your cache has vanished.
+If you don't follow this warning you will still be hit by cache requests after you have stopped running the cache.
+
 
 INSTALLATION PROCEDURE
 1. Send all files to your web server
@@ -17,6 +26,7 @@ Note: You must be sure that there aren't any problems before go to the step 7
 7. Submit the url of skulls.php here: http://skulls.sourceforge.net/submit.php
 
 If you need more help ask here: http://sourceforge.net/forum/forum.php?forum_id=522656
+
 
 UPDATE PROCEDURE
 1. Delete old skulls.php in your web server

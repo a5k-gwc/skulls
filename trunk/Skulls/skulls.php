@@ -49,8 +49,8 @@ if(!$ENABLED || basename($PHP_SELF) == "index.php")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.6" );
-define( "VER", SHORT_VER."h" );
+define( "SHORT_VER", "0.2.7" );
+define( "VER", SHORT_VER."" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -91,7 +91,7 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 	}
 	elseif($supported_net)
 	{
-		if($net == "gnutella")
+		if($net == "gnutella" || $net == "mute")
 			echo "PONG ".NAME." ".VER."\r\n";
 
 		global $SUPPORTED_NETWORKS;
@@ -1177,12 +1177,14 @@ else
 
 	if($INFO)
 	{
-		echo "This is Skulls! Multi-Network WebCache ".VER."\r\n";
-		echo "The sources can be downloaded here: http://sourceforge.net/projects/skulls/\r\n\r\n";
+		echo "I|name|Skulls! Multi-Network WebCache\r\n";
+		echo "I|ver|".VER."\r\n";
+		echo "I|gwc-site|http://sourceforge.net/projects/skulls/\r\n";
+		echo "I|open-source|1\r\n\r\n";
 
-		echo "Maintainer: ".MAINTAINER_NICK."\r\n";
-		if(MAINTAINER_EMAIL != "name AT server DOT com")
-			echo MAINTAINER_EMAIL."\r\n";
+		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
+		if(MAINTAINER_WEBSITE != "http://www.your-site.com/")
+			echo "I|maintainer-site|".MAINTAINER_WEBSITE."\r\n";
 	}
 
 	if($compressed) ob_end_flush();
