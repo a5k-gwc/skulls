@@ -38,7 +38,6 @@ $REMOTE_IP = $_SERVER["REMOTE_ADDR"];
 if(!$ENABLED || basename($PHP_SELF) == "index.php")
 {
 	header("HTTP/1.0 404 Not Found");
-	header("Content-Type: text/plain");
 	die("ERROR: Service disabled\r\n");
 }
 
@@ -51,7 +50,7 @@ if(!$ENABLED || basename($PHP_SELF) == "index.php")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.6" );
-define( "VER", SHORT_VER."g" );
+define( "VER", SHORT_VER."h" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -130,7 +129,7 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 {
 	if( $multi && strpos($nets, "-") > -1 )
 	{
-		$nets = explode( "-", $nets );
+		$nets = explode("-", $nets);
 		$nets_count = count($nets);
 		for( $i = 0; $i < $nets_count; $i++ )
 			if( CheckNetwork($supported_networks, $nets[$i]) )
@@ -210,10 +209,9 @@ function CheckURLValidity($cache){
 function CheckBlockedCache($cache){
 	$cache = strtolower($cache);
 	if(
-		// It doesn't work
+		// They doesn't work
 		$cache == "http://www.xolox.nl/gwebcache/"
 		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
-		// Deepnet Webcache never works good
 		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
 		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/"
 		// It is the same of http://gwebcache.alpha64.info/
@@ -318,12 +316,12 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	fclose($file);
 }
 
-function PingWebCache($cache){
-	global $SUPPORTED_NETWORKS;
+function PingGWC($cache, $query){
+	$debug = FALSE;
 
-	list( , $cache ) = explode("://", $cache, 2);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
-	$main_url = explode("/", $cache);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
-	$splitted_url = explode(":", $main_url[0], 2);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
+	list( , $cache ) = explode("://", $cache);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
+	$main_url = explode("/", $cache);				// $main_url[0] = www.test.com:80		$main_url[1] = page.php
+	$splitted_url = explode(":", $main_url[0]);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
 
 	if( count($splitted_url) > 1 )
 		list($host_name, $port) = $splitted_url;
@@ -333,12 +331,11 @@ function PingWebCache($cache){
 		$port = 80;
 	}
 
-	$cache_data[0] = "FAILED";
 	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
-
 	if(!$fp)
 	{
-		//echo "Error ".$errno."\r\n";
+		$cache_data = "ERR|".$errno;		// ERR|Error name
+		if($debug) echo "Error ".$errno.": ".$errstr."\r\n";
 	}
 	else
 	{
@@ -346,14 +343,11 @@ function PingWebCache($cache){
 		$oldpong = "";
 		$error = "";
 
-		$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1";
-		if( $main_url[count($main_url)-1] == "bazooka.php" )	// Workaround for compatibility with Bazooka
-			$query .= "&net=gnutella2";
-
 		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 		while( !feof($fp) )
 		{
 			$line = fgets( $fp, 1024 );
+			if($debug) echo $line."\r\n";
 
 			if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
 				$pong = rtrim($line);
@@ -362,79 +356,87 @@ function PingWebCache($cache){
 			elseif( substr($line, 0, 5) == "ERROR" )
 				$error = rtrim($line);
 		}
-
 		fclose($fp);
 
-		if( !empty($pong) )
+		if(!empty($pong))
 		{
-			$received_data = explode( "|", $pong );
-			$cache_data[0] = $received_data[2];
+			$received_data = explode("|", $pong);
+			$cache_data = "P|".RemoveGarbage($received_data[2]);
 
 			if(count($received_data) > 3)
 			{
-				if(substr($received_data[3], 0, 4) == "http")	// Workaround for compatibility with PHPGnuCacheII
+				if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII
 					$nets = "gnutella-gnutella2";
 				else
-					$nets = strtolower($received_data[3]);
+					$nets = RemoveGarbage(strtolower($received_data[3]));
 			}
 			elseif( !empty($oldpong) )
 				$nets = "gnutella-gnutella2";
 			else
 				$nets = "gnutella2";
-		}
-		elseif( !empty($oldpong) )
-		{
-			$cache_data[0] = substr($oldpong, 5);
 
-			if( substr($cache_data[0], 0, 13) == "PHPGnuCacheII" ||			// Workaround for compatibility with PHPGnuCacheII
-				substr($cache_data[0], 0, 10) == "perlgcache" )				// Workaround for compatibility with perlgcache
+			$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+		}
+		elseif(!empty($oldpong))
+		{
+			$oldpong = RemoveGarbage(substr($oldpong, 5));
+			$cache_data = "P|".$oldpong;
+
+			if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
+				substr($oldpong, 0, 10) == "perlgcache" ||
+				substr($oldpong, 0, 9) == "GWebCache" )
 				$nets = "gnutella-gnutella2";
-			elseif(substr($cache_data[0], 0, 9) == "MWebCache")
+			elseif(substr($oldpong, 0, 9) == "MWebCache")
 				$nets = "mute";
 			else
 				$nets = "gnutella";
+
+			$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
 		}
-		elseif( strpos(strtolower($error), "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
-		{																	// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double request, make your cache pingable without network parameter when there are ping=1 and multi=1
-			$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
-
-			if(!$fp)
-			{
-				//echo "Error ".$errno."\r\n";
-			}
-			else
-			{
-				$pong = "";
-				$oldpong = "";
-
-				fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=gnutella2 HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
-				while( !feof($fp) )
-				{
-					$line = fgets($fp, 1024);
-
-					if(strtolower(substr($line, 0, 7)) == "i|pong|") { $pong = rtrim($line); break; }
-					elseif(substr($line, 0, 4) == "PONG") { $oldpong = rtrim($line); break; }
-				}
-
-				fclose($fp);
-
-				$nets = "gnutella2";
-				if( !empty($pong) )
-				{
-					list( , , $cache_data[0] ) = explode( "|", $pong );
-					$cache_data[0] = $cache_data[0];
-				}
-				elseif( !empty($oldpong) )
-					$cache_data[0] = substr($oldpong, 5);
-			}
+		else
+		{
+			$error = RemoveGarbage(strtolower($error));
+			$cache_data = "ERR|".$error;	// ERR|Error name
 		}
 	}
 
-	if($cache_data[0] != "FAILED")
+	if($debug) echo "\r\nResult: ".$cache_data."\r\n\r\n";
+	return $cache_data;
+}
+
+function CheckGWC($cache){
+	global $SUPPORTED_NETWORKS;
+
+	$nets = NULL;
+	$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1";
+	$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list	or	ERR|Error name
+	$received_data = explode("|", $result);
+
+	if($received_data[0] == "ERR")
 	{
+		if( strpos($received_data[1], "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
+		{																// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
+			$query .= "&net=gnutella2";
+			$result = PingGWC($cache, $query);
+			$nets = "gnutella2";
+		}
+		elseif( strpos($received_data[1], "access denied by acl") > -1 )
+		{
+			$query = "ping=1&multi=1&client=TEST&version=".VENDOR."%20".SHORT_VER."&cache=1";
+			$result = PingGWC($cache, $query);
+		}
+		unset($received_data);
+		$received_data = explode("|", $result);
+	}
+
+	if($received_data[0] == "ERR" || $received_data[1] == "")
+		$cache_data[0] = "FAIL";
+	else
+	{
+		if($nets == NULL) $nets = $received_data[2];
 		if(CheckNetworkString($SUPPORTED_NETWORKS, $nets))
 		{
-			$cache_data[0] = RemoveGarbage($cache_data[0]);
+			$cache_data[0] = $received_data[1];
 			$cache_data[1] = $nets;
 		}
 		else
@@ -456,7 +458,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list( $read, ) = explode("|", $host_file[$i], 2);
+		list( $read, ) = explode("|", $host_file[$i]);
 
 		if( $ip == $read )
 		{
@@ -490,8 +492,11 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 }
 
 function WriteCacheFile($cache, $net, $client, $version){
-	list( , $url ) = explode("://", $cache, 2);
-	if( $url == $_SERVER["SERVER_NAME"].$_SERVER["PHP_SELF"] )	// It doesn't allow to insert itself in cache list
+	global $SERVER_NAME, $SERVER_PORT, $PHP_SELF;
+
+	list( , $url ) = explode("://", $cache);
+	$my_url = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
+	if($url == $my_url)	// It doesn't allow to insert itself in cache list
 		return 0; // Exists
 
 	$cache = RemoveGarbage($cache);
@@ -506,7 +511,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list( $read, ) = explode("|", $cache_file[$i], 2);
+		list( $read, ) = explode("|", $cache_file[$i]);
 
 		if( strtolower($cache) == strtolower($read) )
 		{
@@ -526,9 +531,9 @@ function WriteCacheFile($cache, $net, $client, $version){
 			return 0; // Exists
 		else
 		{
-			$cache_data = PingWebCache($cache);
+			$cache_data = CheckGWC($cache);
 
-			if($cache_data[0] == "FAILED")
+			if($cache_data[0] == "FAIL")
 			{
 				AddFailedUrl($cache);
 				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
@@ -553,9 +558,9 @@ function WriteCacheFile($cache, $net, $client, $version){
 			return 4; // Blocked URL
 		else
 		{
-			$cache_data = PingWebCache($cache);
+			$cache_data = CheckGWC($cache);
 
-			if($cache_data[0] == "FAILED")
+			if($cache_data[0] == "FAIL")
 			{
 				AddFailedUrl($cache);
 				return 5; // Ping failed
@@ -567,7 +572,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 			}
 			else
 			{
-				if($file_count >= MAX_CACHES || $file_count >= 80)
+				if($file_count >= MAX_CACHES || $file_count >= 100)
 				{
 					ReplaceCache( $cache_file, 0, $cache, $cache_data, $client, $version );
 					return 3; // OK, pushed old data
@@ -597,7 +602,7 @@ function HostFile($net){
 
 	for( $i = 0; $i < $max_hosts; $i++ )
 	{
-		list( $host, ) = explode("|", $host_file[$count_host - 1 - $i], 2);
+		list( $host, ) = explode("|", $host_file[$count_host - 1 - $i]);
 		$host = trim($host);
 		print($host."\r\n");
 	}
@@ -609,12 +614,12 @@ function UrlFile($net){
 
 	for( $n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i-- )
 	{
-		list( $cache, , $cache_net, ) = explode("|", $cache_file[$i], 4);
+		list( $cache, , $cache_net, ) = explode("|", $cache_file[$i]);
 
 		$show = FALSE;
 		if( strpos($cache_net, "-") > -1 )
 		{
-			$cache_networks = explode( "-", $cache_net );
+			$cache_networks = explode("-", $cache_net);
 			$cache_nets_count = count($cache_networks);
 			for( $x=0; $x < $cache_nets_count; $x++ )
 			{
@@ -667,7 +672,7 @@ function Get($net, $pv){
 			$show = FALSE;
 			if( strpos($cache_net, "-") > -1 )
 			{
-				$cache_networks = explode( "-", $cache_net );
+				$cache_networks = explode("-", $cache_net);
 				$cache_nets_count = count($cache_networks);
 				for( $x=0; $x < $cache_nets_count; $x++ )
 				{
@@ -767,8 +772,9 @@ $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
 $COMPRESSION = !empty($_GET["compression"]) && (float)PHP_VERSION >= 4.1 ? strtolower($_GET["compression"]) : NULL;
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;
 
-$USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : NULL;
-$USER_AGENT = str_replace("/", " ", $USER_AGENT);
+$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
+$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
+$USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? str_replace("/", " ", $_SERVER["HTTP_USER_AGENT"]) : NULL;
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
@@ -778,6 +784,9 @@ $CLUSTER = !empty($_GET["cluster"]) ? $_GET["cluster"] : NULL;
 $HOSTFILE = !empty($_GET["hostfile"]) ? $_GET["hostfile"] : 0;
 $URLFILE = !empty($_GET["urlfile"]) ? $_GET["urlfile"] : 0;
 $STATFILE = !empty($_GET["statfile"]) ? $_GET["statfile"] : 0;
+
+$BFILE = !empty($_GET["bfile"]) ? $_GET["bfile"] : 0;
+if($BFILE) { $HOSTFILE = 1; $URLFILE = 1; }
 
 $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
@@ -808,6 +817,12 @@ $KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request
 
 if( empty($_SERVER["QUERY_STRING"]) )
 	$SHOWINFO = 1;
+
+if(MAINTAINER_NICK == "your nickname here")
+{
+	echo "You must read readme.txt in the admin directory first.\r\n";
+	die();
+}
 
 if( !file_exists(DATA_DIR."/last_action.dat") )
 {
@@ -962,7 +977,7 @@ else
 
 	if( $CACHE != NULL && strpos($CACHE, "://") > -1 )
 	{	// Cleaning url
-		list( $protocol, $url ) = explode("://", $CACHE, 2);
+		list( $protocol, $url ) = explode("://", $CACHE);
 
 		if( strpos($url, "/") > -1 )
 			list( $host, $path ) = explode("/", $url, 2);
@@ -989,8 +1004,9 @@ else
 
 		if( strpos($host, ":") > -1 )
 		{
-			list( $host_name, $host_port ) = explode(":", $host, 2);
-			$host_port = (int)$host_port;
+			$splitted_host = explode(":", $host);
+			$host_name = $splitted_host[0];
+			$host_port = (int)$splitted_host[1];
 		}
 		else
 		{
