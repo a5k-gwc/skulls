@@ -227,7 +227,7 @@ function IsClientTooOld($client, $version){
 	{
 		case "RAZA":
 		case "RAZB":
-			if((float)$version < 2.2)	// This also block Etomi that is based on Shareaza 2.1.0.0
+			if((float)$version < 2.2)	// This also block some ripp-offs that are based on old versions of Shareaza
 				return TRUE;
 			break;
 		case "BEAR":
@@ -1177,7 +1177,7 @@ else
 
 	if($INFO)
 	{
-		echo "I|name|Skulls! Multi-Network WebCache\r\n";
+		echo "I|name|".NAME."! Multi-Network WebCache\r\n";
 		echo "I|ver|".VER."\r\n";
 		echo "I|gwc-site|http://sourceforge.net/projects/skulls/\r\n";
 		echo "I|open-source|1\r\n\r\n";

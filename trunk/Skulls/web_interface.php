@@ -147,7 +147,7 @@ function ReplaceVendorCode($client, $version){
 			break;
 		case "SKLL":
 			$client_name = "Skulls (WebCache)";
-			$url = "http://ale5000.altervista.org/software.htm";
+			$url = "http://sourceforge.net/projects/skulls/";
 			break;
 
 		default:
@@ -572,7 +572,7 @@ function ShowHtmlPage($num){
 														echo $cache_url;
 
 													echo "</a></td>";
-													if(strpos($cache_name, "Skulls ") > -1)
+													if(strpos($cache_name, NAME." ") > -1)
 														echo "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													else
 														echo "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
@@ -686,8 +686,8 @@ function ShowHtmlPage($num){
 
 								if($need_update)
 								{
-									echo "<br><font color=\"".$color."\"><b>There is a new version of Skulls, ";
-									echo "please visit <a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" target=\"_blank\">skulls project page</a> to obtain the latest version.</b></font><br>";
+									echo "<br><font color=\"".$color."\"><b>There is a new version of ".NAME.", ";
+									echo "please visit <a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" target=\"_blank\">".NAME." project page</a> to obtain the latest version.</b></font><br>";
 								}
 							}
 						?>
