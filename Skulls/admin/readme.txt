@@ -14,7 +14,7 @@ INSTALLATION PROCEDURE
 5. Send updated vars.php to your web server
 6. Go on http://name_of_your_web_server/skulls.php in your browser, if you don't see any error you are OK
 Note: You must be sure that there aren't any problems before go to the step 7
-7. Submit your url "http://name_of_your_web_server/skulls.php" here: http://skulls.sourceforge.net/submit.php
+7. Submit the url of skulls.php here: http://skulls.sourceforge.net/submit.php
 
 If you need more help ask here: http://sourceforge.net/forum/forum.php?forum_id=522656
 
