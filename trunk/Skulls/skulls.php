@@ -363,7 +363,7 @@ function PingGWC($cache, $query){
 			$received_data = explode("|", $pong);
 			$cache_data = "P|".RemoveGarbage($received_data[2]);
 
-			if(count($received_data) > 3)
+			if(count($received_data) > 3 && $received_data[3] != "")
 			{
 				if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII
 					$nets = "gnutella-gnutella2";
@@ -384,7 +384,8 @@ function PingGWC($cache, $query){
 
 			if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
 				substr($oldpong, 0, 10) == "perlgcache" ||
-				substr($oldpong, 0, 9) == "GWebCache" )
+				substr($oldpong, 0, 9) == "GWebCache" ||
+				substr($oldpong, 0, 12) == "jumswebcache" )
 				$nets = "gnutella-gnutella2";
 			elseif(substr($oldpong, 0, 9) == "MWebCache")
 				$nets = "mute";
@@ -404,7 +405,7 @@ function PingGWC($cache, $query){
 	return $cache_data;
 }
 
-function CheckGWC($cache){
+function CheckGWC($cache, $cache_network, $cache_exists = FALSE){
 	global $SUPPORTED_NETWORKS;
 
 	$nets = NULL;
@@ -414,7 +415,7 @@ function CheckGWC($cache){
 
 	if($received_data[0] == "ERR")
 	{
-		if( strpos($received_data[1], "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
+		if( ($cache_network == "gnutella2" || $cache_exists) && strpos($received_data[1], "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
 		{																// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$query .= "&net=gnutella2";
 			$result = PingGWC($cache, $query);
@@ -531,7 +532,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 			return 0; // Exists
 		else
 		{
-			$cache_data = CheckGWC($cache);
+			$cache_data = CheckGWC($cache, $net, TRUE);
 
 			if($cache_data[0] == "FAIL")
 			{
@@ -558,7 +559,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 			return 4; // Blocked URL
 		else
 		{
-			$cache_data = CheckGWC($cache);
+			$cache_data = CheckGWC($cache, $net);
 
 			if($cache_data[0] == "FAIL")
 			{
