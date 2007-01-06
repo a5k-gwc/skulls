@@ -406,7 +406,7 @@ function ShowHtmlPage($num){
 								<td width="150">- Maintainer:</td>
 								<td style="color: #0044FF;">
 									<?php
-										$mail = MAINTAINER_EMAIL;
+										$mail = str_replace("@", " AT ", MAINTAINER_EMAIL);
 										if($mail == "name AT server DOT com") $mail = "";
 										echo "<b title=\"".$mail."\">".MAINTAINER_NICK."</b>";
 									?>
