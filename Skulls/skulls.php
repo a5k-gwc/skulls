@@ -954,6 +954,9 @@ else
 		die();
 	}
 
+	if((int)PHP_VERSION >= 4 && ini_get("zlib.output_compression") == 1)
+		ini_set("zlib.output_compression", "Off");
+
 	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
