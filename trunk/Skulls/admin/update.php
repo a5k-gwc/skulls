@@ -143,6 +143,9 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 			|| $line[0] == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
 			|| $line[0] == "http://gwebcache.alpha64.info/"
 			|| $line[0] == "http://gwebcache.alpha64.info/index.php"
+			// Double
+			|| $line[0] == "http://gwc.nickstallman.net/gcache2.asp"
+			|| $line[0] == "http://gwc.nickstallman.net/gcache"
 		)
 			$delete = TRUE;
 		else
@@ -251,7 +254,7 @@ if( file_exists("../data/failed_urls.dat") )
 {
 	if( filesize("../data/failed_urls.dat") > 1 * 1024 *1024 )
 	{
-		$log .= "Truncate data/failed_urls.dat because it is too big: ";
+		$log .= "Truncating data/failed_urls.dat because it is too big: ";
 		$log .= truncate("../data/failed_urls.dat");
 	}
 }
@@ -260,13 +263,12 @@ if( file_exists("../stats/update_requests_hour.dat") )
 {
 	if(rtrim($file_content[0]) < 4.6)
 	{
-		$result = unlink("../stats/update_requests_hour.dat");
-		$log .= "Deleting stats/update_requests_hour.dat because the format is changed: ";
-		$log .= check($result);
+		$log .= "Truncating stats/update_requests_hour.dat because the format is changed: ";
+		$log .= truncate("../stats/update_requests_hour.dat");
 	}
 	elseif( filesize("../stats/update_requests_hour.dat") > 1 * 1024 *1024 )
 	{
-		$log .= "Truncate stats/update_requests_hour.dat because it is too big: ";
+		$log .= "Truncating stats/update_requests_hour.dat because it is too big: ";
 		$log .= truncate("../stats/update_requests_hour.dat");
 	}
 }
@@ -275,13 +277,12 @@ if( file_exists("../stats/other_requests_hour.dat") )
 {
 	if(rtrim($file_content[0]) < 4.6)
 	{
-		$result = unlink("../stats/other_requests_hour.dat");
-		$log .= "Deleting stats/other_requests_hour.dat because the format is changed: ";
-		$log .= check($result);
+		$log .= "Truncating stats/other_requests_hour.dat because the format is changed: ";
+		$log .= truncate("../stats/other_requests_hour.dat");
 	}
 	elseif( filesize("../stats/other_requests_hour.dat") > 1 * 1024 *1024 )
 	{
-		$log .= "Truncate stats/other_requests_hour.dat because it is too big: ";
+		$log .= "Truncating stats/other_requests_hour.dat because it is too big: ";
 		$log .= truncate("../stats/other_requests_hour.dat");
 	}
 }
