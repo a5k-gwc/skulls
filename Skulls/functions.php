@@ -4,53 +4,48 @@ function InitializeNetworkFile($net, $show_errors = FALSE){
 	if(!file_exists(DATA_DIR."/hosts_".$net.".dat"))
 	{
 		$file = @fopen(DATA_DIR."/hosts_".$net.".dat", "xb");
-		if($file)
-			fclose($file);
+		if($file !== FALSE) fclose($file);
 		elseif($show_errors)
 			echo "<font color=\"red\">Error during writing of ".DATA_DIR."/hosts_".$net.".dat</font><br>";
 	}
 }
 
-function Initialize($supported_networks, $show_errors = FALSE){
-	$initialized = TRUE;
-
+function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE){
+	$errors = "";
+	$runnig_since = gmdate("Y/m/d h:i:s A");
 	if(!file_exists(DATA_DIR."/runnig_since.dat"))
 	{
 		$file = @fopen( DATA_DIR."/runnig_since.dat", "wb" );
-		if($file)
+		if($file !== FALSE)
+		{
+			flock($file, 2); fwrite($file, $runnig_since); flock($file, 3); fclose($file);
+		}
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/runnig_since.dat</font><br>";
+	}
+	elseif(!$forced)
+	{
+		$file = @fopen(DATA_DIR."/runnig_since.dat", "r+b");
+		if($file !== FALSE)
 		{
 			flock($file, 2);
-			fwrite($file, gmdate("Y/m/d h:i:s A"));
+			$line = fgets($file);
+			if(rtrim($line) == "") { rewind($file); fwrite($file, $runnig_since); }
 			flock($file, 3);
 			fclose($file);
 		}
-		else
-		{
-			$initialized = FALSE;
-			if($show_errors) echo "<font color=\"red\">Error during writing of ".DATA_DIR."/runnig_since.dat</font><br>";
-		}
+		else $errors .= "<font color=\"red\">Error during reading of ".DATA_DIR."/runnig_since.dat</font><br>";
 	}
 	if(!file_exists(DATA_DIR."/caches.dat"))
 	{
 		$file = @fopen(DATA_DIR."/caches.dat", "xb");
-		if($file)
-			fclose($file);
-		else
-		{
-			$initialized = FALSE;
-			if($show_errors) echo "<font color=\"red\">Error during writing of ".DATA_DIR."/caches.dat</font><br>";
-		}
+		if($file !== FALSE) fclose($file);
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/caches.dat</font><br>";
 	}
 	if(!file_exists(DATA_DIR."/failed_urls.dat"))
 	{
 		$file = @fopen(DATA_DIR."/failed_urls.dat", "xb");
-		if($file)
-			fclose($file);
-		else
-		{
-			$initialized = FALSE;
-			if($show_errors) echo "<font color=\"red\">Error during writing of ".DATA_DIR."/failed_urls.dat</font><br>";
-		}
+		if($file !== FALSE) fclose($file);
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/failed_urls.dat</font><br>";
 	}
 
 	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
@@ -62,66 +57,26 @@ function Initialize($supported_networks, $show_errors = FALSE){
 		if(!file_exists("stats/requests.dat"))
 		{
 			$file = @fopen("stats/requests.dat", "xb");
-			if($file)
-			{
-				flock($file, 2);
-				fwrite($file, "1");
-				flock($file, 3);
-				fclose($file);
-			}
-			else
-			{
-				$initialized = FALSE;
-				if($show_errors) echo "<font color=\"red\">Error during writing of stats/requests.dat</font><br>";
-			}
-		}
-		else
-		{
-			$file = @fopen("stats/requests.dat", "r+b");
-			if($file)
-			{
-				flock($file, 2);
-				$line = fgets($file);
-				if(rtrim($line) == "")
-				{
-					rewind($file);
-					fwrite($file, "1");
-				}
-				flock($file, 3);
-				fclose($file);
-			}
-			else
-			{
-				$initialized = FALSE;
-				if($show_errors) echo "<font color=\"red\">Error during reading of stats/requests.dat</font><br>";
-			}
+			if($file !== FALSE) { flock($file, 2); fwrite($file, "0"); flock($file, 3); fclose($file); }
+			else $errors .= "<font color=\"red\">Error during writing of stats/requests.dat</font><br>";
 		}
 		if(!file_exists("stats/update_requests_hour.dat"))
 		{
 			$file = @fopen("stats/update_requests_hour.dat", "xb");
-			if($file)
-				fclose($file);
-			else
-			{
-				$initialized = FALSE;
-				if($show_errors) echo "<font color=\"red\">Error during writing of stats/update_requests_hour.dat</font><br>";
-			}
+			if($file !== FALSE) fclose($file);
+			else $errors .= "<font color=\"red\">Error during writing of stats/update_requests_hour.dat</font><br>";
 		}
 		if(!file_exists("stats/other_requests_hour.dat"))
 		{
 			$file = @fopen("stats/other_requests_hour.dat", "xb");
-			if($file)
-				fclose($file);
-			else
-			{
-				$initialized = FALSE;
-				if($show_errors) echo "<font color=\"red\">Error during writing of stats/other_requests_hour.dat</font><br>";
-			}
+			if($file !== FALSE) fclose($file);
+			else $errors .= "<font color=\"red\">Error during writing of stats/other_requests_hour.dat</font><br>";
 		}
 	}
 
-	if($show_errors && !$initialized)
+	if($show_errors && $errors != "")
 	{
+		echo $errors;
 		echo "<br><b>You must create files manually, and give to them the correct permissions.</b><br>";
 		die();
 	}

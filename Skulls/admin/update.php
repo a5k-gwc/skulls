@@ -1,22 +1,26 @@
 <?php
 header("Pragma: no-cache");
+define( "REVISION", 4.6 );
+if(file_exists("revision.dat"))
+	$file_content = file("revision.dat");
 
-define( "REVISION", 4.2 );
-if( !file_exists("revision.dat") )
+if( !isset($file_content[0]) )
+	$file_content[0] = 0;
+
+$doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\r\n";
+$html_header = "<html><head><title>Update</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
+$html_footer = "</body></html>\r\n";
+
+if(rtrim($file_content[0]) == REVISION)
 {
-	$file = fopen("revision.dat", "xb");
-	flock($file, 2);
-	fwrite($file, "1");
-	flock($file, 3);
-	fclose($file);
-}
-$file_content = file("revision.dat");
-if(rtrim($file_content[0]) >= REVISION)
-{
-	header("Content-Type: text/plain");
-	die("There is no need to update it.\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.\r\nTo check if Skulls is updated you must go on skulls.php\r\n");
+	echo $doctype.$html_header;
+	echo "There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.<br>\r\nTo check if Skulls is updated you must go on skulls.php<br>\r\n";
+	echo $html_footer;
+	die();
 }
 
+ini_set("display_errors", 1);
+error_reporting(E_ALL | E_STRICT);
 
 $log = "";
 $errors = 0;
@@ -29,11 +33,11 @@ function check($result)
 	$updated = TRUE;
 
 	if($result)
-		return "<font color=\"green\"><b>OK</b></font><br/>\r\n";
+		return "<font color=\"green\"><b>OK</b></font><br>\r\n";
 	else
 	{
 		$errors++;
-		return "<font color=\"red\"><b>ERROR</b></font><br/>\r\n";
+		return "<font color=\"red\"><b>ERROR</b></font><br>\r\n";
 	}
 }
 
@@ -55,6 +59,22 @@ function remove_dir($dir)
 		closedir($handle);
 		rmdir($dir);
 	}
+}
+
+function truncate($file_name)
+{
+	global $updated, $errors;
+	$updated = TRUE;
+
+	$file = fopen($file_name, "wb");
+	if($file !== FALSE)
+	{
+		fclose($file);
+		return "<font color=\"green\"><b>OK</b></font><br>\r\n";
+	}
+
+	$errors++;
+	return "<font color=\"red\"><b>ERROR</b></font><br>\r\n";
 }
 
 if( file_exists("../webcachedata/") )
@@ -99,31 +119,88 @@ if( file_exists("../".DATA_DIR."/hosts_gnutella1.dat") )
 
 if( file_exists("../".DATA_DIR."/caches.dat") )
 {
+	$PHP_SELF = $_SERVER["PHP_SELF"];
+	$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
+	$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
+	$MY_URL = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
+	$MY_URL = strtolower(str_replace("/admin/update.php", "/skulls.php", $MY_URL));
 	$cache_file = file("../".DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
 
 	$changed = FALSE;
+	$urls_array = array();
 	for($i = 0; $i < $count_cache; $i++)
 	{
-		$line = explode("|", trim($cache_file[$i]));
-		if($line[2] == "multi")
+		$delete = FALSE;
+		$line = explode("|", rtrim($cache_file[$i]));
+
+		if( !isset($line[5]) || ( isset($urls_array[$line[0]]) && $urls_array[$line[0]] == 1 ) )
+			$delete = TRUE;
+		elseif(strpos($line[0], "?") > -1 || strpos($line[0], "&") > -1 || strpos($line[0], "#") > -1
+			// Bad
+			|| $line[0] == "http://www.xolox.nl/gwebcache/"
+			|| $line[0] == "http://www.xolox.nl/gwebcache/default.asp"
+			|| $line[0] == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
+			|| $line[0] == "http://gwebcache.alpha64.info/"
+			|| $line[0] == "http://gwebcache.alpha64.info/index.php"
+		)
+			$delete = TRUE;
+		else
 		{
-			$line[2] = "gnutella-gnutella2";
-			$changed = TRUE;
+			if($line[2] == "multi")
+			{
+				$line[2] = "gnutella-gnutella2";
+				$changed = TRUE;
+			}
+
+			if(strpos($line[0], "://") > -1)
+			{
+				list( , $cache ) = explode("://", $line[0]);
+
+				if( strpos($cache, "/") > -1 )
+					list( $host, ) = explode("/", $cache);
+				else
+					$host = $cache;
+
+				if(strtolower($host) != $host || strtolower($cache) == $MY_URL)
+					$delete = TRUE;
+			}
+			elseif(substr($line[0], 0, 4) == "uhc:" || substr($line[0], 0, 5) == "ukhl:")
+				;
+			else
+			{
+				$delete = TRUE;
+				echo "<font color=\"red\"><b>caches.dat -> strange url removed: ".$line[0]."</b></font><br>\r\n";
+			}
 		}
-		$data[$i] = implode("|", $line);
+
+		if($delete)
+		{
+			$changed = TRUE;
+			$data[$i] = "";
+		}
+		else
+		{
+			$urls_array[$line[0]] = 1;
+			$data[$i] = implode("|", $line);
+		}
+		unset($line);
 	}
 
 	$file = fopen("../".DATA_DIR."/caches.dat", "wb");
 	flock($file, 2);
 	for($i = 0; $i < $count_cache; $i++)
-		fwrite($file, $data[$i]."\r\n");
+	{
+		$data[$i] = rtrim($data[$i]);
+		if($data[$i] != "")
+			fwrite($file, $data[$i]."\r\n");
+	}
 	flock($file, 3);
 	fclose($file);
 
 	if($changed)
 	{
-		$log .= "Internal structure updated in ".DATA_DIR."/caches.dat.<br/>\r\n";
+		$log .= "Internal structure updated in ".DATA_DIR."/caches.dat.<br>\r\n";
 		$updated = TRUE;
 	}
 }
@@ -132,22 +209,6 @@ if( file_exists("../".DATA_DIR."/blocked_caches.dat") )
 {
 	$result = unlink("../".DATA_DIR."/blocked_caches.dat");
 	$log .= "Deleting ".DATA_DIR."/blocked_caches.dat: ";
-	$log .= check($result);
-}
-
-if( !file_exists("../".DATA_DIR."/failed_urls.dat") )
-{
-	$log .= "Creating ".DATA_DIR."/failed_urls.dat: ";
-
-	$file = fopen( "../".DATA_DIR."/failed_urls.dat", "wb" );
-	if( !$file )
-		$result = FALSE;
-	else
-	{
-		fclose($file);
-		$result = TRUE;
-	}
-
 	$log .= check($result);
 }
 
@@ -165,37 +226,100 @@ if( file_exists("../log/skulls.log") )
 	$log .= check($result);
 }
 
-echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\r\n";
-echo "<html><head><title>Update</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
+if( file_exists("../log/old_clients.log") )
+{
+	$result = unlink("../log/old_clients.log");
+	$log .= "Deleting log/old_clients.log: ";
+	$log .= check($result);
+}
 
-echo $log;
+if( file_exists("../index.htm") && file_exists("../index.html") )
+{
+	$result = unlink("../index.htm");
+	$log .= "Deleting index.htm (there is already index.html): ";
+	$log .= check($result);
+}
+
+if( file_exists("../admin/index.htm") && file_exists("../admin/index.html") )
+{
+	$result = unlink("../admin/index.htm");
+	$log .= "Deleting admin/index.htm (there is already admin/index.html): ";
+	$log .= check($result);
+}
+
+if( file_exists("../data/failed_urls.dat") )
+{
+	if( filesize("../data/failed_urls.dat") > 1 * 1024 *1024 )
+	{
+		$log .= "Truncate data/failed_urls.dat because it is too big: ";
+		$log .= truncate("../data/failed_urls.dat");
+	}
+}
+
+if( file_exists("../stats/update_requests_hour.dat") )
+{
+	if(rtrim($file_content[0]) < 4.6)
+	{
+		$result = unlink("../stats/update_requests_hour.dat");
+		$log .= "Deleting stats/update_requests_hour.dat because the format is changed: ";
+		$log .= check($result);
+	}
+	elseif( filesize("../stats/update_requests_hour.dat") > 1 * 1024 *1024 )
+	{
+		$log .= "Truncate stats/update_requests_hour.dat because it is too big: ";
+		$log .= truncate("../stats/update_requests_hour.dat");
+	}
+}
+
+if( file_exists("../stats/other_requests_hour.dat") )
+{
+	if(rtrim($file_content[0]) < 4.6)
+	{
+		$result = unlink("../stats/other_requests_hour.dat");
+		$log .= "Deleting stats/other_requests_hour.dat because the format is changed: ";
+		$log .= check($result);
+	}
+	elseif( filesize("../stats/other_requests_hour.dat") > 1 * 1024 *1024 )
+	{
+		$log .= "Truncate stats/other_requests_hour.dat because it is too big: ";
+		$log .= truncate("../stats/other_requests_hour.dat");
+	}
+}
+
+echo $doctype.$html_header.$log;
 
 if($errors)
 {
-	echo "<br/><font color=\"red\"><b>".$errors." ";
+	echo "<br><font color=\"red\"><b>".$errors." ";
 	if($errors == 1)
 		echo "ERROR";
 	else
 		echo "ERRORS";
-	echo ".</b></font><br/>";
+	echo ".</b></font><br>";
 	echo "<b>You must execute the failed actions manually.</b><br>";
 }
 else
 {
-	$file = fopen("revision.dat", "wb");
-	flock($file, 2);
-	fwrite($file, REVISION);
-	flock($file, 3);
-	fclose($file);
-
-	if($updated)
-		echo "<br/><font color=\"green\"><b>Updated correctly.</b></font><br>";
-	else
+	$file = @fopen("revision.dat", "wb");
+	if($file !== FALSE)
 	{
-		echo "<font color=\"green\"><b>Already updated.</b></font><br>";
-		echo "<b>This file checks only if data files are updated, it doesn't check if Skulls is updated.<br>To check if Skulls is updated you must go on skulls.php</b><br>";
+		flock($file, 2);
+		fwrite($file, REVISION);
+		flock($file, 3);
+		fclose($file);
+
+		if($updated)
+			echo "<br><font color=\"green\"><b>Updated correctly.</b></font><br>";
+		else
+		{
+			echo "<font color=\"green\"><b>Already updated.</b></font><br>";
+			echo "<b>This file checks only if data files are updated, it doesn't check if Skulls is updated.<br>To check if Skulls is updated you must go on skulls.php</b><br>";
+		}
 	}
+	else
+		echo "<font color=\"red\">Error during writing of admin/revision.dat</font><br>";
 }
 
-echo "</body></html>";
+if( isset($footer) && $footer != "" ) echo "<br><div>".$footer."</div>";
+echo $html_footer;
 ?>

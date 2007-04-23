@@ -1,16 +1,18 @@
 <?php
 function Ping($host_name)
 {
-	$port = 80;
+	if( !function_exists("fsockopen") )
+		return FALSE;
 
+	$port = 80;
 	$fp = @fsockopen( $host_name, $port );
 	if($fp)
 	{
 		fclose ($fp);
 		return TRUE;
 	}
-	else
-		return FALSE;
+
+	return FALSE;
 }
 
 function CheckFunction($function_name)
@@ -35,7 +37,7 @@ else
 
 echo "<br><br>\r\n";
 
-if( Ping("www.google.it") || Ping("www.libero.it") || Ping("sourceforge.net") )
+if( Ping("www.google.it") || Ping("www.libero.it") )
 	$ping = TRUE;
 else
 	$ping = FALSE;
@@ -89,16 +91,12 @@ echo "<b>Function file:</b> ";
 CheckFunction("file");
 echo "<b>Function fopen:</b> ";
 CheckFunction("fopen");
-echo "<b>Function fsockopen:</b> ";
-CheckFunction("fsockopen");
 echo "<b>Function flock:</b> ";
 CheckFunction("flock");
-echo "<b>Function fwrite:</b> ";
-CheckFunction("fwrite");
 echo "<b>Function fgets:</b> ";
 CheckFunction("fgets");
-echo "<b>Function fputs:</b> ";
-CheckFunction("fputs");
+echo "<b>Function fwrite:</b> ";
+CheckFunction("fwrite");
 echo "<b>Function feof:</b> ";
 CheckFunction("feof");
 echo "<b>Function rewind:</b> ";
