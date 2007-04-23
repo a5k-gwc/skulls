@@ -56,8 +56,8 @@ if(CACHE_URL != "")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.7" );
-define( "VER", SHORT_VER."m" );
+define( "SHORT_VER", "0.2.8" );
+define( "VER", SHORT_VER."" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -492,6 +492,7 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 
 		if( $ip == $read )
 		{
+			list( , , , , , $time ) = explode("|", rtrim($host_file[$i]));
 			$host_exists = TRUE;
 			break;
 		}
@@ -499,8 +500,16 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 
 	if($host_exists)
 	{
-		ReplaceHost($host_file, $i, $ip, $leaves, $net, $cluster, $client, $version);
-		return 1; // Updated timestamp
+		$time_diff = time() - ( @strtotime( $time ) + @date("Z") );	// GMT
+		$time_diff = floor($time_diff / 3600);	// Hours
+
+		if( $time_diff < 24 )
+			return 0; // Exists
+		else
+		{
+			ReplaceHost($host_file, $i, $ip, $leaves, $net, $cluster, $client, $version);
+			return 1; // Updated timestamp
+		}
 	}
 	else
 	{
@@ -552,7 +561,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 
 		if( strtolower($cache) == strtolower($read) )
 		{
-			list( , , , , , $time ) = explode("|", trim($cache_file[$i]));
+			list( , , , , , $time ) = explode("|", rtrim($cache_file[$i]));
 			$cache_exists = TRUE;
 			break;
 		}
@@ -1171,6 +1180,8 @@ else
 
 			if( substr($host_name, -20) == "gwc.nickstallman.net" )
 				$CACHE = "http://gwc.nickstallman.net/gcache.asp";
+			elseif( substr($host_name, -9) == ".nyud.net" )
+				$CACHE = "BLOCKED";
 			else
 				$CACHE = $protocol."://".strtolower($host_name).$host_port."/".$path;
 		}
@@ -1211,7 +1222,9 @@ else
 			{
 				$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
 
-				if( $result == 1 ) // Updated timestamp
+				if( $result == 0 ) // Exists
+					print "I|update|OK|Host already updated\r\n";
+				elseif( $result == 1 ) // Updated timestamp
 					print "I|update|OK|Updated host timestamp\r\n";
 				elseif( $result == 2 ) // OK
 					print "I|update|OK|Host added\r\n";
@@ -1327,7 +1340,7 @@ else
 
 	if($INFO)
 	{
-		echo "I|name|".NAME."! Multi-Network WebCache\r\n";
+		echo "I|name|".NAME."\r\n";
 		echo "I|ver|".VER."\r\n";
 		echo "I|gwc-site|http://sourceforge.net/projects/skulls/\r\n";
 		echo "I|open-source|1\r\n";
