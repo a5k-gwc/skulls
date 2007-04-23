@@ -9,7 +9,7 @@ function ShowHtmlPage($num){
 	{
 		global $SUPPORTED_NETWORKS;
 		include "functions.php";
-		Initialize($SUPPORTED_NETWORKS, TRUE);
+		Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
 	}
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -224,6 +224,8 @@ function ShowHtmlPage($num){
 											if( count($cache_file) == 0 )
 												print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"5\" height=\"30\">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>\r\n");
 											else
+											{
+												$udp = "";
 												for($i = count($cache_file) - 1; $i >= 0; $i--)
 												{
 													list ($cache_url, $cache_name, $net, $client, $version, $time) = explode("|", $cache_file[$i], 6);
@@ -240,11 +242,20 @@ function ShowHtmlPage($num){
 													}
 													$color = $i % 2 == 0 ? "#F0F0F0" : "#FFFFFF";
 
-													echo "<tr align=\"left\" bgcolor=\"".$color."\">";
-													echo "<td style=\"padding-right: 10pt;\">";
-													echo "<a href=\"".$cache_url."\" target=\"_blank\">";
+													$output = "<tr align=\"left\" bgcolor=\"".$color."\">";
+													$output .= "<td style=\"padding-right: 10pt;\">";
+													$output .= "<a href=\"".$cache_url."\" target=\"_blank\">";
 
-													list( , $cache_url) = explode("://", $cache_url, 2);
+													if(strpos($cache_url, "://") > -1)
+													{
+														$type = "tcp";
+														list( , $cache_url) = explode("://", $cache_url);
+													}
+													else
+													{
+														$type = "udp";
+														$cache_url = substr($cache_url, strpos($cache_url, ":")+1);
+													}
 													$max_length = 35;
 
 													$pos = strpos($cache_url, "/");
@@ -252,19 +263,24 @@ function ShowHtmlPage($num){
 														$cache_url = substr($cache_url, 0, $pos);
 
 													if(strlen($cache_url) > $max_length)
-														echo substr($cache_url, 0, $max_length)."...";
+														$output .= substr($cache_url, 0, $max_length)."...";
 													else
-														echo $cache_url;
+														$output .= $cache_url;
 
-													echo "</a></td>";
+													$output .= "</a></td>";
 													if(strpos($cache_name, NAME." ") > -1)
-														echo "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													else
-														echo "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
-													echo "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
-													echo "<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>";
-													echo "<td>".$time."</td></tr>";
+														$output .= "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
+													$output .= "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
+													$output .= "<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>";
+													$output .= "<td>".$time."</td></tr>";
+
+													if($type == "tcp") echo $output;
+													else $udp .= $output;
 												}
+												echo $udp;
+											}
 										?>
 									</table>
 								</td>
@@ -348,7 +364,7 @@ function ShowHtmlPage($num){
 			<table width="100%" cellspacing="0" cellpadding="5">
 				<tr>
 					<td bgcolor="#FFFFFF">
-						<b>Update check process:</b> <?php ShowUpdateCheck(); ?>
+						<?php ShowUpdateCheck(); ?>
 					</td>
 				</tr>
 			</table>

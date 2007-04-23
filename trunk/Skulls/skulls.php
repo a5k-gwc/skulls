@@ -2,7 +2,7 @@
 //
 //   Skulls! Multi-Network WebCache (PHP)
 //
-//   Copyright (C) 2005-2006 by ale5000
+//   Copyright (C) 2005-2007 by ale5000
 //   Sources of this script can be downloaded here: http://sourceforge.net/projects/skulls/
 //
 //   This program is free software; you can redistribute it and/or
@@ -23,9 +23,6 @@
 $SUPPORTED_NETWORKS = NULL;
 include "vars.php";
 
-if( !defined("DATA_DIR") && !file_exists("vars.php") )
-	die("ERROR: The file vars.php is missing.");
-
 if( !isset($_GET) )
 {
 	$_SERVER = &$HTTP_SERVER_VARS;
@@ -35,22 +32,32 @@ if( !isset($_GET) )
 $PHP_SELF = $_SERVER["PHP_SELF"];
 $REMOTE_IP = $_SERVER["REMOTE_ADDR"];
 
-if(!$ENABLED || basename($PHP_SELF) == "index.php")
+if(!ENABLED || basename($PHP_SELF) == "index.php")
 {
 	header("HTTP/1.0 404 Not Found");
 	die("ERROR: Service disabled\r\n");
 }
 
-/*if($REMOTE_IP == "...")
+/*if($REMOTE_IP == "...") { header("HTTP/1.0 404 Not Found"); die(); }*/
+
+$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
+$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
+$MY_URL = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
+if(CACHE_URL != "")
 {
-	header("HTTP/1.0 404 Not Found");
-	die();
-}*/
+	list( , $CACHE_URL ) = explode("://", CACHE_URL);
+	if($MY_URL != $CACHE_URL)
+	{
+		header("HTTP/1.0 301 Moved Permanently");
+		header("Location: ".CACHE_URL);
+		die();
+	}
+}
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.7" );
-define( "VER", SHORT_VER."" );
+define( "VER", SHORT_VER."m" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -58,8 +65,12 @@ if($SUPPORTED_NETWORKS == NULL)
 $networks_count = count($SUPPORTED_NETWORKS);
 define( "NETWORKS_COUNT", $networks_count );
 
-function NetsToString()
-{
+function GetMicrotime(){ 
+    list($usec, $sec) = explode(" ",microtime()); 
+    return (float)$usec + (float)$sec; 
+}
+
+function NetsToString(){
 	global $SUPPORTED_NETWORKS;
 	$nets = "";
 
@@ -108,13 +119,15 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 	}
 }
 
-function Support($supported_networks)
+function Support($supported_networks, $udp)
 {
 	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
 		echo "I|support|".strtolower($supported_networks[$i])."\r\n";
-	echo "I|url|".FSOCKOPEN."\r\n";
+	echo "I|compression|none\r\n";
 	echo "I|compression|deflate\r\n";
-	echo "I|compression|zlib\r\n";
+	echo "I|url|".FSOCKOPEN."\r\n";
+	echo "I|uhc|".$udp["uhc"]."\r\n";
+	echo "I|ukhl|".$udp["ukhl"]."\r\n";
 }
 
 function CheckNetwork($supported_networks, $net){
@@ -175,7 +188,6 @@ function CheckIPValidity($remote_ip, $ip){
 			is_numeric($ip_port[1]) &&
 			$ip_port[1] > 0 &&
 			$ip_port[1] < 65536 &&
-			count($ip_array) == 4 &&
 			$ip_port[0] == $remote_ip &&
 			ip2long($ip_port[0]) == ip2long($remote_ip)
 		)
@@ -192,9 +204,14 @@ function CheckIPValidity($remote_ip, $ip){
 }
 
 function CheckURLValidity($cache){
+	global $UDP;
+	$uhc = $UDP["uhc"] == 1 && substr($cache, 0, 4) == "uhc:";
+	$ukhl = $UDP["ukhl"] == 1 && substr($cache, 0, 5) == "ukhl:";
+
 	if(strlen($cache) > 10)
-		if( substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://" )
-			return TRUE;
+		if( substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://" || $uhc || $ukhl )
+			if( !(strpos($cache, "?") > -1 || strpos($cache, "&") > -1 || strpos($cache, "#") > -1) )
+				return TRUE;
 
 	if(LOG_MINOR_ERRORS)
 	{
@@ -209,13 +226,10 @@ function CheckURLValidity($cache){
 function CheckBlockedCache($cache){
 	$cache = strtolower($cache);
 	if(
-		// They doesn't work
+		// Bad
 		$cache == "http://www.xolox.nl/gwebcache/"
 		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
-		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
-		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/"
-		// It is the same of http://gwebcache.alpha64.info/
-		|| $cache == "http://gwebcache.alpha64.info/index.php"
+		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
 	)
 		return TRUE;
 
@@ -237,6 +251,11 @@ function IsClientTooOld($client, $version){
 				if($short_ver != "5.1.0" && $short_ver != "5.2.1" )
 					return TRUE;
 			}
+			break;
+		case "SKLL":
+			if((int)$version == 0)
+				if((float)substr($version, 2) < 2.4)
+					return TRUE;
 			break;
     }
 
@@ -272,7 +291,7 @@ function CheckFailedUrl($url){
 	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
 	{
 		$read = explode("|", $file[$i]);
-		if( strtolower($url) == strtolower($read[0]) )
+		if($url == $read[0])
 		{
 			$read[1] = trim($read[1]);
 			$time_diff = $now - ( @strtotime( $read[1] ) + $offset );	// GMT
@@ -293,8 +312,8 @@ function AddFailedUrl($url){
 	fclose($file);
 }
 
-function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version){
-	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($line + 1) ) ) );
+function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version, $recover_limit = FALSE){
+	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($recover_limit ? $line + 2 : $line + 1) ) ) );
 
 	$file = fopen(DATA_DIR."/hosts_".$net.".dat", "wb");
 	flock($file, 2);
@@ -343,7 +362,7 @@ function PingGWC($cache, $query){
 		$oldpong = "";
 		$error = "";
 
-		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
+		fwrite( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
 		while( !feof($fp) )
 		{
 			$line = fgets( $fp, 1024 );
@@ -405,17 +424,27 @@ function PingGWC($cache, $query){
 	return $cache_data;
 }
 
-function CheckGWC($cache, $cache_network, $cache_exists = FALSE){
+function CheckGWC($cache, $cache_network){
 	global $SUPPORTED_NETWORKS;
 
 	$nets = NULL;
-	$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1";
-	$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list	or	ERR|Error name
+	if(strpos($cache, "://") > -1)
+	{
+		$udp = FALSE;
+		$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1";
+		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list	or	ERR|Error name
+	}
+	else
+	{
+		$udp = TRUE;
+		include "udp.php";
+		$result = PingUDP($cache);
+	}
 	$received_data = explode("|", $result);
 
-	if($received_data[0] == "ERR")
+	if($received_data[0] == "ERR" && !$udp)
 	{
-		if( ($cache_network == "gnutella2" || $cache_exists) && strpos($received_data[1], "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
+		if( strpos($received_data[1], "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
 		{																// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$query .= "&net=gnutella2";
 			$result = PingGWC($cache, $query);
@@ -475,7 +504,12 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	}
 	else
 	{
-		if($file_count >= MAX_HOSTS || $file_count >= 60)
+		if($file_count > MAX_HOSTS || $file_count >= 100)
+		{
+			ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version, TRUE);
+			return 3; // OK, pushed old data
+		}
+		elseif($file_count == MAX_HOSTS)
 		{
 			ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version);
 			return 3; // OK, pushed old data
@@ -493,12 +527,14 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 }
 
 function WriteCacheFile($cache, $net, $client, $version){
-	global $SERVER_NAME, $SERVER_PORT, $PHP_SELF;
+	global $MY_URL;
 
-	list( , $url ) = explode("://", $cache);
-	$my_url = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
-	if($url == $my_url)	// It doesn't allow to insert itself in cache list
-		return 0; // Exists
+	if(strpos($cache, "://") > -1)
+	{
+		list( , $url ) = explode("://", $cache);
+		if($url == $MY_URL)	// It doesn't allow to insert itself in cache list
+			return 0; // Exists
+	}
 
 	$cache = RemoveGarbage($cache);
 	if(CheckFailedUrl($cache))
@@ -526,13 +562,13 @@ function WriteCacheFile($cache, $net, $client, $version){
 	{
 		$time_diff = time() - ( @strtotime( $time ) + @date("Z") );	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
-		if(RECHECK_CACHES < 8) $recheck_caches = 8; else $recheck_caches = RECHECK_CACHES;
+		if(RECHECK_CACHES < 12) $recheck_caches = 12; else $recheck_caches = RECHECK_CACHES;
 
 		if( $time_diff < $recheck_caches )
 			return 0; // Exists
 		else
 		{
-			$cache_data = CheckGWC($cache, $net, TRUE);
+			$cache_data = CheckGWC($cache, $net);
 
 			if($cache_data[0] == "FAIL")
 			{
@@ -618,7 +654,7 @@ function UrlFile($net){
 		list( $cache, , $cache_net, ) = explode("|", $cache_file[$i]);
 
 		$show = FALSE;
-		if( strpos($cache_net, "-") > -1 )
+		if(strpos($cache_net, "-") > -1)
 		{
 			$cache_networks = explode("-", $cache_net);
 			$cache_nets_count = count($cache_networks);
@@ -631,68 +667,98 @@ function UrlFile($net){
 				}
 			}
 		}
-		elseif( $cache_net == $net )
+		elseif($cache_net == $net)
 			$show = TRUE;
 
-		if( $show )
+		if($show && strpos($cache, "://") > -1)
 		{
-			print($cache."\r\n");
+			echo $cache."\r\n";
 			$n++;
 		}
 	}
 }
 
-function Get($net, $pv){
-	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
-	$count_host = count($host_file);
+function Get($net, $pv, $get, $uhc, $ukhl){
+	$output = "";
 	$now = time();
 	$offset = @date("Z");
-	$output = "";
 
-	if($count_host <= MAX_HOSTS_OUT)
-		$max_hosts = $count_host;
-	else
-		$max_hosts = MAX_HOSTS_OUT;
-
-	for( $i=0; $i<$max_hosts; $i++ )
+	if($get)
 	{
-		list( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[$count_host - 1 - $i]);
-		$host = "H|".$host."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset )."|".$cluster;
-		if( $pv >= 4 ) $host .= "|".$leaves;
-		$output .= $host."\r\n";
+		$host_file = file(DATA_DIR."/hosts_".$net.".dat");
+		$count_host = count($host_file);
+
+		if($count_host <= MAX_HOSTS_OUT)
+			$max_hosts = $count_host;
+		else
+			$max_hosts = MAX_HOSTS_OUT;
+
+		for( $i=0; $i<$max_hosts; $i++ )
+		{
+			list( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[$count_host - 1 - $i]);
+			$host = "H|".$host."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset )."|".$cluster;
+			if( $pv >= 4 ) $host .= "|".$leaves;
+			$output .= $host."\r\n";
+		}
 	}
+	else
+		$count_host = 0;
 
 	if(FSOCKOPEN)
 	{
 		$cache_file = file(DATA_DIR."/caches.dat");
 		$count_cache = count($cache_file);
-		for( $n=0, $i=$count_cache-1; $n<MAX_CACHES_OUT && $i>=0; $i-- )
-		{
-			list( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
 
-			$show = FALSE;
-			if( strpos($cache_net, "-") > -1 )
+		if($get)
+		{
+			for( $n=0, $i=$count_cache-1; $n<MAX_CACHES_OUT && $i>=0; $i-- )
 			{
-				$cache_networks = explode("-", $cache_net);
-				$cache_nets_count = count($cache_networks);
-				for( $x=0; $x < $cache_nets_count; $x++ )
+				list( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
+
+				$show = FALSE;
+				if(strpos($cache_net, "-") > -1)
 				{
-					if( $cache_networks[$x] == $net)
+					$cache_networks = explode("-", $cache_net);
+					$cache_nets_count = count($cache_networks);
+					for( $x=0; $x < $cache_nets_count; $x++ )
 					{
-						$show = TRUE;
-						break;
+						if( $cache_networks[$x] == $net)
+						{
+							$show = TRUE;
+							break;
+						}
 					}
 				}
-			}
-			elseif( $cache_net == $net )
-				$show = TRUE;
+				elseif($cache_net == $net)
+					$show = TRUE;
 
-			if( $show )
+				if($show && strpos($cache, "://") > -1)
+				{
+					$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
+					if( $pv >= 4 ) $cache .= "|".( $cache_net != $net ? $cache_net : "" );
+					$output .= $cache."\r\n";
+					$n++;
+				}
+			}
+		}
+
+		if($uhc)
+		{
+			for( $n=0, $i=$count_cache-1; $n<MAX_UHC_CACHES_OUT && $i>=0; $i-- )
 			{
-				$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
-				if( $pv >= 4 ) $cache .= "|".( $cache_net != $net ? $cache_net : "" );
-				$output .= $cache."\r\n";
-				$n++;
+				list( $cache, , $cache_net, , , $time ) = explode("|", $cache_file[$i]);
+
+				$show = FALSE;
+				if( $cache_net == "gnutella" && !(strpos($cache, "://") > -1) )
+					$show = TRUE;
+
+				if($show)
+				{
+					$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
+					if( $pv >= 4 ) $cache .= "|".( $cache_net != $net ? $cache_net : "" );
+					$output .= $cache."\r\n";
+					$n++;
+				}
 			}
 		}
 	}
@@ -706,49 +772,102 @@ function Get($net, $pv){
 	elseif( $count_host == 0 )
 		$output .= "I|NO-HOSTS\r\n";
 
-	if( $pv >= 4 )
+	if($pv >= 3)
 		$output .= "I|nets|".strtolower(NetsToString())."\r\n";
 
 	echo $output;
 }
 
-function CleanStats($request){
-	$stat_file = file("stats/".$request."_requests_hour.dat");
-	$file_count = count($stat_file);
-	$file = fopen("stats/".$request."_requests_hour.dat", "wb");
-	flock($file, 2);
+function StartCompression($COMPRESSION){
+	if($COMPRESSION == "deflate")
+		{ $compressed = TRUE; ob_start("gzdeflate"); }
+	else
+		{ $compressed = FALSE; }
+	if($compressed) header("Content-Encoding: deflate");
 
+	return $compressed;
+}
+
+function CleanStats($request){
 	$now = time();
 	$offset = @date("Z");
-	for($i = 0; $i < $file_count; $i++)
-	{
-		$stat_file[$i] = trim($stat_file[$i]);
-		$time_diff = $now - ( @strtotime( $stat_file[$i] ) + $offset );	// GMT
-		$time_diff = floor($time_diff / 3600);	// Hours
+	$file_count = 0;
+	$line_length = 17;
+	$file = fopen( "stats/".$request."_requests_hour.dat", "rb" );
 
-		if( $time_diff < 1 ) fwrite($file, $stat_file[$i]."\r\n");
+	if(OPTIMIZED_STATS)
+	{
+		while(!feof($file))
+		{
+			$current_stat = fgets($file, 20);
+			$time_diff = $now - ( @strtotime($current_stat) + $offset );	// GMT
+			$time_diff = floor($time_diff / 3600);	// Hours
+
+			if($current_stat != "" && $time_diff >= 1)
+				fseek( $file, $line_length * 100, SEEK_CUR );
+			else
+				{ fseek( $file, -$line_length, SEEK_CUR ); break; }
+		}
+		fseek( $file, -$line_length * 100, SEEK_CUR );
 	}
 
+	while(!feof($file))
+	{
+		$current_stat = fgets($file, 20);
+		$time_diff = $now - ( @strtotime($current_stat) + $offset );	// GMT
+		$time_diff = floor($time_diff / 3600);	// Hours
+
+		if($time_diff < 1)
+		{
+			$stat_file[$file_count] = rtrim($current_stat);
+			$file_count++;
+		}
+	}
+	fclose($file);
+
+
+	set_time_limit("20");
+	$file = fopen("stats/".$request."_requests_hour.dat", "wb");
+	flock($file, 2);
+	for($i = 0; $i < $file_count; $i++)
+		fwrite($file, $stat_file[$i]."\n");
 	flock($file, 3);
 	fclose($file);
 }
 
 function ReadStats($request){
-	$stat_file = file("stats/".$request."_requests_hour.dat");
-	$file_count = count($stat_file);
+	$requests = 0;
 	$now = time();
 	$offset = @date("Z");
-	for($i = $file_count - 1, $requests = 0; $i >= 0; $i--)
+	$line_length = 17;
+	$file = fopen( "stats/".$request."_requests_hour.dat", "rb" );
+
+	if(OPTIMIZED_STATS)
 	{
-		$stat_file[$i] = trim($stat_file[$i]);
-		$time_diff = $now - ( @strtotime( $stat_file[$i] ) + $offset );	// GMT
+		while(!feof($file))
+		{
+			$current_stat = fgets($file, 20);
+			$time_diff = $now - ( @strtotime($current_stat) + $offset );	// GMT
+			$time_diff = floor($time_diff / 3600);	// Hours
+
+			if($current_stat != "" && $time_diff >= 1)
+				fseek( $file, $line_length * 100, SEEK_CUR );
+			else
+				{ fseek( $file, -$line_length, SEEK_CUR ); break; }
+		}
+		fseek( $file, -$line_length * 100, SEEK_CUR );
+	}
+
+	while(!feof($file))
+	{
+		$current_stat = fgets($file, 20);
+		$time_diff = $now - ( @strtotime($current_stat) + $offset );	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 
-		if( $time_diff < 1 )
+		if($time_diff < 1)
 			$requests++;
-		else
-			break;
 	}
+	fclose($file);
 
 	return $requests;
 }
@@ -758,11 +877,13 @@ function UpdateStats($request){
 
 	$file = fopen("stats/".$request."_requests_hour.dat", "ab");
 	flock($file, 2);
-	fwrite($file, gmdate("Y/m/d H:i")."\r\n");
+	fwrite($file, gmdate("Y/m/d H:i")."\n");
 	flock($file, 3);
 	fclose($file);
 }
 
+
+$PHP_VERSION = (float)PHP_VERSION;
 
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 
@@ -770,12 +891,17 @@ $PV = !empty($_GET["pv"]) ? $_GET["pv"] : 0;
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
 $NETS = !empty($_GET["nets"]) ? strtolower($_GET["nets"]) : NULL;	// Currently unsupported
 $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
-$COMPRESSION = !empty($_GET["compression"]) && (float)PHP_VERSION >= 4.1 ? strtolower($_GET["compression"]) : NULL;
+$UHC = !empty($_GET["uhc"]) && $PHP_VERSION >= 4.3 ? $_GET["uhc"] : 0;
+$UKHL = !empty($_GET["ukhl"]) && $PHP_VERSION >= 4.3 ? $_GET["ukhl"] : 0;
+
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;
 
-$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
-$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
 $USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? str_replace("/", " ", $_SERVER["HTTP_USER_AGENT"]) : NULL;
+
+$COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
+$ACCEPT_ENCODING = !empty($_SERVER["HTTP_ACCEPT_ENCODING"]) ? $_SERVER["HTTP_ACCEPT_ENCODING"] : NULL;
+if($COMPRESSION == NULL && strpos($ACCEPT_ENCODING, "deflate") > -1) $COMPRESSION = "deflate";
+if($PHP_VERSION < 4.1) $COMPRESSION = NULL;
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
@@ -795,12 +921,12 @@ $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 $CLIENT = !empty($_GET["client"]) ? strtoupper($_GET["client"]) : NULL;
 // There is MUTE (MUTE network client) and Mutella (Gnutella network client).
 // Both identifying itself as MUTE.
-if($CLIENT == "MUTE" && $NET == NULL)
+if($CLIENT == "MUTE")
 {
 	list($name, ) = explode(" ", $USER_AGENT);
 	if($name == "Mutella")
 		$CLIENT = "MTLL";
-	else
+	elseif($NET == NULL)
 		$NET = "mute";
 	unset($name);
 }
@@ -819,10 +945,19 @@ $KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request
 if( empty($_SERVER["QUERY_STRING"]) )
 	$SHOWINFO = 1;
 
+if( isset($noload) ) die();
+
 if(MAINTAINER_NICK == "your nickname here")
 {
 	echo "You must read readme.txt in the admin directory first.\r\n";
 	die();
+}
+
+if($NET == "gnutella1")
+	$NET = "gnutella";
+if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
+{
+	include "log.php";
 }
 
 if( !file_exists(DATA_DIR."/last_action.dat") )
@@ -830,10 +965,10 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 	if( !file_exists(DATA_DIR."/") ) mkdir(DATA_DIR."/", 0777);
 
 	$file = @fopen( DATA_DIR."/last_action.dat", "xb" );
-	if($file)
+	if($file !== FALSE)
 	{
 		flock($file, 2);
-		fwrite($file, SHORT_VER."|".STATS_ENABLED."|0|".gmdate("Y/m/d H:i"));
+		fwrite($file, VER."|".STATS_ENABLED."|-1|".gmdate("Y/m/d H:i")."|");
 		flock($file, 3);
 		fclose($file);
 	}
@@ -845,13 +980,6 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 
 	include "functions.php";
 	Initialize($SUPPORTED_NETWORKS, TRUE);
-}
-
-if($NET == "gnutella1")
-	$NET = "gnutella";
-if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
-{
-	include "log.php";
 }
 
 
@@ -868,8 +996,13 @@ else
 
 if($web)
 {
+	if($PHP_VERSION >= 4 && ini_get("zlib.output_compression") == 1)
+		ini_set("zlib.output_compression", "0");
 	include "web_interface.php";
+
+	$compressed = StartCompression($COMPRESSION);
 	ShowHtmlPage($web);
+	if($compressed) ob_end_flush();
 }
 elseif( $KICK_START )
 {
@@ -897,8 +1030,8 @@ else
 	{
 		$file = fopen("stats/requests.dat", "r+b");
 		flock($file, 2);
-		$requests = fgets($file);
-		$requests++;
+		$requests = fgets($file, 50);
+		if($requests == "") $requests = 1; else $requests++;
 		rewind($file);
 		fwrite($file, $requests);
 		flock($file, 3);
@@ -954,16 +1087,19 @@ else
 		die();
 	}
 
-	if((int)PHP_VERSION >= 4 && ini_get("zlib.output_compression") == 1)
-		ini_set("zlib.output_compression", "Off");
+	if($PHP_VERSION >= 4 && ini_get("zlib.output_compression") == 1)
+		ini_set("zlib.output_compression", "0");
 
-	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
+	if(!$PING && !$GET && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
 		if(LOG_MAJOR_ERRORS) Logging("invalid_queries", $CLIENT, $VERSION, $NET);
 		UpdateStats("other");
 		die();
 	}
+
+	if($CLIENT == "TEST")
+		$IP = NULL;
 
 	if($LEAVES != NULL && !is_numeric($LEAVES))
 	{
@@ -979,89 +1115,93 @@ else
 			$CLUSTER = RemoveGarbage($value);
 	}
 
-	if( $CACHE != NULL && strpos($CACHE, "://") > -1 )
+	if($CACHE != NULL)
 	{	// Cleaning url
-		list( $protocol, $url ) = explode("://", $CACHE);
+		if(strpos($CACHE, "://") > -1)
+		{
+			list( $protocol, $url ) = explode("://", $CACHE);
 
-		if( strpos($url, "/") > -1 )
-			list( $host, $path ) = explode("/", $url, 2);
+			if( strpos($url, "/") > -1 )
+				list( $host, $path ) = explode("/", $url, 2);
+			elseif( strpos($url, "?") > -1 )
+			{
+				list( $host, $path ) = explode("?", $url);
+				$path = "?".$path;
+			}
+			else
+			{
+				$host = $url;
+				$path = "";
+			}
+
+			$path = str_replace( "./", "", $path );		// Remove "./" from $path if present
+
+			$slash = FALSE;
+			while( substr( $path, strlen($path) - 1, 1 ) == "/" )
+			{
+				$path = substr( $path, 0, strlen($path) - 1 );
+				$slash = TRUE;
+			}
+
+			if( substr( $path, strlen($path) - 1, 1 ) == "." )
+				$path = substr( $path, 0, strlen($path) - 1 );	// Remove dot at the end of $path if present
+
+			if( strlen($path) && $slash )
+				$path .= "/";
+
+			if( strpos($host, ":") > -1 )
+			{
+				$splitted_host = explode(":", $host);
+				$host_name = $splitted_host[0];
+				$host_port = (int)$splitted_host[1];
+			}
+			else
+			{
+				$host_name = $host;
+				$host_port = 80;
+			}
+
+			if( substr( $host_name, strlen($host_name) - 1, 1 ) == "." )
+				$host_name = substr( $host_name, 0, strlen($host_name) - 1 );	// Remove dot at the end of $host_name if present
+
+			if( $host_port == 80 )
+				$host_port = "";
+			else
+				$host_port = ":".$host_port;
+
+			if( substr($host_name, -20) == "gwc.nickstallman.net" )
+				$CACHE = "http://gwc.nickstallman.net/gcache.asp";
+			else
+				$CACHE = $protocol."://".strtolower($host_name).$host_port."/".$path;
+		}
 		else
 		{
-			$host = $url;
-			$path = "";
+			$cache_length = strlen($CACHE);
+			if(substr($CACHE, $cache_length-1) == "/")
+				$CACHE = substr($CACHE, 0, $cache_length-1);
 		}
-
-		$path = str_replace( "./", "", $path );		// Remove "./" from $path if present
-
-		$slash = FALSE;
-		while( substr( $path, strlen($path) - 1, 1 ) == "/" )
-		{
-			$path = substr( $path, 0, strlen($path) - 1 );
-			$slash = TRUE;
-		}
-
-		if( substr( $path, strlen($path) - 1, 1 ) == "." )
-			$path = substr( $path, 0, strlen($path) - 1 );	// Remove dot at the end of $path if present
-
-		if( strlen($path) && $slash )
-			$path .= "/";
-
-		if( strpos($host, ":") > -1 )
-		{
-			$splitted_host = explode(":", $host);
-			$host_name = $splitted_host[0];
-			$host_port = (int)$splitted_host[1];
-		}
-		else
-		{
-			$host_name = $host;
-			$host_port = 80;
-		}
-
-		if( substr( $host_name, strlen($host_name) - 1, 1 ) == "." )
-			$host_name = substr( $host_name, 0, strlen($host_name) - 1 );	// Remove dot at the end of $host_name if present
-
-		if( $host_port == 80 )
-			$host_port = "";
-		else
-			$host_port = ":".$host_port;
-
-		// Problem with wildcard dns on .xolox.nl is fixed
-		/*if( substr($host_name, -9) == ".xolox.nl" )
-			$CACHE = "http://www.xolox.nl/gwebcache/";
-		else*/
-			$CACHE = $protocol."://".$host_name.$host_port."/".$path;
 	}
 
-	if($COMPRESSION == "deflate")
-	{
-		$compressed = TRUE;
-		ob_start("gzdeflate");
-	}
-	elseif($COMPRESSION == "zlib")
-	{
-		$compressed = TRUE;
-		ob_start("gzcompress");
-	}
-	else
-		$compressed = FALSE;
-
-	if($compressed) header("Content-Encoding: deflate");
-	header("X-Remote-IP: ".$REMOTE_IP);
 	if($NET == NULL) $NET = "gnutella";
+	$compressed = StartCompression($COMPRESSION);
+
+	if(!empty($_SERVER["HTTP_X_FORWARDED_FOR"]))
+		header("X-Remote-IP: ".$_SERVER["HTTP_X_FORWARDED_FOR"]);
+	else
+		header("X-Remote-IP: ".$REMOTE_IP);
 
 	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		$supported_net = TRUE;
 	else
 	{
 		$supported_net = FALSE;
-		if(!$MULTI && !$SUPPORT) print "ERROR: Network not supported\r\n";
+		if(($PING && !$MULTI) || $GET || $HOSTFILE || $URLFILE || $CACHE != NULL || $IP != NULL) echo "ERROR: Network not supported\r\n";
 	}
 
 	if($PING)
 		Pong($MULTI, $NET, $CLIENT, $supported_net, $REMOTE_IP);
 	if($SUPPORT)
-		Support($SUPPORTED_NETWORKS);
+		Support($SUPPORTED_NETWORKS, $UDP);
 
 	if($UPDATE)
 	{
@@ -1140,10 +1280,16 @@ else
 		}
 	}
 
-	if($GET)
+	if(!$supported_net) $GET = 0;
+
+	if($GET || $UHC)
 	{
-		if( $supported_net )
-			Get($NET, $PV);
+		Get($NET, $PV, $GET, $UHC, $UKHL);
+		if($UHC || $UKHL)
+		{
+			echo "I|uhc|".$UDP["uhk"]."\r\n";
+			echo "I|ukhl|".$UDP["ukhl"]."\r\n";
+		}
 	}
 	else
 	{
@@ -1153,8 +1299,8 @@ else
 		if($URLFILE && $supported_net && FSOCKOPEN)
 			UrlFile($NET);
 
-		if($PV >= 4 && ($HOSTFILE || $URLFILE) && $supported_net)
-			print("nets: ".strtolower(NetsToString())."\r\n");
+		if($PV >= 3 && ($HOSTFILE || $URLFILE) && $supported_net)
+			echo "nets: ".strtolower(NetsToString())."\r\n";
 	}
 
 	if($CACHE != NULL || $IP != NULL)
@@ -1162,7 +1308,7 @@ else
 	else
 		UpdateStats("other");
 
-	if($STATFILE && !$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE)
+	if($STATFILE)
 	{
 		if(STATS_ENABLED)
 		{
@@ -1184,67 +1330,73 @@ else
 		echo "I|name|".NAME."! Multi-Network WebCache\r\n";
 		echo "I|ver|".VER."\r\n";
 		echo "I|gwc-site|http://sourceforge.net/projects/skulls/\r\n";
-		echo "I|open-source|1\r\n\r\n";
+		echo "I|open-source|1\r\n";
 
 		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
 		if(MAINTAINER_WEBSITE != "http://www.your-site.com/")
 			echo "I|maintainer-site|".MAINTAINER_WEBSITE."\r\n";
 	}
 
-	if($compressed) ob_end_flush();
 
-	$clean_stats = 0;
-	$clean_failed_urls = 0;
-	$changed = 0;
+	$clean_file = NULL;
+	$changed = FALSE;
 	$file = fopen( DATA_DIR."/last_action.dat", "r+b" );
 	flock($file, 2);
-	$last_action_string = fgets($file);
-	list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
-	$time_diff = time() - ( @strtotime( $last_action_date ) + @date("Z") );	// GMT
-	$time_diff = floor($time_diff / 3600);	// Hours
-	if($time_diff >= 1)
+	$last_action_string = fgets($file, 50);
+
+	if($last_action_string != "")
 	{
-		$last_action_date = gmdate("Y/m/d H:i");
-		switch($last_action)
+		list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
+		$time_diff = time() - ( @strtotime( $last_action_date ) + @date("Z") );	// GMT
+		$time_diff = floor($time_diff / 3600);	// Hours
+		if($time_diff >= 1 && $CACHE == NULL)
 		{
-			case 0:
-				$clean_stats = 1;
-				$clean_type = "other";
-				break;
-			case 1:
-				$clean_stats = 1;
-				$clean_type = "update";
-				break;
-			case 2:
-				$clean_failed_urls = 1;
-				$last_action = -1;
-				break;
-			default:
-				$last_action = -1;
+			$last_action++;
+			switch($last_action)
+			{
+				default:
+					$last_action = 0;
+				case 0:
+					$clean_file = "stats";
+					$clean_type = "other";
+					break;
+				case 1:
+					$clean_file = "stats";
+					$clean_type = "update";
+					break;
+				case 2:
+					$clean_file = "failed_urls";
+					break;
+			}
+			if(!STATS_ENABLED && $clean_file == "stats") $clean_file = NULL;
+			$changed = TRUE;
 		}
-		if(!STATS_ENABLED) $clean_stats = 0;
-		$changed = 1;
 	}
-	if($last_ver != SHORT_VER || $last_stats_status != STATS_ENABLED)
+	else { $last_ver = 0; $last_action = -1; }
+
+	if($last_ver != VER || $last_stats_status != STATS_ENABLED)
 	{
 		if( !function_exists("Initialize") )
 		{
 			include "functions.php";
 		}
 		Initialize($SUPPORTED_NETWORKS);
-		$changed = 1;
+		$changed = TRUE;
 	}
 	if($changed)
 	{
+		$last_action_date = gmdate("Y/m/d H:i");
 		rewind($file);
-		fwrite($file, SHORT_VER."|".STATS_ENABLED."|".($last_action + 1)."|".$last_action_date);
+		fwrite($file, VER."|".STATS_ENABLED."|".$last_action."|".$last_action_date."|");
 	}
 	flock($file, 3);
 	fclose($file);
 
-	if($clean_stats)
+	if($compressed) ob_end_flush();
+
+	if($clean_file == "stats")
 		CleanStats($clean_type);
-	elseif($clean_failed_urls)
+	elseif($clean_file == "failed_urls")
 		CleanFailedUrls();
 }
 ?>
