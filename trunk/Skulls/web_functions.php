@@ -103,13 +103,17 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "Phex";
 			$url = "http://phex.kouk.de/mambo/";
 			break;
+		case "RZCB":
+			$client_name = "ShareazaPlus";
+			$url = "http://shareazaplus.sourceforge.net/";
+			break;
 		case "RAZA":
 			$client_name = "Shareaza";
-			$url = "http://www.shareaza.com/";
+			$url = "http://shareaza.sourceforge.net/";
 			break;
 		case "RAZB":
-			$client_name = "SBeta (Shareaza beta)";		// Beta version of Shareaza
-			$url = "http://www.shareaza.com/beta/";
+			$client_name = "ShareazaBeta";		// Beta version of Shareaza
+			$url = "http://shareaza.sourceforge.net/help/?beta";
 			break;
 		case "SNOW":
 			$client_name = "FrostWire";
@@ -126,6 +130,15 @@ function ReplaceVendorCode($client, $version){
 		case "XOLO":
 			$client_name = "XoloX";
 			$url = "http://www.xolox.nl/";
+			break;
+
+		case "eTomi":
+			$client_name = "eTomi";
+			$url = "";
+			break;
+		case "360Share":
+			$client_name = "360Share";
+			$url = "";
 			break;
 
 		case "PGDBScan":

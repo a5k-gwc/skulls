@@ -57,7 +57,7 @@ if(CACHE_URL != "")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.8" );
-define( "VER", SHORT_VER."" );
+define( "VER", SHORT_VER."c" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -185,7 +185,7 @@ function CheckIPValidity($remote_ip, $ip){
 	)
 	{
 		if( count($ip_port) == 2 &&
-			is_numeric($ip_port[1]) &&
+			ctype_digit($ip_port[1]) &&
 			$ip_port[1] > 0 &&
 			$ip_port[1] < 65536 &&
 			$ip_port[0] == $remote_ip &&
@@ -476,7 +476,7 @@ function CheckGWC($cache, $cache_network){
 	return $cache_data;
 }
 
-function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
+function WriteHostFile($remote_ip, $ip, $leaves, $net, $cluster, $client, $version){
 	global $SUPPORTED_NETWORKS;
 
 	// return 4; Unused
@@ -489,8 +489,9 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	for($i = 0; $i < $file_count; $i++)
 	{
 		list( $read, ) = explode("|", $host_file[$i]);
+		list( $read_ip, ) = explode(":", $read);
 
-		if( $ip == $read )
+		if( $remote_ip == $read_ip )
 		{
 			list( , , , , , $time ) = explode("|", rtrim($host_file[$i]));
 			$host_exists = TRUE;
@@ -910,7 +911,6 @@ $USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? str_replace("/", " ", $_SERV
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
 $ACCEPT_ENCODING = !empty($_SERVER["HTTP_ACCEPT_ENCODING"]) ? $_SERVER["HTTP_ACCEPT_ENCODING"] : NULL;
 if($COMPRESSION == NULL && strpos($ACCEPT_ENCODING, "deflate") > -1) $COMPRESSION = "deflate";
-if($PHP_VERSION < 4.1) $COMPRESSION = NULL;
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
@@ -1005,7 +1005,7 @@ else
 
 if($web)
 {
-	if($PHP_VERSION >= 4 && ini_get("zlib.output_compression") == 1)
+	if(ini_get("zlib.output_compression") == 1)
 		ini_set("zlib.output_compression", "0");
 	include "web_interface.php";
 
@@ -1096,7 +1096,7 @@ else
 		die();
 	}
 
-	if($PHP_VERSION >= 4 && ini_get("zlib.output_compression") == 1)
+	if(ini_get("zlib.output_compression") == 1)
 		ini_set("zlib.output_compression", "0");
 
 	if(!$PING && !$GET && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
@@ -1110,7 +1110,7 @@ else
 	if($CLIENT == "TEST")
 		$IP = NULL;
 
-	if($LEAVES != NULL && !is_numeric($LEAVES))
+	if($LEAVES != NULL && !ctype_digit($LEAVES))
 	{
 		$LEAVES = NULL;
 		if(LOG_MAJOR_ERRORS) Logging("invalid_leaves", $CLIENT, $VERSION, $NET);
@@ -1220,7 +1220,7 @@ else
 		{
 			if( CheckIPValidity($REMOTE_IP, $IP) )
 			{
-				$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+				$result = WriteHostFile($REMOTE_IP, $IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|Host already updated\r\n";
@@ -1270,7 +1270,7 @@ else
 		if( $IP != NULL && $supported_net )
 		{
 			if( CheckIPValidity($REMOTE_IP, $IP) )
-				$result = WriteHostFile($IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+				$result = WriteHostFile($REMOTE_IP, $IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
 		}
