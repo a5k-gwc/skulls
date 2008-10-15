@@ -230,6 +230,7 @@ function CheckBlockedCache($cache){
 		$cache == "http://www.xolox.nl/gwebcache/"
 		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
 		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
+		|| $cache == "http://fischaleck.net/cache/mcache.php"
 	)
 		return TRUE;
 
