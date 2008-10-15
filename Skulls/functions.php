@@ -143,7 +143,7 @@ function KickStart($net, $cache){
 					$cluster = RemoveGarbage($host[3]);
 				else
 					$cluster = NULL;
-				$result = WriteHostFile( rtrim($host[1]), NULL, $net, $cluster, "KICKSTART", "1.0" );
+				$result = WriteHostFile( $ip_port[0], rtrim($host[1]), NULL, $net, $cluster, "KICKSTART", "1.0" );
 
 				if( $result == 1 ) // Updated timestamp
 					echo "<b>I|update|OK|Updated host timestamp</b><br>\r\n";

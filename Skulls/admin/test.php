@@ -28,12 +28,10 @@ echo "<html><head><title>Test</title><meta name=\"robots\" content=\"noindex,nof
 echo "<br><br>";
 
 $php_version = PHP_VERSION;
-if((float)$php_version >= 4)
+if((float)$php_version >= 4.1)
 	echo "<b>PHP version: <font color=\"green\">OK</font></b>";
-//elseif((float)$php_version >= 3)
-//	echo "<b>PHP version: <font color=\"gold\">".$php_version."</font> (Version of PHP is old, this script may work but it isn't guaranteed)</b>";
 else
-	echo "<b>PHP version: <font color=\"red\">".$php_version."</font> (This version of PHP is too old)</b>";
+	echo "<b>PHP version: <font color=\"red\">".$php_version."</font> (This version of PHP is too old, the minimum version is 4.1)</b>";
 
 echo "<br><br>\r\n";
 
@@ -57,12 +55,18 @@ echo "</blockquote><br>\r\n";
 echo "<b><font color=\"blue\">Needed functions</font></b>";
 echo "<blockquote>";
 
-echo "<b>Function is_numeric:</b> ";
-CheckFunction("is_numeric");
+echo "<b>Function ctype_digit:</b> ";
+CheckFunction("ctype_digit");
 echo "<b>Function ip2long:</b> ";
 CheckFunction("ip2long");
 echo "<br>";
 
+echo "<b>Function gzdeflate:</b> ";
+CheckFunction("gzdeflate");
+echo "<b>Function ob_start:</b> ";
+CheckFunction("ob_start");
+echo "<b>Function ob_end_flush:</b> ";
+CheckFunction("ob_end_flush");
 echo "<b>Function header:</b> ";
 CheckFunction("header");
 echo "<br>";
