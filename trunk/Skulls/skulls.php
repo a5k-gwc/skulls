@@ -57,7 +57,7 @@ if(CACHE_URL != "")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.8" );
-define( "VER", SHORT_VER."c" );
+define( "VER", SHORT_VER."d" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -110,9 +110,9 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 		{
 			$nets = strtolower(NetsToString());
 			if($client == "TEST" && $net == "gnutella2" && $nets != "gnutella2")
-				echo $pong."|gnutella2|".FSOCKOPEN."|COMPAT|".$nets."|TCP\r\n";	// Workaround for compatibility with Bazooka
+				echo $pong."|gnutella2|".FSOCKOPEN."|COMPAT|".$nets."\r\n";	// Workaround for compatibility with Bazooka
 			elseif($client == "GCII" && $net == "gnutella2")
-				echo $pong."||".FSOCKOPEN."|COMPAT|".$nets."|TCP\r\n";			// Workaround for compatibility with PHPGnuCacheII
+				echo $pong."||".FSOCKOPEN."|COMPAT|".$nets."\r\n";			// Workaround for compatibility with PHPGnuCacheII
 			else
 				echo $pong."|".$nets."|".FSOCKOPEN."|TCP\r\n";
 		}
@@ -231,6 +231,10 @@ function CheckBlockedCache($cache){
 		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
 		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
 		|| $cache == "http://fischaleck.net/cache/mcache.php"
+		|| $cache == "http://gwc.nickstallman.net/index.php"
+		|| $cache == "http://gwc.nickstallman.net/"
+		// It take an eternity to load, it can't help network
+		|| $cache == "http://reukiodo.dyndns.org/beacon/gwc.php"
 	)
 		return TRUE;
 
@@ -385,7 +389,7 @@ function PingGWC($cache, $query){
 
 			if(count($received_data) > 3 && $received_data[3] != "")
 			{
-				if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII
+				if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII and CheaterCache
 					$nets = "gnutella-gnutella2";
 				else
 					$nets = RemoveGarbage(strtolower($received_data[3]));
@@ -403,9 +407,10 @@ function PingGWC($cache, $query){
 			$cache_data = "P|".$oldpong;
 
 			if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
-				substr($oldpong, 0, 10) == "perlgcache" ||
-				substr($oldpong, 0, 9) == "GWebCache" ||
-				substr($oldpong, 0, 12) == "jumswebcache" )
+				substr($oldpong, 0, 12) == "CheaterCache" ||
+				//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
+				//substr($oldpong, 0, 12) == "jumswebcache" ||	// ToDO: Re-verify
+				substr($oldpong, 0, 11) == "GWebCache 2" )
 				$nets = "gnutella-gnutella2";
 			elseif(substr($oldpong, 0, 9) == "MWebCache")
 				$nets = "mute";
@@ -1179,8 +1184,8 @@ else
 			else
 				$host_port = ":".$host_port;
 
-			if( substr($host_name, -20) == "gwc.nickstallman.net" )
-				$CACHE = "http://gwc.nickstallman.net/gcache.asp";
+			if( substr($host_name, -20) == ".robertwoolley.co.uk" )
+				$CACHE = "http://bbs.robertwoolley.co.uk/gwebcache/gcache.php";
 			elseif( substr($host_name, -9) == ".nyud.net" )
 				$CACHE = "BLOCKED";
 			else
