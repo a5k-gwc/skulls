@@ -229,12 +229,12 @@ function CheckBlockedCache($cache){
 		// Bad
 		$cache == "http://www.xolox.nl/gwebcache/"
 		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
-		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
 		|| $cache == "http://fischaleck.net/cache/mcache.php"
 		|| $cache == "http://gwc.nickstallman.net/index.php"
 		|| $cache == "http://gwc.nickstallman.net/"
 		// It take an eternity to load, it can't help network
 		|| $cache == "http://reukiodo.dyndns.org/beacon/gwc.php"
+		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
 	)
 		return TRUE;
 
