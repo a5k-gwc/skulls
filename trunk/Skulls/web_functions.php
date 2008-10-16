@@ -258,14 +258,20 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 			elseif(strpos($line, "404 Not Found") > -1)
 			{
 				$status = "404";
-				$msg = NULL;
+				$msg = $line;
 			}
+			elseif(strpos($line, "403 Forbidden") > -1)
+			{
+				$status = "403";
+				$msg = $line;
+			}
+			
 		}
 
 		fclose ($fp);
 	}
 
-	if($debug) echo "---------------<br>";
+	if($debug) echo "Status: ".RemoveGarbage($status)."<br>---------------<br>";
 	return RemoveGarbage($status)."|".RemoveGarbage($msg)."||".RemoveGarbage($msg_info)."|".RemoveGarbage($msg_error);
 }
 
@@ -324,7 +330,7 @@ function CheckUpdates(){
 		$msg_error = $returned_data[4];
 	}
 
-	if($status == "SOCK_ERROR")
+	if($status == "SOCK_ERROR" || $status == "403")
 	{
 		echo "<b>Update check process:</b> ";
 		if(FSOCKOPEN)
