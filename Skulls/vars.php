@@ -15,7 +15,7 @@ define( "MAINTAINER_EMAIL", "name AT server DOT com" );			// Optional - Your e-m
 define( "MAINTAINER_WEBSITE", "http://www.your-site.com/" );	// Optional - The address of your website (It isn't the url of the cache)
 
 define( "STATS_ENABLED",			1 );	// Enable collecting statistics
-define( "OPTIMIZED_STATS",			1 );	// It works only if the the version of PHP is higher than 4.0.0
+define( "OPTIMIZED_STATS",			1 );
 define( "KICK_START_ENABLED",		0 );	// KickStart should be DISABLED after populating the webcache
 
 define( "LOG_MAJOR_ERRORS",			1 );	// Enable logging of major errors

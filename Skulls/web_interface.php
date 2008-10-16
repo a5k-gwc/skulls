@@ -21,8 +21,8 @@ function ShowHtmlPage($num){
 
 	<style type="text/css">
 		body { font-family: Verdana; }
-		table { font-size: 10px; }
-		a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active { text-decoration: none; }
+		table, div { font-size: 10px; }
+		a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
 		a.hover-underline:hover { text-decoration: underline; }
 	</style>
 </head>
@@ -181,7 +181,7 @@ function ShowHtmlPage($num){
 													if(strpos(strtolower($net), "gnutella") > -1)
 														$url = "gnutella:host:";
 													else
-														$url = "http://";
+														$url = $net.":host:";
 													echo "<a href=\"".$url.$ip."\">".$ip."</a>";
 													if( !empty($leaves) )
 														echo " (".$leaves.")";
@@ -205,7 +205,7 @@ function ShowHtmlPage($num){
 				$cache_file = file(DATA_DIR."/caches.dat");
 				?>
 				<tr bgcolor="#CCFF99"> 
-					<td style="color: #0044FF"><b>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</b></td>
+					<td style="color: #0044FF"><b>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="Javascript:sendGWCs();">Add first 20 caches to your P2P application</a></td>
 				</tr>
 				<tr>
 					<td bgcolor="#FFFFFF">
@@ -244,6 +244,14 @@ function ShowHtmlPage($num){
 
 													$output = "<tr align=\"left\" bgcolor=\"".$color."\">";
 													$output .= "<td style=\"padding-right: 10pt;\">";
+
+													if(strpos($cache_url, "://") > -1)
+													{
+														$prefix = "gwc:";
+														$output .= "<a class=\"gwc\" href=\"".$prefix.$cache_url."?nets=".str_replace(" ", "", strtolower($net))."\">+</a> ";
+													}
+													else
+														$output .= "&nbsp;&nbsp;&nbsp;";
 													$output .= "<a href=\"".$cache_url."\" target=\"_blank\">";
 
 													if(strpos($cache_url, "://") > -1)
@@ -373,6 +381,51 @@ function ShowHtmlPage($num){
 </table>
 <?php
 	}
+
+	if($num == 3)	// WebCache
+	{
+?>
+<script type="text/JavaScript">
+var links = document.getElementsByTagName("a");
+var links_count = links.length;
+var timer, i, c;
+
+function resetVars()
+{
+	timer = null;
+	i = 0;
+	c = 0;
+}
+resetVars();
+
+function sendLink()
+{
+	if( c < 20 && i < links_count )
+	{
+		if( links[i].className == "gwc" )
+		{
+			try{ document.location.href = links[i].href; }
+			catch(e){ alert("Error, gwc: isn't associated to a p2p application."); clearInterval(timer); resetVars(); }
+			c++;
+		}
+		i++;
+	}
+	else
+	{
+		clearInterval(timer); resetVars();
+	}
+}
+
+function sendGWCs()
+{
+	timer = setInterval("sendLink()", 25);
+}
+</script>
+<?php
+	}
+
+	global $footer;
+	if( isset($footer) && $footer != "" ) echo "<br><div>".$footer."</div>";
 ?>
 
 </body>

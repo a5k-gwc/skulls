@@ -57,7 +57,7 @@ if(CACHE_URL != "")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.8" );
-define( "VER", SHORT_VER."d" );
+define( "VER", SHORT_VER."e" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
