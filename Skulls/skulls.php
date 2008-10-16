@@ -450,7 +450,10 @@ function CheckGWC($cache, $cache_network){
 
 	if($received_data[0] == "ERR" && !$udp)
 	{
-		if( strpos($received_data[1], "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
+		if( strpos($received_data[1], "network not supported") > -1
+			|| strpos($received_data[1], "unsupported network") > -1
+			|| strpos($received_data[1], "no network") > -1
+		)	// Workaround for compatibility with GWCv2 specs
 		{																// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$query .= "&net=gnutella2";
 			$result = PingGWC($cache, $query);
