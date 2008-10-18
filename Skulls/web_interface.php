@@ -58,10 +58,10 @@ function ShowHtmlPage($num){
 								<td width="150">- Running since:</td>
 								<td style="color: #994433;">
 								<?php
-									if(file_exists(DATA_DIR."/runnig_since.dat"))
+									if(file_exists(DATA_DIR."/running_since.dat"))
 									{
-										$runnig_since = file(DATA_DIR."/runnig_since.dat");
-										echo $runnig_since[0];
+										$running_since = file(DATA_DIR."/running_since.dat");
+										echo $running_since[0];
 									}
 								?>
 								</td>
@@ -292,6 +292,8 @@ function ShowHtmlPage($num){
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.gnucleus.com/gwebcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													elseif(strpos($cache_name, "jumswebcache") > -1)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www1.mager.org/GWebCache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "MWebCache") > -1)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/tracker/index.php?func=detail&aid=1588787&group_id=83030&atid=568086\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													else
 														$output .= "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
 													$output .= "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";

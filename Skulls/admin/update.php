@@ -1,6 +1,6 @@
 <?php
 header("Pragma: no-cache");
-define( "REVISION", 4.6 );
+define( "REVISION", 4.7 );
 if(file_exists("revision.dat"))
 	$file_content = file("revision.dat");
 
@@ -20,7 +20,10 @@ if(rtrim($file_content[0]) == REVISION)
 }
 
 ini_set("display_errors", 1);
-error_reporting(E_ALL | E_STRICT);
+if(defined("E_STRICT"))
+	error_reporting(E_ALL | E_STRICT);
+else
+	error_reporting(E_ALL);
 
 $log = "";
 $errors = 0;
@@ -140,12 +143,21 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 			// Bad
 			|| $line[0] == "http://www.xolox.nl/gwebcache/"
 			|| $line[0] == "http://www.xolox.nl/gwebcache/default.asp"
+			|| $line[0] == "http://fischaleck.net/cache/mcache.php"
+			|| $line[0] == "http://mcache.naskel.cx/mcache.php"
+			|| $line[0] == "http://silence.forcedefrappe.com/mcache.php"
+			|| $line[0] == "http://gwc.nickstallman.net/"
+			|| $line[0] == "http://gwc.nickstallman.net/beta.php"
+			|| $line[0] == "http://gwc.nickstallman.net/index.php"
+			// It take an eternity to load, it can't help network
+			|| $line[0] == "http://reukiodo.dyndns.org/beacon/gwc.php"
 			|| $line[0] == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
-			|| $line[0] == "http://gwebcache.alpha64.info/"
-			|| $line[0] == "http://gwebcache.alpha64.info/index.php"
 			// Double
-			|| $line[0] == "http://gwc.nickstallman.net/gcache2.asp"
-			|| $line[0] == "http://gwc.nickstallman.net/gcache"
+			|| $line[0] == "http://gwc.frodoslair.net/skulls/skulls"
+			// Other
+			|| ( strpos($line[0], ".robertwoolley.co.uk/") > -1 && $line[0] != "http://bbs.robertwoolley.co.uk/gwebcache/gcache.php" )
+			|| strpos($line[0], ".nyud.net/") > -1
+			|| strpos($line[0], ".nyucd.net/") > -1
 		)
 			$delete = TRUE;
 		else
@@ -261,7 +273,24 @@ if( file_exists("../data/failed_urls.dat") )
 
 if( file_exists("../stats/update_requests_hour.dat") )
 {
-	if(rtrim($file_content[0]) < 4.6)
+	$bad = FALSE;
+
+	$file = @fopen("../stats/update_requests_hour.dat", "r+b");
+	if($file !== FALSE)
+	{
+		for($i = 0; $i < 5; $i++)
+		{
+			$line = fgets($file);
+			if( strpos($line, "\r") > -1 )
+			{
+				$bad = TRUE;
+				break;
+			}
+		}
+		fclose($file);
+	}
+
+	if($bad)
 	{
 		$log .= "Truncating stats/update_requests_hour.dat because the format is changed: ";
 		$log .= truncate("../stats/update_requests_hour.dat");
@@ -275,7 +304,24 @@ if( file_exists("../stats/update_requests_hour.dat") )
 
 if( file_exists("../stats/other_requests_hour.dat") )
 {
-	if(rtrim($file_content[0]) < 4.6)
+	$bad = FALSE;
+
+	$file = @fopen("../stats/other_requests_hour.dat", "r+b");
+	if($file !== FALSE)
+	{
+		for($i = 0; $i < 5; $i++)
+		{
+			$line = fgets($file);
+			if( strpos($line, "\r") > -1 )
+			{
+				$bad = TRUE;
+				break;
+			}
+		}
+		fclose($file);
+	}
+
+	if($bad)
 	{
 		$log .= "Truncating stats/other_requests_hour.dat because the format is changed: ";
 		$log .= truncate("../stats/other_requests_hour.dat");

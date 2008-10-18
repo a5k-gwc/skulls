@@ -57,7 +57,7 @@ if(CACHE_URL != "")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );											// Four uppercase letters vendor code
 define( "SHORT_VER", "0.2.8" );										// Version without letters or words
-define( "VER", SHORT_VER."f" );
+define( "VER", SHORT_VER."g" );
 define( "GWC_SITE", "http://sourceforge.net/projects/skulls/" );	// Site where can be downloaded this cache
 define( "OPEN_SOURCE", "1" );
 
@@ -231,11 +231,16 @@ function CheckBlockedCache($cache){
 		$cache == "http://www.xolox.nl/gwebcache/"
 		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
 		|| $cache == "http://fischaleck.net/cache/mcache.php"
-		|| $cache == "http://gwc.nickstallman.net/index.php"
+		|| $cache == "http://mcache.naskel.cx/mcache.php"
+		|| $cache == "http://silence.forcedefrappe.com/mcache.php"
 		|| $cache == "http://gwc.nickstallman.net/"
+		|| $cache == "http://gwc.nickstallman.net/beta.php"
+		|| $cache == "http://gwc.nickstallman.net/index.php"
 		// It take an eternity to load, it can't help network
 		|| $cache == "http://reukiodo.dyndns.org/beacon/gwc.php"
 		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
+		// Double
+		|| $cache == "http://gwc.frodoslair.net/skulls/skulls"
 	)
 		return TRUE;
 
@@ -372,7 +377,7 @@ function PingGWC($cache, $query){
 		while( !feof($fp) )
 		{
 			$line = fgets( $fp, 1024 );
-			if($debug) echo $line."\r\n";
+			if($debug) echo rtrim($line)."\r\n";
 
 			if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
 				$pong = rtrim($line);
@@ -395,7 +400,7 @@ function PingGWC($cache, $query){
 
 			if(count($received_data) > 3 && $received_data[3] != "")
 			{
-				if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII and CheaterCache
+				if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII
 					$nets = "gnutella-gnutella2";
 				else
 					$nets = RemoveGarbage(strtolower($received_data[3]));
@@ -413,9 +418,8 @@ function PingGWC($cache, $query){
 			$cache_data = "P|".$oldpong;
 
 			if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
-				substr($oldpong, 0, 12) == "CheaterCache" ||
 				//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
-				//substr($oldpong, 0, 12) == "jumswebcache" ||	// ToDO: Re-verify
+				substr($oldpong, 0, 12) == "jumswebcache" ||
 				substr($oldpong, 0, 11) == "GWebCache 2" )
 				$nets = "gnutella-gnutella2";
 			elseif(substr($oldpong, 0, 9) == "MWebCache")

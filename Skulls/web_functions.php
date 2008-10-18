@@ -189,6 +189,11 @@ function ReplaceVendorCode($client, $version){
 			$url = "http://www1.mager.org/GWebCache/";
 			$cache = 2;
 			break;
+		case "MWebCache":
+			$client_name = "MWebCache";
+			$url = "http://sourceforge.net/tracker/index.php?func=detail&aid=1588787&group_id=83030&atid=568086";
+			$cache = 2;
+			break;
 		case "SKLL":
 			$client_name = "Skulls";
 			$url = "http://sourceforge.net/projects/skulls/";
@@ -431,7 +436,7 @@ function ShowUpdateCheck(){
 		{
 			if($result["update_info"] != "") echo $result["update_info"]."\r\n";
 			echo "<br><font color=\"".$color."\"><b>There is a new version of ".NAME.", ";
-			echo "please visit the <a href=\"".GWC_SITE."\" class=\"hover-underline\" target=\"_blank\">".NAME." page</a> to obtain the latest version.</b></font><br>";
+			echo "please visit the download page of <a href=\"".GWC_SITE."\" class=\"hover-underline\" target=\"_blank\">".NAME."</a> to obtain the latest version.</b></font><br>";
 		}
 	}
 }
