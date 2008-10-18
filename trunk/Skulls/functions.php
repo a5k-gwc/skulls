@@ -3,7 +3,7 @@ function InitializeNetworkFile($net, $show_errors = FALSE){
 	$net = strtolower($net);
 	if(!file_exists(DATA_DIR."/hosts_".$net.".dat"))
 	{
-		$file = @fopen(DATA_DIR."/hosts_".$net.".dat", "xb");
+		$file = @fopen(DATA_DIR."/hosts_".$net.".dat", "wb");
 		if($file !== FALSE) fclose($file);
 		elseif($show_errors)
 			echo "<font color=\"red\">Error during writing of ".DATA_DIR."/hosts_".$net.".dat</font><br>";
@@ -12,38 +12,46 @@ function InitializeNetworkFile($net, $show_errors = FALSE){
 
 function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE){
 	$errors = "";
-	$runnig_since = gmdate("Y/m/d h:i:s A");
-	if(!file_exists(DATA_DIR."/runnig_since.dat"))
+	$running_since = gmdate("Y/m/d h:i:s A");
+	if(!file_exists(DATA_DIR."/running_since.dat"))
 	{
-		$file = @fopen( DATA_DIR."/runnig_since.dat", "wb" );
-		if($file !== FALSE)
+		if(file_exists(DATA_DIR."/runnig_since.dat"))
 		{
-			flock($file, 2); fwrite($file, $runnig_since); flock($file, 3); fclose($file);
+			if(!rename(DATA_DIR."/runnig_since.dat", DATA_DIR."/running_since.dat"))
+				$errors .= "<font color=\"red\">Error during renaming of ".DATA_DIR."/runnig_since.dat to ".DATA_DIR."/running_since.dat</font><br>";
 		}
-		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/runnig_since.dat</font><br>";
+		else
+		{
+			$file = @fopen( DATA_DIR."/running_since.dat", "wb" );
+			if($file !== FALSE)
+			{
+				flock($file, 2); fwrite($file, $running_since); flock($file, 3); fclose($file);
+			}
+			else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/running_since.dat</font><br>";
+		}
 	}
 	elseif(!$forced)
 	{
-		$file = @fopen(DATA_DIR."/runnig_since.dat", "r+b");
+		$file = @fopen(DATA_DIR."/running_since.dat", "r+b");
 		if($file !== FALSE)
 		{
 			flock($file, 2);
 			$line = fgets($file);
-			if(rtrim($line) == "") { rewind($file); fwrite($file, $runnig_since); }
+			if(rtrim($line) == "") { rewind($file); fwrite($file, $running_since); }
 			flock($file, 3);
 			fclose($file);
 		}
-		else $errors .= "<font color=\"red\">Error during reading of ".DATA_DIR."/runnig_since.dat</font><br>";
+		else $errors .= "<font color=\"red\">Error during reading of ".DATA_DIR."/running_since.dat</font><br>";
 	}
 	if(!file_exists(DATA_DIR."/caches.dat"))
 	{
-		$file = @fopen(DATA_DIR."/caches.dat", "xb");
+		$file = @fopen(DATA_DIR."/caches.dat", "wb");
 		if($file !== FALSE) fclose($file);
 		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/caches.dat</font><br>";
 	}
 	if(!file_exists(DATA_DIR."/failed_urls.dat"))
 	{
-		$file = @fopen(DATA_DIR."/failed_urls.dat", "xb");
+		$file = @fopen(DATA_DIR."/failed_urls.dat", "wb");
 		if($file !== FALSE) fclose($file);
 		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/failed_urls.dat</font><br>";
 	}
@@ -56,22 +64,35 @@ function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE){
 		if(!file_exists("stats/")) mkdir("stats/", 0777);
 		if(!file_exists("stats/requests.dat"))
 		{
-			$file = @fopen("stats/requests.dat", "xb");
+			$file = @fopen("stats/requests.dat", "wb");
 			if($file !== FALSE) { flock($file, 2); fwrite($file, "0"); flock($file, 3); fclose($file); }
 			else $errors .= "<font color=\"red\">Error during writing of stats/requests.dat</font><br>";
 		}
 		if(!file_exists("stats/update_requests_hour.dat"))
 		{
-			$file = @fopen("stats/update_requests_hour.dat", "xb");
+			$file = @fopen("stats/update_requests_hour.dat", "wb");
 			if($file !== FALSE) fclose($file);
 			else $errors .= "<font color=\"red\">Error during writing of stats/update_requests_hour.dat</font><br>";
 		}
 		if(!file_exists("stats/other_requests_hour.dat"))
 		{
-			$file = @fopen("stats/other_requests_hour.dat", "xb");
+			$file = @fopen("stats/other_requests_hour.dat", "wb");
 			if($file !== FALSE) fclose($file);
 			else $errors .= "<font color=\"red\">Error during writing of stats/other_requests_hour.dat</font><br>";
 		}
+	}
+
+	if(!file_exists(".htaccess"))
+	{
+		$file = @fopen(".htaccess", "wb");
+		if($file !== FALSE)
+		{
+			flock($file, 2);
+			fwrite($file, "RewriteEngine On\r\n\r\n# This should block the extension strip for the cache that is enabled on some servers\r\nRewriteRule ^skulls$ skulls.php$1 [R=permanent,L]\r\n");
+			flock($file, 3);
+			fclose($file);
+		}
+		else $errors .= "<font color=\"red\">Error during writing of .htaccess</font><br>";
 	}
 
 	if($show_errors && $errors != "")
