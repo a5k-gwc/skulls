@@ -55,9 +55,11 @@ if(CACHE_URL != "")
 }
 
 define( "NAME", "Skulls" );
-define( "VENDOR", "SKLL" );
-define( "SHORT_VER", "0.2.8" );
-define( "VER", SHORT_VER."e" );
+define( "VENDOR", "SKLL" );											// Four uppercase letters vendor code
+define( "SHORT_VER", "0.2.8" );										// Version without letters or words
+define( "VER", SHORT_VER."f" );
+define( "GWC_SITE", "http://sourceforge.net/projects/skulls/" );	// Site where can be downloaded this cache
+define( "OPEN_SOURCE", "1" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -98,7 +100,7 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 	if($multi)
 	{
 		$nets = strtolower(NetsToString());
-		echo $pong."|".$nets."|".FSOCKOPEN."|TCP\r\n";
+		echo $pong."|".$nets."|".FSOCKOPEN."\r\n";
 	}
 	elseif($supported_net)
 	{
@@ -114,7 +116,7 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 			elseif($client == "GCII" && $net == "gnutella2")
 				echo $pong."||".FSOCKOPEN."|COMPAT|".$nets."\r\n";			// Workaround for compatibility with PHPGnuCacheII
 			else
-				echo $pong."|".$nets."|".FSOCKOPEN."|TCP\r\n";
+				echo $pong."|".$nets."|".FSOCKOPEN."\r\n";
 		}
 	}
 }
@@ -123,9 +125,8 @@ function Support($supported_networks, $udp)
 {
 	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
 		echo "I|support|".strtolower($supported_networks[$i])."\r\n";
-	echo "I|compression|none\r\n";
 	echo "I|compression|deflate\r\n";
-	echo "I|url|".FSOCKOPEN."\r\n";
+	echo "I|fsockopen|".FSOCKOPEN."\r\n";
 	echo "I|uhc|".$udp["uhc"]."\r\n";
 	echo "I|ukhl|".$udp["ukhl"]."\r\n";
 }
@@ -375,10 +376,15 @@ function PingGWC($cache, $query){
 
 			if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
 				$pong = rtrim($line);
-			elseif( substr($line, 0, 4) == "PONG" )
+			elseif(substr($line, 0, 4) == "PONG")
 				$oldpong = rtrim($line);
-			elseif( substr($line, 0, 5) == "ERROR" )
+			elseif(substr($line, 0, 5) == "ERROR")
 				$error = rtrim($line);
+			elseif(strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
+			{
+				$error = rtrim($line);
+				break;
+			}
 		}
 		fclose($fp);
 
@@ -1014,6 +1020,7 @@ else
 
 if($web)
 {
+	ini_set("user_agent", NAME);
 	if(ini_get("zlib.output_compression") == 1)
 		ini_set("zlib.output_compression", "0");
 	include "web_interface.php";
@@ -1024,6 +1031,8 @@ if($web)
 }
 elseif( $KICK_START )
 {
+	ini_set("user_agent", NAME);
+
 	if( !KICK_START_ENABLED )
 		die("ERROR: Kickstart is disabled\r\n");
 
@@ -1083,7 +1092,7 @@ else
 	elseif($CLIENT == "LIME")
 	{
 		if($name[0] == "eTomi" || $name[0] == "360Share")
-			$CLIENT = $name[0];
+			$blocked = TRUE;
 	}
 	elseif($CLIENT == "RAZA" && isset($name[1]))
 	{
@@ -1189,7 +1198,7 @@ else
 
 			if( substr($host_name, -20) == ".robertwoolley.co.uk" )
 				$CACHE = "http://bbs.robertwoolley.co.uk/gwebcache/gcache.php";
-			elseif( substr($host_name, -9) == ".nyud.net" )
+			elseif( substr($host_name, -9) == ".nyud.net" || substr($host_name, -10) == ".nyucd.net" )
 				$CACHE = "BLOCKED";
 			else
 				$CACHE = $protocol."://".strtolower($host_name).$host_port."/".$path;
@@ -1210,6 +1219,7 @@ else
 	else
 		header("X-Remote-IP: ".$REMOTE_IP);
 
+	ini_set("user_agent", NAME);
 	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		$supported_net = TRUE;
 	else
@@ -1351,11 +1361,12 @@ else
 	{
 		echo "I|name|".NAME."\r\n";
 		echo "I|ver|".VER."\r\n";
-		echo "I|gwc-site|http://sourceforge.net/projects/skulls/\r\n";
-		echo "I|open-source|1\r\n";
+		echo "I|vendor|".VENDOR."\r\n";
+		echo "I|gwc-site|".GWC_SITE."\r\n";
+		echo "I|open-source|".OPEN_SOURCE."\r\n";
 
 		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
-		if(MAINTAINER_WEBSITE != "http://www.your-site.com/")
+		if(MAINTAINER_WEBSITE != "http://www.your-site.com/" && MAINTAINER_WEBSITE != "")
 			echo "I|maintainer-site|".MAINTAINER_WEBSITE."\r\n";
 	}
 

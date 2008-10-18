@@ -1,10 +1,9 @@
 <?php
 function ReplaceVendorCode($client, $version){
 	$cache = 0;
-	if( $client == "TEST" && (float)$version == 0 && substr($version, 0, 1) != "0" )
+	if( $client == "TEST" && (float)$version == 0 && substr($version, 0, 1) != "0" )	// If $client is TEST and $version isn't numeric...
 	{
-		$client = $version;
-		$version = "";
+		list( $client, $version ) = explode(" ", $version, 2);
 		$cache = 1;
 	}
 
@@ -103,10 +102,6 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "Phex";
 			$url = "http://phex.kouk.de/mambo/";
 			break;
-		case "RZCB":
-			$client_name = "ShareazaPlus";
-			$url = "http://shareazaplus.sourceforge.net/";
-			break;
 		case "RAZA":
 			$client_name = "Shareaza";
 			$url = "http://shareaza.sourceforge.net/";
@@ -114,6 +109,14 @@ function ReplaceVendorCode($client, $version){
 		case "RAZB":
 			$client_name = "ShareazaBeta";		// Beta version of Shareaza
 			$url = "http://shareaza.sourceforge.net/help/?beta";
+			break;
+		case "RAZL":
+			$client_name = "ShareazaLite";
+			$url = "http://sourceforge.net/projects/flox/";
+			break;
+		case "RZCB":
+			$client_name = "ShareazaPlus";
+			$url = "http://shareazaplus.sourceforge.net/";
 			break;
 		case "SNOW":
 			$client_name = "FrostWire";
@@ -132,51 +135,79 @@ function ReplaceVendorCode($client, $version){
 			$url = "http://www.xolox.nl/";
 			break;
 
-		case "eTomi":
-			$client_name = "eTomi";
-			$url = "";
-			break;
-		case "360Share":
-			$client_name = "360Share";
-			$url = "";
-			break;
-
 		case "PGDBScan":
-			$client_name = "Jonatkins scan";
+			$client_name = "Jon Atkins GWC scan";
 			$url = "http://gcachescan.jonatkins.com/";
+			break;
+		case "WURM":
+			$client_name = "Wurm Scanner";
+			$url = "http://kevogod.trillinux.org/";
 			break;
 		case "KICKSTART":
 			$client_name = "KickStart";
 			$url = "";
 			break;
-		case "TEST":
-			$client_name = "WebCache";
-			$url = "";
-			break;
 
 		case "BAZK":
-			$client_name = "Bazooka (WebCache)";
-			$url = "http://rocketx.port5.com/";
+		case "Bazooka":
+			$client_name = "Bazooka";
+			$url = "http://www.bazookanetworks.com/";
+			$cache = 2;
+			break;
+		case "BCII":
+			$client_name = "Beacon Cache II";
+			$url = "http://sourceforge.net/projects/beaconcache/";
+			$cache = 2;
+			break;
+		case "BCON":
+			$client_name = "Beacon Cache";
+			$url = "http://sourceforge.net/projects/beaconcache/";
+			$cache = 2;
+			break;
+		case "Cachechu":
+			$client_name = "Cachechu";
+			$url = "http://code.google.com/p/cachechu/";
+			$cache = 2;
+			break;
+		case "CANN":
+			$client_name = "Cannon";
+			$url = "";
+			$cache = 2;
+			break;
+		case "CHTC":
+			$client_name = "CheaterCache";
+			$url = "";
+			$cache = 2;
 			break;
 		case "GCII":
-			$client_name = "PHPGnuCacheII (WebCache)";
+			$client_name = "PHPGnuCacheII";
 			$url = "http://gwcii.sourceforge.net/";
+			$cache = 2;
+			break;
+		case "JGWC":
+			$client_name = "Jums Web Cache";
+			$url = "http://www1.mager.org/GWebCache/";
+			$cache = 2;
 			break;
 		case "SKLL":
-			$client_name = "Skulls (WebCache)";
+			$client_name = "Skulls";
 			$url = "http://sourceforge.net/projects/skulls/";
+			$cache = 2;
 			break;
 
+		case "TEST":
+			$cache = 1;
 		default:
 			if($cache)
-				$client_name = "WebCache (".$client.")";
+				return "WebCache (".$client." ".$version.")";
 			elseif( $client != "" )
 				$client_name = $client;
 			else
 				$client_name = "Unknown client";
-
 			$url = "";
 	}
+
+	if($cache == 2) $version .= " (WebCache)";
 
 	if( $url != "" )
 		return "<a href=\"".$url."\" target=\"_blank\">".$client_name." ".$version."</a>";
@@ -400,7 +431,7 @@ function ShowUpdateCheck(){
 		{
 			if($result["update_info"] != "") echo $result["update_info"]."\r\n";
 			echo "<br><font color=\"".$color."\"><b>There is a new version of ".NAME.", ";
-			echo "please visit <a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" target=\"_blank\">".NAME." project page</a> to obtain the latest version.</b></font><br>";
+			echo "please visit the <a href=\"".GWC_SITE."\" class=\"hover-underline\" target=\"_blank\">".NAME." page</a> to obtain the latest version.</b></font><br>";
 		}
 	}
 }
