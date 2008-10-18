@@ -276,8 +276,22 @@ function ShowHtmlPage($num){
 														$output .= $cache_url;
 
 													$output .= "</a></td>";
-													if(strpos($cache_name, NAME." ") > -1)
+													if(strpos($cache_name, NAME) > -1)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"".GWC_SITE."\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(NAME != "Skulls" && strpos($cache_name, "Skulls") > -1)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "Bazooka") > -1)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.bazookanetworks.com/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "Beacon Cache") > -1)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/beaconcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "Cachechu") > -1)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://code.google.com/p/cachechu/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "PHPGnuCacheII") > -1)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gwcii.sourceforge.net/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "GWebCache") > -1)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.gnucleus.com/gwebcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "jumswebcache") > -1)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www1.mager.org/GWebCache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													else
 														$output .= "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
 													$output .= "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
@@ -355,7 +369,7 @@ function ShowHtmlPage($num){
 			}
 				?>
 				<tr bgcolor="#FFFFFF">
-					<td style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="http://sourceforge.net/projects/skulls/" target="_blank">http://sourceforge.net/projects/skulls/</a></b></td>
+					<td style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" target="_blank"><?php echo GWC_SITE; ?></a></b></td>
 				</tr>
 			</table>
 		</td>
