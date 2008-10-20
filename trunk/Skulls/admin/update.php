@@ -1,6 +1,6 @@
 <?php
 header("Pragma: no-cache");
-define( "REVISION", 4.7 );
+define( "REVISION", 4.8 );
 if(file_exists("revision.dat"))
 	$file_content = file("revision.dat");
 
@@ -146,18 +146,17 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 			|| $line[0] == "http://fischaleck.net/cache/mcache.php"
 			|| $line[0] == "http://mcache.naskel.cx/mcache.php"
 			|| $line[0] == "http://silence.forcedefrappe.com/mcache.php"
-			|| $line[0] == "http://gwc.nickstallman.net/"
-			|| $line[0] == "http://gwc.nickstallman.net/beta.php"
-			|| $line[0] == "http://gwc.nickstallman.net/index.php"
 			// It take an eternity to load, it can't help network
 			|| $line[0] == "http://reukiodo.dyndns.org/beacon/gwc.php"
 			|| $line[0] == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
 			// Double
 			|| $line[0] == "http://gwc.frodoslair.net/skulls/skulls"
+			|| $line[0] == "http://gwc.nickstallman.net/beta.php"
 			// Other
-			|| ( strpos($line[0], ".robertwoolley.co.uk/") > -1 && $line[0] != "http://bbs.robertwoolley.co.uk/gwebcache/gcache.php" )
+			|| $line[0] == "http://bbs.robertwoolley.co.uk/GWebCache/gcache.php"
 			|| strpos($line[0], ".nyud.net/") > -1
 			|| strpos($line[0], ".nyucd.net/") > -1
+			|| strpos($line[0], "index.php") == strlen($line[0]) - 9
 		)
 			$delete = TRUE;
 		else

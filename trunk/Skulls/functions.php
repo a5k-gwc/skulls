@@ -166,17 +166,19 @@ function KickStart($net, $cache){
 					$cluster = NULL;
 				$result = WriteHostFile( $ip_port[0], rtrim($host[1]), NULL, $net, $cluster, "KICKSTART", "1.0" );
 
-				if( $result == 1 ) // Updated timestamp
+				if( $result == 0 ) // Exists
+					echo "<b>I|update|OK|Host already updated</b><br>\r\n";
+				elseif( $result == 1 ) // Updated timestamp
 					echo "<b>I|update|OK|Updated host timestamp</b><br>\r\n";
 				elseif( $result == 2 ) // OK
 					echo "<b>I|update|OK|Host added successfully</b><br>\r\n";
 				elseif( $result == 3 ) // OK, pushed old data
 				{
-					echo "<b>I|update|OK|Host added successfully - pushed old data</b><br>\r\n";
+					echo "<b>I|update|OK|Host added successfully (pushed old data)</b><br>\r\n";
 					break;
 				}
 				else
-					echo "<font color=\"red\"><b>I|error</b></font><br>\r\n";
+					echo "<font color=\"red\"><b>I|update|ERROR|Unknown error 3, return value = ".$result."</b></font><br>\r\n";
 			}
 		}
 		fclose ($fp);
