@@ -57,9 +57,10 @@ if(CACHE_URL != "")
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );											// Four uppercase letters vendor code
 define( "SHORT_VER", "0.2.8" );										// Version without letters or words
-define( "VER", SHORT_VER."g" );
+define( "VER", SHORT_VER."h" );
 define( "GWC_SITE", "http://sourceforge.net/projects/skulls/" );	// Site where can be downloaded this cache
 define( "OPEN_SOURCE", "1" );
+define( "DEBUG", "0" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -233,14 +234,12 @@ function CheckBlockedCache($cache){
 		|| $cache == "http://fischaleck.net/cache/mcache.php"
 		|| $cache == "http://mcache.naskel.cx/mcache.php"
 		|| $cache == "http://silence.forcedefrappe.com/mcache.php"
-		|| $cache == "http://gwc.nickstallman.net/"
-		|| $cache == "http://gwc.nickstallman.net/beta.php"
-		|| $cache == "http://gwc.nickstallman.net/index.php"
 		// It take an eternity to load, it can't help network
 		|| $cache == "http://reukiodo.dyndns.org/beacon/gwc.php"
 		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
 		// Double
 		|| $cache == "http://gwc.frodoslair.net/skulls/skulls"
+		|| $cache == "http://gwc.nickstallman.net/beta.php"
 	)
 		return TRUE;
 
@@ -347,8 +346,6 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 }
 
 function PingGWC($cache, $query){
-	$debug = FALSE;
-
 	list( , $cache ) = explode("://", $cache);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);				// $main_url[0] = www.test.com:80		$main_url[1] = page.php
 	$splitted_url = explode(":", $main_url[0]);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
@@ -365,7 +362,7 @@ function PingGWC($cache, $query){
 	if(!$fp)
 	{
 		$cache_data = "ERR|".$errno;		// ERR|Error name
-		if($debug) echo "Error ".$errno.": ".$errstr."\r\n";
+		if(DEBUG) echo "Error ".$errno.": ".$errstr."\r\n";
 	}
 	else
 	{
@@ -377,19 +374,14 @@ function PingGWC($cache, $query){
 		while( !feof($fp) )
 		{
 			$line = fgets( $fp, 1024 );
-			if($debug) echo rtrim($line)."\r\n";
+			if(DEBUG) echo rtrim($line)."\r\n";
 
 			if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
 				$pong = rtrim($line);
 			elseif(substr($line, 0, 4) == "PONG")
 				$oldpong = rtrim($line);
-			elseif(substr($line, 0, 5) == "ERROR")
-				$error = rtrim($line);
-			elseif(strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
-			{
-				$error = rtrim($line);
-				break;
-			}
+			elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
+				$error .= rtrim($line)." - ";
 		}
 		fclose($fp);
 
@@ -436,7 +428,7 @@ function PingGWC($cache, $query){
 		}
 	}
 
-	if($debug) echo "\r\nResult: ".$cache_data."\r\n\r\n";
+	if(DEBUG) echo "\r\nResult: ".$cache_data."\r\n\r\n";
 	return $cache_data;
 }
 
@@ -929,7 +921,7 @@ $USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? str_replace("/", " ", $_SERV
 
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
 $ACCEPT_ENCODING = !empty($_SERVER["HTTP_ACCEPT_ENCODING"]) ? $_SERVER["HTTP_ACCEPT_ENCODING"] : NULL;
-if($COMPRESSION == NULL && strpos($ACCEPT_ENCODING, "deflate") > -1) $COMPRESSION = "deflate";
+if($COMPRESSION == NULL && strpos($ACCEPT_ENCODING, "deflate") > -1 && !DEBUG) $COMPRESSION = "deflate";
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
@@ -1022,6 +1014,7 @@ elseif( $SHOWSTATS || $SHOWDATA )
 else
 	$web = 0;
 
+header("Connection: close");
 if($web)
 {
 	ini_set("user_agent", NAME);
@@ -1040,7 +1033,9 @@ elseif( $KICK_START )
 	if( !KICK_START_ENABLED )
 		die("ERROR: Kickstart is disabled\r\n");
 
-	if( !CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
+	if( $NET == null )
+		die("ERROR: Network not specified\r\n");
+	elseif( !CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		die("ERROR: Network not supported\r\n");
 
 	if( !function_exists("KickStart") )
@@ -1051,7 +1046,6 @@ elseif( $KICK_START )
 }
 else
 {
-	header("Connection: close");
 	if(!CONTENT_TYPE_WORKAROUND)
 		header("Content-Type: text/plain");
 	else
@@ -1148,15 +1142,19 @@ else
 
 	if($CACHE != NULL)
 	{	// Cleaning url
+		if(DEBUG) echo "URL sent: ".$CACHE."\r\n";
 		if(strpos($CACHE, "://") > -1)
 		{
-			list( $protocol, $url ) = explode("://", $CACHE);
+			if( $CACHE == "http://bbs.robertwoolley.co.uk/GWebCache/gcache.php" )
+				$CACHE = strtolower($CACHE);
+
+			list( $protocol, $url ) = explode("://", $CACHE, 2);
 
 			if( strpos($url, "/") > -1 )
 				list( $host, $path ) = explode("/", $url, 2);
 			elseif( strpos($url, "?") > -1 )
 			{
-				list( $host, $path ) = explode("?", $url);
+				list( $host, $path ) = explode("?", $url, 2);
 				$path = "?".$path;
 			}
 			else
@@ -1200,12 +1198,14 @@ else
 			else
 				$host_port = ":".$host_port;
 
-			if( substr($host_name, -20) == ".robertwoolley.co.uk" )
-				$CACHE = "http://bbs.robertwoolley.co.uk/gwebcache/gcache.php";
-			elseif( substr($host_name, -9) == ".nyud.net" || substr($host_name, -10) == ".nyucd.net" )
+			if( substr($host_name, -9) == ".nyud.net" || substr($host_name, -10) == ".nyucd.net" )
 				$CACHE = "BLOCKED";
 			else
+			{
+				if( strpos($path, "index.php") == strlen($path) - 9)	// index.php removal
+					$path = substr($path, 0, -9);
 				$CACHE = $protocol."://".strtolower($host_name).$host_port."/".$path;
+			}
 		}
 		else
 		{
@@ -1213,6 +1213,7 @@ else
 			if(substr($CACHE, $cache_length-1) == "/")
 				$CACHE = substr($CACHE, 0, $cache_length-1);
 		}
+		if(DEBUG) echo "URL cleaned: ".$CACHE."\r\n";
 	}
 
 	if($NET == NULL) $NET = "gnutella";
@@ -1253,6 +1254,8 @@ else
 					print "I|update|OK|Host added\r\n";
 				elseif( $result == 3 ) // OK, pushed old data
 					print "I|update|OK|Host added (pushed old data)\r\n";
+				else
+					print "I|update|ERROR|Unknown error 1, return value = ".$result."\r\n";
 			}
 			else // Invalid IP
 				print "I|update|WARNING|Invalid host"."\r\n";
@@ -1280,6 +1283,8 @@ else
 					print "I|update|WARNING|Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
 					print "I|update|WARNING|Network of URL not supported\r\n";
+				else
+					print "I|update|ERROR|Unknown error 2, return value = ".$result."\r\n";
 			}
 			else // Invalid URL
 				print("I|update|WARNING|Invalid URL"."\r\n");
