@@ -82,6 +82,19 @@ function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE){
 		}
 	}
 
+	if(!file_exists("admin/revision.dat"))
+	{
+		$file = @fopen("admin/revision.dat", "wb");
+		if($file !== FALSE)
+		{
+			flock($file, 2);
+			fwrite($file, "0");
+			flock($file, 3);
+			fclose($file);
+		}
+		else $errors .= "<font color=\"red\">Error during writing of admin/revision.dat</font><br>";
+	}
+
 	if(!file_exists(".htaccess"))
 	{
 		$file = @fopen(".htaccess", "wb");
@@ -119,7 +132,7 @@ function KickStart($net, $cache){
 		$port = 80;
 	}
 
-	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
+	$fp = @fsockopen($host_name, $port, $errno, $errstr, (float)TIMEOUT);
 
 	if(!$fp)
 	{
@@ -128,7 +141,7 @@ function KickStart($net, $cache){
 	}
 	else
 	{
-		fputs( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n" );
+		fwrite( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: Close\r\n\r\n" );
 		while( !feof($fp) )
 		{
 			$is_host = FALSE;
@@ -147,6 +160,9 @@ function KickStart($net, $cache){
 			{
 			}
 			elseif(strtolower(substr($line, 0, 2)) == "i|")	// Info
+			{
+			}
+			elseif(strtolower(substr($line, 0, 2)) == "d|")	// Debug
 			{
 			}
 			elseif(strpos($line, ":") > -1)					// Host (old method)

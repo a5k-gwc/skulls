@@ -147,6 +147,10 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "KickStart";
 			$url = "";
 			break;
+		case "Submit":
+			$client_name = "Manual submission";
+			$url = "";
+			break;
 
 		case "BAZK":
 		case "Bazooka":
@@ -222,7 +226,6 @@ function ReplaceVendorCode($client, $version){
 
 function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php", $came_from = NULL){
 	global $MY_URL;
-	$debug = FALSE;
 
 	list( , $url ) = explode("://", $url, 2);		// It remove "http://" from $url - $url = www.test.com:80/page.php
 	$main_url = explode("/", $url);					// $main_url[0] = www.test.com:80		$main_url[1] = page.php
@@ -236,12 +239,12 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 		$port = 80;
 	}
 
-	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
+	$fp = @fsockopen($host_name, $port, $errno, $errstr, (float)TIMEOUT);
 	$status = NULL;
 	$msg = NULL;
 	$msg_error = NULL;
 	$msg_info = NULL;
-	if($debug) echo "---------------<br>";
+	if(DEBUG) echo "---------------<br>";
 
 	if(!$fp)
 	{
@@ -250,64 +253,71 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 	}
 	else
 	{
-		$query = "update_check=1&client=".VENDOR."&url=http://".$MY_URL."&cache=1";
+		$query = "update_check=1&client=".VENDOR."&cache=1&url=http://".$MY_URL;
 
-		fwrite( $fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
-		while ( !feof($fp) )
+		if( !fwrite( $fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: Close\r\n\r\n") )
 		{
-			$line = rtrim( fgets( $fp, 1024 ) );
-			if($debug) echo $line."<br>";
-
-			if( strtolower( substr( $line, 0, 2 ) ) == "v|" )
+			$status = "REQUEST_ERROR";
+			$msg = "Error";
+		}
+		else
+		{
+			while ( !feof($fp) )
 			{
-				$received_data = explode("|", $line);
-				$msg = $received_data[1];
-				if( !empty($msg) )
-					$status = "OK";
-			}
-			elseif( strtolower( substr( $line, 0, 2 ) ) == "a|" && $status != "OK" )
-			{
-				$received_data = explode("|", $line);
-				$alternate_url = $received_data[1];
+				$line = rtrim( fgets( $fp, 1024 ) );
+				if(DEBUG) echo rtrim($line)."<br>";
 
-				if($alternate_url != $url && $alternate_url != $came_from && $alternate_url != NULL)
+				if( strtolower( substr( $line, 0, 2 ) ) == "v|" )
 				{
-					$returned_data = QueryUpdateServer($alternate_url, $url);
-					$returned_data = explode("|", $returned_data);
-					$status = $returned_data[0];
-					$msg = $returned_data[1];
-					$msg_info = $returned_data[3];
-					$msg_error = $returned_data[4];
+					$received_data = explode("|", $line);
+					$msg = $received_data[1];
+					if( !empty($msg) )
+						$status = "OK";
 				}
-				elseif($debug) echo "<font color=\"red\"><b>Loop</b></font><br>";
+				elseif( strtolower( substr( $line, 0, 2 ) ) == "a|" && $status != "OK" )
+				{
+					$received_data = explode("|", $line);
+					$alternate_url = $received_data[1];
+
+					if($alternate_url != $url && $alternate_url != $came_from && $alternate_url != NULL)
+					{
+						$returned_data = QueryUpdateServer($alternate_url, $url);
+						$returned_data = explode("|", $returned_data);
+						$status = $returned_data[0];
+						$msg = $returned_data[1];
+						$msg_info = $returned_data[3];
+						$msg_error = $returned_data[4];
+					}
+					elseif(DEBUG) echo "<font color=\"red\"><b>Loop</b></font><br>";
+				}
+				elseif( strtolower( substr( $line, 0, 7 ) ) == "i|info|" )
+				{
+					$received_data = explode("|", $line);
+					$msg_info .= $received_data[2]."<br>";
+				}
+				elseif( strtolower( substr( $line, 0, 8 ) ) == "i|error|" )
+				{
+					$received_data = explode("|", $line);
+					$msg_error .= $received_data[2]."<br>";
+				}
+				elseif(strpos($line, "404 Not Found") > -1)
+				{
+					$status = "404";
+					$msg = $line;
+				}
+				elseif(strpos($line, "403 Forbidden") > -1)
+				{
+					$status = "403";
+					$msg = $line;
+				}
+				
 			}
-			elseif( strtolower( substr( $line, 0, 7 ) ) == "i|info|" )
-			{
-				$received_data = explode("|", $line);
-				$msg_info .= $received_data[2]."<br>";
-			}
-			elseif( strtolower( substr( $line, 0, 8 ) ) == "i|error|" )
-			{
-				$received_data = explode("|", $line);
-				$msg_error .= $received_data[2]."<br>";
-			}
-			elseif(strpos($line, "404 Not Found") > -1)
-			{
-				$status = "404";
-				$msg = $line;
-			}
-			elseif(strpos($line, "403 Forbidden") > -1)
-			{
-				$status = "403";
-				$msg = $line;
-			}
-			
 		}
 
 		fclose ($fp);
 	}
 
-	if($debug) echo "Status: ".RemoveGarbage($status)."<br>---------------<br>";
+	if(DEBUG) echo "Status: ".RemoveGarbage($status)."<br>---------------<br>";
 	return RemoveGarbage($status)."|".RemoveGarbage($msg)."||".RemoveGarbage($msg_info)."|".RemoveGarbage($msg_error);
 }
 
@@ -373,6 +383,10 @@ function CheckUpdates(){
 			echo "<font color=\"red\"><b>".$msg."</b></font><br>\r\n";
 		else
 			echo "<font color=\"gold\"><b>Unable to check without fsockopen</b></font><br>\r\n";
+	}
+	elseif($status == "REQUEST_ERROR")
+	{
+		echo "<font color=\"red\"><b>".$msg."</b></font><br>\r\n";
 	}
 	elseif($status == "OK")
 	{

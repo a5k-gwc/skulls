@@ -1,7 +1,5 @@
 <?php
 function PingUDP($cache){
-	$debug = FALSE;
-
 	$splitted_url = explode(":", $cache);
 
 	$GUID = VENDOR."ALPA"."\347\271\061\151\240\205\096\191";
@@ -28,21 +26,24 @@ function PingUDP($cache){
 
 	list( , $host_name, $port) = $splitted_url;
 
-	$fp = @fsockopen("udp://".$host_name, $port, $errno, $errstr);
+	$fp = @fsockopen("udp://".$host_name, $port, $errno, $errstr, (float)TIMEOUT);
 	if(!$fp)
 	{
 		$cache_data = "ERR|".$errno;						// ERR|Error name
-		if($debug) echo "Error ".$errno.": ".$errstr."\r\n";
+		if(DEBUG) echo "D|update|ERROR|".$errno." (".$errstr.")\r\n";
 	}
 	else
 	{
-		if(!fwrite($fp, $ping))
+		if( !fwrite($fp, $ping) )
+		{
 			$cache_data = "ERR|Request error";				// ERR|Error name
+			fclose($fp);
+		}
 		else
 		{
-			stream_set_timeout($fp, TIMEOUT - 2);
+			stream_set_timeout($fp, (int)TIMEOUT - 2);
 			$line = fread($fp, 2048);
-			//if($debug) echo $line;
+			//if(DEBUG) echo $line."\r\n";
 
 			$info = stream_get_meta_data($fp);
 			if(strpos($line, "UDPHC") > -1)
@@ -64,7 +65,7 @@ function PingUDP($cache){
 		}
 	}
 
-	if($debug) echo "\r\nResult: ".$cache_data."\r\n\r\n";
+	if(DEBUG) echo "\r\nD|update|Result: ".$cache_data."\r\n\r\n";
 	return $cache_data;
 }
 ?>

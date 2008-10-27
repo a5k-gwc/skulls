@@ -35,13 +35,15 @@ define( "DATA_DIR", "data" );				// Directory where data files are stored (you s
 
 $footer = "";
 
-// You can add or remove any network, but after you changed them you must delete last_action.dat in data directory to initialize the changes.
-// By default gnutella is disabled and gnutella2 is enabled.
+// You can add or remove any network.
+// By default Gnutella is disabled.
+// Enabling the Gnutella network can increase a lot the number of requests, so don't enable it if your server can't handle the load.
 // Note -> The name of the network can't contains these characters:  | -
 
 //$SUPPORTED_NETWORKS[] = "Gnutella";
 $SUPPORTED_NETWORKS[] = "Gnutella2";
 $SUPPORTED_NETWORKS[] = "MUTE";
+$SUPPORTED_NETWORKS[] = "Kad";
 
 // UDP (Currently it is incomplete)
 // 0: Disabled, 1: Enabled

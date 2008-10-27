@@ -5,7 +5,7 @@ function Ping($host_name)
 		return FALSE;
 
 	$port = 80;
-	$fp = @fsockopen( $host_name, $port );
+	$fp = @fsockopen($host_name, $port, $errno, $errstr, 20);
 	if($fp)
 	{
 		fclose ($fp);
@@ -35,7 +35,7 @@ else
 
 echo "<br><br>\r\n";
 
-if( Ping("www.google.it") || Ping("www.libero.it") )
+if( Ping("www.google.com") || Ping("www.libero.it") )
 	$ping = TRUE;
 else
 	$ping = FALSE;

@@ -149,9 +149,10 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 			// It take an eternity to load, it can't help network
 			|| $line[0] == "http://reukiodo.dyndns.org/beacon/gwc.php"
 			|| $line[0] == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
-			// Double
+			// Double - They are accessible also from another url
 			|| $line[0] == "http://gwc.frodoslair.net/skulls/skulls"
 			|| $line[0] == "http://gwc.nickstallman.net/beta.php"
+			|| $line[0] == "http://gwebcache.spearforensics.com/"
 			// Other
 			|| $line[0] == "http://bbs.robertwoolley.co.uk/GWebCache/gcache.php"
 			|| strpos($line[0], ".nyud.net/") > -1

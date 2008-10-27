@@ -22,6 +22,7 @@
 
 $SUPPORTED_NETWORKS = NULL;
 include "vars.php";
+$UDP["ukhl"] = 0;	// The support isn't complete
 
 if( !isset($_GET) )
 {
@@ -124,7 +125,7 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 
 function Support($supported_networks, $udp)
 {
-	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
+	for($i=0; $i<NETWORKS_COUNT; $i++)
 		echo "I|support|".strtolower($supported_networks[$i])."\r\n";
 	echo "I|compression|deflate\r\n";
 	echo "I|fsockopen|".FSOCKOPEN."\r\n";
@@ -132,9 +133,11 @@ function Support($supported_networks, $udp)
 	echo "I|ukhl|".$udp["ukhl"]."\r\n";
 }
 
-function CheckNetwork($supported_networks, $net){
-	for( $i = 0; $i < NETWORKS_COUNT; $i++ )
-		if( strtolower($supported_networks[$i]) == strtolower($net) )
+function CheckNetwork($supported_networks, $net)
+{
+	$net = strtolower($net);
+	for($i=0; $i<NETWORKS_COUNT; $i++)
+		if(strtolower($supported_networks[$i]) == $net)
 			return TRUE;
 
 	return FALSE;
@@ -237,9 +240,10 @@ function CheckBlockedCache($cache){
 		// It take an eternity to load, it can't help network
 		|| $cache == "http://reukiodo.dyndns.org/beacon/gwc.php"
 		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
-		// Double
+		// Double - They are accessible also from another url
 		|| $cache == "http://gwc.frodoslair.net/skulls/skulls"
 		|| $cache == "http://gwc.nickstallman.net/beta.php"
+		|| $cache == "http://gwebcache.spearforensics.com/"
 	)
 		return TRUE;
 
@@ -251,7 +255,7 @@ function IsClientTooOld($client, $version){
 	{
 		case "RAZA":
 		case "RAZB":
-			if((float)$version < 2.2)	// This also block some ripp-offs that are based on old versions of Shareaza
+			if((float)$version < 2.2)	// This also block some ripp-offs that are based on old versions of Shareaza.
 				return TRUE;
 			break;
 		case "BEAR":
@@ -273,9 +277,9 @@ function IsClientTooOld($client, $version){
 }
 
 function CleanFailedUrls(){
-	$failed_urls_file = file("data/failed_urls.dat");
+	$failed_urls_file = file(DATA_DIR."/failed_urls.dat");
 	$file_count = count($failed_urls_file);
-	$file = fopen("data/failed_urls.dat", "wb");
+	$file = fopen(DATA_DIR."/failed_urls.dat", "wb");
 	flock($file, 2);
 
 	$now = time();
@@ -358,11 +362,11 @@ function PingGWC($cache, $query){
 		$port = 80;
 	}
 
-	$fp = @fsockopen( $host_name, $port, $errno, $errstr, TIMEOUT );
+	$fp = @fsockopen($host_name, $port, $errno, $errstr, (float)TIMEOUT);
 	if(!$fp)
 	{
-		$cache_data = "ERR|".$errno;		// ERR|Error name
-		if(DEBUG) echo "Error ".$errno.": ".$errstr."\r\n";
+		$cache_data = "ERR|".$errno;				// ERR|Error name
+		if(DEBUG) echo "D|update|ERROR|".$errno." (".$errstr.")\r\n";
 	}
 	else
 	{
@@ -370,65 +374,72 @@ function PingGWC($cache, $query){
 		$oldpong = "";
 		$error = "";
 
-		fwrite( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n\r\n");
-		while( !feof($fp) )
+		if( !fwrite($fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: Close\r\n\r\n") )
 		{
-			$line = fgets( $fp, 1024 );
-			if(DEBUG) echo rtrim($line)."\r\n";
-
-			if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
-				$pong = rtrim($line);
-			elseif(substr($line, 0, 4) == "PONG")
-				$oldpong = rtrim($line);
-			elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
-				$error .= rtrim($line)." - ";
-		}
-		fclose($fp);
-
-		if(!empty($pong))
-		{
-			$received_data = explode("|", $pong);
-			$cache_data = "P|".RemoveGarbage($received_data[2]);
-
-			if(count($received_data) > 3 && $received_data[3] != "")
-			{
-				if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII
-					$nets = "gnutella-gnutella2";
-				else
-					$nets = RemoveGarbage(strtolower($received_data[3]));
-			}
-			elseif( !empty($oldpong) )
-				$nets = "gnutella-gnutella2";
-			else
-				$nets = "gnutella2";
-
-			$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
-		}
-		elseif(!empty($oldpong))
-		{
-			$oldpong = RemoveGarbage(substr($oldpong, 5));
-			$cache_data = "P|".$oldpong;
-
-			if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
-				//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
-				substr($oldpong, 0, 12) == "jumswebcache" ||
-				substr($oldpong, 0, 11) == "GWebCache 2" )
-				$nets = "gnutella-gnutella2";
-			elseif(substr($oldpong, 0, 9) == "MWebCache")
-				$nets = "mute";
-			else
-				$nets = "gnutella";
-
-			$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+			$cache_data = "ERR|Request error";		// ERR|Error name
+			fclose($fp);
 		}
 		else
 		{
-			$error = RemoveGarbage(strtolower($error));
-			$cache_data = "ERR|".$error;	// ERR|Error name
+			while( !feof($fp) )
+			{
+				$line = fgets( $fp, 1024 );
+				if(DEBUG) echo rtrim($line)."\r\n";
+
+				if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
+					$pong = rtrim($line);
+				elseif(substr($line, 0, 4) == "PONG")
+					$oldpong = rtrim($line);
+				elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
+					$error .= rtrim($line)." - ";
+			}
+			fclose($fp);
+
+			if(!empty($pong))
+			{
+				$received_data = explode("|", $pong);
+				$cache_data = "P|".RemoveGarbage($received_data[2]);
+
+				if(count($received_data) > 3 && $received_data[3] != "")
+				{
+					if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII
+						$nets = "gnutella-gnutella2";
+					else
+						$nets = RemoveGarbage(strtolower($received_data[3]));
+				}
+				elseif( !empty($oldpong) )
+					$nets = "gnutella-gnutella2";
+				else
+					$nets = "gnutella2";
+
+				$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+			}
+			elseif(!empty($oldpong))
+			{
+				$oldpong = RemoveGarbage(substr($oldpong, 5));
+				$cache_data = "P|".$oldpong;
+
+				if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
+					//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
+					substr($oldpong, 0, 12) == "jumswebcache" ||
+					substr($oldpong, 0, 11) == "GWebCache 2" )
+					$nets = "gnutella-gnutella2";
+				elseif(substr($oldpong, 0, 9) == "MWebCache")
+					$nets = "mute";
+				else
+					$nets = "gnutella";
+
+				$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+			}
+			else
+			{
+				$error = RemoveGarbage(strtolower($error));
+				$cache_data = "ERR|".$error;	// ERR|Error name
+			}
 		}
 	}
 
-	if(DEBUG) echo "\r\nResult: ".$cache_data."\r\n\r\n";
+	if(DEBUG) echo "\r\nD|update|Result: ".$cache_data."\r\n\r\n";
 	return $cache_data;
 }
 
@@ -908,18 +919,18 @@ $PHP_VERSION = (float)PHP_VERSION;
 
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 
-$PV = !empty($_GET["pv"]) ? $_GET["pv"] : 0;
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
-$NETS = !empty($_GET["nets"]) ? strtolower($_GET["nets"]) : NULL;	// Currently unsupported
-$MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
+$IS_A_CACHE = !empty($_GET["cache"]) ? $_GET["cache"] : 0;		// This should be added to every request made by a cache, it is for statistical purpose only.
+$MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;			// It is added to every ping request (it has no effect on other things) made by Skulls, it tell to the pinged cache to ignore the "net" parameter and outputting the pong using this format, if possible, "I|pong|[cache name] [cache version]|[supported networks list]|[url adding is enabled]" - example: I|pong|Skulls 0.2.8a|gnutella-gnutella2|1
+$PV = !empty($_GET["pv"]) ? $_GET["pv"] : 0;
 $UHC = !empty($_GET["uhc"]) && $PHP_VERSION >= 4.3 ? $_GET["uhc"] : 0;
 $UKHL = !empty($_GET["ukhl"]) && $PHP_VERSION >= 4.3 ? $_GET["ukhl"] : 0;
 
-$INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;
+$INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;				// This tell to the cache to show info like the name, the version, the vendor code, the home page of the cache, the nick and the website of the maintainer (the one that has put the cache on a webserver).
 
 $USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? str_replace("/", " ", $_SERVER["HTTP_USER_AGENT"]) : NULL;
 
-$COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;
+$COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none
 $ACCEPT_ENCODING = !empty($_SERVER["HTTP_ACCEPT_ENCODING"]) ? $_SERVER["HTTP_ACCEPT_ENCODING"] : NULL;
 if($COMPRESSION == NULL && strpos($ACCEPT_ENCODING, "deflate") > -1 && !DEBUG) $COMPRESSION = "deflate";
 
@@ -960,14 +971,14 @@ $SHOWCACHES = !empty($_GET["showurls"]) ? $_GET["showurls"] : 0;
 $SHOWSTATS = !empty($_GET["stats"]) ? $_GET["stats"] : 0;
 $SHOWDATA = !empty($_GET["data"]) ? $_GET["data"] : 0;
 
-$KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter.
+$KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter (it is used the first time to populate the cache, it MUST be disabled after that).
 
 if( empty($_SERVER["QUERY_STRING"]) )
 	$SHOWINFO = 1;
 
 if( isset($noload) ) die();
 
-if(MAINTAINER_NICK == "your nickname here")
+if(MAINTAINER_NICK == "your nickname here" || MAINTAINER_NICK == "")
 {
 	echo "You must read readme.txt in the admin directory first.\r\n";
 	die();
@@ -1017,26 +1028,29 @@ else
 header("Connection: close");
 if($web)
 {
-	ini_set("user_agent", NAME);
 	if(ini_get("zlib.output_compression") == 1)
 		ini_set("zlib.output_compression", "0");
 	include "web_interface.php";
 
 	$compressed = StartCompression($COMPRESSION);
+	header("User-Agent: ".NAME." ".VER);
 	ShowHtmlPage($web);
 	if($compressed) ob_end_flush();
 }
 elseif( $KICK_START )
 {
-	ini_set("user_agent", NAME);
+	if(ini_get("zlib.output_compression") == 1)
+		ini_set("zlib.output_compression", "0");
 
 	if( !KICK_START_ENABLED )
 		die("ERROR: Kickstart is disabled\r\n");
 
-	if( $NET == null )
+	if( $NET == NULL )
 		die("ERROR: Network not specified\r\n");
 	elseif( !CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		die("ERROR: Network not supported\r\n");
+
+	header("User-Agent: ".NAME." ".VER);
 
 	if( !function_exists("KickStart") )
 	{
@@ -1140,9 +1154,12 @@ else
 			$CLUSTER = RemoveGarbage($value);
 	}
 
+	$compressed = StartCompression($COMPRESSION);
+	header("User-Agent: ".NAME." ".VER);
+
 	if($CACHE != NULL)
 	{	// Cleaning url
-		if(DEBUG) echo "URL sent: ".$CACHE."\r\n";
+		if(DEBUG) echo "D|update|URL sent: ".$CACHE."\r\n";
 		if(strpos($CACHE, "://") > -1)
 		{
 			if( $CACHE == "http://bbs.robertwoolley.co.uk/GWebCache/gcache.php" )
@@ -1213,18 +1230,16 @@ else
 			if(substr($CACHE, $cache_length-1) == "/")
 				$CACHE = substr($CACHE, 0, $cache_length-1);
 		}
-		if(DEBUG) echo "URL cleaned: ".$CACHE."\r\n";
+		if(DEBUG) echo "D|update|URL cleaned: ".$CACHE."\r\n";
 	}
 
-	if($NET == NULL) $NET = "gnutella";
-	$compressed = StartCompression($COMPRESSION);
+	if($NET == NULL) $NET = "gnutella";	// This should NOT absolutely be changed (also if your cache don't support the gnutella network) otherwise you will mix host of different networks and it is bad.
 
 	if(!empty($_SERVER["HTTP_X_FORWARDED_FOR"]))
 		header("X-Remote-IP: ".$_SERVER["HTTP_X_FORWARDED_FOR"]);
 	else
 		header("X-Remote-IP: ".$REMOTE_IP);
 
-	ini_set("user_agent", NAME);
 	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		$supported_net = TRUE;
 	else
@@ -1323,7 +1338,7 @@ else
 
 	if(!$supported_net) $GET = 0;
 
-	if($GET || $UHC)
+	if($GET || $UHC || $UKHL)
 	{
 		Get($NET, $PV, $GET, $UHC, $UKHL);
 		if($UHC || $UKHL)
@@ -1332,15 +1347,15 @@ else
 			echo "I|ukhl|".$UDP["ukhl"]."\r\n";
 		}
 	}
-	else
+	elseif($supported_net)
 	{
-		if($HOSTFILE && $supported_net)
+		if($HOSTFILE)
 			HostFile($NET);
 
-		if($URLFILE && $supported_net && FSOCKOPEN)
+		if($URLFILE && FSOCKOPEN)
 			UrlFile($NET);
 
-		if($PV >= 3 && ($HOSTFILE || $URLFILE) && $supported_net)
+		if($PV >= 3 && ($HOSTFILE || $URLFILE))
 			echo "nets: ".strtolower(NetsToString())."\r\n";
 	}
 
@@ -1348,6 +1363,19 @@ else
 		UpdateStats("update");
 	else
 		UpdateStats("other");
+
+	if($INFO)
+	{
+		echo "I|name|".NAME."\r\n";
+		echo "I|ver|".VER."\r\n";
+		echo "I|vendor|".VENDOR."\r\n";
+		echo "I|gwc-site|".GWC_SITE."\r\n";
+		echo "I|open-source|".OPEN_SOURCE."\r\n";
+
+		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
+		if(MAINTAINER_WEBSITE != "http://www.your-site.com/" && MAINTAINER_WEBSITE != "")
+			echo "I|maintainer-site|".MAINTAINER_WEBSITE."\r\n";
+	}
 
 	if($STATFILE)
 	{
@@ -1364,19 +1392,6 @@ else
 		}
 		else
 			echo "WARNING: Statfile disabled\r\n";
-	}
-
-	if($INFO)
-	{
-		echo "I|name|".NAME."\r\n";
-		echo "I|ver|".VER."\r\n";
-		echo "I|vendor|".VENDOR."\r\n";
-		echo "I|gwc-site|".GWC_SITE."\r\n";
-		echo "I|open-source|".OPEN_SOURCE."\r\n";
-
-		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
-		if(MAINTAINER_WEBSITE != "http://www.your-site.com/" && MAINTAINER_WEBSITE != "")
-			echo "I|maintainer-site|".MAINTAINER_WEBSITE."\r\n";
 	}
 
 
