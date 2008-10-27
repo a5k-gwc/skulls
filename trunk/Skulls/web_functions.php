@@ -195,7 +195,7 @@ function ReplaceVendorCode($client, $version){
 			break;
 		case "MWebCache":
 			$client_name = "MWebCache";
-			$url = "http://sourceforge.net/tracker/index.php?func=detail&aid=1588787&group_id=83030&atid=568086";
+			$url = "http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1588787&amp;group_id=83030&amp;atid=568086";
 			$cache = 2;
 			break;
 		case "SKLL":
