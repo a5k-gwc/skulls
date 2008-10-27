@@ -258,7 +258,7 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 		if( !fwrite( $fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: Close\r\n\r\n") )
 		{
 			$status = "REQUEST_ERROR";
-			$msg = "Error";
+			$msg = "Request error";
 		}
 		else
 		{
@@ -386,7 +386,7 @@ function CheckUpdates(){
 	}
 	elseif($status == "REQUEST_ERROR")
 	{
-		echo "<font color=\"red\"><b>".$msg."</b></font><br>\r\n";
+		echo "<b>Update check process:</b> <font color=\"red\"><b>".$msg."</b></font><br>\r\n";
 	}
 	elseif($status == "OK")
 	{

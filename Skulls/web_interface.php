@@ -2,15 +2,11 @@
 include "web_functions.php";
 
 function ShowHtmlPage($num){
-	global $NET;
-	if($NET == NULL) $NET = "all";
-
+	global $NET, $SUPPORTED_NETWORKS;
 	if(!function_exists("Initialize"))
-	{
-		global $SUPPORTED_NETWORKS;
 		include "functions.php";
-		Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
-	}
+
+	Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -39,7 +35,7 @@ function ShowHtmlPage($num){
 				<tr>
 					<td height="30" valign="top" bgcolor="#FFFFFF">
 						<a href="?showinfo=1">General Details</a> /
-						<a href="?showhosts=1&amp;net=<?php echo $NET; ?>">Hosts</a> /
+						<a href="?showhosts=1&amp;net=<?php if($NET == NULL) $NET = "all"; echo $NET; ?>">Hosts</a> /
 						<a href="?showurls=1">Alternative WebCaches</a> /
 						<a href="?stats=1">Statistics</a>
 					</td>
@@ -187,7 +183,7 @@ function ShowHtmlPage($num){
 														echo " (".$leaves.")";
 													echo "</td>";
 													echo "<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>";
-													echo "<td style=\"padding-right: 20pt;\">".$net."</td>";
+													echo "<td style=\"padding-right: 20pt;\"><a href=\"?showhosts=1&amp;net=".strtolower($net)."\">".$net."</a></td>";
 													echo "<td>".$time."</td></tr>";
 												}
 											}
@@ -293,7 +289,7 @@ function ShowHtmlPage($num){
 													elseif(strpos($cache_name, "jumswebcache") > -1)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www1.mager.org/GWebCache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													elseif(strpos($cache_name, "MWebCache") > -1)
-														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/tracker/index.php?func=detail&aid=1588787&group_id=83030&atid=568086\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1588787&amp;group_id=83030&amp;atid=568086\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													else
 														$output .= "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
 													$output .= "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
