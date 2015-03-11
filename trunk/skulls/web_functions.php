@@ -63,7 +63,7 @@ function ReplaceVendorCode($client, $version){
 			break;
 		case "LIME":
 			$client_name = "LimeWire";
-			$url = "http://www.limewire.com/";
+			$url = "http://en.wikipedia.org/wiki/LimeWire";
 			break;
 		case "MESH":
 			$client_name = "iMesh";
@@ -106,9 +106,9 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "Shareaza";
 			$url = "http://shareaza.sourceforge.net/";
 			break;
-		case "RAZB":
-			$client_name = "ShareazaBeta";		// Beta version of Shareaza
-			$url = "http://shareaza.sourceforge.net/help/?beta";
+		case "RAZB":	// Beta version of Shareaza
+			$client_name = "ShareazaBeta";
+			$url = "http://shareaza.sourceforge.net/?id=debug";  /* http://shareaza.sourceforge.net/daily/ */
 			break;
 		case "RAZL":
 			$client_name = "ShareazaLite";
@@ -143,6 +143,7 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "Wurm Scanner";
 			$url = "http://kevogod.trillinux.org/";
 			break;
+
 		case "KICKSTART":
 			$client_name = "KickStart";
 			$url = "";
@@ -155,7 +156,7 @@ function ReplaceVendorCode($client, $version){
 		case "BAZK":
 		case "Bazooka":
 			$client_name = "Bazooka";
-			$url = "http://www.bazookanetworks.com/";
+			$url = "";  /* http://www.bazookanetworks.com/ */
 			$cache = 2;
 			break;
 		case "BCII":
@@ -195,7 +196,7 @@ function ReplaceVendorCode($client, $version){
 			break;
 		case "MWebCache":
 			$client_name = "MWebCache";
-			$url = "http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1588787&amp;group_id=83030&amp;atid=568086";
+			$url = "http://sourceforge.net/p/mute-net/support-requests/7/";
 			$cache = 2;
 			break;
 		case "SKLL":
