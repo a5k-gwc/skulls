@@ -1,6 +1,6 @@
 <?php
 header("Pragma: no-cache");
-define( "REVISION", 4.8 );
+define( "REVISION", 4.9 );
 if(file_exists("revision.dat"))
 	$file_content = file("revision.dat");
 

@@ -43,7 +43,7 @@ $footer = "";
 //$SUPPORTED_NETWORKS[] = "Gnutella";
 $SUPPORTED_NETWORKS[] = "Gnutella2";
 $SUPPORTED_NETWORKS[] = "MUTE";
-$SUPPORTED_NETWORKS[] = "Kad";
+$SUPPORTED_NETWORKS[] = "Foxy";
 
 // UDP (Currently it is incomplete)
 // 0: Disabled, 1: Enabled
