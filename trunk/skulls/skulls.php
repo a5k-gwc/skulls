@@ -57,8 +57,8 @@ if(CACHE_URL != "")
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );											// Four uppercase letters vendor code
-define( "SHORT_VER", "0.2.8" );										// Version without letters or words
-define( "VER", SHORT_VER."h" );
+define( "SHORT_VER", "0.2.9" );										// Numeric version (without letters or words)
+define( "VER", SHORT_VER."" );										// Full version (it can contain letters)
 define( "GWC_SITE", "http://sourceforge.net/projects/skulls/" );	// Site where can be downloaded this cache
 define( "OPEN_SOURCE", "1" );
 define( "DEBUG", "0" );
@@ -94,7 +94,7 @@ function RemoveGarbage($value){
 }
 
 function Pong($multi, $net, $client, $supported_net, $remote_ip){
-	if($remote_ip == "127.0.0.1")	// Prevent caches that incorrectly point to 127.0.0.1 to being added to cache list
+	if($remote_ip == "127.0.0.1")	// Prevent caches that point to 127.0.0.1 to being added to cache list, in this case we actually ping ourselves so the cache may look working while it isn't
 		return;
 
 	$pong = "I|pong|".NAME." ".VER;
@@ -127,8 +127,6 @@ function Support($supported_networks, $udp)
 {
 	for($i=0; $i<NETWORKS_COUNT; $i++)
 		echo "I|support|".strtolower($supported_networks[$i])."\r\n";
-	echo "I|compression|deflate\r\n";
-	echo "I|fsockopen|".FSOCKOPEN."\r\n";
 	echo "I|uhc|".$udp["uhc"]."\r\n";
 	echo "I|ukhl|".$udp["ukhl"]."\r\n";
 }
@@ -193,6 +191,7 @@ function CheckIPValidity($remote_ip, $ip){
 			ctype_digit($ip_port[1]) &&
 			$ip_port[1] > 0 &&
 			$ip_port[1] < 65536 &&
+			$ip_port[1] != 27016 &&  // Port used by bad clients
 			$ip_port[0] == $remote_ip &&
 			ip2long($ip_port[0]) == ip2long($remote_ip)
 		)
@@ -1136,6 +1135,7 @@ else
 		die();
 	}
 
+	/* Block host submission by old caches (they don't do it) */
 	if($CLIENT == "TEST")
 		$IP = NULL;
 
@@ -1232,7 +1232,7 @@ else
 		if(DEBUG) echo "D|update|URL cleaned: ".$CACHE."\r\n";
 	}
 
-	if($NET == NULL) $NET = "gnutella";	// This should NOT absolutely be changed (also if your cache don't support the gnutella network) otherwise you will mix host of different networks and it is bad.
+	if($NET == NULL) $NET = "gnutella";  // This should NOT absolutely be changed (also if your cache don't support the gnutella network) otherwise you will mix host of different networks and it is bad.
 
 	if(!empty($_SERVER["HTTP_X_FORWARDED_FOR"]))
 		header("X-Remote-IP: ".$_SERVER["HTTP_X_FORWARDED_FOR"]);
