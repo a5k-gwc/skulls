@@ -252,10 +252,14 @@ function CheckBlockedCache($cache){
 
 function IsClientTooOld($client, $version){
     switch($client)
-	{
+	{  // Block too old versions and some ripp-offs that are based on old versions.
 		case "RAZA":
 		case "RAZB":
-			if((float)$version < 2.2)	// This also block some ripp-offs that are based on old versions of Shareaza.
+			if((float)$version < 2.3)
+				return TRUE;
+			break;
+		case "LIME";
+			if((int)$version < 4)
 				return TRUE;
 			break;
 		case "BEAR":
@@ -265,11 +269,6 @@ function IsClientTooOld($client, $version){
 				if($short_ver != "5.1.0" && $short_ver != "5.2.1" )
 					return TRUE;
 			}
-			break;
-		case "SKLL":
-			if((int)$version == 0)
-				if((float)substr($version, 2) < 2.4)
-					return TRUE;
 			break;
     }
 
