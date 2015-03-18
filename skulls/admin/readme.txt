@@ -1,5 +1,5 @@
 Skulls! Multi-Network WebCache
-------------------------------
+-------------------------------
 
 skulls.php is the main file.
 
@@ -8,7 +8,7 @@ admin/update.php can be used to update data files if you have installed an old v
 
 
 WARNING
-I STRONGLY SUGGEST you use a CNAME (canonical name) for the cache such as http://gwc.your-site.com/skulls.php
+I STRONGLY SUGGEST you use a CNAME (canonical name) for the cache such as http://gwc.your-site.com/skulls.php instead of http://your-site.com/skulls.php
 So if you ever want to take it down all you will have to do is delete the CNAME.
 If you don't know what is a CNAME then look here: http://en.wikipedia.org/wiki/Domain_name_system
 
@@ -27,14 +27,14 @@ INSTALLATION PROCEDURE
 Note: You must be sure that there aren't any problems before go to the step 8
 8. Submit the url of skulls.php here: http://skulls.sourceforge.net/submit.php
 
-If you need more help ask here: http://sourceforge.net/forum/forum.php?forum_id=522656
+If you need more help ask here: http://sourceforge.net/p/skulls/discussion/
 
 
 UPDATE PROCEDURE
 1. Delete old skulls.php in your web server
 2. Send updated files inside admin directory to your web server
-3. Go on http://name_of_your_web_server/admin/update.php in your browser
+3. Go on http://gwc.your-site.com/admin/update.php in your browser
 4. Send all updated files to your web server (Copy in the new vars.php the things that you have changed in the old vars.php)
-5. Go on http://name_of_your_web_server/skulls.php in your browser, if you don't see any error you are OK
+5. Go on http://gwc.your-site.com/skulls.php in your browser, if you don't see any error you are OK
 
-If you need more help ask here: http://sourceforge.net/forum/forum.php?forum_id=522656
+If you need more help ask here: http://sourceforge.net/p/skulls/discussion/
