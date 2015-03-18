@@ -33,6 +33,10 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "Deepnet Explorer";
 			$url = "http://www.deepnetexplorer.com/";
 			break;
+		case "FOXY":
+			$client_name = "Foxy";
+			$url = "";
+			break;
 		case "GDNA":
 			$client_name = "GnucDNA";
 			$url = "http://www.gnucleus.com/GnucDNA/";

@@ -35,7 +35,7 @@ function ShowHtmlPage($num){
 				<tr>
 					<td height="30" valign="top" bgcolor="#FFFFFF">
 						<a href="?showinfo=1">General Details</a> /
-						<a href="?showhosts=1&amp;net=<?php if($NET == NULL) $NET = "all"; echo $NET; ?>">Hosts</a> /
+						<a href="?showhosts=1&amp;net=all">Hosts</a> /
 						<a href="?showurls=1">Alternative WebCaches</a> /
 						<a href="?stats=1">Statistics</a>
 					</td>
