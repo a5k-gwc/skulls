@@ -93,16 +93,20 @@ function RemoveGarbage($value){
 	return str_replace("\0", "", $value);
 }
 
-function Pong($multi, $net, $client, $supported_net, $remote_ip){
+function Pong($support, $multi, $net, $client, $supported_net, $remote_ip){
 	if($remote_ip == "127.0.0.1")	// Prevent caches that point to 127.0.0.1 to being added to cache list, in this case we actually ping ourselves so the cache may look working while it isn't
 		return;
 
 	$pong = "I|pong|".NAME." ".VER;
 
-	if($multi)
+	if($support)
+	{
+		echo $pong."\r\n";
+	}
+	elseif($multi)
 	{
 		$nets = strtolower(NetsToString());
-		echo $pong."|".$nets."|".FSOCKOPEN."\r\n";
+		echo $pong."|".$nets."\r\n";
 	}
 	elseif($supported_net)
 	{
@@ -118,7 +122,7 @@ function Pong($multi, $net, $client, $supported_net, $remote_ip){
 			elseif($client == "GCII" && $net == "gnutella2")
 				echo $pong."||".FSOCKOPEN."|COMPAT|".$nets."\r\n";			// Workaround for compatibility with PHPGnuCacheII
 			else
-				echo $pong."|".$nets."|".FSOCKOPEN."\r\n";
+				echo $pong."|".$nets."\r\n";
 		}
 	}
 }
@@ -1244,11 +1248,11 @@ else
 	else
 	{
 		$supported_net = FALSE;
-		if(($PING && !$MULTI) || $GET || $HOSTFILE || $URLFILE || $CACHE != NULL || $IP != NULL) echo "ERROR: Network not supported\r\n";
+		if(($PING && !$MULTI && !$SUPPORT) || $GET || $HOSTFILE || $URLFILE || $CACHE != NULL || $IP != NULL) echo "ERROR: Network not supported\r\n";
 	}
 
 	if($PING)
-		Pong($MULTI, $NET, $CLIENT, $supported_net, $REMOTE_IP);
+		Pong($SUPPORT, $MULTI, $NET, $CLIENT, $supported_net, $REMOTE_IP);
 	if($SUPPORT)
 		Support($SUPPORTED_NETWORKS, $UDP);
 
