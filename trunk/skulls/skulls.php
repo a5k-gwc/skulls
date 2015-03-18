@@ -923,7 +923,7 @@ $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
 $IS_A_CACHE = !empty($_GET["cache"]) ? $_GET["cache"] : 0;		// This should be added to every request made by a cache, it is for statistical purpose only.
-$MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;			// It is added to every ping request (it has no effect on other things) made by Skulls, it tell to the pinged cache to ignore the "net" parameter and outputting the pong using this format, if possible, "I|pong|[cache name] [cache version]|[supported networks list]|[url adding is enabled]" - example: I|pong|Skulls 0.2.8a|gnutella-gnutella2|1
+$MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;			// It is added to every ping request (it has no effect on other things), it tell to the pinged cache to ignore the "net" parameter and outputting the pong using this format, if possible, "I|pong|[cache name] [cache version]|[supported networks list]" - example: I|pong|Skulls 0.2.9|gnutella-gnutella2
 $PV = !empty($_GET["pv"]) ? $_GET["pv"] : 0;
 $UHC = !empty($_GET["uhc"]) && $PHP_VERSION >= 4.3 ? $_GET["uhc"] : 0;
 $UKHL = !empty($_GET["ukhl"]) && $PHP_VERSION >= 4.3 ? $_GET["ukhl"] : 0;
