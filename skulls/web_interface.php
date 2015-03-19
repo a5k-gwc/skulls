@@ -278,7 +278,7 @@ function ShowHtmlPage($num){
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													elseif(strpos($cache_name, "Bazooka") > -1)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.bazookanetworks.com/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(strpos($cache_name, "Beacon Cache") > -1)
+													elseif(strpos($cache_name, "Beacon Cache") > -1)  // Beacon Cache and Beacon Cache II
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/beaconcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													elseif(strpos($cache_name, "Cachechu") > -1)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://code.google.com/p/cachechu/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
