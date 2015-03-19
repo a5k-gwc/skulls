@@ -356,9 +356,9 @@ function CheckUpdates(){
 		if($status == "SOCK_ERROR") $time_diff = floor($time_diff / 3600);	// Hours
 		else $time_diff = floor($time_diff / 86400);						// Days
 
-		if($time_diff < 2)
+		if($time_diff < 1)
 			$cached = TRUE;
-		elseif($status == "OK" && $time_diff < 7)
+		elseif($status == "OK" && $time_diff < 4)
 			$cached = TRUE;
 	}
 
