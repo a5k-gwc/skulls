@@ -17,15 +17,20 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-function ReplaceVendorCode($client, $version){
-	$cache = 0;
-	if( $client == "TEST" && (float)$version == 0 && substr($version, 0, 1) != "0" )	// If $client is TEST and $version isn't numeric...
+function ReplaceVendorCode($vendor, $version){
+	$cache = 0; $url = "";
+	if( $vendor == 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
 	{
-		list( $client, $version ) = explode(" ", $version, 2);
+		if(strpos($version, ' ') !== false)
+			list( $vendor, $version ) = explode(' ', $version, 2);
+		elseif(strpos($version, '-') !== false)
+			list( $vendor, $version ) = explode('-', $version, 2);
+		else
+			{$vendor = $version; $version = "";}
 		$cache = 1;
 	}
 
-	switch($client)
+	switch($vendor)
 	{
 		case "ACQL":
 			$client_name = "Acqlite";
@@ -51,9 +56,9 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "Deepnet Explorer";
 			$url = "http://www.deepnetexplorer.com/";
 			break;
-		case "FOXY":
+		case "FOXY":	// Client of Foxy network (Network parameter enforced in the code to prevent leakage on G1/G2)
 			$client_name = "Foxy";
-			$url = "";
+			$url = "http://en.wikipedia.org/wiki/Foxy_%28P2P%29";
 			break;
 		case "GDNA":
 			$client_name = "GnucDNA";
@@ -104,11 +109,11 @@ function ReplaceVendorCode($client, $version){
 			$client_name = "MyNapster";
 			$url = "http://www.mynapster.com/";
 			break;
-		case "MTLL":	// Vendor code of Mutella is changed to MTLL in the code to avoid confusion with MUTE network
+		case "MTLL":	// The vendor code of Mutella is changed to MTLL in the code to avoid confusion with MUTE network
 			$client_name = "Mutella";
 			$url = "http://mutella.sourceforge.net/";
 			break;
-		case "MUTE":	// MUTE (A MUTE net client)
+		case "MUTE":	// Client of MUTE network (Network parameter enforced in the code to prevent leakage on G1/G2)
 			$client_name = "MUTE";
 			$url = "http://mute-net.sourceforge.net/";
 			break;
@@ -166,6 +171,7 @@ function ReplaceVendorCode($client, $version){
 			$url = "http://kevogod.trillinux.org/";
 			break;
 
+		// Special cases
 		case "KICKSTART":
 			$client_name = "KickStart";
 			$url = "";
@@ -175,6 +181,7 @@ function ReplaceVendorCode($client, $version){
 			$url = "";
 			break;
 
+		// GWCs
 		case "BAZK":
 		case "Bazooka":
 			$client_name = "Bazooka";
@@ -231,12 +238,11 @@ function ReplaceVendorCode($client, $version){
 			$cache = 1;
 		default:
 			if($cache)
-				return "WebCache (".$client." ".$version.")";
-			elseif( $client != "" )
-				$client_name = $client;
+				return 'Unknown WebCache ('.$vendor.' '.$version.')';
+			elseif( $vendor != "" )
+				$client_name = $vendor;
 			else
-				$client_name = "Unknown client";
-			$url = "";
+				$client_name = 'Unknown client';
 	}
 
 	if($cache == 2) $version .= " (WebCache)";
