@@ -479,7 +479,7 @@ function ShowUpdateCheck(){
 		{
 			if($result["update_info"] != "") echo $result["update_info"]."\r\n";
 			echo "<br><font color=\"".$color."\"><b>There is a new version of ".NAME.", ";
-			echo "please visit the download page of <a href=\"".GWC_SITE."\" class=\"hover-underline\" target=\"_blank\">".NAME."</a> to obtain the latest version.</b></font><br>";
+			echo "please visit the official site of <a href=\"".GWC_SITE."\" class=\"hover-underline\" target=\"_blank\">".NAME."</a> to obtain the latest version.</b></font><br>";
 		}
 	}
 }
