@@ -50,7 +50,7 @@ define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );											// Four uppercase letters vendor code
 define( "SHORT_VER", "0.2.9" );										// Numeric version (without letters or words)
 define( "VER", SHORT_VER."" );										// Full version (it can contain letters)
-define( "GWC_SITE", "http://sourceforge.net/projects/skulls/" );	// Site where can be downloaded this cache
+define( "GWC_SITE", "http://sourceforge.net/projects/skulls/" );	// Official site of this GWebCache
 define( "OPEN_SOURCE", "1" );
 define( "DEBUG", "0" );
 
@@ -109,9 +109,9 @@ function Pong($support, $multi, $net, $client, $supported_net, $remote_ip){
 		{
 			$nets = strtolower(NetsToString());
 			if($client == "TEST" && $net == "gnutella2" && $nets != "gnutella2")
-				echo $pong."|gnutella2|".FSOCKOPEN."|COMPAT|".$nets."\r\n";	// Workaround for compatibility with Bazooka
+				echo $pong."|gnutella2||COMPAT|".$nets."\r\n";	// Workaround for compatibility with Bazooka
 			elseif($client == "GCII" && $net == "gnutella2")
-				echo $pong."||".FSOCKOPEN."|COMPAT|".$nets."\r\n";			// Workaround for compatibility with PHPGnuCacheII
+				echo $pong."|||COMPAT|".$nets."\r\n";			// Workaround for compatibility with PHPGnuCacheII
 			else
 				echo $pong."|".$nets."\r\n";
 		}
@@ -945,7 +945,7 @@ $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 $CLIENT = !empty($_GET["client"]) ? strtoupper($_GET["client"]) : NULL;
 // There is MUTE (MUTE network client) and Mutella (Gnutella network client).
 // Both identifying itself as MUTE.
-if($CLIENT == "MUTE")
+if($CLIENT === "MUTE")
 {
 	list($name, ) = explode(" ", $USER_AGENT);
 	if($name == "Mutella")
@@ -1074,11 +1074,11 @@ else
 
 	if($CLIENT == NULL || $VERSION == NULL)
 	{
-		header("HTTP/1.0 404 Not Found");
-		print "ERROR: Client or version unknown - Request rejected\r\n";
-		if(LOG_MINOR_ERRORS) Logging("unidentified_clients", $CLIENT, $VERSION, $NET);
+		header('HTTP/1.0 404 Not Found');
+		echo 'ERROR: Client or version unknown - Request rejected\r\n';
+		if(LOG_MINOR_ERRORS) Logging('unidentified_clients', $CLIENT, $VERSION, $NET);
 
-		if($CACHE != NULL || $IP != NULL)
+		if($UPDATE || $CACHE !== null || $IP !== null)
 			UpdateStats("update");
 		else
 			UpdateStats("other");
@@ -1104,11 +1104,8 @@ else
 
 	if( $blocked || IsClientTooOld($CLIENT, $VERSION) )
 	{
-		header("HTTP/1.0 404 Not Found");
-
-		//if(LOG_MINOR_ERRORS) Logging("old_clients", $CLIENT, $VERSION, $NET);
-
-		if($CACHE != NULL || $IP != NULL)
+		header('HTTP/1.0 404 Not Found');
+		if($UPDATE || $CACHE !== null || $IP !== null)
 			UpdateStats("update");
 		else
 			UpdateStats("other");
@@ -1126,9 +1123,9 @@ else
 		die();
 	}
 
-	/* Block host submission by old caches (they don't do it) */
-	if($CLIENT == "TEST")
-		$IP = NULL;
+	/* Block host submission by caches (they don't do it) */
+	if($IS_A_CACHE || $CLIENT === 'TEST')
+		$IP = null;
 
 	if($LEAVES != NULL && !ctype_digit($LEAVES))
 	{
