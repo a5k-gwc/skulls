@@ -65,6 +65,26 @@ function GetMicrotime(){
     return (float)$usec + (float)$sec; 
 }
 
+function NormalizeIdentity(&$vendor, &$ver)
+{
+	if($ver === "" && strlen($vendor) > 4)  // Check if vendor and version are mixed inside vendor
+	{
+		$ver = substr($vendor, 4);
+		$vendor = substr($vendor, 0, 4);
+	}
+	$vendor = strtoupper($vendor);
+}
+
+function ValidateIdentity($vendor, $ver)
+{
+	if(strlen($vendor) < 4)
+		return false;  /* Vendor missing or too short */
+	elseif($ver === "")
+		return false;  /* Version missing */
+
+	return true;
+}
+
 function NetsToString(){
 	global $SUPPORTED_NETWORKS;
 	$nets = "";
@@ -942,7 +962,7 @@ if($BFILE) { $HOSTFILE = 1; $URLFILE = 1; }
 $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 
-$CLIENT = !empty($_GET["client"]) ? strtoupper($_GET["client"]) : NULL;
+$CLIENT = !empty($_GET["client"]) ? $_GET["client"] : "";
 // There is MUTE (MUTE network client) and Mutella (Gnutella network client).
 // Both identifying itself as MUTE.
 if($CLIENT === "MUTE")
@@ -954,7 +974,7 @@ if($CLIENT === "MUTE")
 		$NET = "mute";
 	unset($name);
 }
-$VERSION = !empty($_GET["version"]) ? $_GET["version"] : NULL;
+$VERSION = !empty($_GET["version"]) ? $_GET["version"] : "";
 
 $SUPPORT = !empty($_GET["support"]) ? $_GET["support"] : 0;
 
@@ -1066,13 +1086,8 @@ else
 		fclose($file);
 	}
 
-	if($VERSION == NULL && strlen($CLIENT) > 4)
-	{
-		$VERSION = substr( $CLIENT, 4 );
-		$CLIENT = substr( $CLIENT, 0, 4 );
-	}
-
-	if($CLIENT == NULL || $VERSION == NULL)
+	NormalizeIdentity($CLIENT, $VERSION);
+	if( !ValidateIdentity($CLIENT, $VERSION) )
 	{
 		header('HTTP/1.0 404 Not Found');
 		echo 'ERROR: Client or version unknown - Request rejected\r\n';
