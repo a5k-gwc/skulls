@@ -811,7 +811,7 @@ function Get($net, $pv, $get, $uhc, $ukhl){
 
 function StartCompression($COMPRESSION){
 	if($COMPRESSION == "deflate")
-		{ $compressed = TRUE; ob_start("gzdeflate"); }
+		{ $compressed = TRUE; ob_start("gzcompress"); }
 	else
 		{ $compressed = FALSE; }
 	if($compressed) header("Content-Encoding: deflate");
