@@ -963,17 +963,6 @@ $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 
 $CLIENT = !empty($_GET["client"]) ? $_GET["client"] : "";
-// There is MUTE (MUTE network client) and Mutella (Gnutella network client).
-// Both identifying itself as MUTE.
-if($CLIENT === "MUTE")
-{
-	list($name, ) = explode(" ", $USER_AGENT);
-	if($name == "Mutella")
-		$CLIENT = "MTLL";
-	elseif($NET == NULL)
-		$NET = "mute";
-	unset($name);
-}
 $VERSION = !empty($_GET["version"]) ? $_GET["version"] : "";
 
 $SUPPORT = !empty($_GET["support"]) ? $_GET["support"] : 0;
@@ -1099,6 +1088,18 @@ else
 			UpdateStats("other");
 		die();
 	}
+
+	if($CLIENT === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
+	{
+		list($name, ) = explode(" ", $USER_AGENT, 2);
+		if($name === 'Mutella')
+			$CLIENT = 'MTLL';
+		else
+			$NET = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on G1/G2 */
+		unset($name);
+	}
+	elseif($CLIENT === 'FOXY')
+		$NET = 'foxy';      /* Enforced network parameter for Foxy clients to prevent leakage on G1/G2 */
 
 	$blocked = FALSE;
 	$name = explode(" ", $USER_AGENT);
