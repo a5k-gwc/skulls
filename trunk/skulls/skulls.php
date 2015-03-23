@@ -1148,14 +1148,7 @@ else
 		$LEAVES = NULL;
 		if(LOG_MAJOR_ERRORS) Logging("invalid_leaves", $CLIENT, $VERSION, $NET);
 	}
-
-	if($CLUSTER != NULL)
-	{
-		if( strlen($CLUSTER) > 256 )
-			$CLUSTER = NULL;
-		else
-			$CLUSTER = RemoveGarbage($value);
-	}
+	$CLUSTER = NULL;
 
 	$compressed = StartCompression($COMPRESSION);
 
