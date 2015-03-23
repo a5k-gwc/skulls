@@ -21,12 +21,6 @@ $SUPPORTED_NETWORKS = NULL;
 include "vars.php";
 $UDP["ukhl"] = 0;	// The support isn't complete
 
-if( !isset($_GET) )
-{
-	$_SERVER = &$HTTP_SERVER_VARS;
-	$_GET = &$HTTP_GET_VARS;
-}
-
 $PHP_SELF = $_SERVER["PHP_SELF"];
 $REMOTE_IP = $_SERVER["REMOTE_ADDR"];
 
@@ -1024,7 +1018,6 @@ elseif( $SHOWSTATS || $SHOWDATA )
 else
 	$web = 0;
 
-header("Connection: close");
 if($web)
 {
 	if(ini_get("zlib.output_compression") == 1)
@@ -1032,7 +1025,6 @@ if($web)
 	include "web_interface.php";
 
 	$compressed = StartCompression($COMPRESSION);
-	header("User-Agent: ".NAME." ".VER);
 	ShowHtmlPage($web);
 	if($compressed) ob_end_flush();
 }
@@ -1049,8 +1041,6 @@ elseif( $KICK_START )
 	elseif( !CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		die("ERROR: Network not supported\r\n");
 
-	header("User-Agent: ".NAME." ".VER);
-
 	if( !function_exists("KickStart") )
 	{
 		include "functions.php";
@@ -1060,9 +1050,9 @@ elseif( $KICK_START )
 else
 {
 	if(!CONTENT_TYPE_WORKAROUND)
-		header("Content-Type: text/plain");
+		header('Content-Type: text/plain; charset=UTF-8');
 	else
-		header("Content-Type: application/octet-stream");
+		header('Content-Type: application/octet-stream');
 
 	if(STATS_ENABLED)
 	{
@@ -1155,7 +1145,6 @@ else
 	}
 
 	$compressed = StartCompression($COMPRESSION);
-	header("User-Agent: ".NAME." ".VER);
 
 	if($CACHE != NULL)
 	{	// Cleaning url
