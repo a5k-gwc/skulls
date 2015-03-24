@@ -176,14 +176,14 @@ function Support($support, $supported_networks, $udp)
 {
 	if($support > 1)
 	{
-		echo "I|networks";
+		echo 'I|networks';
 		for($i=0; $i<NETWORKS_COUNT; $i++)
-			echo '|'.strtolower($supported_networks[$i]);
+			echo '|',strtolower($supported_networks[$i]);
 		echo "\r\n";
 	}
 	else
 		for($i=0; $i<NETWORKS_COUNT; $i++)
-			echo "I|support|".strtolower($supported_networks[$i])."\r\n";
+			echo 'I|support|',strtolower($supported_networks[$i]),"\r\n";
 }
 
 function CheckNetwork($supported_networks, $net)
