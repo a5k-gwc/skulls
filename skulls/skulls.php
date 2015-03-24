@@ -65,14 +65,27 @@ function GetMicrotime(){
     return (float)$usec + (float)$sec; 
 }
 
-function NormalizeIdentity(&$vendor, &$ver)
+function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 {
-	if($ver === "" && strlen($vendor) > 4)  // Check if vendor and version are mixed inside vendor
+	/* Check if vendor and version are mixed inside vendor */
+	if($ver === "" && strlen($vendor) > 4)
 	{
 		$ver = substr($vendor, 4);
 		$vendor = substr($vendor, 0, 4);
 	}
 	$vendor = strtoupper($vendor);
+
+	/* Change vendor code of mod versions of Shareaza */
+	if($vendor === 'RAZA')
+	{
+		if(strpos($user_agent, 'Shareaza') !== 0 || strpos($user_agent, 'Shareaza PRO') === 0)
+			$vendor = 'RAZM';
+	}
+	elseif($vendor === 'LIME')
+	{
+		if(strpos($user_agent, 'LimeWire') !== 0)
+			$vendor = 'LIMM';
+	}
 }
 
 function ValidateIdentity($vendor, $ver, $user_agent)
@@ -82,12 +95,22 @@ function ValidateIdentity($vendor, $ver, $user_agent)
 	elseif($ver === "")
 		return false;  /* Version missing */
 
-	if($vendor === 'RAZA' || $vendor === 'RAZB')
-	{  /* Block empty User-Agent and User-Agent without version */
-		if($user_agent === "" || $user_agent === 'Shareaza')
+	return true;
+}
+
+function VerifyUserAgent($vendor, $user_agent)
+{
+	if($vendor === 'RAZA')
+	{  /* Block User-Agent without version */
+		if($user_agent === 'Shareaza')
 			return false;
 	}
-	elseif($vendor === 'LIME')
+	elseif($vendor === 'RAZM')
+	{  /* Block empty User-Agent and bad clients */
+		if($user_agent === "" || strpos($user_agent, 'Shareaza PRO') === 0)
+			return false;
+	}
+	elseif($vendor === 'LIMM')
 	{  /* Block empty User-Agent */
 		if($user_agent === "")
 			return false;
@@ -281,29 +304,29 @@ function CheckBlockedCache($cache){
 	return FALSE;
 }
 
-function IsClientTooOld($client, $version){
+function VerifyVersion($client, $version)
+{
     switch($client)
-	{  // Block too old versions and some ripp-offs that are based on old versions.
+	{  // Block some old versions and some bad versions.
 		case "RAZA":
-		case "RAZB":
 			if((float)$version < 2.3)
-				return TRUE;
+				return false;
 			break;
 		case "LIME";
-			if((int)$version < 4)
-				return TRUE;
+			if((float)$version < 3 || (float)$version >= 8)
+				return false;
 			break;
 		case "BEAR":
 			if((float)$version < 6.1)
 			{
 				$short_ver = substr($version, 0, 5);
 				if($short_ver != "5.1.0" && $short_ver != "5.2.1" )
-					return TRUE;
+					return false;
 			}
 			break;
     }
 
-	return FALSE;
+	return true;
 }
 
 function CleanFailedUrls(){
@@ -958,7 +981,8 @@ $UKHL = !empty($_GET["ukhl"]) && $PHP_VERSION >= 4.3 ? $_GET["ukhl"] : 0;
 
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;				// This tell to the cache to show info like the name, the version, the vendor code, the home page of the cache, the nick and the website of the maintainer (the one that has put the cache on a webserver)
 
-$USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? str_replace("/", " ", $_SERVER["HTTP_USER_AGENT"]) : NULL;
+$UA_ORIGINAL = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
+$USER_AGENT = str_replace('/', ' ', $UA_ORIGINAL);
 
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none
 $ACCEPT_ENCODING = !empty($_SERVER["HTTP_ACCEPT_ENCODING"]) ? $_SERVER["HTTP_ACCEPT_ENCODING"] : NULL;
@@ -1092,11 +1116,11 @@ else
 		fclose($file);
 	}
 
-	NormalizeIdentity($CLIENT, $VERSION);
-	if( !ValidateIdentity($CLIENT, $VERSION, $USER_AGENT) )
+	NormalizeIdentity($CLIENT, $VERSION, $UA_ORIGINAL);
+	if( !ValidateIdentity($CLIENT, $VERSION, $UA_ORIGINAL) )
 	{
 		header('HTTP/1.0 404 Not Found');
-		echo 'ERROR: Client or version unknown - Request rejected\r\n';
+		echo "ERROR: Client or version unknown - Request rejected\r\n";
 		if(LOG_MINOR_ERRORS) Logging('unidentified_clients', $CLIENT, $VERSION, $NET);
 
 		if($UPDATE || $CACHE !== null || $IP !== null)
@@ -1135,9 +1159,11 @@ else
 	}
 	unset($name);
 
-	if( $blocked || IsClientTooOld($CLIENT, $VERSION) )
+	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) )
 	{
 		header('HTTP/1.0 404 Not Found');
+		if(LOG_MINOR_ERRORS) Logging('bad_old_clients', $CLIENT, $VERSION, $NET);
+
 		if($UPDATE || $CACHE !== null || $IP !== null)
 			UpdateStats("update");
 		else
