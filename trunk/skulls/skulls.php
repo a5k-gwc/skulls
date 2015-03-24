@@ -939,13 +939,13 @@ $PHP_VERSION = (float)PHP_VERSION;
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
-$IS_A_CACHE = !empty($_GET["cache"]) ? $_GET["cache"] : 0;		// This should be added to every request made by a cache, it is for statistical purpose only.
-$MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;			// It is added to every ping request (it has no effect on other things), it tell to the pinged cache to ignore the "net" parameter and outputting the pong using this format, if possible, "I|pong|[cache name] [cache version]|[supported networks list]" - example: I|pong|Skulls 0.2.9|gnutella-gnutella2
+$IS_A_CACHE = !empty($_GET["cache"]) ? $_GET["cache"] : 0;		// This must be added to every request made by a cache, to let it know that we are a cache and not a client
+$MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;			// It is added to every ping request (it has no effect on other things), it tell to the pinged cache to ignore the "net" parameter and outputting the pong using this format, if possible, "I|pong|[cache name] [cache version]|[supported networks list]" - example: I|pong|Skulls 0.3.0|gnutella-gnutella2
 $PV = !empty($_GET["pv"]) ? $_GET["pv"] : 0;
 $UHC = !empty($_GET["uhc"]) && $PHP_VERSION >= 4.3 ? $_GET["uhc"] : 0;
 $UKHL = !empty($_GET["ukhl"]) && $PHP_VERSION >= 4.3 ? $_GET["ukhl"] : 0;
 
-$INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;				// This tell to the cache to show info like the name, the version, the vendor code, the home page of the cache, the nick and the website of the maintainer (the one that has put the cache on a webserver).
+$INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;				// This tell to the cache to show info like the name, the version, the vendor code, the home page of the cache, the nick and the website of the maintainer (the one that has put the cache on a webserver)
 
 $USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? str_replace("/", " ", $_SERVER["HTTP_USER_AGENT"]) : NULL;
 
