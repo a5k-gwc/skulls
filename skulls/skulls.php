@@ -138,12 +138,18 @@ function Pong($support, $multi, $net, $client, $supported_net, $remote_ip){
 	}
 }
 
-function Support($supported_networks, $udp)
+function Support($support, $supported_networks, $udp)
 {
-	for($i=0; $i<NETWORKS_COUNT; $i++)
-		echo "I|support|".strtolower($supported_networks[$i])."\r\n";
-	echo "I|uhc|".$udp["uhc"]."\r\n";
-	echo "I|ukhl|".$udp["ukhl"]."\r\n";
+	if($support > 1)
+	{
+		echo "I|networks";
+		for($i=0; $i<NETWORKS_COUNT; $i++)
+			echo '|'.strtolower($supported_networks[$i]);
+		echo "\r\n";
+	}
+	else
+		for($i=0; $i<NETWORKS_COUNT; $i++)
+			echo "I|support|".strtolower($supported_networks[$i])."\r\n";
 }
 
 function CheckNetwork($supported_networks, $net)
@@ -1246,7 +1252,7 @@ else
 	if($PING)
 		Pong($SUPPORT, $MULTI, $NET, $CLIENT, $supported_net, $REMOTE_IP);
 	if($SUPPORT)
-		Support($SUPPORTED_NETWORKS, $UDP);
+		Support($SUPPORT, $SUPPORTED_NETWORKS, $UDP);
 
 	if($UPDATE)
 	{
