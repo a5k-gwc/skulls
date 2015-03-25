@@ -1140,7 +1140,8 @@ else
 	elseif($CLIENT === 'FOXY')
 		$NET = 'foxy';      /* Enforced network parameter for Foxy clients to prevent leakage on G1/G2 */
 
-	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) )
+	/* Block also missing REMOTE_ADDR, although it is unlikely, apparently it could happen in some configurations */
+	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) || $REMOTE_IP === "" || $REMOTE_IP === 'unknown')
 	{
 		header('HTTP/1.0 404 Not Found');
 		if(LOG_MINOR_ERRORS) Logging('bad_old_clients', $CLIENT, $VERSION, $NET);
