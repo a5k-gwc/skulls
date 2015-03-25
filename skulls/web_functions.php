@@ -18,10 +18,12 @@
 //
 
 function ReplaceVendorCode($vendor, $version){
-	$cache = 0; $url = "";
+	$cache = 0; $cache_scan = 0; $url = "";
 	if( $vendor == 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
 	{
-		if(strpos($version, ' ') !== false)
+		if(strpos($version, '/') !== false)
+			list( $vendor, $version ) = explode('/', $version, 2);
+		elseif(strpos($version, ' ') !== false)
 			list( $vendor, $version ) = explode(' ', $version, 2);
 		elseif(strpos($version, '-') !== false)
 			list( $vendor, $version ) = explode('-', $version, 2);
@@ -92,6 +94,9 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = "LimeWire";
 			$url = "http://en.wikipedia.org/wiki/LimeWire";
 			break;
+		case "LIMM":
+			$client_name = "LimeWire mod";
+			break;
 		case "MESH":
 			$client_name = "iMesh";
 			$url = "http://www.imesh.com/";
@@ -133,13 +138,16 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = "Shareaza";
 			$url = "http://shareaza.sourceforge.net/";
 			break;
-		case "RAZB":	// Beta version of Shareaza
+		case "RAZB":	// Old beta versions of Shareaza
 			$client_name = "ShareazaBeta";
-			$url = "http://shareaza.sourceforge.net/?id=debug";  /* http://shareaza.sourceforge.net/daily/ */
+			$url = "http://shareaza.sourceforge.net/?id=debug";
 			break;
 		case "RAZL":
 			$client_name = "ShareazaLite";
 			$url = "http://sourceforge.net/projects/flox/";
+			break;
+		case "RAZM":
+			$client_name = "Shareaza mod";
 			break;
 		case "RZCB":
 			$client_name = "ShareazaPlus";
@@ -162,30 +170,38 @@ function ReplaceVendorCode($vendor, $version){
 			$url = "http://www.xolox.nl/";
 			break;
 
+		// GWC Scanners
+		case "GWCSCANNER":
+			$client_name = "Multi-Network GWC Scan";
+			$url = "http://gcachescan.grantgalitz.com/";
+			$cache_scan = 2;
+			break;
 		case "PGDBScan":
 			$client_name = "Jon Atkins GWC scan";
 			$url = "http://gcachescan.jonatkins.com/";
+			$cache_scan = 2;
 			break;
 		case "WURM":
 			$client_name = "Wurm Scanner";
 			$url = "http://kevogod.trillinux.org/";
+			$cache_scan = 2;
 			break;
 
 		// Special cases
 		case "KICKSTART":
 			$client_name = "KickStart";
-			$url = "";
+			$cache = 0;
 			break;
 		case "Submit":
 			$client_name = "Manual submission";
-			$url = "";
+			$cache = 0;
 			break;
 
 		// GWCs
 		case "BAZK":
 		case "Bazooka":
 			$client_name = "Bazooka";
-			$url = "";  /* http://www.bazookanetworks.com/ */
+			$url = "http://www.bazookanetworks.com/";
 			$cache = 2;
 			break;
 		case "BCII":
@@ -205,12 +221,15 @@ function ReplaceVendorCode($vendor, $version){
 			break;
 		case "CANN":
 			$client_name = "Cannon";
-			$url = "";
 			$cache = 2;
 			break;
 		case "CHTC":
 			$client_name = "CheaterCache";
-			$url = "";
+			$cache = 2;
+			break;
+		case "Crab":
+			$client_name = "GhostWhiteCrab";
+			$url = "http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/";
 			$cache = 2;
 			break;
 		case "GCII":
@@ -238,14 +257,20 @@ function ReplaceVendorCode($vendor, $version){
 			$cache = 1;
 		default:
 			if($cache)
-				return 'Unknown WebCache ('.$vendor.' '.$version.')';
-			elseif( $vendor != "" )
-				$client_name = $vendor;
+			{
+				$client_name = 'Unknown WebCache ('.$vendor.' '.$version.')';
+				$version = "";
+			}
+			elseif( $vendor !== "" )
+			{
+				$client_name = 'Unknown client ('.$vendor.' '.$version.')';
+				$version = "";
+			}
 			else
 				$client_name = 'Unknown client';
 	}
 
-	if($cache == 2) $version .= " (WebCache)";
+	if($cache > 1) $version .= " (WebCache)";
 
 	if( $url != "" )
 		return "<a href=\"".$url."\" target=\"_blank\">".$client_name." ".$version."</a>";
