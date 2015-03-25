@@ -307,7 +307,7 @@ function CheckBlockedCache($cache){
 function VerifyVersion($client, $version)
 {
     switch($client)
-	{  // Block some old versions and some bad versions.
+	{  /* Block some old versions and some bad versions */
 		case "RAZA":
 			if((float)$version < 2.3)
 				return false;
@@ -1141,23 +1141,6 @@ else
 	}
 	elseif($CLIENT === 'FOXY')
 		$NET = 'foxy';      /* Enforced network parameter for Foxy clients to prevent leakage on G1/G2 */
-
-	$blocked = FALSE;
-	$name = explode(" ", $USER_AGENT);
-
-	if($name[0] == "MP3Rocket")
-		$CLIENT = $name[0];
-	elseif($CLIENT == "LIME")
-	{
-		if($name[0] == "eTomi" || $name[0] == "360Share")
-			$blocked = TRUE;
-	}
-	elseif($CLIENT == "RAZA" && isset($name[1]))
-	{
-		if( ($name[0] == "Shareaza" && $name[1] == "PRO") || ($name[0] == "Morpheus" && $name[1] == "Music") || ($name[0] == "Bearshare" && $name[1] == "MP3") || ($name[0] == "WinMX" && $name[1] == "MP3") )	// They are ripp-off of Shareaza
-			$blocked = TRUE;
-	}
-	unset($name);
 
 	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) )
 	{
