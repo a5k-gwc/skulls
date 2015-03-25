@@ -821,7 +821,6 @@ function Get($net, $pv, $get, $uhc, $ukhl){
 				if($show && strpos($cache, "://") > -1)
 				{
 					$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
-					if( $pv >= 4 ) $cache .= "|".( $cache_net != $net ? $cache_net : "" );
 					$output .= $cache."\r\n";
 					$n++;
 				}
@@ -857,9 +856,6 @@ function Get($net, $pv, $get, $uhc, $ukhl){
 		$output .= "I|NO-URL\r\n";
 	elseif( $count_host == 0 )
 		$output .= "I|NO-HOSTS\r\n";
-
-	if($pv >= 3)
-		$output .= "I|nets|".strtolower(NetsToString())."\r\n";
 
 	echo $output;
 }
@@ -1004,32 +1000,33 @@ if($BFILE) { $HOSTFILE = 1; $URLFILE = 1; }
 $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 
-$CLIENT = !empty($_GET["client"]) ? $_GET["client"] : "";
-$VERSION = !empty($_GET["version"]) ? $_GET["version"] : "";
+$CLIENT = !empty($_GET['client']) ? $_GET['client'] : "";
+$VERSION = !empty($_GET['version']) ? $_GET['version'] : "";
 
-$SUPPORT = !empty($_GET["support"]) ? $_GET["support"] : 0;
+$SUPPORT = !empty($_GET['support']) ? $_GET['support'] : 0;
+$GETNETWORKS = !empty($_GET['getnetworks']) ? $_GET['getnetworks'] : 0;
 
-$SHOWINFO = !empty($_GET["showinfo"]) ? $_GET["showinfo"] : 0;
-$SHOWHOSTS = !empty($_GET["showhosts"]) ? $_GET["showhosts"] : 0;
-$SHOWCACHES = !empty($_GET["showurls"]) ? $_GET["showurls"] : 0;
-$SHOWSTATS = !empty($_GET["stats"]) ? $_GET["stats"] : 0;
-$SHOWDATA = !empty($_GET["data"]) ? $_GET["data"] : 0;
+$SHOWINFO = !empty($_GET['showinfo']) ? $_GET['showinfo'] : 0;
+$SHOWHOSTS = !empty($_GET['showhosts']) ? $_GET['showhosts'] : 0;
+$SHOWCACHES = !empty($_GET['showurls']) ? $_GET['showurls'] : 0;
+$SHOWSTATS = !empty($_GET['stats']) ? $_GET['stats'] : 0;
+$SHOWDATA = !empty($_GET['data']) ? $_GET['data'] : 0;
 
-$KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter (it is used the first time to populate the cache, it MUST be disabled after that).
+$KICK_START = !empty($_GET['kickstart']) ? $_GET['kickstart'] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter (it is used the first time to populate the cache, it MUST be disabled after that).
 
-if( empty($_SERVER["QUERY_STRING"]) )
+if( empty($_SERVER['QUERY_STRING']) )
 	$SHOWINFO = 1;
 
 if( isset($noload) ) die();
 
-if(MAINTAINER_NICK == "your nickname here" || MAINTAINER_NICK == "")
+if(MAINTAINER_NICK === 'your nickname here' || MAINTAINER_NICK === "")
 {
 	echo "You must read readme.txt in the admin directory first.\r\n";
 	die();
 }
 
-if($NET == "gnutella1")
-	$NET = "gnutella";
+if($NET === 'gnutella1')
+	$NET = 'gnutella';
 if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
 {
 	include "log.php";
@@ -1157,6 +1154,10 @@ else
 
 	if(ini_get("zlib.output_compression") == 1)
 		ini_set("zlib.output_compression", "0");
+
+	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
+	if($GETNETWORKS)
+		$SUPPORT = 2;
 
 	if(!$PING && !$GET && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
 	{
