@@ -987,8 +987,8 @@ if($COMPRESSION == NULL && strpos($ACCEPT_ENCODING, "deflate") > -1 && !DEBUG) $
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
-$LEAVES = !empty($_GET["x_leaves"]) ? $_GET["x_leaves"] : NULL;
-$CLUSTER = !empty($_GET["cluster"]) ? $_GET["cluster"] : NULL;
+$LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
+$CLUSTER = !empty($_GET['cluster']) ? $_GET['cluster'] : null;
 
 $HOSTFILE = !empty($_GET["hostfile"]) ? $_GET["hostfile"] : 0;
 $URLFILE = !empty($_GET["urlfile"]) ? $_GET["urlfile"] : 0;
@@ -1171,12 +1171,12 @@ else
 	if($IS_A_CACHE || $CLIENT === 'TEST')
 		$IP = null;
 
-	if($LEAVES != NULL && !ctype_digit($LEAVES))
+	if($LEAVES !== null && ( !ctype_digit($LEAVES) || $LEAVES > 2047 ))
 	{
-		$LEAVES = NULL;
+		$LEAVES = null;
 		if(LOG_MAJOR_ERRORS) Logging("invalid_leaves", $CLIENT, $VERSION, $NET);
 	}
-	$CLUSTER = NULL;
+	$CLUSTER = null;
 
 	$compressed = StartCompression($COMPRESSION);
 
