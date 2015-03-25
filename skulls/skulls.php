@@ -246,6 +246,7 @@ function CheckIPValidity($remote_ip, $ip){
 			ctype_digit($ip_port[1]) &&
 			$ip_port[1] > 0 &&
 			$ip_port[1] < 65536 &&
+			$ip_port[1] !=  7001 &&  // Port used by bad clients
 			$ip_port[1] != 27016 &&  // Port used by bad clients
 			$ip_port[0] == $remote_ip &&
 			ip2long($ip_port[0]) == ip2long($remote_ip)
