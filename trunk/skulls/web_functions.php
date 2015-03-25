@@ -165,6 +165,10 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = "TrustyFiles";
 			$url = "http://www.trustyfiles.com/";
 			break;
+		case "WSHR":
+			$client_name = "WireShare";
+			$url = "http://sourceforge.net/projects/wireshare/";
+			break;
 		case "XOLO":
 			$client_name = "XoloX";
 			$url = "http://www.xolox.nl/";
