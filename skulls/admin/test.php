@@ -79,8 +79,8 @@ echo "<b>Function ip2long:</b> ";
 CheckFunction("ip2long");
 echo "<br>";
 
-echo "<b>Function gzdeflate:</b> ";
-CheckFunction("gzdeflate");
+echo "<b>Function gzcompress:</b> ";
+CheckFunction("gzcompress");
 echo "<b>Function ob_start:</b> ";
 CheckFunction("ob_start");
 echo "<b>Function ob_end_flush:</b> ";
