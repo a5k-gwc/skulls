@@ -764,10 +764,13 @@ function UrlFile($net){
 	}
 }
 
-function Get($net, $pv, $get, $uhc, $ukhl){
+function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl){
 	$output = "";
 	$now = time();
 	$offset = @date("Z");
+	$separators = 0;
+	if($getvendors) $separators = 3;
+	elseif($getleaves) $separators = 2;
 
 	if($get)
 	{
@@ -781,9 +784,12 @@ function Get($net, $pv, $get, $uhc, $ukhl){
 
 		for( $i=0; $i<$max_hosts; $i++ )
 		{
-			list( $host, $leaves, $cluster, , , $time ) = explode("|", $host_file[$count_host - 1 - $i]);
-			$host = "H|".$host."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset )."|".$cluster;
-			if( $pv >= 4 ) $host .= "|".$leaves;
+			list( $host, $h_leaves, $h_cluster, $h_vendor, , $h_time ) = explode('|', $host_file[$count_host - 1 - $i]);
+			$host = 'H|'.$host.'|'.TimeSinceSubmissionInSeconds( $now, rtrim($h_time), $offset );
+			if($separators > 1) $host .= '||';
+			if($getleaves) $host .= $h_leaves;
+			if($separators > 2) $host .= '|';
+			if($getvendors) $host .= $h_vendor;
 			$output .= $host."\r\n";
 		}
 	}
@@ -840,7 +846,6 @@ function Get($net, $pv, $get, $uhc, $ukhl){
 				if($show)
 				{
 					$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
-					if( $pv >= 4 ) $cache .= "|".( $cache_net != $net ? $cache_net : "" );
 					$output .= $cache."\r\n";
 					$n++;
 				}
@@ -978,7 +983,7 @@ $UKHL = !empty($_GET["ukhl"]) && $PHP_VERSION >= 4.3 ? $_GET["ukhl"] : 0;
 
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;				// This tell to the cache to show info like the name, the version, the vendor code, the home page of the cache, the nick and the website of the maintainer (the one that has put the cache on a webserver)
 
-$UA_ORIGINAL = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
+$UA_ORIGINAL = !empty($_SERVER['HTTP_USER_AGENT']) ? trim($_SERVER['HTTP_USER_AGENT']) : "";
 $USER_AGENT = str_replace('/', ' ', $UA_ORIGINAL);
 
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none
@@ -1003,8 +1008,12 @@ $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 $CLIENT = !empty($_GET['client']) ? $_GET['client'] : "";
 $VERSION = !empty($_GET['version']) ? $_GET['version'] : "";
 
-$SUPPORT = !empty($_GET['support']) ? $_GET['support'] : 0;
-$GETNETWORKS = !empty($_GET['getnetworks']) ? $_GET['getnetworks'] : 0;
+$SUPPORT = empty($_GET['support']) ? 0 : $_GET['support'];
+$GETNETWORKS = empty($_GET['getnetworks']) ? 0 : $_GET['getnetworks'];
+
+$GETLEAVES = empty($_GET['getleaves']) ? 0 : $_GET['getleaves'];
+$GETVENDORS = empty($_GET['getvendors']) ? 0 : $_GET['getvendors'];
+
 
 $SHOWINFO = !empty($_GET['showinfo']) ? $_GET['showinfo'] : 0;
 $SHOWHOSTS = !empty($_GET['showhosts']) ? $_GET['showhosts'] : 0;
@@ -1141,7 +1150,7 @@ else
 		$NET = 'foxy';      /* Enforced network parameter for Foxy clients to prevent leakage on G1/G2 */
 
 	/* Block also missing REMOTE_ADDR, although it is unlikely, apparently it could happen in some configurations */
-	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) || $REMOTE_IP === "" || $REMOTE_IP === 'unknown')
+	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) || $REMOTE_IP === 'unknown' || $REMOTE_IP == "" )
 	{
 		header('HTTP/1.0 404 Not Found');
 		if(LOG_MINOR_ERRORS) Logging('bad_old_clients', $CLIENT, $VERSION, $NET);
@@ -1366,7 +1375,7 @@ else
 
 	if($GET || $UHC || $UKHL)
 	{
-		Get($NET, $PV, $GET, $UHC, $UKHL);
+		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $UHC, $UKHL);
 		if($UHC || $UKHL)
 		{
 			echo "I|uhc|".$UDP["uhk"]."\r\n";
