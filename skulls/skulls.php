@@ -83,7 +83,7 @@ function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 	}
 	elseif($vendor === 'LIME')
 	{
-		if(strpos($user_agent, 'LimeWire') !== 0)
+		if(strpos($user_agent, 'LimeWire') !== 0 || (int)$ver >= 6)
 			$vendor = 'LIMM';
 	}
 }
@@ -310,11 +310,16 @@ function VerifyVersion($client, $version)
     switch($client)
 	{  /* Block some old versions and some bad versions */
 		case "RAZA":
+		case "RAZM":
 			if((float)$version < 2.3)
 				return false;
 			break;
-		case "LIME";
-			if((float)$version < 3 || (float)$version >= 8)
+		case "LIME":  /* Invalid new versions are switched to LIMM, so no need to check here */
+			if((float)$version < 3)
+				return false;
+			break;
+		case "LIMM":
+			if((float)$version < 2 || (float)$version >= 8)
 				return false;
 			break;
 		case "BEAR":
