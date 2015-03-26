@@ -24,13 +24,14 @@ $UDP["ukhl"] = 0;	// The support isn't complete
 $PHP_SELF = $_SERVER["PHP_SELF"];
 $REMOTE_IP = $_SERVER["REMOTE_ADDR"];
 
+if(function_exists('header_remove'))
+	header_remove('X-Powered-By');
+
 if(!ENABLED || basename($PHP_SELF) == "index.php")
 {
 	header("HTTP/1.0 404 Not Found");
 	die("ERROR: Service disabled\r\n");
 }
-
-/*if($REMOTE_IP == "...") { header("HTTP/1.0 404 Not Found"); die(); }*/
 
 $SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
 $SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
