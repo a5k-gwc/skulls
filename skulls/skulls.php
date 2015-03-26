@@ -442,14 +442,16 @@ function PingGWC($cache, $query){
 		{
 			while( !feof($fp) )
 			{
-				$line = fgets( $fp, 1024 );
-				if(DEBUG) echo rtrim($line)."\r\n";
+				$line = rtrim(fgets($fp, 1024));
+				if(DEBUG) echo $line."\r\n";
 
 				if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
 					$pong = rtrim($line);
 				elseif(substr($line, 0, 4) == "PONG")
 					$oldpong = rtrim($line);
 				elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
+					$error .= rtrim($line)." - ";
+				elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
 					$error .= rtrim($line)." - ";
 			}
 			fclose($fp);
@@ -509,7 +511,7 @@ function CheckGWC($cache, $cache_network){
 	if(strpos($cache, "://") > -1)
 	{
 		$udp = FALSE;
-		$query = "ping=1&multi=1&client=".VENDOR."&version=".SHORT_VER."&cache=1";
+		$query = "ping=1&multi=1&pv=2&client=".VENDOR."&version=".SHORT_VER."&cache=1";
 		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list	or	ERR|Error name
 	}
 	else
@@ -525,6 +527,7 @@ function CheckGWC($cache, $cache_network){
 		if( strpos($received_data[1], "network not supported") > -1
 			|| strpos($received_data[1], "unsupported network") > -1
 			|| strpos($received_data[1], "no network") > -1
+			|| strpos($received_data[1], "net-not-supported") > -1
 		)	// Workaround for compatibility with GWCv2 specs
 		{																// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$query .= "&net=gnutella2";
