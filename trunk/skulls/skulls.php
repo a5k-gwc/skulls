@@ -1023,6 +1023,8 @@ $GETNETWORKS = empty($_GET['getnetworks']) ? 0 : $_GET['getnetworks'];
 $GETLEAVES = empty($_GET['getleaves']) ? 0 : $_GET['getleaves'];
 $GETVENDORS = empty($_GET['getvendors']) ? 0 : $_GET['getvendors'];
 
+$NO_IP_HEADER = empty($_GET['noipheader']) ? 0 : $_GET['noipheader'];
+
 
 $SHOWINFO = !empty($_GET['showinfo']) ? $_GET['showinfo'] : 0;
 $SHOWHOSTS = !empty($_GET['showhosts']) ? $_GET['showhosts'] : 0;
@@ -1277,12 +1279,15 @@ else
 
 	if($NET == NULL) $NET = "gnutella";  // This should NOT absolutely be changed (also if your cache don't support the gnutella network) otherwise you will mix host of different networks and it is bad.
 
-	if(!empty($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP'] !== 'unknown')
-		header('X-Remote-IP: '.$_SERVER['HTTP_CLIENT_IP']);  /* Check for shared internet/ISP IP */
-	elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] !== 'unknown')
-		header('X-Remote-IP: '.$_SERVER['HTTP_X_FORWARDED_FOR']);  /* Check for IPs passing through proxies */
-	else
-		header('X-Remote-IP: '.$REMOTE_IP);
+	if(!$NO_IP_HEADER)
+	{
+		if(!empty($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP'] !== 'unknown')
+			header('X-Remote-IP: '.$_SERVER['HTTP_CLIENT_IP']);  /* Check for shared internet/ISP IP */
+		elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] !== 'unknown')
+			header('X-Remote-IP: '.$_SERVER['HTTP_X_FORWARDED_FOR']);  /* Check for IPs passing through proxies */
+		else
+			header('X-Remote-IP: '.$REMOTE_IP);
+	}
 
 	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		$supported_net = TRUE;
