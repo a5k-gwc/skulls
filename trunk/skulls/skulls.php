@@ -434,7 +434,13 @@ function PingGWC($cache, $query){
 		$oldpong = "";
 		$error = "";
 
-		if( !fwrite($fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: Close\r\n\r\n") )
+		$gwc_url = "";
+		if(CACHE_URL != "") $gwc_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
+		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$gwc_url."\r\n";
+		$out = "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n".$common_headers;
+		if(DEBUG) echo $out;
+
+		if( !fwrite($fp, $out) )
 		{
 			$cache_data = "ERR|Request error";		// ERR|Error name
 			fclose($fp);
