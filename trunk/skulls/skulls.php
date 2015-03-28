@@ -1180,6 +1180,12 @@ else
 	if($GETNETWORKS)
 		$SUPPORT = 2;
 
+	if($IS_A_CACHE || $CLIENT === 'TEST')
+	{
+		$IP = null;         /* Block host submission by caches, they don't do it */
+		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header to caches, they don't need it */
+	}
+
 	if(!$PING && !$GET && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
@@ -1187,10 +1193,6 @@ else
 		UpdateStats("other");
 		die();
 	}
-
-	/* Block host submission by caches (they don't do it) */
-	if($IS_A_CACHE || $CLIENT === 'TEST')
-		$IP = null;
 
 	if($LEAVES !== null && ( !ctype_digit($LEAVES) || $LEAVES > 2047 ))
 	{
