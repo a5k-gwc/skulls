@@ -79,7 +79,7 @@ function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 	/* Change vendor code of mod versions of Shareaza */
 	if($vendor === 'RAZA')
 	{
-		if(strpos($user_agent, 'Shareaza') !== 0 || strpos($user_agent, 'Shareaza PRO') === 0)
+		if(strpos($user_agent, 'Shareaza ') !== 0 || strpos($user_agent, 'Shareaza PRO') === 0)
 			$vendor = 'RAZM';
 	}
 	elseif($vendor === 'LIME')
