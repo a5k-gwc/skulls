@@ -89,12 +89,12 @@ function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 	}
 }
 
-function ValidateIdentity($vendor, $ver, $user_agent)
+function ValidateIdentity($vendor, $ver)
 {
-	if(strlen($vendor) < 4)
-		return false;  /* Vendor missing or too short */
-	elseif($ver === "")
+	if($ver === "")
 		return false;  /* Version missing */
+	elseif(strlen($vendor) < 4)
+		return false;  /* Vendor missing or too short */
 
 	return true;
 }
@@ -1136,7 +1136,7 @@ else
 	}
 
 	NormalizeIdentity($CLIENT, $VERSION, $UA_ORIGINAL);
-	if( !ValidateIdentity($CLIENT, $VERSION, $UA_ORIGINAL) )
+	if( !ValidateIdentity($CLIENT, $VERSION) )
 	{
 		header('HTTP/1.0 404 Not Found');
 		echo "ERROR: Client or version unknown - Request rejected\r\n";
