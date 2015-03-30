@@ -101,6 +101,10 @@ function ValidateIdentity($vendor, $ver)
 
 function VerifyUserAgent($vendor, $user_agent)
 {
+	/* Block Google from making queries */
+	if(strpos($user_agent, 'Googlebot') !== false)
+		return false;
+
 	if($vendor === 'RAZM')
 	{  /* Block empty User-Agent, User-Agent without version and bad clients */
 		if($user_agent === "" || $user_agent === 'Shareaza' || strpos($user_agent, 'Shareaza PRO') === 0)
