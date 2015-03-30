@@ -192,10 +192,7 @@ function ShowHtmlPage($num){
 
 													echo "<tr align=\"left\" bgcolor=\"".$color."\">";
 													echo "<td style=\"padding-right: 10pt;\">";
-													if(strpos(strtolower($net), "gnutella") > -1)
-														$url = "gnutella:host:";
-													else
-														$url = $net.":host:";
+													$url = $net.":host:";
 													echo "<a href=\"".$url.$ip."\">".$ip."</a>";
 													if( !empty($leaves) )
 														echo " (".$leaves.")";
