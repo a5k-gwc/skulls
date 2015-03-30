@@ -35,15 +35,16 @@ define( "DATA_DIR", "data" );				// Directory where data files are stored (you s
 
 $footer = "";
 
-// You can add or remove any network.
-// By default Gnutella is disabled.
+// You can add or remove any network you want.
+// By default Gnutella and Foxy are disabled but they can be enabled by uncommenting the relative line.
+//
 // Enabling the Gnutella network can increase a lot the number of requests, so don't enable it if your server can't handle the load.
 // Note -> The name of the network can't contains these characters:  | -
 
 //$SUPPORTED_NETWORKS[] = "Gnutella";
 $SUPPORTED_NETWORKS[] = "Gnutella2";
 $SUPPORTED_NETWORKS[] = "MUTE";
-$SUPPORTED_NETWORKS[] = "Foxy";
+//$SUPPORTED_NETWORKS[] = "Foxy";
 
 // UDP (Currently it is incomplete)
 // 0: Disabled, 1: Enabled
