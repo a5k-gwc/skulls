@@ -724,6 +724,21 @@ function WriteCacheFile($cache, $net, $client, $version){
 	}
 }
 
+
+/* Workaround for a bug, some old Shareaza versions doesn't send updates if we don't have any host */
+function CheckIfDummyHostIsNeeded($vendor, $ver)
+{
+	if($vendor === 'RAZA')
+	{
+		$ver_array = explode('.', $ver, 3);
+		if( count($ver_array) === 3 )
+			if($ver_array[0] < 2 || ($ver_array[0] === '2' && $ver_array[1] < 6))
+				return true;
+	}
+
+	return false;
+}
+
 function HostFile($net){
 	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
 	$count_host = count($host_file);
@@ -774,7 +789,7 @@ function UrlFile($net){
 	}
 }
 
-function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl){
+function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host){
 	$output = "";
 	$now = time();
 	$offset = @date("Z");
@@ -801,6 +816,12 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl){
 			if($separators > 2) $host .= '|';
 			if($getvendors) $host .= $h_vendor;
 			$output .= $host."\r\n";
+		}
+		/* Workaround for a bug, some old Shareaza versions doesn't send updates if we don't have any host */
+		if($count_host === 0 && $add_dummy_host)
+		{
+			$output .= "H|1.1.1.1:7331|100000\r\n";
+			$count_host = 1;
 		}
 	}
 	else
@@ -1392,7 +1413,9 @@ else
 
 	if($GET || $UHC || $UKHL)
 	{
-		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $UHC, $UKHL);
+		$dummy_host_needed = CheckIfDummyHostIsNeeded($CLIENT, $VERSION);
+
+		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $UHC, $UKHL, $dummy_host_needed);
 		if($UHC || $UKHL)
 		{
 			echo "I|uhc|".$UDP["uhk"]."\r\n";
