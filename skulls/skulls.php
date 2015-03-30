@@ -818,7 +818,7 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host){
 			if($separators > 1) $host .= '||';
 			if($getleaves) $host .= $h_leaves;
 			if($separators > 2) $host .= '|';
-			if($getvendors) $host .= $h_vendor;
+			if($getvendors && $h_vendor !== 'KICKSTART') $host .= $h_vendor;
 			$output .= $host."\r\n";
 		}
 		/* Workaround for a bug, some old Shareaza versions doesn't send updates if we don't have any host */
