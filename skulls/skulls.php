@@ -115,6 +115,36 @@ function VerifyUserAgent($vendor, $user_agent)
 	return true;
 }
 
+function VerifyVersion($client, $version)
+{
+    switch($client)
+	{  /* Block some old versions and some bad versions */
+		case "RAZA":
+		case "RAZM":
+			if((float)$version < 2.3)
+				return false;
+			break;
+		case "LIME":  /* Invalid new versions are switched to LIMM, so no need to check here */
+			if((float)$version < 3)
+				return false;
+			break;
+		case "LIMM":
+			if((float)$version < 2 || (float)$version >= 8)
+				return false;
+			break;
+		case "BEAR":
+			if((float)$version < 6.1)
+			{
+				$short_ver = substr($version, 0, 5);
+				if($short_ver != "5.1.0" && $short_ver != "5.2.1" )
+					return false;
+			}
+			break;
+    }
+
+	return true;
+}
+
 function NetsToString(){
 	global $SUPPORTED_NETWORKS;
 	$nets = "";
@@ -299,36 +329,6 @@ function CheckBlockedCache($cache){
 		return TRUE;
 
 	return FALSE;
-}
-
-function VerifyVersion($client, $version)
-{
-    switch($client)
-	{  /* Block some old versions and some bad versions */
-		case "RAZA":
-		case "RAZM":
-			if((float)$version < 2.3)
-				return false;
-			break;
-		case "LIME":  /* Invalid new versions are switched to LIMM, so no need to check here */
-			if((float)$version < 3)
-				return false;
-			break;
-		case "LIMM":
-			if((float)$version < 2 || (float)$version >= 8)
-				return false;
-			break;
-		case "BEAR":
-			if((float)$version < 6.1)
-			{
-				$short_ver = substr($version, 0, 5);
-				if($short_ver != "5.1.0" && $short_ver != "5.2.1" )
-					return false;
-			}
-			break;
-    }
-
-	return true;
 }
 
 function CleanFailedUrls(){
