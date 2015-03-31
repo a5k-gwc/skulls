@@ -33,9 +33,7 @@ if(!ENABLED || basename($PHP_SELF) == "index.php")
 	die("ERROR: Service disabled\r\n");
 }
 
-$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
-$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
-$MY_URL = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
+$MY_URL = $_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
 if(CACHE_URL != "")
 {
 	list( , $CACHE_URL ) = explode("://", CACHE_URL);

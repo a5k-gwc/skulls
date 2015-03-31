@@ -140,10 +140,7 @@ if( file_exists("../".DATA_DIR."/hosts_gnutella1.dat") )
 
 if( file_exists("../".DATA_DIR."/caches.dat") )
 {
-	$PHP_SELF = $_SERVER["PHP_SELF"];
-	$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
-	$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
-	$MY_URL = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
+	$MY_URL = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];  /* HTTP_HOST already contains port if needed */
 	$MY_URL = strtolower(str_replace("/admin/update.php", "/skulls.php", $MY_URL));
 	$cache_file = file("../".DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
