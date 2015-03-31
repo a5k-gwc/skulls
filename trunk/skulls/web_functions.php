@@ -417,8 +417,7 @@ function CheckUpdates(){
 
 	if(!$cached)
 	{
-		global $SERVER_NAME;
-		$ip = gethostbyname($SERVER_NAME);
+		$ip = gethostbyname($_SERVER['SERVER_NAME']);
 
 		if($ip == "127.0.0.1")
 		{
