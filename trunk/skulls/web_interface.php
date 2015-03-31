@@ -195,7 +195,7 @@ function ShowHtmlPage($num){
 													echo "<td style=\"padding-right: 10pt;\">";
 													$url = $net.":host:";
 													echo "<a href=\"".$url.$ip."\">".$ip."</a>";
-													if( !empty($leaves) )
+													if($leaves !== "")
 														echo " (".$leaves.")";
 													echo "</td>";
 													echo "<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>";
