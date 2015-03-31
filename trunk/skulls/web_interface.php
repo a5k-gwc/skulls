@@ -29,16 +29,17 @@ function ShowHtmlPage($num){
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER; ?></title>
-	<meta name="robots" content="noindex,nofollow,noarchive">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER; ?></title>
 
-	<style type="text/css">
-		body { font-family: Verdana; }
-		table, div { font-size: 10px; }
-		a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
-		a.hover-underline:hover { text-decoration: underline; }
-	</style>
+<meta name="robots" content="noindex, nofollow, noarchive">
+
+<style type="text/css">
+	body { font-family: Verdana; }
+	table, div { font-size: 10px; }
+	a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
+	a.hover-underline:hover { text-decoration: underline; }
+</style>
 </head>
 
 <body bgcolor="#FFFF00"><br>
