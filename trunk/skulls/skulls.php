@@ -147,6 +147,83 @@ function VerifyVersion($client, $version)
 	return true;
 }
 
+function CanonicalizeURL(&$full_url)
+{
+	/* $_GET parameters are already "urldecoded" by PHP, so do NOT urldecode again */
+	if(DEBUG) echo 'D|update|URL sent: ',$full_url,"\r\n";
+
+	if(strpos($full_url, '://') !== false)
+	{
+		list($scheme, $url) = explode('://', $full_url, 2);
+
+		/* Drop everything after "?" */
+		if(strpos($url, '?') !== false)
+			list($url) = explode('?', $url, 2);
+		/* Drop everything after "#" */
+		if(strpos($url, '#') !== false)
+			list($url) = explode('#', $url, 2);
+
+		/* Separate host from path */
+		if(strpos($url, '/') !== false)
+			list($host, $path) = explode('/', $url, 2);
+		else
+			{$host = $url; $path = "";}
+		$path = '/'.$path;
+
+		/* Remove dots and slashes at the end of $path */
+		$end_slash = false;
+		$path_len = strlen($path);
+		while( $path_len-- > 0 )
+		{
+			if($path[$path_len] === '/')
+				$end_slash = true;
+			elseif($path[$path_len] === '.');
+			else
+				break;
+		}
+		$path_len++;
+		$path = substr($path, 0, $path_len);
+
+		if($path_len > 4)
+		{
+			$ext = substr($path, -4);
+			if($ext === '.php' || $ext === '.cgi' || $ext === '.asp' || $ext === '.cfm' || $ext === '.jsp')
+			{
+				$end_slash = false;  /* If we can be sure it is a file then we can safely strip the slash */
+
+				$last_slash = strrpos($path, '/'); if($last_slash === false) $last_slash = 0;
+				if( strpos($path, '/index', $last_slash) === $path_len - 10 )
+					$path = substr($path, 0, -9);  /* Strip index.php, index.asp, etc. */
+			}
+			elseif($ext === '.htm' || substr($path, -5) === '.html')
+				return false;  /* Block static pages */
+		}
+		if($end_slash)  /* Add slash only if there was before */
+			$path .= '/';
+
+		if(strpos($host, ':') !== false)
+			list($host_name, $host_port) = explode(':', $host, 2);
+		else
+			{$host_name = $host; $host_port = 80;}
+		/* ToDO: Verify port */
+
+		if(substr($host_name, -9) === '.nyud.net' || substr($host_name, -10) === '.nyucd.net')
+			return false;  /* Block Coral Content Distribution Network */
+
+		$full_url = strtolower($scheme).'://'.strtolower($host_name).( $host_port == 80 ? "" : ':'.(int)$host_port ).$path;
+	}
+	else
+	{
+		$cache_length = strlen($full_url);
+		if(substr($full_url, $cache_length-1) == "/")
+			$full_url = substr($full_url, 0, $cache_length-1);
+	}
+
+	if(DEBUG) echo 'D|update|URL cleaned: ',$full_url,"\r\n";
+
+	return true;
+}
+
 function NetsToString(){
 	global $SUPPORTED_NETWORKS;
 	$nets = "";
@@ -1227,81 +1304,10 @@ else
 
 	$compressed = StartCompression($COMPRESSION);
 
+	//$CACHE_IS_VALID = true;
 	if($CACHE != NULL)
-	{	// Cleaning url
-		if(DEBUG) echo "D|update|URL sent: ".$CACHE."\r\n";
-		if(strpos($CACHE, "://") > -1)
-		{
-			if( $CACHE == "http://bbs.robertwoolley.co.uk/GWebCache/gcache.php" )
-				$CACHE = strtolower($CACHE);
-
-			list( $protocol, $url ) = explode("://", $CACHE, 2);
-
-			if( strpos($url, "/") > -1 )
-				list( $host, $path ) = explode("/", $url, 2);
-			elseif( strpos($url, "?") > -1 )
-			{
-				list( $host, $path ) = explode("?", $url, 2);
-				$path = "?".$path;
-			}
-			else
-			{
-				$host = $url;
-				$path = "";
-			}
-
-			$path = str_replace( "./", "", $path );		// Remove "./" from $path if present
-
-			$slash = FALSE;
-			while( substr( $path, strlen($path) - 1, 1 ) == "/" )
-			{
-				$path = substr( $path, 0, strlen($path) - 1 );
-				$slash = TRUE;
-			}
-
-			if( substr( $path, strlen($path) - 1, 1 ) == "." )
-				$path = substr( $path, 0, strlen($path) - 1 );	// Remove dot at the end of $path if present
-
-			if( strlen($path) && $slash )
-				$path .= "/";
-
-			if( strpos($host, ":") > -1 )
-			{
-				$splitted_host = explode(":", $host);
-				$host_name = $splitted_host[0];
-				$host_port = (int)$splitted_host[1];
-			}
-			else
-			{
-				$host_name = $host;
-				$host_port = 80;
-			}
-
-			if( substr( $host_name, strlen($host_name) - 1, 1 ) == "." )
-				$host_name = substr( $host_name, 0, strlen($host_name) - 1 );	// Remove dot at the end of $host_name if present
-
-			if( $host_port == 80 )
-				$host_port = "";
-			else
-				$host_port = ":".$host_port;
-
-			if( substr($host_name, -9) == ".nyud.net" || substr($host_name, -10) == ".nyucd.net" )
-				$CACHE = "BLOCKED";
-			else
-			{
-				if( strpos($path, "index.php") == strlen($path) - 9)	// index.php removal
-					$path = substr($path, 0, -9);
-				$CACHE = $protocol."://".strtolower($host_name).$host_port."/".$path;
-			}
-		}
-		else
-		{
-			$cache_length = strlen($CACHE);
-			if(substr($CACHE, $cache_length-1) == "/")
-				$CACHE = substr($CACHE, 0, $cache_length-1);
-		}
-		if(DEBUG) echo "D|update|URL cleaned: ".$CACHE."\r\n";
-	}
+		if(!CanonicalizeURL($CACHE))
+			$CACHE = 'BLOCKED';
 
 	if($NET == NULL) $NET = "gnutella";  // This should NOT absolutely be changed (also if your cache don't support the gnutella network) otherwise you will mix host of different networks and it is bad.
 
