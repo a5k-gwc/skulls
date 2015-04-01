@@ -387,27 +387,16 @@ function CheckURLValidity($cache){
 	return FALSE;
 }
 
-// When bugs of caches are fixed, ask here http://sourceforge.net/tracker/?atid=797138&group_id=155771&func=browse and the caches will be unlocked
-function CheckBlockedCache($cache){
-	$cache = strtolower($cache);
+/* When bugs of GWCs are fixed, ask on http://sourceforge.net/p/skulls/discussion/ and the GWCs will be unlocked */
+function CheckBlockedGWC($gwc_url){
+	$gwc_url = strtolower($gwc_url);
 	if(
-		// Bad
-		$cache == "http://www.xolox.nl/gwebcache/"
-		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
-		|| $cache == "http://fischaleck.net/cache/mcache.php"
-		|| $cache == "http://mcache.naskel.cx/mcache.php"
-		|| $cache == "http://silence.forcedefrappe.com/mcache.php"
-		// It take an eternity to load, it can't help network
-		|| $cache == "http://reukiodo.dyndns.org/beacon/gwc.php"
-		|| $cache == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
-		// Double - They are accessible also from another url
-		|| $cache == "http://gwc.frodoslair.net/skulls/skulls"
-		|| $cache == "http://gwc.nickstallman.net/beta.php"
-		|| $cache == "http://gwebcache.spearforensics.com/"
+		$gwc_url === 'http://cache.trillinux.org/g2/bazooka.php'  /* Bugged - return hosts with negative age */
+		//|| $gwc_url === ''
 	)
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 function CleanFailedUrls(){
@@ -766,7 +755,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 	}
 	else
 	{
-		if(CheckBlockedCache($cache))
+		if(CheckBlockedGWC($cache))
 			return 4; // Blocked URL
 		else
 		{
