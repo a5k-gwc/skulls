@@ -501,7 +501,7 @@ function PingGWC($cache, $query){
 		$gwc_url = "";
 		if(CACHE_URL != "") $gwc_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$gwc_url."\r\n";
-		$out = "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\n".$common_headers;
+		$out = "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) ).'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_name."\r\n".$common_headers;
 		if(DEBUG) echo $out;
 
 		if( !fwrite($fp, $out) )
@@ -530,7 +530,7 @@ function PingGWC($cache, $query){
 			if(!empty($pong))
 			{
 				$received_data = explode("|", $pong);
-				$cache_data = "P|".RemoveGarbage($received_data[2]);
+				$cache_data = "P|".rawurldecode(RemoveGarbage($received_data[2]));
 
 				if(count($received_data) > 3 && $received_data[3] != "")
 				{
@@ -548,7 +548,7 @@ function PingGWC($cache, $query){
 			}
 			elseif(!empty($oldpong))
 			{
-				$oldpong = RemoveGarbage(substr($oldpong, 5));
+				$oldpong = rawurldecode(RemoveGarbage(substr($oldpong, 5)));
 				$cache_data = "P|".$oldpong;
 
 				if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
