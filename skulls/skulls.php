@@ -206,6 +206,7 @@ function CanonicalizeURL(&$full_url)
 		else
 			{$host_name = $host; $host_port = 80;}
 		/* ToDO: Verify port */
+		/* ToDO: Remove dot at the end of hostname if present */
 
 		if(substr($host_name, -9) === '.nyud.net' || substr($host_name, -10) === '.nyucd.net')
 			return false;  /* Block Coral Content Distribution Network */
@@ -1294,7 +1295,7 @@ else
 	$compressed = StartCompression($COMPRESSION);
 
 	//$CACHE_IS_VALID = true;
-	if($CACHE != NULL)
+	if($CACHE !== null)
 		if(!CanonicalizeURL($CACHE))
 			$CACHE = 'BLOCKED';
 
