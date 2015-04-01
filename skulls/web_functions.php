@@ -205,7 +205,7 @@ function ReplaceVendorCode($vendor, $version){
 		case "BAZK":
 		case "Bazooka":
 			$client_name = "Bazooka";
-			$url = "http://www.bazookanetworks.com/";
+			//$url = "http://www.bazookanetworks.com/";
 			$cache = 2;
 			break;
 		case "BCII":
@@ -248,7 +248,12 @@ function ReplaceVendorCode($vendor, $version){
 			break;
 		case "MWebCache":
 			$client_name = "MWebCache";
-			$url = "http://sourceforge.net/p/mute-net/support-requests/7/";
+			$url = "http://mute-net.sourceforge.net/mWebCache.shtml";
+			/* http://sourceforge.net/p/mute-net/support-requests/7/ */
+			$cache = 2;
+			break;
+		case "NGWC":  /* Example query => ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
+			$client_name = "node.gwc";
 			$cache = 2;
 			break;
 		case "SKLL":
