@@ -537,7 +537,7 @@ function PingGWC($cache, $query){
 					if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII
 						$nets = "gnutella-gnutella2";
 					else
-						$nets = RemoveGarbage(strtolower($received_data[3]));
+						$nets = rawurldecode(RemoveGarbage(strtolower($received_data[3])));
 				}
 				elseif( !empty($oldpong) )
 					$nets = "gnutella-gnutella2";
@@ -595,7 +595,7 @@ function CheckGWC($cache, $cache_network){
 
 	if($received_data[0] == "ERR" && !$udp)
 	{
-		if( strpos($received_data[1], "network not supported") > -1
+		if( strpos($received_data[1], "not supported") > -1
 			|| strpos($received_data[1], "unsupported network") > -1
 			|| strpos($received_data[1], "no network") > -1
 			|| strpos($received_data[1], "net-not-supported") > -1
@@ -607,7 +607,7 @@ function CheckGWC($cache, $cache_network){
 		}
 		elseif( strpos($received_data[1], "access denied by acl") > -1 )
 		{
-			$query = "ping=1&multi=1&client=TEST&version=".VENDOR."%20".SHORT_VER."&cache=1";
+			$query = "ping=1&multi=1&pv=2&client=TEST&version=".VENDOR."%20".SHORT_VER."&cache=1";
 			$result = PingGWC($cache, $query);
 		}
 		unset($received_data);
