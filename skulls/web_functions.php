@@ -35,351 +35,351 @@ function ReplaceVendorCode($vendor, $version){
 	/* http://rfc-gnutella.sourceforge.net/ */
 	switch($vendor)
 	{
-		case "ACQL":
-			$client_name = "Acqlite";
-			$url = "http://acqlite.sourceforge.net/";
+		case 'ACQL':
+			$client_name = 'Acqlite';
+			$url = 'http://acqlite.sourceforge.net/';
 			break;
-		case "ACQX":
-			$client_name = "Acquisition";
-			$url = "http://www.acquisitionx.com/";
+		case 'ACQX':
+			$client_name = 'Acquisition';
+			$url = 'http://www.acquisitionx.com/';
 			break;
-		case "AGIO":
-			$client_name = "Adagio";
-			$url = "http://sourceforge.net/projects/agio/";
+		case 'AGIO':
+			$client_name = 'Adagio';
+			$url = 'http://sourceforge.net/projects/agio/';
 			break;
-		case "AGNT":
-			$client_name = "Agentella";
+		case 'AGNT':
+			$client_name = 'Agentella';
 			break;
-		case "ARES":
-			$client_name = "Ares";  /* by SoftGap */
-			$url = "http://aresgalaxy.sourceforge.net/";
+		case 'ARES':
+			$client_name = 'Ares';  /* by SoftGap */
+			$url = 'http://aresgalaxy.sourceforge.net/';
 			break;
-		case "ATOM":
-			$client_name = "AtomWire";
+		case 'ATOM':
+			$client_name = 'AtomWire';
 			break;
-		case "BEAR":
-			$client_name = "BearShare";
-			$url = "http://www.bearshare.com/";
+		case 'BEAR':
+			$client_name = 'BearShare';
+			$url = 'http://www.bearshare.com/';
 			break;
-		case "COCO":
-			$client_name = "CocoGnut";
-			$url = "http://www.alpha-programming.co.uk/software/cocognut/";
+		case 'COCO':
+			$client_name = 'CocoGnut';
+			$url = 'http://www.alpha-programming.co.uk/software/cocognut/';
 			break;
-		case "CULT":
-			$client_name = "Cultiv8r (Emixode)";
+		case 'CULT':
+			$client_name = 'Cultiv8r (Emixode)';
 			break;
-		case "DNET":
-			$client_name = "Deepnet Explorer";
-			$url = "http://www.deepnetexplorer.com/";
+		case 'DNET':
+			$client_name = 'Deepnet Explorer';
+			$url = 'http://www.deepnetexplorer.com/';
 			break;
-		case "FISH":
-			$client_name = "PEERanha";
+		case 'FISH':
+			$client_name = 'PEERanha';
 			break;
-		case "FOXY":  /* Foxy - client of Foxy network (Network parameter enforced in the code to prevent leakage on G1/G2) */
-			$client_name = "Foxy";
-			$url = "http://en.wikipedia.org/wiki/Foxy_%28P2P%29";
+		case 'FOXY':  /* Foxy - client of Foxy network (Network parameter enforced in the code to prevent leakage on G1/G2) */
+			$client_name = 'Foxy';
+			$url = 'http://en.wikipedia.org/wiki/Foxy_%28P2P%29';
 			break;
-		case "FSCP":
-			$client_name = "Filescope";
-			$url = "http://filescope.com/";
+		case 'FSCP':
+			$client_name = 'Filescope';
+			$url = 'http://filescope.com/';
 			break;
-		case "FUST":
-			$client_name = "Fusteeno";
+		case 'FUST':
+			$client_name = 'Fusteeno';
 			break;
-		case "GDNA":
-			$client_name = "GnucDNA";
-			$url = "http://gnucleus.sourceforge.net/GnucDNA/";
+		case 'GDNA':
+			$client_name = 'GnucDNA';
+			$url = 'http://gnucleus.sourceforge.net/GnucDNA/';
 			break;
-		case "GEN2":
-			$client_name = "Gentoo giFT-Gnutella";
+		case 'GEN2':
+			$client_name = 'Gentoo giFT-Gnutella';
 			break;
-		case "GIFT":
-			$client_name = "giFT-Gnutella";
-			$url = "http://gift.sourceforge.net/";
+		case 'GIFT':
+			$client_name = 'giFT-Gnutella';
+			$url = 'http://gift.sourceforge.net/';
 			break;
-		case "GNEW":
-			$client_name = "Gnewtellium";
-			$url = "http://gnewtellium.sourceforge.net/";
+		case 'GNEW':
+			$client_name = 'Gnewtellium';
+			$url = 'http://gnewtellium.sourceforge.net/';
 			break;
-		case "GNOT":
-			$client_name = "Gnotella";
+		case 'GNOT':
+			$client_name = 'Gnotella';
 			break;
-		case "GNTG":
-			$client_name = "Gnutelligentsia";
-			$url = "http://gnutelligentsia.sourceforge.net/";
+		case 'GNTG':
+			$client_name = 'Gnutelligentsia';
+			$url = 'http://gnutelligentsia.sourceforge.net/';
 			break;
-		case "GNUC":
-			$client_name = "Gnucleus";
-			$url = "http://gnucleus.sourceforge.net/Gnucleus/";
+		case 'GNUC':
+			$client_name = 'Gnucleus';
+			$url = 'http://gnucleus.sourceforge.net/Gnucleus/';
 			break;
-		case "GNUT":
-			$client_name = "Gnut";
+		case 'GNUT':
+			$client_name = 'Gnut';
 			break;
-		case "GNZL":
-			$client_name = "Gnoozle";
+		case 'GNZL':
+			$client_name = 'Gnoozle';
 			break;
-		case "GOLD":
-			$client_name = "Ares Gold";
+		case 'GOLD':
+			$client_name = 'Ares Gold';
 			break;
-		case "GPUX":
-			$client_name = "GPU";
-			$url = "http://sourceforge.net/projects/gpu/";
+		case 'GPUX':
+			$client_name = 'GPU';
+			$url = 'http://sourceforge.net/projects/gpu/';
 			break;
 		/* ToDO: Check also vendor GNTD, maybe old version */
-		case "GTKG":
-			$client_name = "Gtk-Gnutella";
-			$url = "http://gtk-gnutella.sourceforge.net/";
+		case 'GTKG':
+			$client_name = 'Gtk-Gnutella';
+			$url = 'http://gtk-gnutella.sourceforge.net/';
 			break;
-		case "HSLG":
-			$client_name = "Hagelslag";
-			$url = "http://os4depot.net/index.php?function=showfile&file=network/p2p/hagelslag.lha";
+		case 'HSLG':
+			$client_name = 'Hagelslag';
+			$url = 'http://os4depot.net/index.php?function=showfile&file=network/p2p/hagelslag.lha';
 			break;
-		case "HYDR":
-			$client_name = "Hydranode";
-			$url = "http://hydranode.com/";
+		case 'HYDR':
+			$client_name = 'Hydranode';
+			$url = 'http://hydranode.com/';
 			break;
-		case "LIME":
-			$client_name = "LimeWire";
-			$url = "http://en.wikipedia.org/wiki/LimeWire";
+		case 'LIME':
+			$client_name = 'LimeWire';
+			$url = 'http://en.wikipedia.org/wiki/LimeWire';
 			break;
-		case "LIMM":  /* Generic vendor */
-			$client_name = "LimeWire mod";
+		case 'LIMM':  /* Generic vendor */
+			$client_name = 'LimeWire mod';
 			break;
-		case "MACT":
-			$client_name = "Mactella";
+		case 'MACT':
+			$client_name = 'Mactella';
 			break;
-		case "MESH":
-			$client_name = "iMesh";
-			$url = "http://www.imesh.com/";
+		case 'MESH':
+			$client_name = 'iMesh';
+			$url = 'http://www.imesh.com/';
 			break;
-		case "MLDK":
-			$client_name = "MLDonkey";
-			$url = "http://mldonkey.sourceforge.net/";
+		case 'MLDK':
+			$client_name = 'MLDonkey';
+			$url = 'http://mldonkey.sourceforge.net/';
 			break;
-		case "MMMM":  /* Morpheus 2.0+ */
-			$client_name = "Morpheus";
-			$url = "http://en.wikipedia.org/wiki/Morpheus_%28software%29";
+		case 'MMMM':  /* Morpheus 2.0+ */
+			$client_name = 'Morpheus';
+			$url = 'http://en.wikipedia.org/wiki/Morpheus_%28software%29';
 			break;
-		case "MNAP":
-			$client_name = "MyNapster";
+		case 'MNAP':
+			$client_name = 'MyNapster';
 			break;
-		case "MOOD":
-			$client_name = "MoodAmp";
+		case 'MOOD':
+			$client_name = 'MoodAmp';
 			break;
-		case "MRPH":  /* Morpheus - old versions */
-			$client_name = "Morpheus (old)";
-			$url = "http://en.wikipedia.org/wiki/Morpheus_%28software%29";
+		case 'MRPH':  /* Morpheus - old versions */
+			$client_name = 'Morpheus (old)';
+			$url = 'http://en.wikipedia.org/wiki/Morpheus_%28software%29';
 			break;
-		case "MTLL":  /* Mutella - the vendor code of Mutella is MUTE but it is changed to MTLL in the code to avoid confusion with the MUTE network */
-			$client_name = "Mutella";
-			$url = "http://mutella.sourceforge.net/";
+		case 'MTLL':  /* Mutella - the vendor code of Mutella is MUTE but it is changed to MTLL in the code to avoid confusion with the MUTE network */
+			$client_name = 'Mutella';
+			$url = 'http://mutella.sourceforge.net/';
 			break;
-		case "MUTE":  /* MUTE - client of MUTE network (Network parameter enforced in the code to prevent leakage on G1/G2) */
-			$client_name = "MUTE";
-			$url = "http://mute-net.sourceforge.net/";
+		case 'MUTE':  /* MUTE - client of MUTE network (Network parameter enforced in the code to prevent leakage on G1/G2) */
+			$client_name = 'MUTE';
+			$url = 'http://mute-net.sourceforge.net/';
 			break;
-		case "MXIE":
-			$client_name = "mxie";
+		case 'MXIE':
+			$client_name = 'mxie';
 			break;
-		case "NAPS":
-			$client_name = "NapShare";
-			$url = "http://napshare.sourceforge.net/";
+		case 'NAPS':
+			$client_name = 'NapShare';
+			$url = 'http://napshare.sourceforge.net/';
 			break;
-		case "NOVA":
-			$client_name = "Nova";
-			$url = "http://novap2p.sourceforge.net/";
+		case 'NOVA':
+			$client_name = 'Nova';
+			$url = 'http://novap2p.sourceforge.net/';
 			break;
-		case "OCFG":
-			$client_name = "OpenCola";
+		case 'OCFG':
+			$client_name = 'OpenCola';
 			break;
-		case "OPRA":
-			$client_name = "Opera";
-			$url = "http://www.opera.com/";
+		case 'OPRA':
+			$client_name = 'Opera';
+			$url = 'http://www.opera.com/';
 			break;
-		case "PEER":
-			$client_name = "PeerProject";
-			$url = "http://peerproject.org/";
+		case 'PEER':
+			$client_name = 'PeerProject';
+			$url = 'http://peerproject.org/';
 			break;
-		case "PHEX":
-			$client_name = "Phex";
-			$url = "http://www.phex.org/mambo/";
+		case 'PHEX':
+			$client_name = 'Phex';
+			$url = 'http://www.phex.org/mambo/';
 			break;
-		case "QAZA":
-			$client_name = "Quazaa";
-			$url = "http://quazaa.sourceforge.net/";
+		case 'QAZA':
+			$client_name = 'Quazaa';
+			$url = 'http://quazaa.sourceforge.net/';
 			break;
-		case "QAZB":
-			$client_name = "Quazaa Beta";
-			$url = "http://quazaa.sourceforge.net/";
+		case 'QAZB':
+			$client_name = 'Quazaa Beta';
+			$url = 'http://quazaa.sourceforge.net/';
 			break;
-		case "QTEL":
-			$client_name = "Qtella";
-			$url = "http://qtella.sourceforge.net/";
+		case 'QTEL':
+			$client_name = 'Qtella';
+			$url = 'http://qtella.sourceforge.net/';
 			break;
-		case "RAZA":  /* Shareaza */
-			$client_name = "Shareaza";
-			$url = "http://shareaza.sourceforge.net/";
+		case 'RAZA':  /* Shareaza */
+			$client_name = 'Shareaza';
+			$url = 'http://shareaza.sourceforge.net/';
 			break;
-		case "RAZB":  /* Shareaza - old beta versions */
-			$client_name = "ShareazaBeta";
-			$url = "http://shareaza.sourceforge.net/?id=debug";
+		case 'RAZB':  /* Shareaza - old beta versions */
+			$client_name = 'ShareazaBeta';
+			$url = 'http://shareaza.sourceforge.net/?id=debug';
 			break;
-		case "RAZL":
-			$client_name = "ShareazaLite";
-			$url = "http://sourceforge.net/projects/flox/";
+		case 'RAZL':
+			$client_name = 'ShareazaLite';
+			$url = 'http://sourceforge.net/projects/flox/';
 			break;
-		case "RAZM":  /* Generic vendor */
-			$client_name = "Shareaza mod";
+		case 'RAZM':  /* Generic vendor */
+			$client_name = 'Shareaza mod';
 			break;
-		case "RZCA":
-			$client_name = "ShareazaPlus Alpha";
-			$url = "http://shareazaplus.sourceforge.net/";
+		case 'RZCA':
+			$client_name = 'ShareazaPlus Alpha';
+			$url = 'http://shareazaplus.sourceforge.net/';
 			break;
-		case "RZCB":
-			$client_name = "ShareazaPlus Beta";
-			$url = "http://shareazaplus.sourceforge.net/";
+		case 'RZCB':
+			$client_name = 'ShareazaPlus Beta';
+			$url = 'http://shareazaplus.sourceforge.net/';
 			break;
-		case "RZCC":
-			$client_name = "ShareazaPlus";
-			$url = "http://shareazaplus.sourceforge.net/";
+		case 'RZCC':
+			$client_name = 'ShareazaPlus';
+			$url = 'http://shareazaplus.sourceforge.net/';
 			break;
-		case "SALM":
-			$client_name = "Salmonella";
+		case 'SALM':
+			$client_name = 'Salmonella';
 			break;
-		case "SHLN":
-			$client_name = "Sharelin";
-			$url = "http://sharelin.sourceforge.net/";
+		case 'SHLN':
+			$client_name = 'Sharelin';
+			$url = 'http://sharelin.sourceforge.net/';
 			break;
-		case "SNOW":
-			$client_name = "FrostWire";
-			$url = "http://www.frostwire.com/";
+		case 'SNOW':
+			$client_name = 'FrostWire';
+			$url = 'http://www.frostwire.com/';
 			break;
-		case "SNUT":
-			$client_name = "SwapNut";
+		case 'SNUT':
+			$client_name = 'SwapNut';
 			break;
-		case "SWAP":
-			$client_name = "Swapper";
-			$url = "http://www.revolutionarystuff.com/swapper/";
+		case 'SWAP':
+			$client_name = 'Swapper';
+			$url = 'http://www.revolutionarystuff.com/swapper/';
 			break;
-		case "SWFT":
-			$client_name = "SwiftPeer";
+		case 'SWFT':
+			$client_name = 'SwiftPeer';
 			break;
-		case "TFLS":
-			$client_name = "TrustyFiles";
-			$url = "http://www.trustyfiles.com/";
+		case 'TFLS':
+			$client_name = 'TrustyFiles';
+			$url = 'http://www.trustyfiles.com/';
 			break;
-		/*case "TGWC":
-			$client_name = "";
+		/*case 'TGWC':
+			$client_name = '';
 			break;*/
-		case "TOAD":
-			$client_name = "ToadNode";
+		case 'TOAD':
+			$client_name = 'ToadNode';
 			break;
-		case "WSHR":
-			$client_name = "WireShare";
-			$url = "http://sourceforge.net/projects/wireshare/";
+		case 'WSHR':
+			$client_name = 'WireShare';
+			$url = 'http://sourceforge.net/projects/wireshare/';
 			break;
-		case "XOLO":
-			$client_name = "XoloX";
+		case 'XOLO':
+			$client_name = 'XoloX';
 			break;
-		case "XTLA":
-			$client_name = "Xtella";
-			$url = "http://xtella.sourceforge.net/";
+		case 'XTLA':
+			$client_name = 'Xtella';
+			$url = 'http://xtella.sourceforge.net/';
 			break;
-		case "ZIGA":
-			$client_name = "Ziga";
-			$url = "http://sourceforge.net/projects/ziga/";
+		case 'ZIGA':
+			$client_name = 'Ziga';
+			$url = 'http://sourceforge.net/projects/ziga/';
 			break;
 
 		// GWC Scanners
-		case "GWCSCANNER":
-			$client_name = "Multi-Network GWC Scan";
-			$url = "http://gcachescan.grantgalitz.com/";
+		case 'GWCSCANNER':
+			$client_name = 'Multi-Network GWC Scan';
+			$url = 'http://gcachescan.grantgalitz.com/';
 			$cache_scan = 2;
 			break;
-		case "PGDBScan":
-			$client_name = "Jon Atkins GWC scan";
-			$url = "http://gcachescan.jonatkins.com/";
+		case 'PGDBScan':
+			$client_name = 'Jon Atkins GWC scan';
+			$url = 'http://gcachescan.jonatkins.com/';
 			$cache_scan = 2;
 			break;
-		case "WURM":
-			$client_name = "Wurm Scanner";
-			$url = "http://kevogod.trillinux.org/";
+		case 'WURM':
+			$client_name = 'Wurm Scanner';
+			$url = 'http://kevogod.trillinux.org/';
 			$cache_scan = 2;
 			break;
 
 		// Special cases
-		case "KICKSTART":
-			$client_name = "KickStart";
+		case 'KICKSTART':
+			$client_name = 'KickStart';
 			$cache = 0;
 			break;
-		case "Submit":
-			$client_name = "Manual submission";
+		case 'Submit':
+			$client_name = 'Manual submission';
 			$cache = 0;
 			break;
 
 		// GWCs
-		case "BAZK":
-		case "Bazooka":
-			$client_name = "Bazooka";
-			//$url = "http://www.bazookanetworks.com/";
+		case 'BAZK':
+		case 'Bazooka':
+			$client_name = 'Bazooka';
+			//$url = 'http://www.bazookanetworks.com/';
 			$cache = 2;
 			break;
-		case "BCII":
-			$client_name = "Beacon Cache II";
-			$url = "http://sourceforge.net/projects/beaconcache/";
+		case 'BCII':
+			$client_name = 'Beacon Cache II';
+			$url = 'http://sourceforge.net/projects/beaconcache/';
 			$cache = 2;
 			break;
-		case "BCON":
-			$client_name = "Beacon Cache";
-			$url = "http://sourceforge.net/projects/beaconcache/";
+		case 'BCON':
+			$client_name = 'Beacon Cache';
+			$url = 'http://sourceforge.net/projects/beaconcache/';
 			$cache = 2;
 			break;
-		case "Cachechu":
-			$client_name = "Cachechu";
-			$url = "http://code.google.com/p/cachechu/";
+		case 'Cachechu':
+			$client_name = 'Cachechu';
+			$url = 'http://code.google.com/p/cachechu/';
 			$cache = 2;
 			break;
-		case "CANN":
-			$client_name = "Cannon";
+		case 'CANN':
+			$client_name = 'Cannon';
 			$cache = 2;
 			break;
-		case "CHTC":
-			$client_name = "CheaterCache";
+		case 'CHTC':
+			$client_name = 'CheaterCache';
 			$cache = 2;
 			break;
-		case "Crab":
-			$client_name = "GhostWhiteCrab";
-			$url = "http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/";
+		case 'Crab':
+			$client_name = 'GhostWhiteCrab';
+			$url = 'http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/';
 			$cache = 2;
 			break;
-		case "GCII":
-			$client_name = "PHPGnuCacheII";
-			$url = "http://gwcii.sourceforge.net/";
+		case 'GCII':
+			$client_name = 'PHPGnuCacheII';
+			$url = 'http://gwcii.sourceforge.net/';
 			$cache = 2;
 			break;
-		case "JGWC":
-			$client_name = "jumswebcache";
-			$url = "http://www1.mager.org/GWebCache/";
+		case 'JGWC':
+			$client_name = 'jumswebcache';
+			$url = 'http://www1.mager.org/GWebCache/';
 			/* http://github.com/jum/GWebCache */
 			$cache = 2;
 			break;
-		case "MWebCache":
-			$client_name = "MWebCache";
-			$url = "http://mute-net.sourceforge.net/mWebCache.shtml";
+		case 'MWebCache':
+			$client_name = 'MWebCache';
+			$url = 'http://mute-net.sourceforge.net/mWebCache.shtml';
 			/* http://sourceforge.net/p/mute-net/support-requests/7/ */
 			$cache = 2;
 			break;
-		case "NGWC":  /* Example query => ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
-			$client_name = "node.gwc";
+		case 'NGWC':  /* Example query => ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
+			$client_name = 'node.gwc';
 			$cache = 2;
 			break;
-		case "SKLL":
-			$client_name = "Skulls";
-			$url = "http://sourceforge.net/projects/skulls/";
+		case 'SKLL':
+			$client_name = 'Skulls';
+			$url = 'http://sourceforge.net/projects/skulls/';
 			$cache = 2;
 			break;
 
-		case "TEST":
+		case 'TEST':
 			$cache = 1;
 		default:
 			if($cache)
