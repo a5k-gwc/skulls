@@ -17,33 +17,9 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-$SUPPORTED_NETWORKS = NULL;
+$SUPPORTED_NETWORKS = null;
 include "vars.php";
 $UDP["ukhl"] = 0;	// The support isn't complete
-
-$PHP_SELF = $_SERVER["PHP_SELF"];
-$REMOTE_IP = $_SERVER["REMOTE_ADDR"];
-
-if(function_exists('header_remove'))
-	header_remove('X-Powered-By');
-
-if(!ENABLED || basename($PHP_SELF) == "index.php")
-{
-	header("HTTP/1.0 404 Not Found");
-	die("ERROR: Service disabled\r\n");
-}
-
-$MY_URL = $_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
-if(CACHE_URL != "")
-{
-	list( , $CACHE_URL ) = explode("://", CACHE_URL);
-	if($MY_URL != $CACHE_URL)
-	{
-		header("HTTP/1.0 301 Moved Permanently");
-		header("Location: ".CACHE_URL);
-		die();
-	}
-}
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );											// Four uppercase letters vendor code
@@ -53,8 +29,29 @@ define( "GWC_SITE", "http://sourceforge.net/projects/skulls/" );	// Official sit
 define( "OPEN_SOURCE", "1" );
 define( "DEBUG", "0" );
 
-if($SUPPORTED_NETWORKS == NULL)
-	die("ERROR: No network is supported.");
+$PHP_SELF = $_SERVER["PHP_SELF"];
+$REMOTE_IP = $_SERVER["REMOTE_ADDR"];
+
+if(function_exists('header_remove'))
+	header_remove('X-Powered-By');
+
+if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === null)
+{
+	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+	die("ERROR: Service disabled\r\n");
+}
+
+$MY_URL = $_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
+if(CACHE_URL != "")
+{
+	list( , $CACHE_URL ) = explode("://", CACHE_URL);
+	if($MY_URL != $CACHE_URL)
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
+		header('Location: '.CACHE_URL);
+		die();
+	}
+}
 
 $networks_count = count($SUPPORTED_NETWORKS);
 define( "NETWORKS_COUNT", $networks_count );
@@ -1231,8 +1228,8 @@ else
 	NormalizeIdentity($CLIENT, $VERSION, $UA_ORIGINAL);
 	if( !ValidateIdentity($CLIENT, $VERSION) )
 	{
-		header('HTTP/1.0 404 Not Found');
-		echo "ERROR: Client or version unknown - Request rejected\r\n";
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		echo "ERROR: Invalid client identification\r\n";
 		if(LOG_MINOR_ERRORS) Logging('unidentified_clients', $CLIENT, $VERSION, $NET);
 
 		if($UPDATE || $CACHE !== null || $IP !== null)
@@ -1257,7 +1254,7 @@ else
 	/* Block also missing REMOTE_ADDR, although it is unlikely, apparently it could happen in some configurations */
 	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) || $REMOTE_IP === 'unknown' || $REMOTE_IP == "" )
 	{
-		header('HTTP/1.0 404 Not Found');
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		if(LOG_MINOR_ERRORS) Logging('bad_old_clients', $CLIENT, $VERSION, $NET);
 
 		if($UPDATE || $CACHE !== null || $IP !== null)
