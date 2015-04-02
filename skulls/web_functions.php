@@ -242,8 +242,9 @@ function ReplaceVendorCode($vendor, $version){
 			$cache = 2;
 			break;
 		case "JGWC":
-			$client_name = "Jums Web Cache";
+			$client_name = "jumswebcache";
 			$url = "http://www1.mager.org/GWebCache/";
+			/* http://github.com/jum/GWebCache */
 			$cache = 2;
 			break;
 		case "MWebCache":
