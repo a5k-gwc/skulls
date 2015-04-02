@@ -19,7 +19,7 @@
 
 function ReplaceVendorCode($vendor, $version){
 	$cache = 0; $cache_scan = 0; $url = "";
-	if( $vendor == 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
+	if( $vendor === 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
 	{
 		if(strpos($version, '/') !== false)
 			list( $vendor, $version ) = explode('/', $version, 2);
@@ -32,6 +32,7 @@ function ReplaceVendorCode($vendor, $version){
 		$cache = 1;
 	}
 
+	/* http://rfc-gnutella.sourceforge.net/ */
 	switch($vendor)
 	{
 		case "ACQL":
@@ -46,6 +47,16 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = "Adagio";
 			$url = "http://sourceforge.net/projects/agio/";
 			break;
+		case "AGNT":
+			$client_name = "Agentella";
+			break;
+		case "ARES":
+			$client_name = "Ares";  /* by SoftGap */
+			$url = "http://aresgalaxy.sourceforge.net/";
+			break;
+		case "ATOM":
+			$client_name = "AtomWire";
+			break;
 		case "BEAR":
 			$client_name = "BearShare";
 			$url = "http://www.bearshare.com/";
@@ -54,48 +65,88 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = "CocoGnut";
 			$url = "http://www.alpha-programming.co.uk/software/cocognut/";
 			break;
+		case "CULT":
+			$client_name = "Cultiv8r (Emixode)";
+			break;
 		case "DNET":
 			$client_name = "Deepnet Explorer";
 			$url = "http://www.deepnetexplorer.com/";
 			break;
-		case "FOXY":	// Client of Foxy network (Network parameter enforced in the code to prevent leakage on G1/G2)
+		case "FISH":
+			$client_name = "PEERanha";
+			break;
+		case "FOXY":  /* Foxy - client of Foxy network (Network parameter enforced in the code to prevent leakage on G1/G2) */
 			$client_name = "Foxy";
 			$url = "http://en.wikipedia.org/wiki/Foxy_%28P2P%29";
 			break;
+		case "FSCP":
+			$client_name = "Filescope";
+			$url = "http://filescope.com/";
+			break;
+		case "FUST":
+			$client_name = "Fusteeno";
+			break;
 		case "GDNA":
 			$client_name = "GnucDNA";
-			$url = "http://www.gnucleus.com/GnucDNA/";
+			$url = "http://gnucleus.sourceforge.net/GnucDNA/";
+			break;
+		case "GEN2":
+			$client_name = "Gentoo giFT-Gnutella";
 			break;
 		case "GIFT":
-			$client_name = "giFT";
+			$client_name = "giFT-Gnutella";
 			$url = "http://gift.sourceforge.net/";
+			break;
+		case "GNEW":
+			$client_name = "Gnewtellium";
+			$url = "http://gnewtellium.sourceforge.net/";
+			break;
+		case "GNOT":
+			$client_name = "Gnotella";
+			break;
+		case "GNTG":
+			$client_name = "Gnutelligentsia";
+			$url = "http://gnutelligentsia.sourceforge.net/";
 			break;
 		case "GNUC":
 			$client_name = "Gnucleus";
-			$url = "http://www.gnucleus.com/Gnucleus/";
+			$url = "http://gnucleus.sourceforge.net/Gnucleus/";
+			break;
+		case "GNUT":
+			$client_name = "Gnut";
 			break;
 		case "GNZL":
 			$client_name = "Gnoozle";
-			$url = "";
 			break;
 		case "GOLD":
 			$client_name = "Ares Gold";
-			$url = "";
 			break;
 		case "GPUX":
 			$client_name = "GPU";
 			$url = "http://sourceforge.net/projects/gpu/";
 			break;
+		/* ToDO: Check also vendor GNTD, maybe old version */
 		case "GTKG":
-			$client_name = "GTK Gnutella";
+			$client_name = "Gtk-Gnutella";
 			$url = "http://gtk-gnutella.sourceforge.net/";
+			break;
+		case "HSLG":
+			$client_name = "Hagelslag";
+			$url = "http://os4depot.net/index.php?function=showfile&file=network/p2p/hagelslag.lha";
+			break;
+		case "HYDR":
+			$client_name = "Hydranode";
+			$url = "http://hydranode.com/";
 			break;
 		case "LIME":
 			$client_name = "LimeWire";
 			$url = "http://en.wikipedia.org/wiki/LimeWire";
 			break;
-		case "LIMM":
+		case "LIMM":  /* Generic vendor */
 			$client_name = "LimeWire mod";
+			break;
+		case "MACT":
+			$client_name = "Mactella";
 			break;
 		case "MESH":
 			$client_name = "iMesh";
@@ -103,42 +154,73 @@ function ReplaceVendorCode($vendor, $version){
 			break;
 		case "MLDK":
 			$client_name = "MLDonkey";
-			$url = "http://www.mldonkey.net/";
+			$url = "http://mldonkey.sourceforge.net/";
 			break;
-		case "MMMM":
-		case "MRPH":
+		case "MMMM":  /* Morpheus 2.0+ */
 			$client_name = "Morpheus";
-			$url = "http://www.morpheus.com/";
+			$url = "http://en.wikipedia.org/wiki/Morpheus_%28software%29";
 			break;
 		case "MNAP":
 			$client_name = "MyNapster";
-			$url = "http://www.mynapster.com/";
 			break;
-		case "MTLL":	// The vendor code of Mutella is changed to MTLL in the code to avoid confusion with MUTE network
+		case "MOOD":
+			$client_name = "MoodAmp";
+			break;
+		case "MRPH":  /* Morpheus - old versions */
+			$client_name = "Morpheus (old)";
+			$url = "http://en.wikipedia.org/wiki/Morpheus_%28software%29";
+			break;
+		case "MTLL":  /* Mutella - the vendor code of Mutella is MUTE but it is changed to MTLL in the code to avoid confusion with the MUTE network */
 			$client_name = "Mutella";
 			$url = "http://mutella.sourceforge.net/";
 			break;
-		case "MUTE":	// Client of MUTE network (Network parameter enforced in the code to prevent leakage on G1/G2)
+		case "MUTE":  /* MUTE - client of MUTE network (Network parameter enforced in the code to prevent leakage on G1/G2) */
 			$client_name = "MUTE";
 			$url = "http://mute-net.sourceforge.net/";
 			break;
 		case "MXIE":
 			$client_name = "mxie";
-			$url = "http://www.mxie.com/";
+			break;
+		case "NAPS":
+			$client_name = "NapShare";
+			$url = "http://napshare.sourceforge.net/";
 			break;
 		case "NOVA":
 			$client_name = "Nova";
 			$url = "http://novap2p.sourceforge.net/";
 			break;
+		case "OCFG":
+			$client_name = "OpenCola";
+			break;
+		case "OPRA":
+			$client_name = "Opera";
+			$url = "http://www.opera.com/";
+			break;
+		case "PEER":
+			$client_name = "PeerProject";
+			$url = "http://peerproject.org/";
+			break;
 		case "PHEX":
 			$client_name = "Phex";
-			$url = "http://phex.kouk.de/mambo/";
+			$url = "http://www.phex.org/mambo/";
 			break;
-		case "RAZA":
+		case "QAZA":
+			$client_name = "Quazaa";
+			$url = "http://quazaa.sourceforge.net/";
+			break;
+		case "QAZB":
+			$client_name = "Quazaa Beta";
+			$url = "http://quazaa.sourceforge.net/";
+			break;
+		case "QTEL":
+			$client_name = "Qtella";
+			$url = "http://qtella.sourceforge.net/";
+			break;
+		case "RAZA":  /* Shareaza */
 			$client_name = "Shareaza";
 			$url = "http://shareaza.sourceforge.net/";
 			break;
-		case "RAZB":	// Old beta versions of Shareaza
+		case "RAZB":  /* Shareaza - old beta versions */
 			$client_name = "ShareazaBeta";
 			$url = "http://shareaza.sourceforge.net/?id=debug";
 			break;
@@ -146,24 +228,51 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = "ShareazaLite";
 			$url = "http://sourceforge.net/projects/flox/";
 			break;
-		case "RAZM":
+		case "RAZM":  /* Generic vendor */
 			$client_name = "Shareaza mod";
 			break;
+		case "RZCA":
+			$client_name = "ShareazaPlus Alpha";
+			$url = "http://shareazaplus.sourceforge.net/";
+			break;
 		case "RZCB":
+			$client_name = "ShareazaPlus Beta";
+			$url = "http://shareazaplus.sourceforge.net/";
+			break;
+		case "RZCC":
 			$client_name = "ShareazaPlus";
 			$url = "http://shareazaplus.sourceforge.net/";
+			break;
+		case "SALM":
+			$client_name = "Salmonella";
+			break;
+		case "SHLN":
+			$client_name = "Sharelin";
+			$url = "http://sharelin.sourceforge.net/";
 			break;
 		case "SNOW":
 			$client_name = "FrostWire";
 			$url = "http://www.frostwire.com/";
 			break;
+		case "SNUT":
+			$client_name = "SwapNut";
+			break;
 		case "SWAP":
 			$client_name = "Swapper";
 			$url = "http://www.revolutionarystuff.com/swapper/";
 			break;
+		case "SWFT":
+			$client_name = "SwiftPeer";
+			break;
 		case "TFLS":
 			$client_name = "TrustyFiles";
 			$url = "http://www.trustyfiles.com/";
+			break;
+		/*case "TGWC":
+			$client_name = "";
+			break;*/
+		case "TOAD":
+			$client_name = "ToadNode";
 			break;
 		case "WSHR":
 			$client_name = "WireShare";
@@ -171,7 +280,14 @@ function ReplaceVendorCode($vendor, $version){
 			break;
 		case "XOLO":
 			$client_name = "XoloX";
-			$url = "http://www.xolox.nl/";
+			break;
+		case "XTLA":
+			$client_name = "Xtella";
+			$url = "http://xtella.sourceforge.net/";
+			break;
+		case "ZIGA":
+			$client_name = "Ziga";
+			$url = "http://sourceforge.net/projects/ziga/";
 			break;
 
 		// GWC Scanners
