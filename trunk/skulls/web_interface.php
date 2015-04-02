@@ -288,24 +288,28 @@ function ShowHtmlPage($num){
 														$output .= $cache_url;
 
 													$output .= "</a></td>";
-													if(strpos($cache_name, NAME) > -1)
+													if(strpos($cache_name, NAME) === 0)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"".GWC_SITE."\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(NAME != "Skulls" && strpos($cache_name, "Skulls") > -1)
+													elseif(NAME !== 'Sk'.'ulls' && strpos($cache_name, 'Sk'.'ulls') === 0)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(strpos($cache_name, "Bazooka") > -1)
-														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.bazookanetworks.com/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(strpos($cache_name, "Beacon Cache") > -1)  // Beacon Cache and Beacon Cache II
+													//elseif(strpos($cache_name, "Bazooka") === 0)
+														//$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.bazookanetworks.com/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "Beacon Cache") === 0)  /* Beacon Cache and Beacon Cache II */
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/beaconcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(strpos($cache_name, "Cachechu") > -1)
+													elseif(strpos($cache_name, "Cachechu") === 0)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://code.google.com/p/cachechu/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(strpos($cache_name, "PHPGnuCacheII") > -1)
+													elseif(strpos($cache_name, "GhostWhiteCrab") === 0)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "PHPGnuCacheII") === 0)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gwcii.sourceforge.net/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(strpos($cache_name, "GWebCache") > -1)
-														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.gnucleus.com/gwebcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(strpos($cache_name, "jumswebcache") > -1)
+													elseif(strpos($cache_name, "jumswebcache") === 0)
 														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www1.mager.org/GWebCache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
-													elseif(strpos($cache_name, "MWebCache") > -1)
-														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1588787&amp;group_id=83030&amp;atid=568086\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "MWebCache") === 0)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://mute-net.sourceforge.net/mWebCache.shtml\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "GWebCache") === 0)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gnucleus.sourceforge.net/gwebcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+													elseif(strpos($cache_name, "DKAC/Enticing-Enumon") === 0)
+														$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://dkac.trillinux.org/dkac/dkac.php\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
 													else
 														$output .= "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
 													$output .= "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
