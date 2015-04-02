@@ -530,7 +530,8 @@ function PingGWC($cache, $query){
 			if(!empty($pong))
 			{
 				$received_data = explode("|", $pong);
-				$cache_data = "P|".rawurldecode(RemoveGarbage($received_data[2]));
+				$gwc_name = rawurldecode(RemoveGarbage($received_data[2]));
+				$cache_data = "P|".$gwc_name;
 
 				if(count($received_data) > 3 && $received_data[3] != "")
 				{
@@ -539,6 +540,8 @@ function PingGWC($cache, $query){
 					else
 						$nets = rawurldecode(RemoveGarbage(strtolower($received_data[3])));
 				}
+				elseif(strpos($gwc_name, 'GhostWhiteCrab') === 0)  /* On GhostWhiteCrab if the network list is missing it is gnutella */
+					$nets = "gnutella";
 				elseif( !empty($oldpong) )
 					$nets = "gnutella-gnutella2";
 				else
