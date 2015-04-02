@@ -1241,15 +1241,15 @@ else
 
 	if($CLIENT === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
 	{
-		list($name, ) = explode(" ", $USER_AGENT, 2);
-		if($name === 'Mutella')
+		if(strpos($UA_ORIGINAL, 'Mutella') === 0)
 			$CLIENT = 'MTLL';
 		else
 			$NET = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on G1/G2 */
-		unset($name);
 	}
 	elseif($CLIENT === 'FOXY')
 		$NET = 'foxy';      /* Enforced network parameter for Foxy clients to prevent leakage on G1/G2 */
+
+	if($NET === null) $NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
 	/* Block also missing REMOTE_ADDR, although it is unlikely, apparently it could happen in some configurations */
 	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) || $REMOTE_IP === 'unknown' || $REMOTE_IP == "" )
@@ -1298,8 +1298,6 @@ else
 	if($CACHE !== null)
 		if(!CanonicalizeURL($CACHE))
 			$CACHE = 'BLOCKED';
-
-	if($NET == NULL) $NET = "gnutella";  // This should NOT absolutely be changed (also if your cache don't support the gnutella network) otherwise you will mix host of different networks and it is bad.
 
 	if(!$NO_IP_HEADER)
 	{
