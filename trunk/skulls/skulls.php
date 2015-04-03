@@ -41,16 +41,23 @@ if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === nu
 	die("ERROR: Service disabled\r\n");
 }
 
-$MY_URL = $_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
-if(CACHE_URL !== "")
+function IsSecureConnection()
 {
-	list( , $CACHE_URL ) = explode('://', CACHE_URL);
-	if($MY_URL !== $CACHE_URL)
-	{
-		header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
-		header('Location: '.CACHE_URL);
-		die();
-	}
+	if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' )
+		return true;
+
+	if( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https' )
+		return true;
+
+	return false;
+}
+
+$MY_URL = (IsSecureConnection() ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
+if(CACHE_URL !== $MY_URL && CACHE_URL !== "")
+{
+	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
+	header('Location: '.CACHE_URL);
+	die();
 }
 
 define( 'NETWORKS_COUNT', count($SUPPORTED_NETWORKS) );
@@ -496,7 +503,7 @@ function PingGWC($cache, $query){
 		$error = "";
 
 		$gwc_url = "";
-		if(CACHE_URL != "") $gwc_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
+		if(CACHE_URL !== "") $gwc_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$gwc_url."\r\n";
 		$out = "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) ).'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_name."\r\n".$common_headers;
 		if(DEBUG) echo $out;
@@ -694,12 +701,8 @@ function WriteHostFile($remote_ip, $ip, $leaves, $net, $cluster, $client, $versi
 function WriteCacheFile($cache, $net, $client, $version){
 	global $MY_URL;
 
-	if(strpos($cache, "://") > -1)
-	{
-		list( , $url ) = explode("://", $cache);
-		if($url == $MY_URL)	// It doesn't allow to insert itself in cache list
-			return 0; // Exists
-	}
+	if($cache === $MY_URL)  /* It doesn't allow to insert itself in the GWC list */
+		return 0; // Exists
 
 	$cache = RemoveGarbage($cache);
 	if(CheckFailedUrl($cache))
