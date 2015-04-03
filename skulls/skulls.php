@@ -18,19 +18,19 @@
 //
 
 $SUPPORTED_NETWORKS = null;
-include "vars.php";
-$UDP["ukhl"] = 0;	// The support isn't complete
+include 'vars.php';
+$UDP['ukhl'] = 0;	// The support isn't complete
 
-define( "NAME", "Skulls" );
-define( "VENDOR", "SKLL" );											// Four uppercase letters vendor code
-define( "SHORT_VER", "0.3.0" );										// Numeric version (without letters or words)
-define( "VER", SHORT_VER."c" );										// Full version (it can contain letters)
-define( "GWC_SITE", "http://sourceforge.net/projects/skulls/" );	// Official site of this GWebCache
-define( "OPEN_SOURCE", "1" );
-define( "DEBUG", "0" );
+define( 'NAME', 'Skulls' );
+define( 'VENDOR', 'SKLL' );											// Four uppercase letters vendor code
+define( 'SHORT_VER', '0.3.0' );										// Numeric version (without letters)
+define( 'VER', SHORT_VER.'c' );										// Full version (it can contain letters)
+define( 'GWC_SITE', 'http://sourceforge.net/projects/skulls/' );	// Official site of this GWebCache
+define( 'OPEN_SOURCE', '1' );
+define( 'DEBUG', 0 );
 
-$PHP_SELF = $_SERVER["PHP_SELF"];
-$REMOTE_IP = $_SERVER["REMOTE_ADDR"];
+$PHP_SELF = $_SERVER['PHP_SELF'];
+$REMOTE_IP = $_SERVER['REMOTE_ADDR'];
 
 if(function_exists('header_remove'))
 	header_remove('X-Powered-By');
@@ -42,10 +42,10 @@ if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === nu
 }
 
 $MY_URL = $_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
-if(CACHE_URL != "")
+if(CACHE_URL !== "")
 {
-	list( , $CACHE_URL ) = explode("://", CACHE_URL);
-	if($MY_URL != $CACHE_URL)
+	list( , $CACHE_URL ) = explode('://', CACHE_URL);
+	if($MY_URL !== $CACHE_URL)
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 		header('Location: '.CACHE_URL);
@@ -53,12 +53,12 @@ if(CACHE_URL != "")
 	}
 }
 
-$networks_count = count($SUPPORTED_NETWORKS);
-define( "NETWORKS_COUNT", $networks_count );
+define( 'NETWORKS_COUNT', count($SUPPORTED_NETWORKS) );
 
-function GetMicrotime(){ 
-    list($usec, $sec) = explode(" ",microtime()); 
-    return (float)$usec + (float)$sec; 
+function GetMicrotime()
+{ 
+	list($usec, $sec) = explode(' ', microtime(), 2);
+	return (float)$usec + (float)$sec; 
 }
 
 function NormalizeIdentity(&$vendor, &$ver, $user_agent)
@@ -118,24 +118,24 @@ function VerifyVersion($client, $version)
 {
     switch($client)
 	{  /* Block some old versions and some bad versions */
-		case "RAZA":
-		case "RAZM":
+		case 'RAZA':
+		case 'RAZM':
 			if((float)$version < 2.3)
 				return false;
 			break;
-		case "LIME":  /* Invalid new versions are switched to LIMM, so no need to check here */
+		case 'LIME':  /* Invalid new versions are switched to LIMM, so no need to check here */
 			if((float)$version < 3)
 				return false;
 			break;
-		case "LIMM":
+		case 'LIMM':
 			if((float)$version < 2 || (float)$version >= 8)
 				return false;
 			break;
-		case "BEAR":
+		case 'BEAR':
 			if((float)$version < 6.1)
 			{
 				$short_ver = substr($version, 0, 5);
-				if($short_ver != "5.1.0" && $short_ver != "5.2.1" )
+				if($short_ver != '5.1.0' && $short_ver != '5.2.1' )
 					return false;
 			}
 			break;
@@ -213,7 +213,7 @@ function CanonicalizeURL(&$full_url)
 	else
 	{
 		$cache_length = strlen($full_url);
-		if(substr($full_url, $cache_length-1) == "/")
+		if(substr($full_url, $cache_length-1) === '/')
 			$full_url = substr($full_url, 0, $cache_length-1);
 	}
 
@@ -228,7 +228,7 @@ function NetsToString(){
 
 	for( $i=0; $i < NETWORKS_COUNT; $i++ )
 	{
-		if($i) $nets .= "-";
+		if($i) $nets .= '-';
 		$nets .= $SUPPORTED_NETWORKS[$i];
 	}
 	return $nets;
@@ -242,7 +242,7 @@ function RemoveGarbage($value){
 }
 
 function Pong($support, $multi, $net, $client, $supported_net, $remote_ip){
-	if($remote_ip == "127.0.0.1")	// Prevent caches that point to 127.0.0.1 to being added to cache list, in this case we actually ping ourselves so the cache may look working while it isn't
+	if($remote_ip === '127.0.0.1')  /* Prevent caches that point to 127.0.0.1 to being added to cache list, in this case we actually ping ourselves so the cache may look working while it isn't */
 		return;
 
 	$pong = "I|pong|".NAME." ".VER;
