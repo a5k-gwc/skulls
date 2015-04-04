@@ -384,7 +384,7 @@ function ReplaceVendorCode($vendor, $version){
 		default:
 			if($cache)
 			{
-				$client_name = 'Unknown WebCache ('.$vendor.' '.$version.')';
+				$client_name = 'Unknown GWC ('.$vendor.' '.$version.')';
 				$version = "";
 			}
 			elseif( $vendor !== "" )
@@ -396,12 +396,12 @@ function ReplaceVendorCode($vendor, $version){
 				$client_name = 'Unknown client';
 	}
 
-	if($cache > 1) $version .= " (WebCache)";
+	if($cache > 1) $version .= ' (GWC)';
 
-	if( $url != "" )
-		return "<a href=\"".$url."\" target=\"_blank\">".$client_name." ".$version."</a>";
+	if( $url !== "" )
+		return '<a href="'.$url.'" target="_blank">'.$client_name.' '.$version.'</a>';
 	else
-		return $client_name." ".$version;
+		return $client_name.' '.$version;
 }
 
 function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php", $came_from = NULL){
