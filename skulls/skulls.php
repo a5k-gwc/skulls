@@ -229,7 +229,8 @@ function CanonicalizeURL(&$full_url)
 	return true;
 }
 
-function NetsToString(){
+function NetsToString()
+{
 	global $SUPPORTED_NETWORKS;
 	$nets = "";
 
@@ -241,14 +242,16 @@ function NetsToString(){
 	return $nets;
 }
 
-function RemoveGarbage($value){
+function RemoveGarbage($value)
+{
 	$value = str_replace("|", "", $value);
 	$value = str_replace("\r", "", $value);
 	$value = str_replace("\n", "", $value);
 	return str_replace("\0", "", $value);
 }
 
-function Pong($support, $multi, $net, $client, $supported_net, $remote_ip){
+function Pong($support, $multi, $net, $client, $supported_net, $remote_ip)
+{
 	if($remote_ip === '127.0.0.1')  /* Prevent caches that point to 127.0.0.1 to being added to cache list, in this case we actually ping ourselves so the cache may look working while it isn't */
 		return;
 
@@ -331,12 +334,14 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 	return FALSE;
 }
 
-function TimeSinceSubmissionInSeconds($now, $time_of_submission, $offset){
+function TimeSinceSubmissionInSeconds($now, $time_of_submission, $offset)
+{
 	$time_of_submission = trim($time_of_submission);
 	return $now - ( @strtotime($time_of_submission) + $offset );	// GMT
 }
 
-function CheckIPValidity($remote_ip, $ip){
+function CheckIPValidity($remote_ip, $ip)
+{
 	$ip_port = explode(":", $ip);	// $ip_port[0] = IP	$ip_port[1] = Port
 
 	$ip_array = explode(".", $ip_port[0]);
@@ -373,7 +378,8 @@ function CheckIPValidity($remote_ip, $ip){
 	return FALSE;
 }
 
-function CheckURLValidity($cache){
+function CheckURLValidity($cache)
+{
 	global $UDP;
 	$uhc = $UDP["uhc"] == 1 && substr($cache, 0, 4) == "uhc:";
 	$ukhl = $UDP["ukhl"] == 1 && substr($cache, 0, 5) == "ukhl:";
@@ -393,7 +399,8 @@ function CheckURLValidity($cache){
 }
 
 /* When bugs of GWCs are fixed, ask on http://sourceforge.net/p/skulls/discussion/ and the GWCs will be unlocked */
-function CheckBlockedGWC($gwc_url){
+function CheckBlockedGWC($gwc_url)
+{
 	$gwc_url = strtolower($gwc_url);
 	if(
 		$gwc_url === 'http://cache.trillinux.org/g2/bazooka.php'  /* Bugged - return hosts with negative age */
@@ -404,7 +411,8 @@ function CheckBlockedGWC($gwc_url){
 	return false;
 }
 
-function CleanFailedUrls(){
+function CleanFailedUrls()
+{
 	$failed_urls_file = file(DATA_DIR."/failed_urls.dat");
 	$file_count = count($failed_urls_file);
 	$file = fopen(DATA_DIR."/failed_urls.dat", "wb");
@@ -426,7 +434,8 @@ function CleanFailedUrls(){
 	fclose($file);
 }
 
-function CheckFailedUrl($url){
+function CheckFailedUrl($url)
+{
 	$file = file(DATA_DIR."/failed_urls.dat");
 	$file_count = count($file);
 
@@ -446,7 +455,8 @@ function CheckFailedUrl($url){
 	return FALSE;
 }
 
-function AddFailedUrl($url){
+function AddFailedUrl($url)
+{
 	$file = fopen(DATA_DIR."/failed_urls.dat", "ab");
 	flock($file, 2);
 	fwrite($file, $url."|".gmdate("Y/m/d H:i")."\r\n");
@@ -454,7 +464,8 @@ function AddFailedUrl($url){
 	fclose($file);
 }
 
-function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version, $recover_limit = FALSE){
+function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version, $recover_limit = FALSE)
+{
 	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($recover_limit ? $line + 2 : $line + 1) ) ) );
 
 	$file = fopen(DATA_DIR."/hosts_".$net.".dat", "wb");
@@ -464,7 +475,8 @@ function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $
 	fclose($file);
 }
 
-function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version){
+function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version)
+{
 	$new_cache_file = implode("", array_merge( array_slice($cache_file, 0, $line), array_slice( $cache_file, ($line + 1) ) ) );
 
 	$file = fopen(DATA_DIR."/caches.dat", "wb");
@@ -477,7 +489,8 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	fclose($file);
 }
 
-function PingGWC($cache, $query){
+function PingGWC($cache, $query)
+{
 	list( , $cache ) = explode("://", $cache);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);				// $main_url[0] = www.test.com:80		$main_url[1] = page.php
 	$splitted_url = explode(":", $main_url[0]);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
@@ -582,7 +595,8 @@ function PingGWC($cache, $query){
 	return $cache_data;
 }
 
-function CheckGWC($cache, $cache_network){
+function CheckGWC($cache, $cache_network)
+{
 	global $SUPPORTED_NETWORKS;
 
 	$nets = NULL;
@@ -638,7 +652,8 @@ function CheckGWC($cache, $cache_network){
 	return $cache_data;
 }
 
-function WriteHostFile($remote_ip, $ip, $leaves, $net, $cluster, $client, $version){
+function WriteHostFile($remote_ip, $ip, $leaves, $net, $cluster, $client, $version)
+{
 	global $SUPPORTED_NETWORKS;
 
 	// return 4; Unused
@@ -698,7 +713,8 @@ function WriteHostFile($remote_ip, $ip, $leaves, $net, $cluster, $client, $versi
 	}
 }
 
-function WriteCacheFile($cache, $net, $client, $version){
+function WriteCacheFile($cache, $net, $client, $version)
+{
 	global $MY_URL;
 
 	if($cache === $MY_URL)  /* It doesn't allow to insert itself in the GWC list */
@@ -811,7 +827,8 @@ function CheckIfDummyHostIsNeeded($vendor, $ver)
 	return false;
 }
 
-function HostFile($net){
+function HostFile($net)
+{
 	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
 	$count_host = count($host_file);
 
@@ -828,7 +845,8 @@ function HostFile($net){
 	}
 }
 
-function UrlFile($net){
+function UrlFile($net)
+{
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
 
@@ -861,7 +879,8 @@ function UrlFile($net){
 	}
 }
 
-function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host){
+function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
+{
 	$output = "";
 	$now = time();
 	$offset = @date("Z");
@@ -968,7 +987,8 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host){
 	echo $output;
 }
 
-function StartCompression($COMPRESSION){
+function StartCompression($COMPRESSION)
+{
 	if($COMPRESSION == "deflate")
 		{ $compressed = TRUE; ob_start("gzcompress"); }
 	else
@@ -978,7 +998,8 @@ function StartCompression($COMPRESSION){
 	return $compressed;
 }
 
-function CleanStats($request){
+function CleanStats($request)
+{
 	$now = time();
 	$offset = @date("Z");
 	$file_count = 0;
@@ -1025,7 +1046,8 @@ function CleanStats($request){
 	fclose($file);
 }
 
-function ReadStats($request){
+function ReadStats($request)
+{
 	$requests = 0;
 	$now = time();
 	$offset = @date("Z");
@@ -1062,7 +1084,8 @@ function ReadStats($request){
 	return $requests;
 }
 
-function UpdateStats($request){
+function UpdateStats($request)
+{
 	if(!STATS_ENABLED) return;
 
 	$file = fopen("stats/".$request."_requests_hour.dat", "ab");
