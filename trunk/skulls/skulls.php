@@ -1134,7 +1134,8 @@ $USER_AGENT = str_replace('/', ' ', $UA_ORIGINAL);
 
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none
 $ACCEPT_ENCODING = !empty($_SERVER["HTTP_ACCEPT_ENCODING"]) ? $_SERVER["HTTP_ACCEPT_ENCODING"] : NULL;
-if($COMPRESSION == NULL && strpos($ACCEPT_ENCODING, "deflate") > -1 && !DEBUG) $COMPRESSION = "deflate";
+/* The deflate compression in HTTP 1.1 is the format specified by RFC 1950 instead Internet Explorer incorrectly interpret it as RFC 1951 (buggy IE, what surprise!!!) */
+if($COMPRESSION === null && strpos($ACCEPT_ENCODING, "deflate") !== false && strpos($UA_ORIGINAL, '; MSIE ') === false && !DEBUG) $COMPRESSION = "deflate";
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
