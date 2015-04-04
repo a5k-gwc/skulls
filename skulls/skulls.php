@@ -464,13 +464,14 @@ function AddFailedUrl($url)
 	fclose($file);
 }
 
-function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version, $recover_limit = FALSE)
+function ReplaceHost($file_path, $line, $h_ip, $h_port, $leaves, $client, $version, $h_ua, $h_suspect, &$host_file, $recover_limit = false)
 {
 	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($recover_limit ? $line + 2 : $line + 1) ) ) );
+	$last_host = $h_ip.'|'.$h_port.'|'.$leaves.'|'.$client.'|'.$version.'|'.$h_ua.'|'.$h_suspect.'|||'.gmdate('Y/m/d h:i:s A')."|\n";
 
-	$file = fopen(DATA_DIR."/hosts_".$net.".dat", "wb");
+	$file = fopen($file_path, "wb");
 	flock($file, 2);
-	fwrite($file, $new_host_file.$ip."|".$leaves."|".$cluster."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
+	fwrite($file, $new_host_file.$last_host);
 	flock($file, 3);
 	fclose($file);
 }
@@ -652,29 +653,29 @@ function CheckGWC($cache, $cache_network)
 	return $cache_data;
 }
 
-function WriteHostFile($remote_ip, $ip, $leaves, $net, $cluster, $client, $version)
+function WriteHostFile($remote_ip, $ip, $leaves, $net, $client, $version, $h_ua, $h_suspect = '0')
 {
 	global $SUPPORTED_NETWORKS;
 
 	// return 4; Unused
 	$client = RemoveGarbage($client);
 	$version = RemoveGarbage($version);
-	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
+	$file_path = DATA_DIR.'/hosts_'.$net.'.dat';
+	$host_file = file($file_path);
 	$file_count = count($host_file);
 	$host_exists = FALSE;
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list( $read, ) = explode("|", $host_file[$i]);
-		list( $read_ip, ) = explode(":", $read);
-
-		if( $remote_ip == $read_ip )
+		list( $read_ip ) = explode('|', $host_file[$i], 2);
+		if( $remote_ip === $read_ip )
 		{
-			list( , , , , , $time ) = explode("|", rtrim($host_file[$i]));
+			list( , , , , , , , , , $time ) = explode('|', $host_file[$i], 11);
 			$host_exists = TRUE;
 			break;
 		}
 	}
+	list($h_ip, $h_port) = explode(':', $ip, 2);
 
 	if($host_exists)
 	{
@@ -685,27 +686,27 @@ function WriteHostFile($remote_ip, $ip, $leaves, $net, $cluster, $client, $versi
 			return 0; // Exists
 		else
 		{
-			ReplaceHost($host_file, $i, $ip, $leaves, $net, $cluster, $client, $version);
+			ReplaceHost($file_path, $i, $h_ip, $h_port, $leaves, $client, $version, $h_ua, $h_suspect, $host_file);
 			return 1; // Updated timestamp
 		}
 	}
 	else
 	{
-		if($file_count > MAX_HOSTS || $file_count >= 100)
+		if($file_count > MAX_HOSTS || $file_count > 100)
 		{
-			ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version, TRUE);
+			ReplaceHost($file_path, 0, $h_ip, $h_port, $leaves, $client, $version, $h_ua, $h_suspect, $host_file, true);
 			return 3; // OK, pushed old data
 		}
 		elseif($file_count == MAX_HOSTS)
 		{
-			ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version);
+			ReplaceHost($file_path, 0, $h_ip, $h_port, $leaves, $client, $version, $h_ua, $h_suspect, $host_file);
 			return 3; // OK, pushed old data
 		}
 		else
 		{
 			$file = fopen(DATA_DIR."/hosts_".$net.".dat", "ab");
 			flock($file, 2);
-			fwrite($file, $ip."|".$leaves."|".$cluster."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
+			fwrite($file, $h_ip.'|'.$h_port.'|'.$leaves.'|'.$client.'|'.$version.'|'.$h_ua.'|'.$h_suspect.'|||'.gmdate('Y/m/d h:i:s A')."|\n");
 			flock($file, 3);
 			fclose($file);
 			return 2; // OK
@@ -793,7 +794,7 @@ function WriteCacheFile($cache, $net, $client, $version)
 			}
 			else
 			{
-				if($file_count >= MAX_CACHES || $file_count >= 100)
+				if($file_count >= MAX_CACHES || $file_count > 100)
 				{
 					ReplaceCache( $cache_file, 0, $cache, $cache_data, $client, $version );
 					return 3; // OK, pushed old data
@@ -839,9 +840,8 @@ function HostFile($net)
 
 	for( $i = 0; $i < $max_hosts; $i++ )
 	{
-		list( $host, ) = explode("|", $host_file[$count_host - 1 - $i]);
-		$host = trim($host);
-		print($host."\r\n");
+		list( $h_ip, $h_port ) = explode('|', $host_file[$count_host - 1 - $i], 3);
+		echo $h_ip,':',$h_port,"\r\n";
 	}
 }
 
@@ -900,8 +900,8 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 
 		for( $i=0; $i<$max_hosts; $i++ )
 		{
-			list( $host, $h_leaves, $h_cluster, $h_vendor, , $h_time ) = explode('|', $host_file[$count_host - 1 - $i]);
-			$host = 'H|'.$host.'|'.TimeSinceSubmissionInSeconds( $now, rtrim($h_time), $offset );
+			list( $h_ip, $h_port, $h_leaves, $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */, /* $h_otherport */, /* $h_cluster */, $h_time ) = explode('|', $host_file[$count_host - 1 - $i], 11);
+			$host = 'H|'.$h_ip.':'.$h_port.'|'.TimeSinceSubmissionInSeconds( $now, $h_time, $offset );
 			if($separators > 1) $host .= '||';
 			if($getleaves) $host .= $h_leaves;
 			if($separators > 2) $host .= '|';
@@ -1354,7 +1354,7 @@ else
 		{
 			if( CheckIPValidity($REMOTE_IP, $IP) )
 			{
-				$result = WriteHostFile($REMOTE_IP, $IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+				$result = WriteHostFile($REMOTE_IP, $IP, $LEAVES, $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|Host already updated\r\n";
@@ -1408,7 +1408,7 @@ else
 		if( $IP != NULL && $supported_net )
 		{
 			if( CheckIPValidity($REMOTE_IP, $IP) )
-				$result = WriteHostFile($REMOTE_IP, $IP, $LEAVES, $NET, $CLUSTER, $CLIENT, $VERSION);
+				$result = WriteHostFile($REMOTE_IP, $IP, $LEAVES, $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
 		}

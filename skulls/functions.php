@@ -194,11 +194,7 @@ function KickStart($net, $cache){
 
 			if($is_host)
 			{
-				if(isset($host[3]) && strlen($host[3]) <= 256) // Cluster
-					$cluster = RemoveGarbage($host[3]);
-				else
-					$cluster = NULL;
-				$result = WriteHostFile( $ip_port[0], rtrim($host[1]), NULL, $net, $cluster, "KICKSTART", "1.0" );
+				$result = WriteHostFile($ip_port[0], rtrim($host[1]), NULL, $net, "KICKSTART", "1.0", "", "");
 
 				if( $result == 0 ) // Exists
 					echo "<b>I|update|OK|Host already updated</b><br>\r\n";
