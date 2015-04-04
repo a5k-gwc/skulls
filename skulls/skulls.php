@@ -52,6 +52,14 @@ function IsSecureConnection()
 	return false;
 }
 
+if(empty($_SERVER['HTTP_HOST']))
+{
+	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+	include 'log.php';
+	if(LOG_MAJOR_ERRORS) Logging("missing_host_header", null, null, null);
+	die("ERROR: Missing Host header\r\n");
+}
+
 $MY_URL = (IsSecureConnection() ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
 if(CACHE_URL !== $MY_URL && CACHE_URL !== "")
 {
