@@ -29,16 +29,14 @@ define( 'GWC_SITE', 'http://sourceforge.net/projects/skulls/' );	// Official sit
 define( 'OPEN_SOURCE', '1' );
 define( 'DEBUG', 0 );
 
-$PHP_SELF = $_SERVER['PHP_SELF'];
-$REMOTE_IP = $_SERVER['REMOTE_ADDR'];
-
-if(function_exists('header_remove'))
-	header_remove('X-Powered-By');
-
-if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === null)
+/* Compression will be enabled later only if needed, otherwise it is just a waste of server resources */
+function DisableAutomaticCompression()
 {
-	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-	die("ERROR: Service disabled\r\n");
+	$auto_compr = ini_get('zlib.output_compression');
+	if(!empty($auto_compr))
+		ini_set('zlib.output_compression', '0');
+	if(function_exists('apache_setenv'))
+		apache_setenv('no-gzip', '1');
 }
 
 function IsSecureConnection()
@@ -50,6 +48,20 @@ function IsSecureConnection()
 		return true;
 
 	return false;
+}
+
+DisableAutomaticCompression();
+
+if(function_exists('header_remove'))
+	header_remove('X-Powered-By');
+
+$PHP_SELF = $_SERVER['PHP_SELF'];
+$REMOTE_IP = $_SERVER['REMOTE_ADDR'];
+
+if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === null)
+{
+	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+	die("ERROR: Service disabled\r\n");
 }
 
 if(empty($_SERVER['HTTP_HOST']))
@@ -1213,8 +1225,6 @@ else
 
 if($web)
 {
-	if(ini_get("zlib.output_compression") == 1)
-		ini_set("zlib.output_compression", "0");
 	include "web_interface.php";
 
 	$compressed = StartCompression($COMPRESSION);
@@ -1223,9 +1233,6 @@ if($web)
 }
 elseif( $KICK_START )
 {
-	if(ini_get("zlib.output_compression") == 1)
-		ini_set("zlib.output_compression", "0");
-
 	if( !KICK_START_ENABLED )
 		die("ERROR: Kickstart is disabled\r\n");
 
@@ -1297,9 +1304,6 @@ else
 			UpdateStats("other");
 		die();
 	}
-
-	if(ini_get("zlib.output_compression") == 1)
-		ini_set("zlib.output_compression", "0");
 
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
 	if($GETNETWORKS)
