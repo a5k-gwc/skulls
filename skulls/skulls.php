@@ -436,7 +436,7 @@ function CleanFailedUrls()
 	$failed_urls_file = file(DATA_DIR."/failed_urls.dat");
 	$file_count = count($failed_urls_file);
 	$file = fopen(DATA_DIR."/failed_urls.dat", "wb");
-	flock($file, 2);
+	flock($file, LOCK_EX);
 
 	$now = time();
 	$offset = @date("Z");
@@ -450,7 +450,7 @@ function CleanFailedUrls()
 		if( $time_diff < 2 ) fwrite($file, $failed_urls_file[$i]."\r\n");
 	}
 
-	flock($file, 3);
+	flock($file, LOCK_UN);
 	fclose($file);
 }
 
@@ -478,9 +478,9 @@ function CheckFailedUrl($url)
 function AddFailedUrl($url)
 {
 	$file = fopen(DATA_DIR."/failed_urls.dat", "ab");
-	flock($file, 2);
+	flock($file, LOCK_EX);
 	fwrite($file, $url."|".gmdate("Y/m/d H:i")."\r\n");
-	flock($file, 3);
+	flock($file, LOCK_UN);
 	fclose($file);
 }
 
@@ -490,9 +490,9 @@ function ReplaceHost($file_path, $line, $h_ip, $h_port, $leaves, $client, $versi
 	$last_host = $h_ip.'|'.$h_port.'|'.$leaves.'|'.$client.'|'.$version.'|'.$h_ua.'|'.$h_suspect.'|||'.gmdate('Y/m/d h:i:s A')."|\n";
 
 	$file = fopen($file_path, "wb");
-	flock($file, 2);
+	flock($file, LOCK_EX);
 	fwrite($file, $new_host_file.$last_host);
-	flock($file, 3);
+	flock($file, LOCK_UN);
 	fclose($file);
 }
 
@@ -501,12 +501,12 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	$new_cache_file = implode("", array_merge( array_slice($cache_file, 0, $line), array_slice( $cache_file, ($line + 1) ) ) );
 
 	$file = fopen(DATA_DIR."/caches.dat", "wb");
-	flock($file, 2);
+	flock($file, LOCK_EX);
 	if($cache != NULL)
 		fwrite($file, $new_cache_file.$cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 	else
 		fwrite($file, $new_cache_file);
-	flock($file, 3);
+	flock($file, LOCK_UN);
 	fclose($file);
 }
 
@@ -725,9 +725,9 @@ function WriteHostFile($remote_ip, $ip, $leaves, $net, $client, $version, $h_ua,
 		else
 		{
 			$file = fopen(DATA_DIR."/hosts_".$net.".dat", "ab");
-			flock($file, 2);
+			flock($file, LOCK_EX);
 			fwrite($file, $h_ip.'|'.$h_port.'|'.$leaves.'|'.$client.'|'.$version.'|'.$h_ua.'|'.$h_suspect.'|||'.gmdate('Y/m/d h:i:s A')."|\n");
-			flock($file, 3);
+			flock($file, LOCK_UN);
 			fclose($file);
 			return 2; // OK
 		}
@@ -822,9 +822,9 @@ function WriteCacheFile($cache, $net, $client, $version)
 				else
 				{
 					$file = fopen(DATA_DIR."/caches.dat", "ab");
-					flock($file, 2);
+					flock($file, LOCK_EX);
 					fwrite($file, $cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
-					flock($file, 3);
+					flock($file, LOCK_UN);
 					fclose($file);
 					return 2; // OK
 				}
@@ -1059,10 +1059,10 @@ function CleanStats($request)
 
 	set_time_limit("20");
 	$file = fopen("stats/".$request."_requests_hour.dat", "wb");
-	flock($file, 2);
+	flock($file, LOCK_EX);
 	for($i = 0; $i < $file_count; $i++)
 		fwrite($file, $stat_file[$i]."\n");
-	flock($file, 3);
+	flock($file, LOCK_UN);
 	fclose($file);
 }
 
@@ -1109,9 +1109,9 @@ function UpdateStats($request)
 	if(!STATS_ENABLED) return;
 
 	$file = fopen("stats/".$request."_requests_hour.dat", "ab");
-	flock($file, 2);
+	flock($file, LOCK_EX);
 	fwrite($file, gmdate("Y/m/d H:i")."\n");
-	flock($file, 3);
+	flock($file, LOCK_UN);
 	fclose($file);
 }
 
@@ -1197,9 +1197,9 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 	$file = @fopen( DATA_DIR."/last_action.dat", "xb" );
 	if($file !== FALSE)
 	{
-		flock($file, 2);
+		flock($file, LOCK_EX);
 		fwrite($file, VER."|".STATS_ENABLED."|-1|".gmdate("Y/m/d H:i")."|");
-		flock($file, 3);
+		flock($file, LOCK_UN);
 		fclose($file);
 	}
 	else
@@ -1258,12 +1258,12 @@ else
 	if(STATS_ENABLED)
 	{
 		$file = fopen("stats/requests.dat", "r+b");
-		flock($file, 2);
+		flock($file, LOCK_EX);
 		$requests = fgets($file, 50);
 		if($requests == "") $requests = 1; else $requests++;
 		rewind($file);
 		fwrite($file, $requests);
-		flock($file, 3);
+		flock($file, LOCK_UN);
 		fclose($file);
 	}
 
@@ -1508,7 +1508,7 @@ else
 	$clean_file = NULL;
 	$changed = FALSE;
 	$file = fopen( DATA_DIR."/last_action.dat", "r+b" );
-	flock($file, 2);
+	flock($file, LOCK_EX);
 	$last_action_string = fgets($file, 50);
 
 	if($last_action_string != "")
@@ -1556,7 +1556,7 @@ else
 		rewind($file);
 		fwrite($file, VER."|".STATS_ENABLED."|".$last_action."|".$last_action_date."|");
 	}
-	flock($file, 3);
+	flock($file, LOCK_UN);
 	fclose($file);
 
 	if($compressed) ob_end_flush();
