@@ -106,7 +106,9 @@ function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 	}
 	elseif($vendor === 'LIME')
 	{
-		if(strpos($user_agent, 'LimeWire') !== 0 || (int)$ver >= 6)
+		if(strpos($user_agent, 'Cabos') !== false)
+			$vendor = 'CABO';
+		elseif(strpos($user_agent, 'LimeWire') !== 0 || (int)$ver >= 6)
 			$vendor = 'LIMM';
 	}
 }
@@ -1126,7 +1128,7 @@ $UKHL = !empty($_GET["ukhl"]) && $PHP_VERSION >= 4.3 ? $_GET["ukhl"] : 0;
 
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;				// This tell to the cache to show info like the name, the version, the vendor code, the home page of the cache, the nick and the website of the maintainer (the one that has put the cache on a webserver)
 
-$UA_ORIGINAL = !empty($_SERVER['HTTP_USER_AGENT']) ? trim($_SERVER['HTTP_USER_AGENT']) : "";
+$UA_ORIGINAL = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
 $USER_AGENT = str_replace('/', ' ', $UA_ORIGINAL);
 
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none

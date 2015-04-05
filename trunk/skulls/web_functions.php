@@ -61,6 +61,9 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = 'BearShare';
 			$url = 'http://www.bearshare.com/';
 			break;
+		case 'CABO':  /* Cabos - the vendor code of Cabos is LIME but it is changed to CABO in the code to distinguish it from the normal LimeWire */
+			$client_name = 'Cabos/LimeWire';
+			break;
 		case 'COCO':
 			$client_name = 'CocoGnut';
 			$url = 'http://www.alpha-programming.co.uk/software/cocognut/';
