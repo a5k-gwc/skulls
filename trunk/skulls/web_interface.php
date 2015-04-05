@@ -187,21 +187,21 @@ function ShowHtmlPage($num){
 											{
 												for( $i = $elements - 1; $i >= 0; $i-- )
 												{
-													list ($h_ip, $h_port, $h_leaves, $h_vendor, $h_ver, $h_ua, /* $h_suspect */, , /* $h_cluster */, $time) = explode('|', $host_file["host"][$i], 11);
-													if(isset($host_file["net"][$i])) $net = $host_file["net"][$i];
+													list( $h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, $h_ver, $h_ua, /* $h_suspect */, ) = explode('|', $host_file['host'][$i], 13);
+													if(isset($host_file['net'][$i])) $net = $host_file['net'][$i];
 													$color = $i % 2 === 0 ? "#F0F0F0" : "#FFFFFF";
 													$host = $h_ip.':'.$h_port;
+													$url = $net.':host:';
 
 													echo '<tr align="left" bgcolor="',$color,'">';
 													echo '<td style="padding-right: 10pt;">';
-													$url = $net.':host:';
 													echo '<a href="',$url,$host,'">',$host,'</a>';
 													if($h_leaves !== "")
 														echo ' (',$h_leaves,')';
 													echo '</td>';
 													echo '<td style="padding-right: 20pt;"><strong title="',$h_ua,'">',ReplaceVendorCode($h_vendor, $h_ver),'</strong></td>';
 													echo '<td style="padding-right: 20pt;"><a href="?showhosts=1&amp;net=',strtolower($net),'">',$net,'</a></td>';
-													echo '<td>',$time,'</td></tr>';
+													echo '<td>',$h_age,'</td></tr>';
 												}
 											}
 										?>
