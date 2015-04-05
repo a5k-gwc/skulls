@@ -484,14 +484,13 @@ function AddFailedUrl($url)
 	fclose($file);
 }
 
-function ReplaceHost($file_path, $line, $h_ip, $h_port, $leaves, $client, $version, $h_ua, $h_suspect, &$host_file, $recover_limit = false)
+function ReplaceHost($file_path, $line, $this_host, &$host_file, $recover_limit = false)
 {
 	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($recover_limit ? $line + 2 : $line + 1) ) ) );
-	$last_host = $h_ip.'|'.$h_port.'|'.$leaves.'|'.$client.'|'.$version.'|'.$h_ua.'|'.$h_suspect.'|||'.gmdate('Y/m/d h:i:s A')."|\n";
 
 	$file = fopen($file_path, "wb");
 	flock($file, LOCK_EX);
-	fwrite($file, $new_host_file.$last_host);
+	fwrite($file, $new_host_file.$this_host);
 	flock($file, LOCK_UN);
 	fclose($file);
 }
@@ -673,13 +672,11 @@ function CheckGWC($cache, $cache_network)
 	return $cache_data;
 }
 
-function WriteHostFile($remote_ip, $ip, $leaves, $net, $client, $version, $h_ua, $h_suspect = '0')
+function WriteHostFile($net, $remote_ip, $ip, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = '0')
 {
 	global $SUPPORTED_NETWORKS;
 
 	// return 4; Unused
-	$client = RemoveGarbage($client);
-	$version = RemoveGarbage($version);
 	$file_path = DATA_DIR.'/hosts_'.$net.'.dat';
 	$host_file = file($file_path);
 	$file_count = count($host_file);
@@ -687,15 +684,15 @@ function WriteHostFile($remote_ip, $ip, $leaves, $net, $client, $version, $h_ua,
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list( $read_ip ) = explode('|', $host_file[$i], 2);
+		list( $time, $read_ip, ) = explode('|', $host_file[$i], 3);
 		if( $remote_ip === $read_ip )
 		{
-			list( , , , , , , , , , $time ) = explode('|', $host_file[$i], 11);
 			$host_exists = TRUE;
 			break;
 		}
 	}
 	list($h_ip, $h_port) = explode(':', $ip, 2);
+	$this_host = gmdate('Y/m/d h:i:s A').'|'.$h_ip.'|'.$h_port.'|'.$h_leaves.'|'.$h_max_leaves.'|'.$h_uptime.'|'.RemoveGarbage($h_vendor).'|'.RemoveGarbage($h_ver).'|'.RemoveGarbage($h_ua).'|'.$h_suspect."|||\n";
 
 	if($host_exists)
 	{
@@ -706,7 +703,7 @@ function WriteHostFile($remote_ip, $ip, $leaves, $net, $client, $version, $h_ua,
 			return 0; // Exists
 		else
 		{
-			ReplaceHost($file_path, $i, $h_ip, $h_port, $leaves, $client, $version, $h_ua, $h_suspect, $host_file);
+			ReplaceHost($file_path, $i, $this_host, $host_file);
 			return 1; // Updated timestamp
 		}
 	}
@@ -714,19 +711,19 @@ function WriteHostFile($remote_ip, $ip, $leaves, $net, $client, $version, $h_ua,
 	{
 		if($file_count > MAX_HOSTS || $file_count > 100)
 		{
-			ReplaceHost($file_path, 0, $h_ip, $h_port, $leaves, $client, $version, $h_ua, $h_suspect, $host_file, true);
+			ReplaceHost($file_path, 0, $this_host, $host_file, true);
 			return 3; // OK, pushed old data
 		}
 		elseif($file_count == MAX_HOSTS)
 		{
-			ReplaceHost($file_path, 0, $h_ip, $h_port, $leaves, $client, $version, $h_ua, $h_suspect, $host_file);
+			ReplaceHost($file_path, 0, $this_host, $host_file);
 			return 3; // OK, pushed old data
 		}
 		else
 		{
-			$file = fopen(DATA_DIR."/hosts_".$net.".dat", "ab");
+			$file = fopen($file_path, "ab");
 			flock($file, LOCK_EX);
-			fwrite($file, $h_ip.'|'.$h_port.'|'.$leaves.'|'.$client.'|'.$version.'|'.$h_ua.'|'.$h_suspect.'|||'.gmdate('Y/m/d h:i:s A')."|\n");
+			fwrite($file, $this_host);
 			flock($file, LOCK_UN);
 			fclose($file);
 			return 2; // OK
@@ -860,7 +857,7 @@ function HostFile($net)
 
 	for( $i = 0; $i < $max_hosts; $i++ )
 	{
-		list( $h_ip, $h_port ) = explode('|', $host_file[$count_host - 1 - $i], 3);
+		list( , $h_ip, $h_port, ) = explode('|', $host_file[$count_host - 1 - $i], 4);
 		echo $h_ip,':',$h_port,"\r\n";
 	}
 }
@@ -920,8 +917,8 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 
 		for( $i=0; $i<$max_hosts; $i++ )
 		{
-			list( $h_ip, $h_port, $h_leaves, $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */, /* $h_otherport */, /* $h_cluster */, $h_time ) = explode('|', $host_file[$count_host - 1 - $i], 11);
-			$host = 'H|'.$h_ip.':'.$h_port.'|'.TimeSinceSubmissionInSeconds( $now, $h_time, $offset );
+			list( $h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */, ) = explode('|', $host_file[$count_host - 1 - $i], 13);
+			$host = 'H|'.$h_ip.':'.$h_port.'|'.TimeSinceSubmissionInSeconds( $now, $h_age, $offset );
 			if($separators > 1) $host .= '||';
 			if($getleaves) $host .= $h_leaves;
 			if($separators > 2) $host .= '|';
@@ -1140,6 +1137,7 @@ if($COMPRESSION === null && strpos($ACCEPT_ENCODING, "deflate") !== false && str
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
 $LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
+$MAX_LEAVES = isset($_GET['x_max']) ? $_GET['x_max'] : null;
 $CLUSTER = !empty($_GET['cluster']) ? $_GET['cluster'] : null;
 
 $HOSTFILE = !empty($_GET["hostfile"]) ? $_GET["hostfile"] : 0;
@@ -1329,6 +1327,11 @@ else
 		$LEAVES = null;
 		if(LOG_MAJOR_ERRORS) Logging("invalid_leaves", $CLIENT, $VERSION, $NET);
 	}
+	if($MAX_LEAVES !== null && ( !ctype_digit($MAX_LEAVES) || $MAX_LEAVES > 2047 ))
+	{
+		$MAX_LEAVES = null;
+		if(LOG_MAJOR_ERRORS) Logging("invalid_max_leaves", $CLIENT, $VERSION, $NET);
+	}
 	$CLUSTER = null;
 
 	$compressed = StartCompression($COMPRESSION);
@@ -1367,7 +1370,7 @@ else
 		{
 			if( CheckIPValidity($REMOTE_IP, $IP) )
 			{
-				$result = WriteHostFile($REMOTE_IP, $IP, $LEAVES, $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
+				$result = WriteHostFile($NET, $REMOTE_IP, $IP, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|Host already updated\r\n";
@@ -1421,7 +1424,7 @@ else
 		if( $IP != NULL && $supported_net )
 		{
 			if( CheckIPValidity($REMOTE_IP, $IP) )
-				$result = WriteHostFile($REMOTE_IP, $IP, $LEAVES, $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
+				$result = WriteHostFile($NET, $REMOTE_IP, $IP, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
 		}

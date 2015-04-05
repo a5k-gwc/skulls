@@ -194,7 +194,7 @@ function KickStart($net, $cache){
 
 			if($is_host)
 			{
-				$result = WriteHostFile($ip_port[0], rtrim($host[1]), NULL, $net, "KICKSTART", "1.0", "", "");
+				$result = WriteHostFile($net, $ip_port[0], rtrim($host[1]), "", "", "", 'KICKSTART', '1.0', "", '0');
 
 				if( $result == 0 ) // Exists
 					echo "<b>I|update|OK|Host already updated</b><br>\r\n";
