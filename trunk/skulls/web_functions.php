@@ -375,6 +375,8 @@ function ReplaceVendorCode($vendor, $version){
 			break;
 		case 'NGWC':  /* Example query => ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
 			$client_name = 'node.gwc';
+			$url = 'http://andrewgilmore.co.uk/project/nodegwc';
+			/* http://github.com/agilmore/node.gwc */
 			$cache = 2;
 			break;
 		case 'SKLL':
