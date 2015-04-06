@@ -63,6 +63,7 @@ function ReplaceVendorCode($vendor, $version){
 			break;
 		case 'CABO':  /* Cabos - the vendor code of Cabos is LIME but it is changed to CABO in the code to distinguish it from the normal LimeWire */
 			$client_name = 'Cabos/LimeWire';
+			$url = 'http://cabos.sourceforge.jp/';
 			break;
 		case 'COCO':
 			$client_name = 'CocoGnut';
@@ -339,7 +340,7 @@ function ReplaceVendorCode($vendor, $version){
 			break;
 		case 'Cachechu':
 			$client_name = 'Cachechu';
-			$url = 'http://code.google.com/p/cachechu/';
+			$url = 'http://github.com/kevogod/cachechu';
 			$cache = 2;
 			break;
 		case 'CANN':
