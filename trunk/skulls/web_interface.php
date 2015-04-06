@@ -189,7 +189,7 @@ function ShowHtmlPage($num){
 												{
 													list( $h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, $h_ver, $h_ua, /* $h_suspect */, ) = explode('|', $host_file['host'][$i], 13);
 													if(isset($host_file['net'][$i])) $net = $host_file['net'][$i];
-													$color = $i % 2 === 0 ? "#F0F0F0" : "#FFFFFF";
+													$color = (($elements - $i) % 2 === 0 ? "#F0F0F0" : "#FFFFFF");
 													$host = $h_ip.':'.$h_port;
 													$url = $net.':host:';
 
