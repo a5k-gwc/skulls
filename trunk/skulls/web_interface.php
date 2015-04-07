@@ -181,7 +181,7 @@ function ShowHtmlPage($num){
 											<td>Last updated</td>
 										</tr>
 										<?php
-											if( $elements == 0 )
+											if( $elements === 0 )
 												print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"4\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td></tr>\r\n");
 											else
 											{
@@ -228,6 +228,7 @@ function ShowHtmlPage($num){
 			elseif($num == 3)	// WebCache
 			{
 				$cache_file = file(DATA_DIR."/caches.dat");
+				$elements = count($cache_file);
 				?>
 				<tr bgcolor="#CCFF99"> 
 					<td style="color: #0044FF"><b>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="Javascript:sendGWCs();">Add first 20 caches to your P2P application</a></td>
@@ -246,12 +247,13 @@ function ShowHtmlPage($num){
 											<td>Last updated</td>
 										</tr>
 										<?php
-											if( count($cache_file) == 0 )
+											
+											if( $elements === 0 )
 												print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"5\" height=\"30\">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>\r\n");
 											else
 											{
 												$udp = "";
-												for($i = count($cache_file) - 1; $i >= 0; $i--)
+												for($i = $elements - 1; $i >= 0; $i--)
 												{
 													list ($cache_url, $cache_name, $net, $client, $version, $time) = explode("|", $cache_file[$i], 6);
 													if( strpos($net, "-") > -1 )
@@ -265,7 +267,7 @@ function ShowHtmlPage($num){
 															$net .= ucfirst($networks[$x]);
 														}
 													}
-													$color = $i % 2 == 0 ? "#F0F0F0" : "#FFFFFF";
+													$color = (($elements - $i) % 2 === 0 ? "#F0F0F0" : "#FFFFFF");
 
 													$output = "<tr align=\"left\" bgcolor=\"".$color."\">";
 													$output .= "<td style=\"padding-right: 10pt;\">";
