@@ -143,7 +143,7 @@ function ShowHtmlPage($num){
 					global $SUPPORTED_NETWORKS;
 					$max_hosts *= NETWORKS_COUNT;
 
-					for($x = 0; $x < NETWORKS_COUNT; $x++)
+					for($x = NETWORKS_COUNT - 1; $x >= 0; $x--)
 					{
 						$temp = file(DATA_DIR."/hosts_".strtolower($SUPPORTED_NETWORKS[$x]).".dat");
 						$n_temp = count($temp);
@@ -152,8 +152,8 @@ function ShowHtmlPage($num){
 							$host_file["host"][$elements] = $temp[$y];
 							$host_file["net"][$elements] = $SUPPORTED_NETWORKS[$x];
 							$elements++;
-							unset($temp[$y]);
 						}
+						$temp = null;
 					}
 				}
 				elseif( file_exists(DATA_DIR."/hosts_".$NET.".dat") )
