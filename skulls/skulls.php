@@ -24,7 +24,7 @@ $UDP['ukhl'] = 0;	// The support isn't complete
 define( 'NAME', 'Skulls' );
 define( 'VENDOR', 'SKLL' );											// Four uppercase letters vendor code
 define( 'SHORT_VER', '0.3.0' );										// Numeric version (without letters)
-define( 'VER', SHORT_VER.'d' );										// Full version (it can contain letters)
+define( 'VER', SHORT_VER.'e' );										// Full version (it can contain letters)
 define( 'GWC_SITE', 'http://sourceforge.net/projects/skulls/' );	// Official site of this GWebCache
 define( 'OPEN_SOURCE', '1' );
 define( 'DEBUG', 0 );
