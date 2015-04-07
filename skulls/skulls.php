@@ -272,12 +272,12 @@ function RemoveGarbage($value)
 	return str_replace("\0", "", $value);
 }
 
-function Pong($support, $multi, $net, $client, $supported_net, $remote_ip)
+function Pong($support, $multi, $net, $client, $version, $supported_net, $remote_ip)
 {
 	if($remote_ip === '127.0.0.1')  /* Prevent caches that point to 127.0.0.1 to being added to cache list, in this case we actually ping ourselves so the cache may look working while it isn't */
 		return;
 
-	$pong = "I|pong|".NAME." ".VER;
+	$pong = 'I|pong|'.NAME.' '.VER;
 
 	if($support)
 	{
@@ -286,23 +286,23 @@ function Pong($support, $multi, $net, $client, $supported_net, $remote_ip)
 	elseif($multi)
 	{
 		$nets = strtolower(NetsToString());
-		echo $pong."|".$nets."\r\n";
+		echo $pong.'|'.$nets."\r\n";
 	}
 	elseif($supported_net)
 	{
-		if($net == "gnutella" || $net == "mute")
-			echo "PONG ".NAME." ".VER."\r\n";
+		if($net === 'gnutella' || $net === 'mute')
+			echo 'PONG '.NAME.' '.VER."\r\n";
 
 		global $SUPPORTED_NETWORKS;
-		if(NETWORKS_COUNT > 1 || strtolower($SUPPORTED_NETWORKS[0]) != "gnutella")
+		if(NETWORKS_COUNT > 1 || strtolower($SUPPORTED_NETWORKS[0]) !== 'gnutella')
 		{
 			$nets = strtolower(NetsToString());
-			if($client == "TEST" && $net == "gnutella2" && $nets != "gnutella2")
-				echo $pong."|gnutella2||COMPAT|".$nets."\r\n";	// Workaround for compatibility with Bazooka
-			elseif($client == "GCII" && $net == "gnutella2")
-				echo $pong."|||COMPAT|".$nets."\r\n";			// Workaround for compatibility with PHPGnuCacheII
+			if($client === 'TEST' && $net === 'gnutella2' && strpos($version, 'Bazooka') === 0)
+				echo $pong.'|gnutella2||COMPAT|'.$nets."\r\n";	/* Workaround for compatibility with Bazooka (it expect only gnutella2 instead of a supported network list and chokes on the rest) */
+			elseif($client === 'GCII' && $net === 'gnutella2')
+				echo $pong.'|||COMPAT|'.$nets."\r\n";			/* Workaround for compatibility with PHPGnuCacheII (it expects our url instead of a supported network list, keep it empty is also fine) */
 			else
-				echo $pong."|".$nets."\r\n";
+				echo $pong.'|'.$nets."\r\n";
 		}
 	}
 }
@@ -1362,7 +1362,7 @@ else
 	}
 
 	if($PING)
-		Pong($SUPPORT, $MULTI, $NET, $CLIENT, $supported_net, $REMOTE_IP);
+		Pong($SUPPORT, $MULTI, $NET, $CLIENT, $VERSION, $supported_net, $REMOTE_IP);
 	if($SUPPORT)
 		Support($SUPPORT, $SUPPORTED_NETWORKS, $UDP);
 
