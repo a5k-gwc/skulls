@@ -194,7 +194,7 @@ function ShowHtmlPage($num){
 													if(isset($host_file['net'][$i])) $net = $host_file['net'][$i];
 													$color = (($elements - $i) % 2 === 0 ? "#F0F0F0" : "#FFFFFF");
 													$host = $h_ip.':'.$h_port;
-													$url = $net.':host:';
+													$url = strtolower($net).':host:';
 
 													echo '<tr align="left" bgcolor="',$color,'">';
 													echo '<td style="padding-right: 10pt;">';
