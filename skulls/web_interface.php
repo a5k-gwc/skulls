@@ -185,8 +185,8 @@ function ShowHtmlPage($num){
 												print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"4\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td></tr>\r\n");
 											else
 											{
-												include "geoip/geoip.php";
-												$geoip = InitializeGeoIP();
+												include './geoip/geoip.php';
+												$geoip = new GeoIPWrapper();
 
 												for( $i = $elements - 1; $i >= 0; $i-- )
 												{
@@ -200,9 +200,9 @@ function ShowHtmlPage($num){
 													echo '<td style="padding-right: 10pt;">';
 													if($geoip)
 													{
-														$country_name = GeoIPGetCountryName($h_ip);
-														$country_code = GeoIPGetCountryCode($h_ip);
-														echo '<img width="16" height="11" src="'.GeoIPGetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
+														$country_name = $geoip->GetCountryNameByIP($h_ip);
+														$country_code = $geoip->GetCountryCodeByIP($h_ip);
+														echo '<img width="16" height="11" src="'.$geoip->GetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
 													}
 													echo '<a href="',$url,$host,'">',$host,'</a>';
 													if($h_leaves !== "")
@@ -212,6 +212,9 @@ function ShowHtmlPage($num){
 													echo '<td style="padding-right: 20pt;"><a href="?showhosts=1&amp;net=',strtolower($net),'">',$net,'</a></td>';
 													echo '<td>',$h_age,'</td></tr>';
 												}
+
+												if($geoip) $geoip->Destroy();
+												$geoip = null;
 											}
 										?>
 									</table>
