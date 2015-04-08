@@ -130,12 +130,12 @@ function VerifyUserAgent($vendor, $user_agent)
 		return false;
 
 	if($vendor === 'RAZM')
-	{  /* Block empty User-Agent, User-Agent without version and bad clients */
+	{  /* Block empty User-Agent, User-Agent without version and rip-offs; bad clients */
 		if($user_agent === "" || $user_agent === 'Shareaza' || strpos($user_agent, 'Shareaza PRO') === 0)
 			return false;
 	}
 	elseif($vendor === 'LIMM')
-	{  /* Block empty User-Agent */
+	{  /* Block empty User-Agent; bad clients */
 		if($user_agent === "")
 			return false;
 	}
