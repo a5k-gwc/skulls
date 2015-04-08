@@ -516,10 +516,10 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	fclose($file);
 }
 
-function PingGWC($gwc, $query)
+function PingGWC($gwc_url, $query)
 {
 	$errno = -1; $errstr = "";
-	list( , $cache ) = explode("://", $gwc);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
+	list( , $cache ) = explode("://", $gwc_url);	// It remove "http://" from $cache - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);				// $main_url[0] = www.test.com:80		$main_url[1] = page.php
 
 	/* Separate hostname from port */
@@ -532,20 +532,21 @@ function PingGWC($gwc, $query)
 	if(!$fp)
 	{
 		$cache_data = "ERR|".$errno;				// ERR|Error name
-		if(DEBUG) echo "D|update|ERROR|".$errno." (".$errstr.")\r\n";
+		if(DEBUG) echo "\r\n"."D|update|ERROR|".$errno." (".$errstr.")\r\n";
 	}
 	else
 	{
 		$pong = "";
 		$oldpong = "";
+		$nets_list1 = null;
 		$error = "";
 
-		$gwc_url = "";
-		if(CACHE_URL !== "") $gwc_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
+		$our_url = "";
+		if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 		$host = $host_name.($host_port === 80 ? "" : ':'.$host_port);
-		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$gwc_url."\r\n";
+		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url."\r\n";
 		$out = "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) ).'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host."\r\n".$common_headers;
-		if(DEBUG) echo $out;
+		if(DEBUG) echo "\r\n".$out;
 
 		if( !fwrite($fp, $out) )
 		{
@@ -559,10 +560,12 @@ function PingGWC($gwc, $query)
 				$line = rtrim(fgets($fp, 1024));
 				if(DEBUG) echo $line."\r\n";
 
-				if( strtolower( substr( $line, 0, 7 ) ) == "i|pong|" )
+				if( strtolower( substr( $line, 0, 7 ) ) === "i|pong|" )
 					$pong = rtrim($line);
-				elseif(substr($line, 0, 4) == "PONG")
+				elseif(substr($line, 0, 4) === "PONG")
 					$oldpong = rtrim($line);
+				elseif(strtolower( substr($line, 0, 11) ) === "i|networks|")
+					$nets_list1 = strtolower( substr($line, 11) );
 				elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
 					$error .= rtrim($line)." - ";
 				elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
@@ -573,17 +576,19 @@ function PingGWC($gwc, $query)
 			if(!empty($pong))
 			{
 				$received_data = explode("|", $pong);
-				$gwc_name = rawurldecode(RemoveGarbage($received_data[2]));
+				$gwc_name = RemoveGarbage(rawurldecode($received_data[2]));
 				$cache_data = "P|".$gwc_name;
 
-				if(count($received_data) > 3 && $received_data[3] != "")
+				if($nets_list1 !== null)
+					$nets = RemoveGarbage(str_replace( array('-', '|'), array('%2D', '-'), $nets_list1 ));
+				elseif(count($received_data) > 3 && $received_data[3] != "")
 				{
-					if(substr($received_data[3], 0, 4) == "http")		// Workaround for compatibility with PHPGnuCacheII
+					if(substr($received_data[3], 0, 4) === "http")  /* Workaround for compatibility with PHPGnuCacheII */
 						$nets = "gnutella-gnutella2";
 					else
-						$nets = rawurldecode(RemoveGarbage(strtolower($received_data[3])));
+						$nets = RemoveGarbage(strtolower($received_data[3]));
 				}
-				elseif(strpos($gwc_name, 'GhostWhiteCrab') === 0)  /* On GhostWhiteCrab if the network list is missing it is gnutella */
+				elseif(strpos($gwc_name, 'GhostWhiteCrab') === 0)  /* On GhostWhiteCrab if the network is gnutella then the networks list is missing :( */
 					$nets = "gnutella";
 				elseif( !empty($oldpong) )
 					$nets = "gnutella-gnutella2";
@@ -594,8 +599,12 @@ function PingGWC($gwc, $query)
 			}
 			elseif(!empty($oldpong))
 			{
-				$oldpong = rawurldecode(RemoveGarbage(substr($oldpong, 5)));
+				$oldpong = RemoveGarbage(rawurldecode(substr($oldpong, 5)));
 				$cache_data = "P|".$oldpong;
+
+				/* Needed to force specs v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
+				if(strpos($oldpong, 'Cachechu') === 0)
+					return PingGWC($gwc_url, $query.'&update=1');
 
 				if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
 					//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
