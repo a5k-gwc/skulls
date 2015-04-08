@@ -1127,6 +1127,8 @@ function UpdateStats($request)
 }
 
 
+ini_set('default_charset', 'UTF-8');
+
 $PHP_VERSION = (float)PHP_VERSION;
 
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
