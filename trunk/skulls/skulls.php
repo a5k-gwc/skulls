@@ -516,21 +516,19 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	fclose($file);
 }
 
-function PingGWC($cache, $query)
+function PingGWC($gwc, $query)
 {
-	list( , $cache ) = explode("://", $cache);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
+	$errno = -1; $errstr = "";
+	list( , $cache ) = explode("://", $gwc);		// It remove "http://" from $cache - $cache = www.test.com:80/page.php
 	$main_url = explode("/", $cache);				// $main_url[0] = www.test.com:80		$main_url[1] = page.php
-	$splitted_url = explode(":", $main_url[0]);		// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
 
-	if( count($splitted_url) > 1 )
-		list($host_name, $port) = $splitted_url;
+	/* Separate hostname from port */
+	if(strpos($main_url[0], ':') !== false)
+		{ list($host_name, $host_port) = explode(':', $main_url[0], 2); $host_port = (int)$host_port; }
 	else
-	{
-		$host_name = $main_url[0];
-		$port = 80;
-	}
+		{ $host_name = $main_url[0]; $host_port = 80; }
 
-	$fp = @fsockopen($host_name, $port, $errno, $errstr, (float)TIMEOUT);
+	$fp = @fsockopen($host_name, $host_port, $errno, $errstr, (float)TIMEOUT);
 	if(!$fp)
 	{
 		$cache_data = "ERR|".$errno;				// ERR|Error name
@@ -544,8 +542,9 @@ function PingGWC($cache, $query)
 
 		$gwc_url = "";
 		if(CACHE_URL !== "") $gwc_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
+		$host = $host_name.($host_port === 80 ? "" : ':'.$host_port);
 		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$gwc_url."\r\n";
-		$out = "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) ).'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_name."\r\n".$common_headers;
+		$out = "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) ).'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host."\r\n".$common_headers;
 		if(DEBUG) echo $out;
 
 		if( !fwrite($fp, $out) )
