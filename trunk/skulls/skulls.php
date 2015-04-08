@@ -108,7 +108,7 @@ function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 	{
 		if(strpos($user_agent, 'Cabos') !== false)
 			$vendor = 'CABO';
-		elseif(strpos($user_agent, 'LimeWire') !== 0 || (int)$ver >= 6)
+		elseif(strpos($user_agent, 'LimeWire') !== 0 || (float)$ver >= 5.7)
 			$vendor = 'LIMM';
 	}
 }
