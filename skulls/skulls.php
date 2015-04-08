@@ -235,16 +235,16 @@ function CanonicalizeURL(&$full_url)
 			$path .= '/';
 
 		if(strpos($host, ':') !== false)
-			list($host_name, $host_port) = explode(':', $host, 2);
+			{ list($host_name, $host_port) = explode(':', $host, 2); if(!ctype_digit($host_port)) return false; $host_port = (int)$host_port; }
 		else
-			{$host_name = $host; $host_port = 80;}
+			{ $host_name = $host; $host_port = 80; }
 		/* ToDO: Verify port */
 		/* ToDO: Remove dot at the end of hostname if present */
 
 		if(substr($host_name, -9) === '.nyud.net' || substr($host_name, -10) === '.nyucd.net')
 			return false;  /* Block Coral Content Distribution Network */
 
-		$full_url = strtolower($scheme).'://'.strtolower($host_name).( $host_port == 80 ? "" : ':'.(int)$host_port ).$path;
+		$full_url = strtolower($scheme).'://'.strtolower($host_name).($host_port === 80 ? "" : ':'.$host_port).$path;
 	}
 	else
 	{
@@ -532,7 +532,7 @@ function PingGWC($gwc_url, $query)
 	if(!$fp)
 	{
 		$cache_data = "ERR|".$errno;				// ERR|Error name
-		if(DEBUG) echo "\r\n"."D|update|ERROR|".$errno." (".$errstr.")\r\n";
+		if(DEBUG) echo "\r\n".'D|update|ERROR|'.$errno.'|'.rtrim($errstr)."\r\n";
 	}
 	else
 	{
