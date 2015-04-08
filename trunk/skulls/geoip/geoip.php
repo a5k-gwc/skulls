@@ -51,14 +51,16 @@ class GeoIPWrapper
 	function _InitAPI()
 	{
 		/* MaxMind GeoIP Legacy PHP API: http://github.com/maxmind/geoip-api-php */
-		include_once $this->curr_dir.'/api/geoip.inc';
+		$path = $this->curr_dir.'/api/geoip.inc';
+		if(!file_exists($path))
+			return false;
 
+		include_once $path;
 		$this->api_handle = geoip_open($this->curr_dir.'/GeoIP.dat', GEOIP_STANDARD);
-		if($this->api_handle !== null)
-			return true;
+		if($this->api_handle === null)
+			{ trigger_error('GeoIPWrapper - Initialization of API failed', E_USER_ERROR); return false; }
 
-		trigger_error('GeoIPWrapper - Initialization of API failed', E_USER_ERROR);
-		return false;
+		return true;
 	}
 
 
@@ -87,8 +89,6 @@ class GeoIPWrapper
 			$this->is_pecl = false;
 			$this->api_handle = null;
 		}
-		else
-			trigger_error('GeoIPWrapper - Duplicate destroy call', E_USER_WARNING);
 	}
 
 	/* Public */
