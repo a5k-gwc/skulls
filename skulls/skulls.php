@@ -171,6 +171,15 @@ function VerifyVersion($client, $version)
 	return true;
 }
 
+function ValidatePort($port)
+{
+	$int_port = (int)$port;
+	if($int_port === 7001 || $int_port === 27016)
+		return false;
+
+	return true;
+}
+
 function CanonicalizeURL(&$full_url)
 {
 	/* $_GET parameters are already "urldecoded" by PHP, so do NOT urldecode again */
@@ -182,10 +191,10 @@ function CanonicalizeURL(&$full_url)
 
 		/* Drop everything after "?" */
 		if(strpos($url, '?') !== false)
-			list($url) = explode('?', $url, 2);
+			list($url, ) = explode('?', $url, 2);
 		/* Drop everything after "#" */
 		if(strpos($url, '#') !== false)
-			list($url) = explode('#', $url, 2);
+			list($url, ) = explode('#', $url, 2);
 
 		/* Separate host from path */
 		if(strpos($url, '/') !== false)
@@ -381,8 +390,6 @@ function CheckIPValidity($remote_ip, $ip)
 			ctype_digit($ip_port[1]) &&
 			$ip_port[1] > 0 &&
 			$ip_port[1] < 65536 &&
-			$ip_port[1] !=  7001 &&  // Port used by bad clients
-			$ip_port[1] != 27016 &&  // Port used by bad clients
 			$ip_port[0] == $remote_ip &&
 			ip2long($ip_port[0]) == ip2long($remote_ip)
 		)
@@ -672,7 +679,7 @@ function CheckGWC($cache, $cache_network)
 	return $cache_data;
 }
 
-function WriteHostFile($net, $remote_ip, $ip, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = '0')
+function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = '0')
 {
 	global $SUPPORTED_NETWORKS;
 
@@ -684,14 +691,13 @@ function WriteHostFile($net, $remote_ip, $ip, $h_leaves, $h_max_leaves, $h_uptim
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list( $time, $read_ip, ) = explode('|', $host_file[$i], 3);
-		if( $remote_ip === $read_ip )
+		list($time, $read_ip, ) = explode('|', $host_file[$i], 3);
+		if($h_ip === $read_ip)
 		{
 			$host_exists = TRUE;
 			break;
 		}
 	}
-	list($h_ip, $h_port) = explode(':', $ip, 2);
 	$this_host = gmdate('Y/m/d h:i:s A').'|'.$h_ip.'|'.$h_port.'|'.$h_leaves.'|'.$h_max_leaves.'|'.$h_uptime.'|'.RemoveGarbage($h_vendor).'|'.RemoveGarbage($h_ver).'|'.RemoveGarbage($h_ua).'|'.$h_suspect."|||\n";
 
 	if($host_exists)
@@ -1134,7 +1140,8 @@ $ACCEPT_ENCODING = !empty($_SERVER["HTTP_ACCEPT_ENCODING"]) ? $_SERVER["HTTP_ACC
 /* The deflate compression in HTTP 1.1 is the format specified by RFC 1950 instead Internet Explorer incorrectly interpret it as RFC 1951 (buggy IE, what surprise!!!) */
 if($COMPRESSION === null && strpos($ACCEPT_ENCODING, "deflate") !== false && strpos($UA_ORIGINAL, '; MSIE ') === false && !DEBUG) $COMPRESSION = "deflate";
 
-$IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
+$HOST = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
+$IP = null; $PORT = null; $GOOD_PORT = true;
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
 $LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
 $MAX_LEAVES = isset($_GET['x_max']) ? $_GET['x_max'] : null;
@@ -1271,12 +1278,15 @@ else
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
 		if(LOG_MINOR_ERRORS) Logging('unidentified_clients', $CLIENT, $VERSION, $NET);
-
-		if($UPDATE || $CACHE !== null || $IP !== null)
-			UpdateStats("update");
-		else
-			UpdateStats("other");
+		UpdateStats("other");
 		die();
+	}
+
+	/* Separate ip from port for the submitted host, it will be used later */
+	if($HOST !== null)
+	{
+		list($IP, $PORT) = explode(':', $HOST, 2);
+		$GOOD_PORT = ValidatePort($PORT);
 	}
 
 	if($CLIENT === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
@@ -1292,15 +1302,11 @@ else
 	if($NET === null) $NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
 	/* Block also missing REMOTE_ADDR, although it is unlikely, apparently it could happen in some configurations */
-	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) || $REMOTE_IP === 'unknown' || $REMOTE_IP == "" )
+	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) || !$GOOD_PORT || $REMOTE_IP === 'unknown' || $REMOTE_IP == "" )
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		if(LOG_MINOR_ERRORS) Logging('bad_old_clients', $CLIENT, $VERSION, $NET);
-
-		if($UPDATE || $CACHE !== null || $IP !== null)
-			UpdateStats("update");
-		else
-			UpdateStats("other");
+		UpdateStats("other");
 		die();
 	}
 
@@ -1310,11 +1316,11 @@ else
 
 	if($IS_A_CACHE || $CLIENT === 'TEST')
 	{
-		$IP = null;         /* Block host submission by caches, they don't do it */
+		$HOST = null;         /* Block host submission by caches, they don't do it */
 		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header to caches, they don't need it */
 	}
 
-	if(!$PING && !$GET && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
+	if(!$PING && !$GET && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $HOST == NULL && !$INFO)
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
 		if(LOG_MAJOR_ERRORS) Logging("invalid_queries", $CLIENT, $VERSION, $NET);
@@ -1356,7 +1362,7 @@ else
 	else
 	{
 		$supported_net = FALSE;
-		if(($PING && !$MULTI && !$SUPPORT) || $GET || $HOSTFILE || $URLFILE || $CACHE != NULL || $IP != NULL) echo "ERROR: Network not supported\r\n";
+		if(($PING && !$MULTI && !$SUPPORT) || $GET || $HOSTFILE || $URLFILE || $CACHE != NULL || $HOST != NULL) echo "ERROR: Network not supported\r\n";
 	}
 
 	if($PING)
@@ -1366,11 +1372,11 @@ else
 
 	if($UPDATE)
 	{
-		if( $IP != NULL && $supported_net )
+		if( $HOST != NULL && $supported_net )
 		{
-			if( CheckIPValidity($REMOTE_IP, $IP) )
+			if( CheckIPValidity($REMOTE_IP, $HOST) )
 			{
-				$result = WriteHostFile($NET, $REMOTE_IP, $IP, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
+				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|Host already updated\r\n";
@@ -1418,13 +1424,13 @@ else
 	}
 	else
 	{
-		if( $supported_net && ( $IP != NULL || $CACHE != NULL ) )
+		if( $supported_net && ( $HOST != NULL || $CACHE != NULL ) )
 			print "OK\r\n";
 
-		if( $IP != NULL && $supported_net )
+		if( $HOST != NULL && $supported_net )
 		{
-			if( CheckIPValidity($REMOTE_IP, $IP) )
-				$result = WriteHostFile($NET, $REMOTE_IP, $IP, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
+			if( CheckIPValidity($REMOTE_IP, $HOST) )
+				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
 		}
@@ -1472,7 +1478,7 @@ else
 			echo "nets: ".strtolower(NetsToString())."\r\n";
 	}
 
-	if($CACHE != NULL || $IP != NULL)
+	if($CACHE != NULL || $HOST != NULL)
 		UpdateStats("update");
 	else
 		UpdateStats("other");
