@@ -117,7 +117,7 @@ function ValidateIdentity($vendor, $ver)
 {
 	if($ver === "")
 		return false;  /* Version missing */
-	elseif(strlen($vendor) < 4)
+	if(strlen($vendor) < 4)
 		return false;  /* Vendor missing or too short */
 
 	return true;
@@ -145,30 +145,28 @@ function VerifyUserAgent($vendor, $user_agent)
 
 function VerifyVersion($client, $version)
 {
-    switch($client)
-	{  /* Block some old versions and some bad versions */
+	/* Block some old versions and some bad versions */
+	$float_ver = (float)$version;
+	switch($client)
+	{
 		case 'RAZA':
-		case 'RAZM':
-			if((float)$version < 2.3)
+		case 'RAZM':  /* 3.0 and 3.3.1.0 are fakes */
+			if($float_ver < 2.3 || $version === '3.0' || $version === '3.3.1.0')
 				return false;
 			break;
 		case 'LIME':  /* Invalid new versions are switched to LIMM, so no need to check here */
-			if((float)$version < 3)
+			if($float_ver < 3)
 				return false;
 			break;
 		case 'LIMM':
-			if((float)$version < 2 || (float)$version >= 8)
+			if($float_ver < 2 || $float_ver >= 8)
 				return false;
 			break;
 		case 'BEAR':
-			if((float)$version < 6.1)
-			{
-				$short_ver = substr($version, 0, 5);
-				if($short_ver != '5.1.0' && $short_ver != '5.2.1' )
-					return false;
-			}
+			if($float_ver < 5)
+				return false;
 			break;
-    }
+	}
 
 	return true;
 }
