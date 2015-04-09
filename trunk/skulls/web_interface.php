@@ -291,7 +291,7 @@ function ShowHtmlPage($num){
 														$type = "udp";
 														$cache_url = substr($cache_url, strpos($cache_url, ":")+1);
 													}
-													$max_length = 35;
+													$max_length = 40;
 
 													$pos = strpos($cache_url, "/");
 													if($pos > 0)
