@@ -41,10 +41,10 @@ function DisableAutomaticCompression()
 
 function IsSecureConnection()
 {
-	if( !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' )
+	if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 		return true;
 
-	if( isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https' )
+	if(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
 		return true;
 
 	return false;
