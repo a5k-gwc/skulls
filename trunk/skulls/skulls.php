@@ -638,7 +638,7 @@ function CheckGWC($cache, $cache_network)
 	if(strpos($cache, "://") > -1)
 	{
 		$udp = FALSE;
-		$query = "ping=1&multi=1&pv=2&client=".VENDOR."&version=".SHORT_VER."&cache=1";
+		$query = "ping=1&multi=1&getnetworks=1&pv=2&client=".VENDOR."&version=".SHORT_VER."&cache=1";
 		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list	or	ERR|Error name
 	}
 	else
