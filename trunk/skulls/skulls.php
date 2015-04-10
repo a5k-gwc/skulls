@@ -101,7 +101,7 @@ function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 	/* Change vendor code of mod versions of Shareaza */
 	if($vendor === 'RAZA')
 	{
-		if(strpos($user_agent, 'Shareaza ') !== 0 || strpos($user_agent, 'Shareaza PRO') === 0)
+		if(strpos($user_agent, 'Shareaza ') !== 0 || strpos($user_agent, 'PRO') !== false)
 			$vendor = 'RAZM';
 	}
 	elseif($vendor === 'LIME')
@@ -131,7 +131,7 @@ function VerifyUserAgent($vendor, $user_agent)
 
 	if($vendor === 'RAZM')
 	{  /* Block empty User-Agent, User-Agent without version and rip-offs; bad clients */
-		if($user_agent === "" || $user_agent === 'Shareaza' || strpos($user_agent, 'Shareaza PRO') === 0)
+		if($user_agent === "" || $user_agent === 'Shareaza' || strpos($user_agent, 'Shareaza PRO') === 0 || strpos($user_agent, 'dianlei') === 0)
 			return false;
 	}
 	elseif($vendor === 'LIMM')
@@ -149,12 +149,14 @@ function VerifyVersion($client, $version)
 	$float_ver = (float)$version;
 	switch($client)
 	{
-		case 'RAZA':
-		case 'RAZM':  /* 3.0 and 3.3.1.0 are fakes */
-			if($float_ver < 2.3 || $version === '3.0' || $version === '3.3.1.0')
+		case 'RAZA':  /* Note: the missing "break" is intentional */
+			if($float_ver < 2.3)
+				return false;
+		case 'RAZM':  /* 3.0, 3.0.0.0 and 3.3.1.0 are fakes */
+			if($version === '3.0' || $version === '3.0.0.0' || $version === '3.3.1.0')
 				return false;
 			break;
-		case 'LIME':  /* Invalid new versions are switched to LIMM, so no need to check here */
+		case 'LIME':  /* Note: invalid new versions are switched to LIMM, so no need to check here */
 			if($float_ver < 3)
 				return false;
 			break;
