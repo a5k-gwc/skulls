@@ -61,10 +61,6 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = 'BearShare';
 			$url = 'http://www.bearshare.com/';
 			break;
-		case 'CABO':  /* Cabos - the vendor code of Cabos is LIME but it is changed to CABO in the code to distinguish it from the normal LimeWire */
-			$client_name = 'Cabos/LimeWire';
-			$url = 'http://cabos.sourceforge.jp/';
-			break;
 		case 'COCO':
 			$client_name = 'CocoGnut';
 			$url = 'http://www.alpha-programming.co.uk/software/cocognut/';
@@ -146,9 +142,6 @@ function ReplaceVendorCode($vendor, $version){
 			$client_name = 'LimeWire';
 			$url = 'http://en.wikipedia.org/wiki/LimeWire';
 			break;
-		case 'LIMM':  /* Generic vendor */
-			$client_name = 'LimeWire mod';
-			break;
 		case 'MACT':
 			$client_name = 'Mactella';
 			break;
@@ -173,10 +166,6 @@ function ReplaceVendorCode($vendor, $version){
 		case 'MRPH':  /* Morpheus - old versions */
 			$client_name = 'Morpheus (old)';
 			$url = 'http://en.wikipedia.org/wiki/Morpheus_%28software%29';
-			break;
-		case 'MTLL':  /* Mutella - the vendor code of Mutella is MUTE but it is changed to MTLL in the code to avoid confusion with the MUTE network */
-			$client_name = 'Mutella';
-			$url = 'http://mutella.sourceforge.net/';
 			break;
 		case 'MUTE':  /* MUTE - client of MUTE network (Network parameter enforced in the code to prevent leakage on G1/G2) */
 			$client_name = 'MUTE';
@@ -231,9 +220,6 @@ function ReplaceVendorCode($vendor, $version){
 		case 'RAZL':
 			$client_name = 'ShareazaLite';
 			$url = 'http://sourceforge.net/projects/flox/';
-			break;
-		case 'RAZM':  /* Generic vendor */
-			$client_name = 'Shareaza mod';
 			break;
 		case 'RZCA':
 			$client_name = 'ShareazaPlus Alpha';
@@ -294,7 +280,23 @@ function ReplaceVendorCode($vendor, $version){
 			$url = 'http://sourceforge.net/projects/ziga/';
 			break;
 
-		// GWC Scanners
+		/* Custom vendor codes (they are set inside the php code to differentiate multiple clients with the same vendor code) */
+		case 'CABO':  /* Cabos - the vendor code of Cabos is LIME but it is changed to CABO in the code to distinguish it from the normal LimeWire */
+			$client_name = 'Cabos/LimeWire';
+			$url = 'http://cabos.sourceforge.jp/';
+			break;
+		case 'LIMM':  /* Generic vendor */
+			$client_name = 'LimeWire mod';
+			break;
+		case 'MTLL':  /* Mutella - the vendor code of Mutella is MUTE but it is changed to MTLL in the code to avoid confusion with MUTE - client of MUTE network */
+			$client_name = 'Mutella';
+			$url = 'http://mutella.sourceforge.net/';
+			break;
+		case 'RAZM':  /* Generic vendor */
+			$client_name = 'Shareaza mod';
+			break;
+
+		/* GWC Scanners */
 		case 'GWCSCANNER':
 			$client_name = 'Multi-Network GWC Scan';
 			$url = 'http://gcachescan.grantgalitz.com/';
@@ -311,7 +313,7 @@ function ReplaceVendorCode($vendor, $version){
 			$cache_scan = 2;
 			break;
 
-		// Special cases
+		/* Special cases */
 		case 'KICKSTART':
 			$client_name = 'KickStart';
 			$cache = 0;
@@ -321,7 +323,7 @@ function ReplaceVendorCode($vendor, $version){
 			$cache = 0;
 			break;
 
-		// GWCs
+		/* GWCs */
 		case 'BAZK':
 		case 'Bazooka':
 			$client_name = 'Bazooka';
