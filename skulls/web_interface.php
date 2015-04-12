@@ -83,7 +83,7 @@ function ShowHtmlPage($num){
 							</tr>
 							<tr>
 								<td width="150">- Version:</td>
-								<td style="color: #008000;"><b><?php echo VER; ?></b></td>
+								<td style="color: #008000;"><b><?php echo VER,' (',GetMainFileRev(),')'; ?></b></td>
 							</tr>
 							<tr>
 								<td width="150">- Supported networks:</td>
