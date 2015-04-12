@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright (C) 2005-2008, 2015 by ale5000
+//  Copyright © 2005-2008, 2015 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -25,6 +25,10 @@ This product includes country flag icons created by Mark James, available at htt
 Flag icons download: http://www.famfamfam.com/lab/icons/flags/
 */
 
+/*
+NOTE: If you use a version of the GeoIP PECL extension older than 1.1.0 it may ignore the path of the database configured by ini_set and use the default path;
+in this case you have to manually configure the path inside php.ini or copy the database to the correct folder.
+*/
 class GeoIPWrapper
 {
 	/* Private */
@@ -32,6 +36,8 @@ class GeoIPWrapper
 	var $is_pecl = false;
 	var $curr_dir = null;
 	var $api_handle = null;
+	var $db_ver = null;
+	var $db_cr = "";
 
 
 	/* Private */
@@ -63,6 +69,62 @@ class GeoIPWrapper
 		return true;
 	}
 
+	function _GetDBInfoPECL()
+	{
+		$db_info = @geoip_database_info(GEOIP_COUNTRY_EDITION);
+		if($db_info === null) return false;
+
+		return $db_info;
+	}
+
+	function _GetDBInfoDirectlyFromFile()  /* This code will possibly break in the future but I haven't found a better way to get the DB version */
+	{
+		$read_data = false; $null = "\0"; $max_length = 200;
+		$fp = @fopen($this->curr_dir.'/GeoIP.dat', 'rb');
+
+		if($fp !== false)
+		{
+			if(fseek($fp, -$max_length, SEEK_END) !== -1)
+				$read_data = fread($fp, $max_length);
+			fclose($fp);
+		}
+
+		if($read_data === false || strlen($read_data) !== $max_length)
+			return false;
+
+		$i = $max_length;
+		while($i-- > 0)
+			if($read_data[$i] === $null)
+				break;
+
+		return substr($read_data, $i+1);
+	}
+
+	function _GetDBVersionAndCopyright()
+	{
+		if($this->db_ver === null)
+		{
+			if($this->is_pecl)
+				$db_info = $this->_GetDBInfoPECL();
+			else
+				$db_info = $this->_GetDBInfoDirectlyFromFile();
+
+			if($db_info === false) return false;
+			$db_info = str_replace('(c)', '©', $db_info);
+
+			$cr_pos = strpos($db_info, 'Copyright');
+			if($cr_pos !== false)
+			{
+				$this->db_ver = rtrim(substr($db_info, 0, $cr_pos));
+				$this->db_cr = rtrim(substr($db_info, $cr_pos));
+			}
+			else
+				$this->db_ver = rtrim($db_info);
+		}
+
+		return true;
+	}
+
 
 	/* Constructor */
 	function GeoIPWrapper()
@@ -88,10 +150,48 @@ class GeoIPWrapper
 			$this->enabled = false;
 			$this->is_pecl = false;
 			$this->api_handle = null;
+			$this->db_ver = null;
+			$this->db_cr = "";
 		}
 	}
 
 	/* Public */
+	function IsEnabled()
+	{
+		return $this->enabled;
+	}
+
+	function GetType()
+	{
+		if($this->enabled)
+		{
+			if($this->is_pecl)
+				return 'PECL extension';
+			else
+				return 'Legacy PHP API';
+		}
+
+		return 'Missing';
+	}
+
+	function GetDBVersion()
+	{
+		if(!$this->enabled) return "";
+
+		if($this->_GetDBVersionAndCopyright())
+			return $this->db_ver;
+
+		return 'Missing DB';
+	}
+
+	function GetDBCopyright()
+	{
+		if($this->enabled && $this->_GetDBVersionAndCopyright())
+			return $this->db_cr;
+
+		return "";
+	}
+
 	function GetCountryNameByIP($ip)
 	{
 		if(!$this->enabled) return null;
