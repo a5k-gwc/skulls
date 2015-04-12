@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright (C) 2005-2008, 2015 by ale5000
+//  Copyright © 2005-2008, 2015 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -28,6 +28,12 @@ define( 'VER', SHORT_VER.'' );										// Full version (it can contain letters)
 define( 'GWC_SITE', 'http://sourceforge.net/projects/skulls/' );	// Official site of this GWebCache
 define( 'OPEN_SOURCE', '1' );
 define( 'DEBUG', 0 );
+
+function GetMainFileRev()
+{
+	$main_rev = '$Rev$';
+	return trim(substr($main_rev, 1, -1));
+}
 
 /* Compression will be enabled later only if needed, otherwise it is just a waste of server resources */
 function DisableAutomaticCompression()
