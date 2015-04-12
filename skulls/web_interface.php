@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright (C) 2005-2008, 2015 by ale5000
+//  Copyright © 2005-2008, 2015 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -99,6 +99,30 @@ function ShowHtmlPage($num){
 								?>
 								</td>
 							</tr>
+							<tr>
+								<td>&nbsp;</td>
+							</tr>
+							<?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
+							<tr>
+								<td width="150">- GeoIP type:</td>
+								<td style="color: #994433;"><b><?php if($geoip) echo $geoip->GetType(); ?></b></td>
+							</tr>
+							<?php
+							if($geoip && $geoip->IsEnabled())
+							{
+							?>
+								<tr>
+									<td width="150">- GeoIP DB version:</td>
+									<td style="color: #008000;"><b><?php echo htmlentities($geoip->GetDBVersion()); ?></b></td>
+								</tr>
+								<tr>
+									<td width="150">- GeoIP DB copyright:</td>
+									<td style="color: #994433;"><?php echo htmlentities($geoip->GetDBCopyright()); ?></td>
+								</tr>
+							<?php
+							}
+							if($geoip) $geoip->Destroy(); $geoip = null;
+							?>
 							<tr>
 								<td>&nbsp;</td>
 							</tr>
