@@ -41,8 +41,8 @@ $footer = '';
 // Enabling the Gnutella network can increase a lot the number of requests, so don't enable it if your server can't handle the load.
 // Note -> The name of the network can't contains these characters:  | -
 
-//$SUPPORTED_NETWORKS[] = 'Gnutella';
 $SUPPORTED_NETWORKS[] = 'Gnutella2';
+//$SUPPORTED_NETWORKS[] = 'Gnutella';
 $SUPPORTED_NETWORKS[] = 'MUTE';
 //$SUPPORTED_NETWORKS[] = 'Foxy';
 
