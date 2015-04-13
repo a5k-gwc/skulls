@@ -524,6 +524,15 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	fclose($file);
 }
 
+function ConnectionTest()
+{
+	$fp = @fsockopen('google.com', 80, $errno, $errstr, 5);
+	if($fp === false) return false;
+	fclose($fp);
+
+	return true;
+}
+
 function PingGWC($gwc_url, $query)
 {
 	$errno = -1; $errstr = "";
@@ -539,7 +548,7 @@ function PingGWC($gwc_url, $query)
 	$fp = @fsockopen($host_name, $host_port, $errno, $errstr, (float)TIMEOUT);
 	if(!$fp)
 	{
-		$cache_data = "ERR|".$errno;				// ERR|Error name
+		$cache_data = 'CONN_ERR|'.$errno;				// CONN_ERR|Error number
 		if(DEBUG) echo "\r\n".'D|update|ERROR|'.$errno.'|'.rtrim($errstr)."\r\n";
 	}
 	else
@@ -638,7 +647,7 @@ function PingGWC($gwc_url, $query)
 	return $cache_data;
 }
 
-function CheckGWC($cache, $cache_network)
+function CheckGWC($cache, $cache_network, $congestion_check = false)
 {
 	global $SUPPORTED_NETWORKS;
 
@@ -647,7 +656,7 @@ function CheckGWC($cache, $cache_network)
 	{
 		$udp = FALSE;
 		$query = "ping=1&multi=1&getnetworks=1&pv=2&client=".VENDOR."&version=".SHORT_VER."&cache=1";
-		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list	or	ERR|Error name
+		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list    or    ERR|Error name    or    CONN_ERR|Error number
 	}
 	else
 	{
@@ -657,14 +666,14 @@ function CheckGWC($cache, $cache_network)
 	}
 	$received_data = explode("|", $result);
 
-	if($received_data[0] == "ERR" && !$udp)
+	if($received_data[0] === 'ERR' && !$udp)
 	{
 		if( strpos($received_data[1], "not supported") > -1
 			|| strpos($received_data[1], "unsupported network") > -1
 			|| strpos($received_data[1], "no network") > -1
 			|| strpos($received_data[1], "net-not-supported") > -1
-		)	// Workaround for compatibility with GWCv2 specs
-		{																// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
+		)	// Workaround for compatibility with some GWCs using v2 specs
+		{										// FOR GWCS DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$query .= "&net=gnutella2";
 			$result = PingGWC($cache, $query);
 			$nets = "gnutella2";
@@ -678,7 +687,9 @@ function CheckGWC($cache, $cache_network)
 		$received_data = explode("|", $result);
 	}
 
-	if($received_data[0] == "ERR" || $received_data[1] == "")
+	if($congestion_check && $received_data[0] === 'CONN_ERR' && !ConnectionTest())
+		$cache_data[0] = 'CONGESTION';
+	elseif($received_data[0] === 'CONN_ERR' || $received_data[0] === 'ERR' || $received_data[1] == "")
 		$cache_data[0] = "FAIL";
 	else
 	{
@@ -792,7 +803,7 @@ function WriteCacheFile($cache, $net, $client, $version)
 			return 0; // Exists
 		else
 		{
-			$cache_data = CheckGWC($cache, $net);
+			$cache_data = CheckGWC($cache, $net, true);
 
 			if($cache_data[0] == "FAIL")
 			{
@@ -805,6 +816,10 @@ function WriteCacheFile($cache, $net, $client, $version)
 				AddFailedUrl($cache);
 				ReplaceCache( $cache_file, $i, NULL, NULL, NULL, NULL );
 				return 6; // Unsupported network
+			}
+			elseif($cache_data[0] == "CONGESTION")
+			{
+				return 7; // Possible network congestion
 			}
 			else
 			{
@@ -1433,6 +1448,8 @@ else
 					print "I|update|WARNING|Ping of ".$CACHE." failed\r\n";
 				elseif( $result == 6 ) // Unsupported network
 					print "I|update|WARNING|Network of URL not supported\r\n";
+				elseif( $result == 7 ) // Possible network congestion
+					print "I|update|OK|CONGESTION|Possible network congestion, cannot check url\r\n";
 				else
 					print "I|update|ERROR|Unknown error 2, return value = ".$result."\r\n";
 			}
