@@ -747,7 +747,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 			ReplaceHost($file_path, 0, $this_host, $host_file, true);
 			return 3; // OK, pushed old data
 		}
-		elseif($file_count == MAX_HOSTS)
+		elseif($file_count === MAX_HOSTS)
 		{
 			ReplaceHost($file_path, 0, $this_host, $host_file);
 			return 3; // OK, pushed old data
