@@ -155,11 +155,12 @@ function VerifyVersion($client, $version)
 	$float_ver = (float)$version;
 	switch($client)
 	{
-		case 'RAZA':  /* Note: the missing "break" is intentional */
-			if($float_ver < 2.3)
+		case 'RAZA':  /* 3.0, 3.0.0.0 and 3.3.1.0 are fakes */
+			if($float_ver < 2.3 || $version === '3.0' || $version === '3.0.0.0' || $version === '3.3.1.0')
 				return false;
-		case 'RAZM':  /* 3.0, 3.0.0.0 and 3.3.1.0 are fakes */
-			if($version === '3.0' || $version === '3.0.0.0' || $version === '3.3.1.0')
+			break;
+		case 'RAZM':
+			if($float_ver < 2)
 				return false;
 			break;
 		case 'LIME':  /* Note: invalid new versions are switched to LIMM, so no need to check here */
@@ -322,7 +323,7 @@ function Pong($support, $multi, $net, $client, $version, $supported_net, $remote
 	}
 }
 
-function Support($support, $supported_networks, $udp)
+function Support($support, $supported_networks)
 {
 	if($support > 1)
 	{
@@ -1401,7 +1402,7 @@ else
 	if($PING)
 		Pong($SUPPORT, $MULTI, $NET, $CLIENT, $VERSION, $supported_net, $REMOTE_IP);
 	if($SUPPORT)
-		Support($SUPPORT, $SUPPORTED_NETWORKS, $UDP);
+		Support($SUPPORT, $SUPPORTED_NETWORKS);
 
 	if($UPDATE)
 	{
