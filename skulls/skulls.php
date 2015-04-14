@@ -1060,6 +1060,7 @@ function CleanStats($request)
 	$file_count = 0;
 	$line_length = 17;
 	$file = fopen( "stats/".$request."_requests_hour.dat", "rb" );
+	if($file === false) return;
 
 	if(OPTIMIZED_STATS)
 	{
@@ -1094,6 +1095,7 @@ function CleanStats($request)
 
 	set_time_limit("20");
 	$file = fopen("stats/".$request."_requests_hour.dat", "wb");
+	if($file === false) return;
 	flock($file, LOCK_EX);
 	for($i = 0; $i < $file_count; $i++)
 		fwrite($file, $stat_file[$i]."\n");
@@ -1108,6 +1110,7 @@ function ReadStats($request)
 	$offset = @date("Z");
 	$line_length = 17;
 	$file = fopen( "stats/".$request."_requests_hour.dat", "rb" );
+	if($file === false) return 0;
 
 	if(OPTIMIZED_STATS)
 	{
@@ -1144,6 +1147,7 @@ function UpdateStats($request)
 	if(!STATS_ENABLED) return;
 
 	$file = fopen("stats/".$request."_requests_hour.dat", "ab");
+	if($file === false) return;
 	flock($file, LOCK_EX);
 	fwrite($file, gmdate("Y/m/d H:i")."\n");
 	flock($file, LOCK_UN);
