@@ -145,7 +145,7 @@ function ShowHtmlPage($num){
 										<td style="color: #0044FF;">
 											<?php
 												$website = MAINTAINER_WEBSITE;
-												echo "<a href=\"".$website."\" class=\"hover-underline\" target=\"_blank\">".$website."</a>";
+												echo '<a href="'.$website.'" class="hover-underline" rel="external" target="_blank">'.$website.'</a>';
 											?>
 										</td>
 									</tr>
@@ -299,11 +299,11 @@ function ShowHtmlPage($num){
 													if(strpos($cache_url, "://") > -1)
 													{
 														$prefix = "gwc:";
-														$output .= "<a class=\"gwc\" href=\"".$prefix.$cache_url."?nets=".str_replace(" ", "", strtolower($net))."\">+</a> ";
+														$output .= '<a class="gwc" href="'.$prefix.$cache_url.'?nets='.str_replace(' ', "", strtolower($net)).'" rel="nofollow">+</a> ';
 													}
 													else
 														$output .= "&nbsp;&nbsp;&nbsp;";
-													$output .= "<a href=\"".$cache_url."\" target=\"_blank\">";
+													$output .= '<a href="'.$cache_url.'" rel="external" target="_blank">';
 
 													if(strpos($cache_url, "://") > -1)
 													{
@@ -429,7 +429,7 @@ function ShowHtmlPage($num){
 			}
 				?>
 				<tr bgcolor="#FFFFFF">
-					<td style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" target="_blank"><?php echo GWC_SITE; ?></a></b></td>
+					<td style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" rel="external" target="_blank"><?php echo GWC_SITE; ?></a></b></td>
 				</tr>
 			</table>
 		</td>
