@@ -1059,7 +1059,7 @@ function CleanStats($request)
 	$offset = @date("Z");
 	$file_count = 0;
 	$line_length = 17;
-	$file = fopen( "stats/".$request."_requests_hour.dat", "rb" );
+	$file = fopen('stats/'.$request.'-reqs.dat', 'rb');
 	if($file === false) return;
 
 	if(OPTIMIZED_STATS)
@@ -1094,7 +1094,7 @@ function CleanStats($request)
 
 
 	set_time_limit("20");
-	$file = fopen("stats/".$request."_requests_hour.dat", "wb");
+	$file = fopen('stats/'.$request.'-reqs.dat', 'wb');
 	if($file === false) return;
 	flock($file, LOCK_EX);
 	for($i = 0; $i < $file_count; $i++)
@@ -1103,13 +1103,13 @@ function CleanStats($request)
 	fclose($file);
 }
 
-function ReadStats($request)
+function ReadStats($is_update = false, $good = true)
 {
 	$requests = 0;
 	$now = time();
 	$offset = @date("Z");
 	$line_length = 17;
-	$file = fopen( "stats/".$request."_requests_hour.dat", "rb" );
+	$file = fopen('stats/'.($is_update? ($good? 'upd' : 'upd-bad') : 'other').'-reqs.dat', 'rb');
 	if($file === false) return 0;
 
 	if(OPTIMIZED_STATS)
@@ -1142,16 +1142,22 @@ function ReadStats($request)
 	return $requests;
 }
 
-function UpdateStats($request)
+function UpdateStats($is_update = false, $good = true)
 {
 	if(!STATS_ENABLED) return;
 
-	$file = fopen("stats/".$request."_requests_hour.dat", "ab");
+	$file = fopen('stats/'.($is_update? ($good? 'upd' : 'upd-bad') : 'other').'-reqs.dat', 'ab');
 	if($file === false) return;
 	flock($file, LOCK_EX);
-	fwrite($file, gmdate("Y/m/d H:i")."\n");
+	fwrite($file, gmdate('Y/m/d H:i')."\n");
 	flock($file, LOCK_UN);
 	fclose($file);
+}
+
+function ReadStatsTotalReqs()
+{
+	$requests = file('stats/requests.dat');
+	return $requests[0];
 }
 
 
@@ -1316,7 +1322,7 @@ else
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
 		if(LOG_MINOR_ERRORS) Logging('unidentified_clients', $CLIENT, $VERSION, $NET);
-		UpdateStats("other");
+		UpdateStats();
 		die();
 	}
 
@@ -1344,7 +1350,7 @@ else
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		if(LOG_MINOR_ERRORS) Logging('bad_old_clients', $CLIENT, $VERSION, $NET);
-		UpdateStats("other");
+		UpdateStats();
 		die();
 	}
 
@@ -1362,7 +1368,7 @@ else
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
 		if(LOG_MAJOR_ERRORS) Logging("invalid_queries", $CLIENT, $VERSION, $NET);
-		UpdateStats("other");
+		UpdateStats();
 		die();
 	}
 
@@ -1408,10 +1414,12 @@ else
 	if($SUPPORT)
 		Support($SUPPORT, $SUPPORTED_NETWORKS);
 
+	$is_good_update = null;
 	if($UPDATE)
 	{
 		if( $HOST != NULL && $supported_net )
 		{
+			$result = -1;
 			if( CheckIPValidity($REMOTE_IP, $HOST) )
 			{
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
@@ -1429,10 +1437,16 @@ else
 			}
 			else // Invalid IP
 				print "I|update|WARNING|Invalid host"."\r\n";
+
+			if($result >= 0 || $result <= 3)
+				$is_good_update = true;
+			else
+				$is_good_update = false;
 		}
 
 		if( $CACHE != NULL && $supported_net )
 		{
+			$result = -1;
 			if(!FSOCKOPEN) // Cache adding disabled
 				print "I|update|WARNING|URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
@@ -1460,6 +1474,14 @@ else
 			}
 			else // Invalid URL
 				print("I|update|WARNING|Invalid URL"."\r\n");
+
+			if($is_good_update !== null)
+			{
+				if($result >= 0 || $result <= 3)
+					$is_good_update = true;
+				else
+					$is_good_update = false;
+			}
 		}
 	}
 	else
@@ -1469,14 +1491,21 @@ else
 
 		if( $HOST != NULL && $supported_net )
 		{
+			$result = -1;
 			if( CheckIPValidity($REMOTE_IP, $HOST) )
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
+
+			if($result >= 0 || $result <= 3)
+				$is_good_update = true;
+			else
+				$is_good_update = false;
 		}
 
 		if( $CACHE != NULL && $supported_net )
 		{
+			$result = -1;
 			if(!FSOCKOPEN) // Cache adding disabled
 				print "WARNING: URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
@@ -1490,6 +1519,14 @@ else
 			}
 			else // Invalid URL
 				print "WARNING: Invalid URL"."\r\n";
+
+			if($is_good_update !== null)
+			{
+				if($result >= 0 || $result <= 3)
+					$is_good_update = true;
+				else
+					$is_good_update = false;
+			}
 		}
 	}
 
@@ -1519,9 +1556,9 @@ else
 	}
 
 	if($CACHE != NULL || $HOST != NULL)
-		UpdateStats("update");
+		UpdateStats(true, $is_good_update);
 	else
-		UpdateStats("other");
+		UpdateStats();
 
 	if($INFO)
 	{
@@ -1540,14 +1577,14 @@ else
 	{
 		if(STATS_ENABLED)
 		{
-			$requests = file("stats/requests.dat");
-			echo $requests[0]."\r\n";
+			/* Good + bad update requests of last hour */
+			$upd_reqs = ReadStats(true) + ReadStats(true, false);
+			/* Other requests of last hour */
+			$other_reqs = ReadStats();
 
-			$other_requests = ReadStats("other");
-			$update_requests = ReadStats("update");
-
-			echo ($other_requests + $update_requests)."\r\n";
-			echo $update_requests."\r\n";
+			echo ReadStatsTotalReqs(),"\r\n";
+			echo ($other_reqs + $upd_reqs),"\r\n";
+			echo $upd_reqs,"\r\n";
 		}
 		else
 			echo "WARNING: Statfile disabled\r\n";
@@ -1578,9 +1615,13 @@ else
 					break;
 				case 1:
 					$clean_file = "stats";
-					$clean_type = "update";
+					$clean_type = "upd";
 					break;
 				case 2:
+					$clean_file = "stats";
+					$clean_type = "upd-bad";
+					break;
+				case 3:
 					$clean_file = "failed_urls";
 					break;
 			}

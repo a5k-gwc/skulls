@@ -104,17 +104,23 @@ function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE)
 			if($file !== FALSE) { flock($file, 2); fwrite($file, "0"); flock($file, 3); fclose($file); }
 			else $errors .= "<font color=\"red\">Error during writing of stats/requests.dat</font><br>";
 		}
-		if(!file_exists("stats/update_requests_hour.dat"))
+		if(!file_exists("stats/upd-reqs.dat"))
 		{
-			$file = @fopen("stats/update_requests_hour.dat", "wb");
+			$file = @fopen("stats/upd-reqs.dat", "wb");
 			if($file !== FALSE) fclose($file);
-			else $errors .= "<font color=\"red\">Error during writing of stats/update_requests_hour.dat</font><br>";
+			else $errors .= "<font color=\"red\">Error during writing of stats/upd-reqs.dat</font><br>";
 		}
-		if(!file_exists("stats/other_requests_hour.dat"))
+		if(!file_exists("stats/upd-bad-reqs.dat"))
 		{
-			$file = @fopen("stats/other_requests_hour.dat", "wb");
+			$file = @fopen("stats/upd-bad-reqs.dat", "wb");
 			if($file !== FALSE) fclose($file);
-			else $errors .= "<font color=\"red\">Error during writing of stats/other_requests_hour.dat</font><br>";
+			else $errors .= "<font color=\"red\">Error during writing of stats/upd-bad-reqs.dat</font><br>";
+		}
+		if(!file_exists("stats/other-reqs.dat"))
+		{
+			$file = @fopen("stats/other-reqs.dat", "wb");
+			if($file !== FALSE) fclose($file);
+			else $errors .= "<font color=\"red\">Error during writing of stats/other-reqs.dat</font><br>";
 		}
 	}
 

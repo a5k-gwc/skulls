@@ -286,65 +286,30 @@ if( file_exists("../data/failed_urls.dat") )
 	}
 }
 
-if( file_exists("../stats/update_requests_hour.dat") )
+if( file_exists("../stats/upd-reqs.dat") )
 {
-	$bad = FALSE;
-
-	$file = @fopen("../stats/update_requests_hour.dat", "r+b");
-	if($file !== FALSE)
+	if( filesize("../stats/upd-reqs.dat") > 1 * 1024 *1024 )
 	{
-		for($i = 0; $i < 5; $i++)
-		{
-			$line = fgets($file);
-			if( strpos($line, "\r") > -1 )
-			{
-				$bad = TRUE;
-				break;
-			}
-		}
-		fclose($file);
-	}
-
-	if($bad)
-	{
-		$log .= "Truncating stats/update_requests_hour.dat because the format is changed: ";
-		$log .= truncate("../stats/update_requests_hour.dat");
-	}
-	elseif( filesize("../stats/update_requests_hour.dat") > 1 * 1024 *1024 )
-	{
-		$log .= "Truncating stats/update_requests_hour.dat because it is too big: ";
-		$log .= truncate("../stats/update_requests_hour.dat");
+		$log .= "Truncating stats/upd-reqs.dat because it is too big: ";
+		$log .= truncate("../stats/upd-reqs.dat");
 	}
 }
 
-if( file_exists("../stats/other_requests_hour.dat") )
+if( file_exists("../stats/upd-bad-reqs.dat") )
 {
-	$bad = FALSE;
-
-	$file = @fopen("../stats/other_requests_hour.dat", "r+b");
-	if($file !== FALSE)
+	if( filesize("../stats/upd-bad-reqs.dat") > 1 * 1024 *1024 )
 	{
-		for($i = 0; $i < 5; $i++)
-		{
-			$line = fgets($file);
-			if( strpos($line, "\r") > -1 )
-			{
-				$bad = TRUE;
-				break;
-			}
-		}
-		fclose($file);
+		$log .= "Truncating stats/upd-bad-reqs.dat because it is too big: ";
+		$log .= truncate("../stats/upd-bad-reqs.dat");
 	}
+}
 
-	if($bad)
+if( file_exists("../stats/other-reqs.dat") )
+{
+	if( filesize("../stats/other-reqs.dat") > 1 * 1024 *1024 )
 	{
-		$log .= "Truncating stats/other_requests_hour.dat because the format is changed: ";
-		$log .= truncate("../stats/other_requests_hour.dat");
-	}
-	elseif( filesize("../stats/other_requests_hour.dat") > 1 * 1024 *1024 )
-	{
-		$log .= "Truncating stats/other_requests_hour.dat because it is too big: ";
-		$log .= truncate("../stats/other_requests_hour.dat");
+		$log .= "Truncating stats/other-reqs.dat because it is too big: ";
+		$log .= truncate("../stats/other-reqs.dat");
 	}
 }
 
