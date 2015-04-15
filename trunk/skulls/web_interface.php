@@ -375,8 +375,12 @@ function ShowHtmlPage($num){
 			{
 				if(STATS_ENABLED)
 				{
-					$other_requests = ReadStats("other");
-					$update_requests = ReadStats("update");
+					/* Bad update requests of last hour */
+					$upd_bad_reqs = ReadStats(true, false);  
+					/* Good + bad update requests of last hour */
+					$upd_reqs = ReadStats(true) + $upd_bad_reqs;
+					/* Other requests of last hour */
+					$other_reqs = ReadStats();
 				}
 				?>
 				<tr bgcolor="#CCFF99"> 
@@ -390,12 +394,9 @@ function ShowHtmlPage($num){
 								<td style="color: #994433;">
 								<?php
 									if(STATS_ENABLED)
-									{
-										$requests = file("stats/requests.dat");
-										echo $requests[0];
-									}
+										echo ReadStatsTotalReqs();
 									else
-										echo "Disabled";
+										echo 'Disabled';
 								?>
 								</td>
 							</tr>
@@ -404,9 +405,9 @@ function ShowHtmlPage($num){
 								<td style="color: #994433;">
 								<?php
 									if(STATS_ENABLED)
-										echo $other_requests + $update_requests;
+										echo $other_reqs + $upd_reqs;
 									else
-										echo "Disabled";
+										echo 'Disabled';
 								?>
 								</td>
 							</tr>
@@ -415,9 +416,9 @@ function ShowHtmlPage($num){
 								<td style="color: #994433;">
 								<?php
 									if(STATS_ENABLED)
-										echo $update_requests;
+										echo $upd_reqs,' (',$upd_bad_reqs,' bad)';
 									else
-										echo "Disabled";
+										echo 'Disabled';
 								?>
 								</td>
 							</tr>
