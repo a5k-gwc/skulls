@@ -1,5 +1,6 @@
 <?php
-		/* You must read readme.txt in the admin directory to configure properly */
+//  Copyright © by ale5000
+//  You must read readme.txt in the admin directory to configure this properly
 
 define( 'ENABLED',					1 );
 
@@ -33,6 +34,7 @@ define( 'TIMEOUT',					20 );	// Socket time out for fsockopen
 
 define( 'DATA_DIR', 'data' );				// Directory where data files are stored (you should use relative path, you can leave it as is by default)
 
+$header = '';
 $footer = '';
 
 // You can add or remove any network you want.
