@@ -1278,7 +1278,7 @@ if($web)
 	include "web_interface.php";
 
 	$compressed = StartCompression($COMPRESSION);
-	ShowHtmlPage($web);
+	ShowHtmlPage($web, $header, $footer);
 	if($compressed) ob_end_flush();
 }
 elseif( $KICK_START )
