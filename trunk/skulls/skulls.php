@@ -1304,18 +1304,6 @@ else
 	else
 		header('Content-Type: application/octet-stream');
 
-	if(STATS_ENABLED)
-	{
-		$file = fopen("stats/requests.dat", "r+b");
-		flock($file, LOCK_EX);
-		$requests = fgets($file, 50);
-		if($requests == "") $requests = 1; else $requests++;
-		rewind($file);
-		fwrite($file, $requests);
-		flock($file, LOCK_UN);
-		fclose($file);
-	}
-
 	NormalizeIdentity($CLIENT, $VERSION, $UA_ORIGINAL);
 	if( !ValidateIdentity($CLIENT, $VERSION) )
 	{
@@ -1352,6 +1340,18 @@ else
 		if(LOG_MINOR_ERRORS) Logging('bad_old_clients', $CLIENT, $VERSION, $NET);
 		UpdateStats();
 		die();
+	}
+
+	if(STATS_ENABLED)
+	{
+		$file = fopen("stats/requests.dat", "r+b");
+		flock($file, LOCK_EX);
+		$requests = fgets($file, 50);
+		if($requests == "") $requests = 1; else $requests++;
+		rewind($file);
+		fwrite($file, $requests);
+		flock($file, LOCK_UN);
+		fclose($file);
 	}
 
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
