@@ -73,8 +73,6 @@ if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === nu
 if(empty($_SERVER['HTTP_HOST']))
 {
 	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-	include 'log.php';
-	if(LOG_MAJOR_ERRORS) Logging("missing_host_header", null, null, null);
 	die("ERROR: Missing Host header\r\n");
 }
 
