@@ -1161,7 +1161,11 @@ function ReadStatsTotalReqs()
 }
 
 
+/* Set default charset to UTF-8 */
 ini_set('default_charset', 'UTF-8');
+/* Suppress warnings if the timezone isn't set */
+if(function_exists('date_default_timezone_get'))
+	date_default_timezone_set(@date_default_timezone_get());
 
 $PHP_VERSION = (float)PHP_VERSION;
 
