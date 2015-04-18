@@ -1169,6 +1169,20 @@ function ReadStatsTotalReqs()
 	return $requests[0];
 }
 
+function WriteStatsTotalReqs()
+{
+	if(!STATS_ENABLED) return;
+
+	$file = fopen('stats/requests.dat', 'r+b'); if($file === false) return;
+	flock($file, LOCK_EX);
+	$requests = fgets($file, 50);
+	if($requests === "") $requests = 1; else $requests++;
+	rewind($file);
+	fwrite($file, $requests);
+	flock($file, LOCK_UN);
+	fclose($file);
+}
+
 
 /* Set default charset to UTF-8 */
 ini_set('default_charset', 'UTF-8');
@@ -1322,8 +1336,8 @@ else
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
+		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
 		if(LOG_MINOR_ERRORS) Logging('unidentified-clients', $CLIENT, $VERSION, $NET);
-		UpdateStats(STATS_BLOCKED);
 		die();
 	}
 
@@ -1350,33 +1364,20 @@ else
 	if(!VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !$GOOD_PORT || empty($REMOTE_IP) || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		if(STATS_FOR_BAD_CLIENTS) { UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs(); }
 		if(LOG_MINOR_ERRORS) Logging('bad-or-blocked-clients', $CLIENT, $VERSION, $NET);
-		if(STATS_FOR_BAD_CLIENTS) UpdateStats(STATS_BLOCKED);
 		die();
-	}
-
-	if(STATS_ENABLED)
-	{
-		$file = fopen("stats/requests.dat", "r+b");
-		if($file !== false)
-		{
-			flock($file, LOCK_EX);
-			$requests = fgets($file, 50);
-			if($requests === "") $requests = 1; else $requests++;
-			rewind($file);
-			fwrite($file, $requests);
-			flock($file, LOCK_UN);
-			fclose($file);
-		}
 	}
 
 	if(!VerifyVersion($CLIENT, $VERSION))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
 		if(LOG_MINOR_ERRORS) Logging('old-clients', $CLIENT, $VERSION, $NET);
-		UpdateStats(STATS_BLOCKED);
 		die();
 	}
+
+	WriteStatsTotalReqs();
 
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
 	if($GETNETWORKS)
@@ -1390,9 +1391,9 @@ else
 
 	if(!$GET && !$PING && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE === null && $HOST === null && !$INFO)
 	{
-		print "ERROR: Invalid command - Request rejected\r\n";
-		if(LOG_MAJOR_ERRORS) Logging("invalid-queries", $CLIENT, $VERSION, $NET);
+		echo "ERROR: Invalid command - Request rejected\r\n";
 		UpdateStats(STATS_BLOCKED);
+		if(LOG_MAJOR_ERRORS) Logging("invalid-queries", $CLIENT, $VERSION, $NET);
 		die();
 	}
 
@@ -1579,11 +1580,6 @@ else
 			echo "nets: ".strtolower(NetsToString())."\r\n";
 	}
 
-	if($CACHE != NULL || $HOST != NULL)
-		UpdateStats($is_good_update? STATS_UPD : STATS_UPD_BAD);
-	else
-		UpdateStats(STATS_OTHER);
-
 	if($INFO)
 	{
 		echo "I|name|".NAME."\r\n";
@@ -1593,9 +1589,14 @@ else
 		echo "I|open-source|".OPEN_SOURCE."\r\n";
 
 		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
-		if(MAINTAINER_WEBSITE != "http://www.your-site.com/" && MAINTAINER_WEBSITE != "")
+		if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
 			echo "I|maintainer-site|".MAINTAINER_WEBSITE."\r\n";
 	}
+
+	if($CACHE != NULL || $HOST != NULL)
+		UpdateStats($is_good_update? STATS_UPD : STATS_UPD_BAD);
+	else
+		UpdateStats(STATS_OTHER);
 
 	if($STATFILE)
 	{
