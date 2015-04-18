@@ -16,11 +16,12 @@ define( 'MAINTAINER_EMAIL', 'name AT server DOT com' );			// Optional - Your e-m
 define( 'MAINTAINER_WEBSITE', 'http://www.your-site.com/' );	// Optional - The address of your website (It isn't the url of the cache)
 
 define( 'STATS_ENABLED',			1 );	// Enable collecting statistics
+define( 'STATS_FOR_BAD_CLIENTS',	0 );	// Collect statistics also for requests from bad clients (NOTE: This is only for debugging, usually it should be kept disabled since it increase server load)
 define( 'OPTIMIZED_STATS',			1 );
 define( 'KICK_START_ENABLED',		0 );	// KickStart should be DISABLED after populating the webcache
 
 define( 'LOG_MAJOR_ERRORS',			1 );	// Enable logging of major errors
-define( 'LOG_MINOR_ERRORS',			0 );	// Enable logging of minor errors (ONLY for debugging)
+define( 'LOG_MINOR_ERRORS',			0 );	// Enable logging of minor errors (NOTE: This is only for debugging, usually it should be kept disabled since it increase server load)
 
 define( 'MAX_HOSTS',				100 );	// Maximum number of host stored for EACH network (If there are 2 networks and this value is 30 then 30 x 2 = 60 - Setting this value too high DECREASE SPEED of the webcache)
 define( 'MAX_HOSTS_OUT',			40 );	// Maximum number of host sent in each request (By setting this value too high you can WASTE BANDWIDTH, by setting too low you can increase the number of requests)
