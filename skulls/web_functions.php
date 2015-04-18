@@ -630,14 +630,14 @@ function ShowUpdateCheck(){
 
 		if($need_update) $color = "red";
 		else $color = "green";
-		echo "<b>Latest version: <font color=\"green\">".$result["latest_ver"]."</font></b><br>";
-		echo "<b>This version: <font color=\"".$color."\">".SHORT_VER."</font></b><br>";
+		echo '<b>Latest version: <font color="green">',$result['latest_ver'],'</font></b><br>',"\n";
+		echo '<b>This version: <font color="',$color,'">',SHORT_VER,'</font></b>',"\n";
 
 		if($need_update)
 		{
-			if($result["update_info"] != "") echo $result["update_info"]."\n";
-			echo "<br><font color=\"".$color."\"><b>There is a new version of ".NAME.", ";
-			echo "please visit the official site of <a href=\"".GWC_SITE."\" class=\"hover-underline\" target=\"_blank\">".NAME."</a> to obtain the latest version.</b></font><br>";
+			if($result['update_info'] != "") echo '<div style="margin-bottom: 0;">',$result["update_info"],'</div><br>',"\n";
+			echo '<div style="margin-bottom: 0;"><font color="',$color,'"><b>There is a new version of ',NAME,', ';
+			echo 'please visit the official site of <a href="',GWC_SITE,'" class="hover-underline" rel="external" target="_blank">',NAME,'</a> to obtain the latest version.</b></font></div>';
 		}
 		echo "\n";
 	}
