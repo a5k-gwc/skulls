@@ -504,6 +504,7 @@ function sendGWCs()
 	}
 
 	if($footer !== "") echo '<div class="center">',$footer,'</div>',"\n";
+	echo '<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="http://pics8.inxhost.com/images/sticker.gif" alt="Sticker"></a></div>',"\n";
 ?>
 </body>
 </html>
