@@ -116,6 +116,12 @@ function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE)
 			if($file !== FALSE) fclose($file);
 			else $errors .= "<font color=\"red\">Error during writing of stats/upd-bad-reqs.dat</font><br>";
 		}
+		if(!file_exists("stats/blocked-reqs.dat"))
+		{
+			$file = @fopen("stats/blocked-reqs.dat", "wb");
+			if($file !== FALSE) fclose($file);
+			else $errors .= "<font color=\"red\">Error during writing of stats/blocked-reqs.dat</font><br>";
+		}
 		if(!file_exists("stats/other-reqs.dat"))
 		{
 			$file = @fopen("stats/other-reqs.dat", "wb");
