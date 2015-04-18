@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright (C) 2005-2008, 2015 by ale5000
+//  Copyright © 2005-2008, 2015 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -567,24 +567,24 @@ function CheckUpdates(){
 	{
 		echo "<b>Update check process:</b> ";
 		if(FSOCKOPEN)
-			echo "<font color=\"red\"><b>".$msg."</b></font><br>\r\n";
+			echo "<font color=\"red\"><b>".$msg."</b></font><br>\n";
 		else
-			echo "<font color=\"gold\"><b>Unable to check without fsockopen</b></font><br>\r\n";
+			echo "<font color=\"gold\"><b>Unable to check without fsockopen</b></font><br>\n";
 	}
 	elseif($status == "REQUEST_ERROR")
 	{
-		echo "<b>Update check process:</b> <font color=\"red\"><b>".$msg."</b></font><br>\r\n";
+		echo "<b>Update check process:</b> <font color=\"red\"><b>".$msg."</b></font><br>\n";
 	}
 	elseif($status == "OK")
 	{
-		//echo "<b>Update check process:</b> <font color=\"green\"><b>OK</b></font><br>\r\n";	// Debug
-		if($msg_error != "") echo "<b><font style=\"color: #FF0000;\">ERRORS: ".$msg_error."</font></b><br>\r\n";
+		//echo "<b>Update check process:</b> <font color=\"green\"><b>OK</b></font><br>\n";	// Debug
+		if($msg_error != "") echo "<b><font style=\"color: #FF0000;\">ERRORS: ".$msg_error."</font></b><br>\n";
 	}
 	elseif($status == "404")
-		echo "<b>Update check process:</b> <font color=\"red\"><b>Invalid query or file deleted</b></font><br>\r\n";
+		echo "<b>Update check process:</b> <font color=\"red\"><b>Invalid query or file deleted</b></font><br>\n";
 	else
 	{
-		echo "<b>Update check process:</b> <font color=\"red\"><b>Server response incorrect, maybe there are problems in the update server</b></font><br>\r\n";
+		echo "<b>Update check process:</b> <font color=\"red\"><b>Server response incorrect, maybe there are problems in the update server</b></font><br>\n";
 		$status = "INCORRECT";
 	}
 
@@ -635,10 +635,11 @@ function ShowUpdateCheck(){
 
 		if($need_update)
 		{
-			if($result["update_info"] != "") echo $result["update_info"]."\r\n";
+			if($result["update_info"] != "") echo $result["update_info"]."\n";
 			echo "<br><font color=\"".$color."\"><b>There is a new version of ".NAME.", ";
 			echo "please visit the official site of <a href=\"".GWC_SITE."\" class=\"hover-underline\" target=\"_blank\">".NAME."</a> to obtain the latest version.</b></font><br>";
 		}
+		echo "\n";
 	}
 }
 ?>

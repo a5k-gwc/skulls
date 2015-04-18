@@ -377,7 +377,7 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 function TimeSinceSubmissionInSeconds($now, $time_of_submission, $offset)
 {
 	$time_of_submission = trim($time_of_submission);
-	return $now - ( @strtotime($time_of_submission) + $offset );	// GMT
+	return $now - ( strtotime($time_of_submission) + $offset );	// GMT
 }
 
 function CheckIPValidity($remote_ip, $ip)
@@ -457,12 +457,12 @@ function CleanFailedUrls()
 	flock($file, LOCK_EX);
 
 	$now = time();
-	$offset = @date("Z");
+	$offset = date("Z");
 	for($i = 0; $i < $file_count; $i++)
 	{
 		$failed_urls_file[$i] = rtrim($failed_urls_file[$i]);
 		list( , $failed_time) = explode("|", $failed_urls_file[$i]);
-		$time_diff = $now - ( @strtotime( $failed_time ) + $offset );	// GMT
+		$time_diff = $now - ( strtotime( $failed_time ) + $offset );	// GMT
 		$time_diff = floor($time_diff / 86400);	// Days
 
 		if( $time_diff < 2 ) fwrite($file, $failed_urls_file[$i]."\r\n");
@@ -477,13 +477,13 @@ function CheckFailedUrl($url)
 	$file = file(DATA_DIR."/failed_urls.dat");
 	$file_count = count($file);
 
-	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
+	for($i = 0, $now = time(), $offset = date("Z"); $i < $file_count; $i++)
 	{
 		$read = explode("|", $file[$i]);
 		if($url == $read[0])
 		{
 			$read[1] = trim($read[1]);
-			$time_diff = $now - ( @strtotime( $read[1] ) + $offset );	// GMT
+			$time_diff = $now - ( strtotime( $read[1] ) + $offset );	// GMT
 			$time_diff = floor($time_diff / 86400);	// Days
 
 			if( $time_diff < 2 ) return TRUE;
@@ -732,7 +732,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 
 	if($host_exists)
 	{
-		$time_diff = time() - ( @strtotime( $time ) + @date("Z") );	// GMT
+		$time_diff = time() - ( strtotime( $time ) + date("Z") );	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 
 		if( $time_diff < 24 )
@@ -798,7 +798,7 @@ function WriteCacheFile($cache, $net, $client, $version)
 
 	if($cache_exists)
 	{
-		$time_diff = time() - ( @strtotime( $time ) + @date("Z") );	// GMT
+		$time_diff = time() - ( strtotime( $time ) + date("Z") );	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 		if(RECHECK_CACHES < 12) $recheck_caches = 12; else $recheck_caches = RECHECK_CACHES;
 
@@ -940,7 +940,7 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 {
 	$output = "";
 	$now = time();
-	$offset = @date("Z");
+	$offset = date("Z");
 	$separators = 0;
 	if($getvendors) $separators = 3;
 	elseif($getleaves) $separators = 2;
@@ -1058,7 +1058,7 @@ function StartCompression($COMPRESSION)
 function CleanStats($request)
 {
 	$now = time();
-	$offset = @date("Z");
+	$offset = date("Z");
 	$file_count = 0;
 	$line_length = 17;
 	$file = fopen('stats/'.$request.'-reqs.dat', 'rb');
@@ -1069,7 +1069,7 @@ function CleanStats($request)
 		while(!feof($file))
 		{
 			$current_stat = fgets($file, 20);
-			$time_diff = $now - ( @strtotime($current_stat) + $offset );	// GMT
+			$time_diff = $now - ( strtotime($current_stat) + $offset );	// GMT
 			$time_diff = floor($time_diff / 3600);	// Hours
 
 			if($current_stat != "" && $time_diff >= 1)
@@ -1083,7 +1083,7 @@ function CleanStats($request)
 	while(!feof($file))
 	{
 		$current_stat = fgets($file, 20);
-		$time_diff = $now - ( @strtotime($current_stat) + $offset );	// GMT
+		$time_diff = $now - ( strtotime($current_stat) + $offset );	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 
 		if($time_diff < 1)
@@ -1122,7 +1122,7 @@ function ReadStats($type)
 		while(!feof($file))
 		{
 			$current_stat = fgets($file, 20);
-			$time_diff = $now - ( @strtotime($current_stat) + $offset );	// GMT
+			$time_diff = $now - ( strtotime($current_stat) + $offset );	// GMT
 			$time_diff = floor($time_diff / 3600);	// Hours
 
 			if($current_stat != "" && $time_diff >= 1)
@@ -1136,7 +1136,7 @@ function ReadStats($type)
 	while(!feof($file))
 	{
 		$current_stat = fgets($file, 20);
-		$time_diff = $now - ( @strtotime($current_stat) + $offset );	// GMT
+		$time_diff = $now - ( strtotime($current_stat) + $offset );	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 
 		if($time_diff < 1)
@@ -1492,7 +1492,7 @@ else
 				elseif( $result == 6 ) // Unsupported network
 					print "I|update|WARNING|Network of URL not supported\r\n";
 				elseif( $result == 7 ) // Possible network congestion
-					print "I|update|OK|CONGESTION|Possible network congestion, cannot check url\r\n";
+					print "I|update|OK|CONGESTION|Possible network congestion on this server, cannot check GWC\r\n";
 				else
 					print "I|update|ERROR|Unknown error 2, return value = ".$result."\r\n";
 			}
@@ -1627,7 +1627,7 @@ else
 	if($last_action_string != "")
 	{
 		list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
-		$time_diff = time() - ( @strtotime( $last_action_date ) + @date("Z") );	// GMT
+		$time_diff = time() - ( strtotime( $last_action_date ) + date("Z") );	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 		if($time_diff >= 1 && $CACHE == NULL)
 		{

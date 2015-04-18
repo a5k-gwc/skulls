@@ -224,7 +224,7 @@ a.hover-underline:hover { text-decoration: underline; }
 							</tr>
 							<?php
 							if( $elements === 0 )
-								print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"4\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td></tr>\r\n");
+								print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"4\" height=\"30\">There are no <strong>hosts</strong> listed at this time.</td></tr>\n");
 							else
 							{
 								include './geoip/geoip.php';
@@ -284,7 +284,7 @@ a.hover-underline:hover { text-decoration: underline; }
 							</tr>
 							<?php
 							if( $elements === 0 )
-								print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"5\" height=\"30\">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>\r\n");
+								print("<tr align=\"center\" bgcolor=\"#FFFFFF\"><td colspan=\"5\" height=\"30\">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>\n");
 							else
 							{
 								$udp = "";
