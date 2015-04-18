@@ -84,7 +84,11 @@ if(CACHE_URL !== $MY_URL && CACHE_URL !== "")
 	die();
 }
 
-define( 'NETWORKS_COUNT', count($SUPPORTED_NETWORKS) );
+define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
+define('STATS_OTHER',   0);
+define('STATS_UPD',     1);
+define('STATS_UPD_BAD', 2);
+define('STATS_BLOCKED', 3);
 
 function GetMicrotime()
 { 
@@ -364,7 +368,7 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("unsupported_nets", $CLIENT, $VERSION, $NET);
+		Logging("unsupported-nets", $CLIENT, $VERSION, $NET);
 	}
 
 	return FALSE;
@@ -406,7 +410,7 @@ function CheckIPValidity($remote_ip, $ip)
 	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("invalid_ips", $CLIENT, $VERSION, $NET);
+		Logging("invalid-hosts", $CLIENT, $VERSION, $NET);
 	}
 
 	return FALSE;
@@ -426,7 +430,7 @@ function CheckURLValidity($cache)
 	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("invalid_urls", $CLIENT, $VERSION, $NET);
+		Logging("invalid-urls", $CLIENT, $VERSION, $NET);
 	}
 
 	return FALSE;
@@ -1101,14 +1105,17 @@ function CleanStats($request)
 	fclose($file);
 }
 
-function ReadStats($is_update = false, $good = true)
+function ReadStats($type)
 {
+	$name = null;
+	if($type === STATS_OTHER) $name = 'other'; elseif($type === STATS_UPD) $name = 'upd'; elseif($type === STATS_UPD_BAD) $name = 'upd-bad';
+	elseif($type === STATS_BLOCKED) $name = 'blocked'; else { trigger_error('ReadStats - Invalid type', E_USER_ERROR); return 0; }
+
+	$file = fopen('stats/'.$name.'-reqs.dat', 'rb'); if($file === false) return 0;
 	$requests = 0;
 	$now = time();
-	$offset = @date("Z");
+	$offset = date("Z");
 	$line_length = 17;
-	$file = fopen('stats/'.($is_update? ($good? 'upd' : 'upd-bad') : 'other').'-reqs.dat', 'rb');
-	if($file === false) return 0;
 
 	if(OPTIMIZED_STATS)
 	{
@@ -1140,14 +1147,18 @@ function ReadStats($is_update = false, $good = true)
 	return $requests;
 }
 
-function UpdateStats($is_update = false, $good = true)
+function UpdateStats($type)
 {
 	if(!STATS_ENABLED) return;
 
-	$file = fopen('stats/'.($is_update? ($good? 'upd' : 'upd-bad') : 'other').'-reqs.dat', 'ab');
-	if($file === false) return;
+	$name = null;
+	if($type === STATS_OTHER) $name = 'other'; elseif($type === STATS_UPD) $name = 'upd'; elseif($type === STATS_UPD_BAD) $name = 'upd-bad';
+	elseif($type === STATS_BLOCKED) $name = 'blocked'; else { trigger_error('UpdateStats - Invalid type', E_USER_ERROR); return; }
+
+	$line = gmdate('Y/m/d H:i')."\n";
+	$file = fopen('stats/'.$name.'-reqs.dat', 'ab'); if($file === false) return;
 	flock($file, LOCK_EX);
-	fwrite($file, gmdate('Y/m/d H:i')."\n");
+	fwrite($file, $line);
 	flock($file, LOCK_UN);
 	fclose($file);
 }
@@ -1311,8 +1322,8 @@ else
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
-		if(LOG_MINOR_ERRORS) Logging('unidentified_clients', $CLIENT, $VERSION, $NET);
-		UpdateStats();
+		if(LOG_MINOR_ERRORS) Logging('unidentified-clients', $CLIENT, $VERSION, $NET);
+		UpdateStats(STATS_BLOCKED);
 		die();
 	}
 
@@ -1336,24 +1347,35 @@ else
 	if($NET === null) $NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
 	/* Block also missing REMOTE_ADDR, although it is unlikely, apparently it could happen in some configurations */
-	if( !VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !VerifyVersion($CLIENT, $VERSION) || !$GOOD_PORT || $REMOTE_IP === 'unknown' || $REMOTE_IP == "" )
+	if(!VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !$GOOD_PORT || empty($REMOTE_IP) || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-		if(LOG_MINOR_ERRORS) Logging('bad_old_clients', $CLIENT, $VERSION, $NET);
-		UpdateStats();
+		if(LOG_MINOR_ERRORS) Logging('bad-or-blocked-clients', $CLIENT, $VERSION, $NET);
+		if(STATS_FOR_BAD_CLIENTS) UpdateStats(STATS_BLOCKED);
 		die();
 	}
 
 	if(STATS_ENABLED)
 	{
 		$file = fopen("stats/requests.dat", "r+b");
-		flock($file, LOCK_EX);
-		$requests = fgets($file, 50);
-		if($requests == "") $requests = 1; else $requests++;
-		rewind($file);
-		fwrite($file, $requests);
-		flock($file, LOCK_UN);
-		fclose($file);
+		if($file !== false)
+		{
+			flock($file, LOCK_EX);
+			$requests = fgets($file, 50);
+			if($requests === "") $requests = 1; else $requests++;
+			rewind($file);
+			fwrite($file, $requests);
+			flock($file, LOCK_UN);
+			fclose($file);
+		}
+	}
+
+	if(!VerifyVersion($CLIENT, $VERSION))
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		if(LOG_MINOR_ERRORS) Logging('old-clients', $CLIENT, $VERSION, $NET);
+		UpdateStats(STATS_BLOCKED);
+		die();
 	}
 
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
@@ -1362,27 +1384,27 @@ else
 
 	if($IS_A_CACHE || $CLIENT === 'TEST')
 	{
-		$HOST = null;         /* Block host submission by caches, they don't do it */
-		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header to caches, they don't need it */
+		$HOST = null;       /* Block host submission by GWCs, they don't do it */
+		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header to GWCs, they don't need it */
 	}
 
-	if(!$PING && !$GET && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $HOST == NULL && !$INFO)
+	if(!$GET && !$PING && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE === null && $HOST === null && !$INFO)
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
-		if(LOG_MAJOR_ERRORS) Logging("invalid_queries", $CLIENT, $VERSION, $NET);
-		UpdateStats();
+		if(LOG_MAJOR_ERRORS) Logging("invalid-queries", $CLIENT, $VERSION, $NET);
+		UpdateStats(STATS_BLOCKED);
 		die();
 	}
 
 	if($LEAVES !== null && ( !ctype_digit($LEAVES) || $LEAVES > 2047 ))
 	{
 		$LEAVES = null;
-		if(LOG_MAJOR_ERRORS) Logging("invalid_leaves", $CLIENT, $VERSION, $NET);
+		if(LOG_MAJOR_ERRORS) Logging("invalid-leaves", $CLIENT, $VERSION, $NET);
 	}
 	if($MAX_LEAVES !== null && ( !ctype_digit($MAX_LEAVES) || $MAX_LEAVES > 2047 ))
 	{
 		$MAX_LEAVES = null;
-		if(LOG_MAJOR_ERRORS) Logging("invalid_max_leaves", $CLIENT, $VERSION, $NET);
+		if(LOG_MAJOR_ERRORS) Logging("invalid-max-leaves", $CLIENT, $VERSION, $NET);
 	}
 	$CLUSTER = null;
 
@@ -1558,9 +1580,9 @@ else
 	}
 
 	if($CACHE != NULL || $HOST != NULL)
-		UpdateStats(true, $is_good_update);
+		UpdateStats($is_good_update? STATS_UPD : STATS_UPD_BAD);
 	else
-		UpdateStats();
+		UpdateStats(STATS_OTHER);
 
 	if($INFO)
 	{
@@ -1580,12 +1602,14 @@ else
 		if(STATS_ENABLED)
 		{
 			/* Good + bad update requests of last hour */
-			$upd_reqs = ReadStats(true) + ReadStats(true, false);
+			$upd_reqs = ReadStats(STATS_UPD) + ReadStats(STATS_UPD_BAD);
 			/* Other requests of last hour */
-			$other_reqs = ReadStats();
+			$other_reqs = ReadStats(STATS_OTHER);
+			/* Blocked requests of last hour */
+			$blocked_reqs = ReadStats(STATS_BLOCKED);
 
 			echo ReadStatsTotalReqs(),"\r\n";
-			echo ($other_reqs + $upd_reqs),"\r\n";
+			echo ($other_reqs + $upd_reqs + $blocked_reqs),"\r\n";
 			echo $upd_reqs,"\r\n";
 		}
 		else
@@ -1599,6 +1623,7 @@ else
 	flock($file, LOCK_EX);
 	$last_action_string = fgets($file, 50);
 
+	/* ToDO: clean this */
 	if($last_action_string != "")
 	{
 		list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
@@ -1606,24 +1631,34 @@ else
 		$time_diff = floor($time_diff / 3600);	// Hours
 		if($time_diff >= 1 && $CACHE == NULL)
 		{
+			define('CLEAN_STATS_OTHER',   0);
+			define('CLEAN_STATS_BLOCKED', 1);
+			define('CLEAN_STATS_UPD',     2);
+			define('CLEAN_STATS_UPD_BAD', 3);
+			define('CLEAN_FAILED_URLS',   4);
+
 			$last_action++;
 			switch($last_action)
 			{
 				default:
 					$last_action = 0;
-				case 0:
+				case CLEAN_STATS_OTHER:
 					$clean_file = "stats";
 					$clean_type = "other";
 					break;
-				case 1:
+				case CLEAN_STATS_BLOCKED:
+					$clean_file = "stats";
+					$clean_type = "blocked";
+					break;
+				case CLEAN_STATS_UPD:
 					$clean_file = "stats";
 					$clean_type = "upd";
 					break;
-				case 2:
+				case CLEAN_STATS_UPD_BAD:
 					$clean_file = "stats";
 					$clean_type = "upd-bad";
 					break;
-				case 3:
+				case CLEAN_FAILED_URLS:
 					$clean_file = "failed_urls";
 					break;
 			}

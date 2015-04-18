@@ -157,7 +157,7 @@ a.hover-underline:hover { text-decoration: underline; }
 							</tr>
 							<tr>
 								<td width="150">- Maintainer:</td>
-								<td style="color: #0044FF;"><?php echo '<b',$mail,'>',htmlentities(MAINTAINER_NICK).'</b>',"\n"; ?></td>
+								<td style="color: #0044FF;"><?php echo '<b',$mail,'>',htmlentities(MAINTAINER_NICK),'</b>'; ?></td>
 							</tr>
 <?php
 							if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
@@ -385,11 +385,13 @@ a.hover-underline:hover { text-decoration: underline; }
 				if(STATS_ENABLED)
 				{
 					/* Bad update requests of last hour */
-					$upd_bad_reqs = ReadStats(true, false);
+					$upd_bad_reqs = ReadStats(STATS_UPD_BAD);
 					/* Good + bad update requests of last hour */
-					$upd_reqs = ReadStats(true) + $upd_bad_reqs;
+					$upd_reqs = ReadStats(STATS_UPD) + $upd_bad_reqs;
+					/* Blocked requests of last hour */
+					$blocked_reqs = ReadStats(STATS_BLOCKED);
 					/* Other requests of last hour */
-					$other_reqs = ReadStats();
+					$other_reqs = ReadStats(STATS_OTHER);
 				}
 ?>
 				<tr class="page-title"> 
@@ -414,7 +416,7 @@ a.hover-underline:hover { text-decoration: underline; }
 								<td style="color: #994433;">
 <?php
 									if(STATS_ENABLED)
-										echo $other_reqs + $upd_reqs;
+										echo ($other_reqs + $upd_reqs + $blocked_reqs),' (',$blocked_reqs,' blocked)';
 									else
 										echo 'Disabled';
 ?>
