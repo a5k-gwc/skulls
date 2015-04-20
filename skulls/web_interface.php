@@ -34,7 +34,7 @@ function ShowHtmlPage($num, $header, $footer)
 <title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER; ?></title>
 
 <meta name="robots" content="<?php if($num === 1) echo 'index, follow'; else echo 'noindex, nofollow'; ?>, noarchive, noimageindex">
-<meta name="keywords" content="skulls, gwebcache, gwc, p2p, gnutella, bootstrap">
+<meta name="keywords" content="skulls, gwebcache, gwc, p2p, bootstrap, gnutella, gnutella2">
 <meta name="author" content="ale5000">
 <meta name="generator" content="Notepad++">
 
@@ -42,20 +42,18 @@ function ShowHtmlPage($num, $header, $footer)
 <!--
 body { margin: 2em; padding: 0; background-color: #ffff00; font-family: Verdana; font-size: 75%; }
 div { margin-bottom: 2em; }
+img { border-style: none; }
 table { border: 1px solid #ff3300; border-spacing: 0; border-collapse: collapse; background-color: #ffffff; }
-td { padding: 0.4em; }
+th, td { padding: 0.4em; }  th { text-align: left; font-weight: bold; }
 
-.center { text-align: center; }
-.center table { margin-left: auto; margin-right: auto; text-align: left; }
+.center { text-align: center; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }
 .title-text { padding-left: 0.2em; font-size: 1.6em; }
 .page-list { padding-left: 0.8em; padding-bottom: 1.5em; }
 .page-title { background-color: #ccff99; }
-.inner-table-informations { border-style: none; }
-.inner-table-informations td { padding: 0.1em; }
+.inner-table-infos { border-style: none; }
+.inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; }
 .inner-table { border-color: #ccccdd; }
-
-.odd  { background-color: #ffffff; }  /* Odd lines */
-.even { background-color: #f0f0f0; }  /* Even lines */
+/* Odd lines */ .odd  { background-color: #ffffff; }  /* Even lines */ .even { background-color: #f0f0f0; }
 
 table, div { font-size: 10px; }
 a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
@@ -69,7 +67,7 @@ a.hover-underline:hover { text-decoration: underline; }
 	if($header !== "") echo '<div class="center">',$header,'</div>',"\n";
 ?>
 	<div class="center">
-		<table>
+		<table summary="">
 			<tr>
 				<td><b class="title-text"><span style="color: #008000"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></b></td>
 			</tr>
@@ -90,9 +88,9 @@ a.hover-underline:hover { text-decoration: underline; }
 				</tr>
 				<tr>
 					<td>
-						<table class="inner-table-informations" width="100%">
+						<table class="inner-table-infos" width="100%" summary="Informations about this GWC">
 							<tr>
-								<td width="150">- Running since:</td>
+								<th width="150">- Running since:</th>
 								<td style="color: #994433;">
 <?php
 									if(file_exists(DATA_DIR."/running_since.dat"))
@@ -104,11 +102,11 @@ a.hover-underline:hover { text-decoration: underline; }
 								</td>
 							</tr>
 							<tr>
-								<td width="150">- Version:</td>
+								<th width="150">- Version:</th>
 								<td style="color: #008000;" title="<?php echo GetMainFileRev(); ?>"><b><?php echo VER; ?></b></td>
 							</tr>
 							<tr>
-								<td width="150">- Supported networks:</td>
+								<th width="150">- Supported networks:</th>
 								<td style="color: #994433;">
 <?php
 									global $SUPPORTED_NETWORKS;
@@ -127,7 +125,7 @@ a.hover-underline:hover { text-decoration: underline; }
 							</tr>
 <?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
 							<tr>
-								<td width="150">- GeoIP type:</td>
+								<th width="150">- GeoIP type:</th>
 								<td style="color: #994433;"><b><?php if($geoip) echo $geoip->GetType(); ?></b></td>
 							</tr>
 <?php
@@ -135,11 +133,11 @@ a.hover-underline:hover { text-decoration: underline; }
 							{
 ?>
 								<tr>
-									<td width="150">- GeoIP DB version:</td>
+									<th width="150">- GeoIP DB version:</th>
 									<td style="color: #008000;"><b><?php echo htmlentities($geoip->GetDBVersion()); ?></b></td>
 								</tr>
 								<tr>
-									<td width="150">- GeoIP DB copyright:</td>
+									<th width="150">- GeoIP DB copyright:</th>
 									<td style="color: #994433;"><?php echo htmlentities($geoip->GetDBCopyright()); ?></td>
 								</tr>
 <?php
@@ -156,7 +154,7 @@ a.hover-underline:hover { text-decoration: underline; }
 								<td>&nbsp;</td>
 							</tr>
 							<tr>
-								<td width="150">- Maintainer:</td>
+								<th width="150">- Maintainer:</th>
 								<td style="color: #0044FF;"><?php echo '<b',$mail,'>',htmlentities(MAINTAINER_NICK),'</b>'; ?></td>
 							</tr>
 <?php
@@ -164,7 +162,7 @@ a.hover-underline:hover { text-decoration: underline; }
 							{
 ?>
 								<tr>
-									<td width="150">- Maintainer website:</td>
+									<th width="150">- Maintainer website:</th>
 									<td style="color: #0044FF;">
 <?php
 										$website = htmlentities(MAINTAINER_WEBSITE);
@@ -215,12 +213,12 @@ a.hover-underline:hover { text-decoration: underline; }
 				</tr>
 				<tr>
 					<td>
-						<table class="inner-table" width="100%">
+						<table class="inner-table" width="100%" summary="Current hosts in cache">
 							<tr bgcolor="#C6E6E6">
-								<td>Host address (Leaves)</td>
-								<td>Client</td>
-								<td>Network</td>
-								<td>Last updated</td>
+								<th>Host address (Leaves)</th>
+								<th>Client</th>
+								<th>Network</th>
+								<th>Last updated</th>
 							</tr>
 							<?php
 							if( $elements === 0 )
@@ -274,13 +272,13 @@ a.hover-underline:hover { text-decoration: underline; }
 				</tr>
 				<tr>
 					<td>
-						<table class="inner-table" width="100%">
+						<table class="inner-table" width="100%" summary="Current GWCs in cache">
 							<tr bgcolor="#C6E6E6">
-								<td>URL</td>
-								<td>Name</td>
-								<td>Networks</td>
-								<td>Submitting client</td>
-								<td>Last checked</td>
+								<th>URL</th>
+								<th>Name</th>
+								<th>Networks</th>
+								<th>Submitting client</th>
+								<th>Last checked</th>
 							</tr>
 							<?php
 							if( $elements === 0 )
@@ -399,9 +397,9 @@ a.hover-underline:hover { text-decoration: underline; }
 				</tr>
 				<tr>
 					<td>
-						<table class="inner-table-informations" width="100%">
+						<table class="inner-table-infos" width="100%" summary="Statistics about this GWC">
 							<tr>
-								<td width="150">- Total requests:</td>
+								<th width="150">- Total requests:</th>
 								<td style="color: #994433;">
 <?php
 									if(STATS_ENABLED)
@@ -412,7 +410,7 @@ a.hover-underline:hover { text-decoration: underline; }
 								</td>
 							</tr>
 							<tr>
-								<td width="150">- Requests this hour:</td>
+								<th width="150">- Requests this hour:</th>
 								<td style="color: #994433;">
 <?php
 									if(STATS_ENABLED)
@@ -423,7 +421,7 @@ a.hover-underline:hover { text-decoration: underline; }
 								</td>
 							</tr>
 							<tr>
-								<td width="150">- Updates this hour:</td>
+								<th width="150">- Updates this hour:</th>
 								<td style="color: #994433;">
 <?php
 									if(STATS_ENABLED)
