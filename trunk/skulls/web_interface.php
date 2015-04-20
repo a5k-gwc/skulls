@@ -32,6 +32,7 @@ function ShowHtmlPage($num, $header, $footer)
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER; ?></title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="robots" content="<?php if($num === 1) echo 'index, follow'; else echo 'noindex, nofollow'; ?>, noarchive, noimageindex">
 <meta name="keywords" content="skulls, gwebcache, gwc, p2p, bootstrap, gnutella, gnutella2">
@@ -40,23 +41,25 @@ function ShowHtmlPage($num, $header, $footer)
 
 <style type="text/css">
 <!--
-body { margin: 2em; padding: 0; background-color: #ffff00; font-family: Verdana; font-size: 75%; }
-div { margin-bottom: 2em; }
+body { margin: 0; padding: 2em; background-color: yellow; color: black; font-family: Verdana; font-size: 65%; }
+h1 { margin: 0; font-size: 1.5em; font-weight: bold; }
+h1, .center { text-align: center; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }
+h1.title { text-align: left; }
+table { border: 1px solid red; border-spacing: 0; border-collapse: collapse; background-color: white; }
+th, td { padding: 0.4em; }  th { text-align: left; }
+strong, th { font-weight: bold; }
 img { border-style: none; }
-table { border: 1px solid #ff3300; border-spacing: 0; border-collapse: collapse; background-color: #ffffff; }
-th, td { padding: 0.4em; }  th { text-align: left; font-weight: bold; }
 
-.center { text-align: center; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }
-.title-text { padding-left: 0.2em; font-size: 1.6em; }
+.spacer { margin-bottom: 2em; }
+.main-title, .good { color: green; }  .bad { color: red }
+.title { padding-left: 0.2em; }
 .page-list { padding-left: 0.8em; padding-bottom: 1.5em; }
 .page-title { background-color: #ccff99; }
 .inner-table-infos { border-style: none; }
 .inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; }
 .inner-table { border-color: #ccccdd; }
-/* Odd lines */ .odd  { background-color: #ffffff; }  /* Even lines */ .even { background-color: #f0f0f0; }
-.good { color: green; }  .bad { color: red }
+/* Odd lines */ .odd  { background-color: white; }  /* Even lines */ .even { background-color: #f0f0f0; }
 
-table, div { font-size: 10px; }
 a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
 a.hover-underline:hover { text-decoration: underline; }
 -->
@@ -65,12 +68,12 @@ a.hover-underline:hover { text-decoration: underline; }
 
 <body>
 <?php
-	if($header !== "") echo '<div class="center">',$header,'</div>',"\n";
+	if($header !== "") echo '<div class="center">',$header,'</div><div class="spacer"></div>',"\n";
 ?>
 	<div class="center">
 		<table summary="">
 			<tr>
-				<td><b class="title-text"><span style="color: #008000"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></b></td>
+				<td><h1 class="title"><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1></td>
 			</tr>
 			<tr>
 				<td class="page-list">
@@ -442,21 +445,15 @@ a.hover-underline:hover { text-decoration: underline; }
 				<td style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" rel="external"><?php echo GWC_SITE; ?></a></b></td>
 			</tr>
 		</table>
-	</div>
+	</div><div class="spacer"></div>
 <?php
 
 	if($num == 1)	// Info
 	{
 ?>
 	<div class="center">
-		<table>
-			<tr>
-				<td>
-					<?php ShowUpdateCheck(); ?>
-				</td>
-			</tr>
-		</table>
-	</div>
+		<?php ShowUpdateCheck(); ?>
+	</div><div class="spacer"></div>
 <?php
 	}
 ?>	
@@ -522,9 +519,9 @@ function sendGWCs()
 <?php
 	}
 
-	if($footer !== "") echo '<div class="center">',$footer,'</div>',"\n";
-	echo '<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.gif" alt="Sticker"></a></div>',"\n";
+	if($footer !== "") echo '<div class="center">',$footer,'</div><div class="spacer"></div>',"\n";
 ?>
+	<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.gif" alt="Sticker"></a></div>
 </body>
 </html>
 <?php
