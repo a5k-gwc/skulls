@@ -54,6 +54,7 @@ th, td { padding: 0.4em; }  th { text-align: left; font-weight: bold; }
 .inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; }
 .inner-table { border-color: #ccccdd; }
 /* Odd lines */ .odd  { background-color: #ffffff; }  /* Even lines */ .even { background-color: #f0f0f0; }
+.good { color: green; }  .bad { color: red }
 
 table, div { font-size: 10px; }
 a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
@@ -166,7 +167,7 @@ a.hover-underline:hover { text-decoration: underline; }
 									<td style="color: #0044FF;">
 <?php
 										$website = htmlentities(MAINTAINER_WEBSITE);
-										echo '<a href="',$website,'" class="hover-underline" rel="external" target="_blank">',$website,'</a>',"\n";
+										echo '<a href="',$website,'" class="hover-underline" rel="external">',$website,'</a>',"\n";
 ?>
 									</td>
 								</tr>
@@ -244,7 +245,7 @@ a.hover-underline:hover { text-decoration: underline; }
 										$country_code = $geoip->GetCountryCodeByIP($h_ip);
 										echo '<img width="16" height="11" src="'.$geoip->GetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
 									}
-									echo '<a href="',$url,$host,'">',$host,'</a>';
+									echo '<a href="',$url,$host,'" rel="nofollow">',$host,'</a>';
 									if($h_leaves !== "")
 										echo ' (',$h_leaves,')';
 									echo '</td>';
@@ -268,7 +269,7 @@ a.hover-underline:hover { text-decoration: underline; }
 				$elements = count($cache_file);
 ?>
 				<tr class="page-title"> 
-					<td style="color: #0044FF"><b>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="Javascript:sendGWCs();">Add first 20 caches to your P2P application</a></td>
+					<td style="color: #0044FF"><b>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</b>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:sendGWCs();" rel="nofollow">Add first 20 caches to your P2P application</a></td>
 				</tr>
 				<tr>
 					<td>
@@ -313,7 +314,7 @@ a.hover-underline:hover { text-decoration: underline; }
 									}
 									else
 										$output .= "&nbsp;&nbsp;&nbsp;";
-									$output .= '<a href="'.$cache_url.'" rel="external" target="_blank">';
+									$output .= '<a href="'.$cache_url.'" rel="external nofollow">';
 
 									if(strpos($cache_url, "://") > -1)
 									{
@@ -338,29 +339,29 @@ a.hover-underline:hover { text-decoration: underline; }
 
 									$output .= "</a></td>";
 									if(strpos($cache_name, NAME) === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"".GWC_SITE."\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"".GWC_SITE."\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(NAME !== 'Sk'.'ulls' && strpos($cache_name, 'Sk'.'ulls') === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									//elseif(strpos($cache_name, "Bazooka") === 0)
-										//$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.bazookanetworks.com/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										//$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.bazookanetworks.com/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "Beacon Cache") === 0)  /* Beacon Cache and Beacon Cache II */
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/beaconcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/beaconcache/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "Cachechu") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://github.com/kevogod/cachechu\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://github.com/kevogod/cachechu\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "GhostWhiteCrab") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "PHPGnuCacheII") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gwcii.sourceforge.net/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gwcii.sourceforge.net/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "jumswebcache") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www1.mager.org/GWebCache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www1.mager.org/GWebCache/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "MWebCache") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://mute-net.sourceforge.net/mWebCache.shtml\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://mute-net.sourceforge.net/mWebCache.shtml\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "node.gwc") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://andrewgilmore.co.uk/project/nodegwc\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://andrewgilmore.co.uk/project/nodegwc\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "GWebCache") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gnucleus.sourceforge.net/gwebcache/\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gnucleus.sourceforge.net/gwebcache/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									elseif(strpos($cache_name, "DKAC/Enticing-Enumon") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://dkac.trillinux.org/dkac/dkac.php\" class=\"hover-underline\" style=\"color: black;\" target=\"_blank\">".$cache_name."</a></td>";
+										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://dkac.trillinux.org/dkac/dkac.php\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
 									else
 										$output .= "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
 									$output .= "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
@@ -438,12 +439,12 @@ a.hover-underline:hover { text-decoration: underline; }
 			}
 ?>
 			<tr>
-				<td style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" rel="external" target="_blank"><?php echo GWC_SITE; ?></a></b></td>
+				<td style="padding: 5pt;"><b><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" rel="external"><?php echo GWC_SITE; ?></a></b></td>
 			</tr>
 		</table>
 	</div>
-
 <?php
+
 	if($num == 1)	// Info
 	{
 ?>
@@ -458,11 +459,30 @@ a.hover-underline:hover { text-decoration: underline; }
 	</div>
 <?php
 	}
+?>	
+	<script type="text/javascript">
+	<!--
+	function UseRelExternal()
+	{
+		var links; if(document.links) links = document.links; else links = GetElemsByTag("a"); if(!links) return false;
+
+		var links_count = links.length, ext_links_event = function(e){ var e = e || window.event; if(e.preventDefault) e.preventDefault(); else e.returnValue = false; window.open(this.href, "_blank"); };
+		for(var i=0; i<links_count; i++)
+			if((' '+links[i].rel+' ').indexOf(" external ") != -1 && !links[i].onclick)
+				links[i].onclick = ext_links_event;
+
+		return true;
+	}
+	UseRelExternal();
+	//-->
+	</script>
+<?php
 
 	if($num == 3)	// WebCache
 	{
 ?>
-<script type="text/JavaScript">
+<script type="text/javascript">
+<!--
 var links = document.getElementsByTagName("a");
 var links_count = links.length;
 var timer, i, c;
@@ -497,6 +517,7 @@ function sendGWCs()
 {
 	timer = setInterval("sendLink()", 25);
 }
+//-->
 </script>
 <?php
 	}
