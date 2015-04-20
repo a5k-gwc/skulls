@@ -407,7 +407,7 @@ function ReplaceVendorCode($vendor, $version){
 	if($cache > 1) $version .= ' (GWC)';
 
 	if( $url !== "" )
-		return '<a href="'.$url.'" target="_blank">'.$client_name.' '.$version.'</a>';
+		return '<a href="'.$url.'" rel="external">'.$client_name.' '.$version.'</a>';
 	else
 		return $client_name.' '.$version;
 }
@@ -628,16 +628,15 @@ function ShowUpdateCheck(){
 				$need_update = TRUE;
 		}
 
-		if($need_update) $color = "red";
-		else $color = "green";
-		echo '<b>Latest version: <font color="green">',$result['latest_ver'],'</font></b><br>',"\n";
-		echo '<b>This version: <font color="',$color,'">',SHORT_VER,'</font></b>',"\n";
+		if($need_update) $class = "bad"; else $class = "good";
+		echo '<b>Latest version: <span class="good">',$result['latest_ver'],'</span></b><br>',"\n";
+		echo '<b>This version: <span class="',$class,'">',SHORT_VER,'</span></b>',"\n";
 
 		if($need_update)
 		{
 			if($result['update_info'] != "") echo '<div style="margin-bottom: 0;">',$result["update_info"],'</div><br>',"\n";
-			echo '<div style="margin-bottom: 0;"><font color="',$color,'"><b>There is a new version of ',NAME,', ';
-			echo 'please visit the official site of <a href="',GWC_SITE,'" class="hover-underline" rel="external" target="_blank">',NAME,'</a> to obtain the latest version.</b></font></div>';
+			echo '<div style="margin-bottom: 0;"><span class="',$class,'"><b>There is a new version of ',NAME,', ';
+			echo 'please visit the official site of <a href="',GWC_SITE,'" class="hover-underline" rel="external">',NAME,'</a> to obtain the latest version.</b></span></div>';
 		}
 		echo "\n";
 	}
