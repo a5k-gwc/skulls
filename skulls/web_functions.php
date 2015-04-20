@@ -628,17 +628,18 @@ function ShowUpdateCheck(){
 				$need_update = TRUE;
 		}
 
+		echo '<table><tr><td>';
 		if($need_update) $class = "bad"; else $class = "good";
-		echo '<b>Latest version: <span class="good">',$result['latest_ver'],'</span></b><br>',"\n";
-		echo '<b>This version: <span class="',$class,'">',SHORT_VER,'</span></b>',"\n";
+		echo '<div><b>Latest version: <span class="good">',$result['latest_ver'],'</span></b></div>';
+		echo '<div><b>This version: <span class="',$class,'">',SHORT_VER,'</span></b></div>',"\n";
 
 		if($need_update)
 		{
-			if($result['update_info'] != "") echo '<div style="margin-bottom: 0;">',$result["update_info"],'</div><br>',"\n";
-			echo '<div style="margin-bottom: 0;"><span class="',$class,'"><b>There is a new version of ',NAME,', ';
+			if($result['update_info'] != "") echo '<div>',$result["update_info"],'</div>',"\n";
+			echo '<br><div><span class="',$class,'"><b>There is a new version of ',NAME,', ';
 			echo 'please visit the official site of <a href="',GWC_SITE,'" class="hover-underline" rel="external">',NAME,'</a> to obtain the latest version.</b></span></div>';
 		}
-		echo "\n";
+		echo '</td></tr></table>',"\n";
 	}
 }
 ?>
