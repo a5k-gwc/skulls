@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright (C) 2005-2008, 2015 by ale5000
+//  Copyright © 2005-2008, 2015 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -143,15 +143,23 @@ function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE)
 		else $errors .= "<font color=\"red\">Error during writing of admin/revision.dat</font><br>";
 	}
 
-	if(!file_exists(".htaccess"))
+	if(!file_exists('./.htaccess'))
 	{
-		$file = @fopen(".htaccess", "wb");
-		if($file !== FALSE)
+		$fp1 = @fopen('./includes/base-htaccess.php', 'rb');
+		$fp2 = @fopen('./.htaccess', 'wb');
+		if($fp1 !== false && $fp2 !== false)
 		{
-			flock($file, 2);
-			fwrite($file, "RewriteEngine On\r\n\r\n# This should block the extension strip for the cache that is enabled on some servers\r\nRewriteRule ^skulls$ skulls.php$1 [R=permanent,L]\r\n");
-			flock($file, 3);
-			fclose($file);
+			flock($fp1, LOCK_EX);
+			flock($fp2, LOCK_EX);
+
+			fgets($fp1, 512);  /* Skip first line */
+			while(($data = fgets($fp1, 512)) !== false)
+				fwrite($fp2, $data);
+
+			flock($fp1, LOCK_UN);
+			flock($fp2, LOCK_UN);
+			fclose($fp1);
+			fclose($fp2);
 		}
 		else $errors .= "<font color=\"red\">Error during writing of .htaccess</font><br>";
 	}
