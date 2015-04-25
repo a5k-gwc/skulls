@@ -51,7 +51,7 @@ strong, th { font-weight: bold; }
 img { border-style: none; }
 
 .spacer { margin-bottom: 2em; }
-.main-title, .good { color: green; }  .bad { color: red }
+.main-title, .good { color: green; }  .bad { color: red; }  .unknown { color: gold; }
 .title { padding-left: 0.2em; }
 .page-list { padding-left: 0.8em; padding-bottom: 1.5em; }
 .page-title { background-color: #ccff99; }
