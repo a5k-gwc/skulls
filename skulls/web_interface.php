@@ -58,6 +58,7 @@ img { border-style: none; }
 .inner-table-infos { border-style: none; }
 .inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; }
 .inner-table { border-color: #ccccdd; }
+.header-column { background-color: #c6e6e6; }
 /* Odd lines */ .odd  { background-color: white; }  /* Even lines */ .even { background-color: #f0f0f0; }
 
 a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
@@ -218,7 +219,7 @@ a.hover-underline:hover { text-decoration: underline; }
 				<tr>
 					<td>
 						<table class="inner-table" width="100%" summary="Current hosts in cache">
-							<tr bgcolor="#C6E6E6">
+							<tr class="header-column">
 								<th>Host address (Leaves)</th>
 								<th>Client</th>
 								<th>Network</th>
@@ -277,7 +278,7 @@ a.hover-underline:hover { text-decoration: underline; }
 				<tr>
 					<td>
 						<table class="inner-table" width="100%" summary="Current GWCs in cache">
-							<tr bgcolor="#C6E6E6">
+							<tr class="header-column">
 								<th>URL</th>
 								<th>Name</th>
 								<th>Networks</th>
