@@ -17,7 +17,8 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-function ReplaceVendorCode($vendor, $version){
+function ReplaceVendorCode($vendor, $version)
+{
 	$cache = 0; $cache_scan = 0; $url = "";
 	if( $vendor === 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
 	{
@@ -412,7 +413,8 @@ function ReplaceVendorCode($vendor, $version){
 		return $client_name.' '.$version;
 }
 
-function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php", $came_from = NULL){
+function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php", $came_from = NULL)
+{
 	global $MY_URL;
 
 	list( , $url ) = explode("://", $url, 2);		// It remove "http://" from $url - $url = www.test.com:80/page.php
@@ -436,8 +438,8 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 
 	if(!$fp)
 	{
-		$status = "SOCK_ERROR";
-		$msg = "Error ".$errno;
+		$status = 'SOCK_ERROR';
+		$msg = 'Connection error '.$errno.' ('.rtrim($errstr).')';
 	}
 	else
 	{
@@ -509,7 +511,8 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 	return RemoveGarbage($status)."|".RemoveGarbage($msg)."||".RemoveGarbage($msg_info)."|".RemoveGarbage($msg_error);
 }
 
-function CheckUpdates(){
+function CheckUpdates()
+{
 	if(!file_exists(DATA_DIR."/update_check.dat"))
 	{
 		$file = @fopen(DATA_DIR."/update_check.dat", "xb");
@@ -536,7 +539,7 @@ function CheckUpdates(){
 		list($status, $msg, $latest_check, $msg_info, $msg_error) = explode("|", $file[0]);
 
 		$time_diff = time() - ( @strtotime( $latest_check ) + @date("Z") );	// GMT
-		if($status == "SOCK_ERROR") $time_diff = floor($time_diff / 3600);	// Hours
+		if($status === 'SOCK_ERROR') $time_diff = floor($time_diff / 3600);	// Hours
 		else $time_diff = floor($time_diff / 86400);						// Days
 
 		if($time_diff < 1)
@@ -563,29 +566,30 @@ function CheckUpdates(){
 		$msg_error = $returned_data[4];
 	}
 
-	if($status == "SOCK_ERROR" || $status == "403")
+	if($status === 'SOCK_ERROR' || $status === '403')
 	{
-		echo "<b>Update check process:</b> ";
+		echo '<div><b>Update check process: ';
 		if(FSOCKOPEN)
-			echo "<font color=\"red\"><b>".$msg."</b></font><br>\n";
+			echo '<span class="bad">',$msg,'</span>';
 		else
-			echo "<font color=\"gold\"><b>Unable to check without fsockopen</b></font><br>\n";
+			echo '<span class="unknown">Unable to check without fsockopen</span>';
+		echo '</b></div>',"\n";
 	}
-	elseif($status == "REQUEST_ERROR")
+	elseif($status === 'REQUEST_ERROR')
 	{
-		echo "<b>Update check process:</b> <font color=\"red\"><b>".$msg."</b></font><br>\n";
+		echo '<div><b>Update check process: <span class="bad">'.$msg.'</span></b></div>',"\n";
 	}
-	elseif($status == "OK")
+	elseif($status === 'OK')
 	{
-		//echo "<b>Update check process:</b> <font color=\"green\"><b>OK</b></font><br>\n";	// Debug
-		if($msg_error != "") echo "<b><font style=\"color: #FF0000;\">ERRORS: ".$msg_error."</font></b><br>\n";
+		if(DEBUG) echo '<div><b>Update check process: <span class="good">OK</span></b></div>',"\n";
+		if($msg_error !== "") echo '<div class="bad"><b>ERRORS: '.$msg_error.'</b></div>',"\n";
 	}
-	elseif($status == "404")
-		echo "<b>Update check process:</b> <font color=\"red\"><b>Invalid query or file deleted</b></font><br>\n";
+	elseif($status === '404')
+		echo '<div><b>Update check process: <span class="bad">Invalid query or file deleted</span></b></div>',"\n";
 	else
 	{
-		echo "<b>Update check process:</b> <font color=\"red\"><b>Server response incorrect, maybe there are problems in the update server</b></font><br>\n";
-		$status = "INCORRECT";
+		echo '<div><b>Update check process: <span class="bad">Server response incorrect, maybe there are problems in the update server</span></b></div>',"\n";
+		$status = 'INCORRECT';
 	}
 
 	if(!$cached)
@@ -611,7 +615,9 @@ function CheckUpdates(){
 	return $result;
 }
 
-function ShowUpdateCheck(){
+function ShowUpdateCheck()
+{
+	echo '<table><tr><td>';
 	$result = CheckUpdates();
 
 	if($result["status"] == "OK")
@@ -628,7 +634,6 @@ function ShowUpdateCheck(){
 				$need_update = TRUE;
 		}
 
-		echo '<table><tr><td>';
 		if($need_update) $class = "bad"; else $class = "good";
 		echo '<div><b>Latest version: <span class="good">',$result['latest_ver'],'</span></b></div>';
 		echo '<div><b>This version: <span class="',$class,'">',SHORT_VER,'</span></b></div>',"\n";
@@ -639,7 +644,7 @@ function ShowUpdateCheck(){
 			echo '<br><div><span class="',$class,'"><b>There is a new version of ',NAME,', ';
 			echo 'please visit the official site of <a href="',GWC_SITE,'" class="hover-underline" rel="external">',NAME,'</a> to obtain the latest version.</b></span></div>';
 		}
-		echo '</td></tr></table>',"\n";
 	}
+	echo '</td></tr></table>',"\n";
 }
 ?>
