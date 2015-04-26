@@ -31,7 +31,7 @@ define( 'MAX_CACHES_OUT',			10 );	// Maximum number of cache sent in each reques
 define( 'MAX_UDP_CACHES_OUT',		5 );
 
 define( 'RECHECK_CACHES',			24 );	// Hours to recheck a good cache
-define( 'TIMEOUT',					20 );	// Socket time out for fsockopen
+define( 'TIMEOUT',					15 );	// Socket timeout for fsockopen
 
 define( 'DATA_DIR', 'data' );				// Directory where data files are stored (you should use relative path, you can leave it as is by default)
 
