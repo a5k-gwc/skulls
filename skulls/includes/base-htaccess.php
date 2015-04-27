@@ -27,6 +27,17 @@ FileETag None
     RewriteCond "%{REQUEST_URI}" "^(.*)/skulls$"
     RewriteRule "" "%1/skulls.php" [L,R=permanent]
   </Files>
+
+  # Redirect from the www url to the not-www url (excluding the main php script that already auto-redirect itself)
+  RewriteCond "%{HTTPS}" "off"
+  RewriteCond "%{REQUEST_URI}" "!/skulls\.php$"
+  RewriteCond "%{HTTP_HOST}" "^www\.(.+)$"
+  RewriteRule "" "http://%1%{REQUEST_URI}" [L,R=permanent]
+
+  RewriteCond "%{HTTPS}" "on"
+  RewriteCond "%{REQUEST_URI}" "!/skulls\.php$"
+  RewriteCond "%{HTTP_HOST}" "^www\.(.+)$"
+  RewriteRule "" "https://%1%{REQUEST_URI}" [L,R=permanent]
 </IfModule>
 
 ### Set charsets ###
