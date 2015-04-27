@@ -45,12 +45,17 @@ function ShowHtmlPage($num, $header, $footer)
 <!--
 body { margin: 0; padding: 2em; background-color: yellow; color: black; font-family: Verdana; font-size: 65%; }
 h1 { margin: 0; font-size: 1.5em; font-weight: bold; }
-h1, .center { text-align: center; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }
+h1, .center { text-align: center; }  .center div { text-align: left; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }
 h1.title { text-align: left; }
-table { border: 1px solid red; border-spacing: 0; border-collapse: collapse; background-color: white; }
-th, td { padding: 0.4em; }  th { text-align: left; }
+table, .container { border: 1px solid red; background-color: white; }  table { border-spacing: 0; border-collapse: collapse; }
+th, td, .container { padding: 0.4em; }  th { text-align: left; }
 strong, th { font-weight: bold; }
 img { border-style: none; }
+
+/* The line "display: inline-block;" gives hasLayout, the line "display: inline;" reset the display as desired, without taking back hasLayout. */
+/* So we need both for IE 7 and earlier but they mustn't be in a single rule, otherwise it doesn't work completely. */
+div.container { display: -moz-inline-stack; display: inline-block; }
+div.container { *display: inline; }  /* The asterisk makes it usable only by IE 7 and earlier (that is exactly where we need it) */
 
 .spacer { margin-bottom: 2em; }
 .main-title, .good { color: green; }  .bad { color: red; }  .unknown { color: gold; }
@@ -455,7 +460,9 @@ a.hover-underline:hover { text-decoration: underline; }
 	{
 ?>
 	<div class="center">
-		<?php ShowUpdateCheck(); ?>
+		<div class="container">
+			<?php ShowUpdateCheck(); ?>
+		</div>
 	</div><div class="spacer"></div>
 <?php
 	}
