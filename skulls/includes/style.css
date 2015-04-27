@@ -1,0 +1,27 @@
+body { margin: 0; padding: 2em; background-color: yellow; color: black; font-family: Verdana; font-size: 65%; }
+h1 { margin: 0; font-size: 1.5em; font-weight: bold; }
+h1, .center { text-align: center; }  .center div { text-align: left; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }
+h1.title { text-align: left; }
+table, .container { border: 1px solid red; background-color: white; }  table { border-spacing: 0; border-collapse: collapse; }
+th, td, .container { padding: 0.4em; }  th { text-align: left; }
+strong, th { font-weight: bold; }
+img { border-style: none; }
+
+/* The line "display: inline-block;" gives hasLayout, the line "display: inline;" reset the display as desired, without taking back hasLayout. */
+/* So we need both for IE 7 and earlier but they mustn't be in a single rule, otherwise it doesn't work completely. */
+div.container { display: -moz-inline-stack; display: inline-block; }
+div.container { *display: inline; }  /* The asterisk makes it usable only by IE 7 and earlier (that is exactly where we need it) */
+
+.spacer { margin-bottom: 2em; }
+.main-title, .good { color: green; }  .bad { color: red; }  .unknown { color: gold; }
+.title { padding-left: 0.2em; }
+.page-list { padding-left: 0.8em; padding-bottom: 1.5em; }
+.page-title { background-color: #ccff99; }
+.inner-table-infos { border-style: none; }
+.inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; width: 37%; }
+.inner-table { border-color: #ccccdd; }
+.header-column { background-color: #c6e6e6; }
+/* Odd lines */ .odd  { background-color: white; }  /* Even lines */ .even { background-color: #f0f0f0; }
+
+a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
+a.hover-underline:hover { text-decoration: underline; }
