@@ -6,7 +6,7 @@ define( 'ENABLED',					1 );
 
 // It may happen that the cache is reachable from more then one address (this uselessly increase the cache usage), to avoid this you must put the address that you want use for the cache below.
 // IMPORTANT: Check carefully that it is the correct url
-define( 'CACHE_URL',				'' );	// Optional but recommended - The full url of the cache, example: http://gwc.your-site.com/skulls.php
+define( 'CACHE_URL',				'' );	// Optional but recommended - The full url of your GWC, example: http://gwc.your-site.com/skulls.php
 
 define( 'FSOCKOPEN',				1 );	// Disable ONLY if the server have FSOCKOPEN disabled, use admin/test.php to check
 define( 'CONTENT_TYPE_WORKAROUND',	0 );	// Use admin/test.php to know the right value
