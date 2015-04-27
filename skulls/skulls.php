@@ -945,6 +945,7 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 	if($getvendors) $separators = 3;
 	elseif($getleaves) $separators = 2;
 
+	$count_host = 0;
 	if($get)
 	{
 		$host_file = file(DATA_DIR."/hosts_".$net.".dat");
@@ -972,9 +973,8 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 			$count_host = 1;
 		}
 	}
-	else
-		$count_host = 0;
 
+	$count_out_cache = 0;
 	if(FSOCKOPEN)
 	{
 		$cache_file = file(DATA_DIR."/caches.dat");
@@ -1010,6 +1010,7 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 					$n++;
 				}
 			}
+			$count_out_cache = $n;
 		}
 
 		if($uhc)
@@ -1029,17 +1030,15 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 					$n++;
 				}
 			}
+			$count_out_cache += $n;
 		}
 	}
-	else
-		$count_cache = 0;
 
-	if( $count_host == 0 && $count_cache == 0 )
-		$output .= "I|NO-URL-NO-HOSTS\r\n";
-	elseif( $count_cache == 0 )
-		$output .= "I|NO-URL\r\n";
-	elseif( $count_host == 0 )
+	if( $count_host === 0 )
 		$output .= "I|NO-HOSTS\r\n";
+	if( $count_out_cache === 0 )
+		$output .= "I|NO-URL\r\n";
+	/* I|NO-URL-NO-HOSTS combined reply is no longer used */
 
 	echo $output;
 }
