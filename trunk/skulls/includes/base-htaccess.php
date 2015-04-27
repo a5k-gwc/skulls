@@ -18,6 +18,17 @@ FileETag None
   Deny from Env=GoAway
 </Files>
 
+### Redirection  ###
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  <Files "skulls">
+    ### This should block, for the main php script, the extension strip that is enabled on some servers by re-adding the extension ###
+    RewriteCond "%{REQUEST_URI}" "^(.*)/skulls$"
+    RewriteRule "" "%1/skulls.php" [L,R=permanent]
+  </Files>
+</IfModule>
+
 ### Set charsets ###
 AddDefaultCharset UTF-8
 AddCharset        UTF-8 .css .js
@@ -72,6 +83,3 @@ AddType image/x-icon           .ico
 <Files "base-htaccess.php">
   Deny from All
 </Files>
-
-# This should block, for the GWC, the extension strip that is enabled on some servers
-RedirectMatch permanent "^(.*)/skulls$" "$1/skulls.php"
