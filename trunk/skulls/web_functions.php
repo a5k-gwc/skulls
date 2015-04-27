@@ -617,7 +617,6 @@ function CheckUpdates()
 
 function ShowUpdateCheck()
 {
-	echo '<table><tr><td>';
 	$result = CheckUpdates();
 
 	if($result["status"] == "OK")
@@ -645,6 +644,6 @@ function ShowUpdateCheck()
 			echo 'please visit the official site of <a href="',GWC_SITE,'" class="hover-underline" rel="external">',NAME,'</a> to obtain the latest version.</b></span></div>';
 		}
 	}
-	echo '</td></tr></table>',"\n";
+	echo "\n";
 }
 ?>
