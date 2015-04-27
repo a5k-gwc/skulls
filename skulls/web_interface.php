@@ -63,7 +63,7 @@ div.container { *display: inline; }  /* The asterisk makes it usable only by IE 
 .page-list { padding-left: 0.8em; padding-bottom: 1.5em; }
 .page-title { background-color: #ccff99; }
 .inner-table-infos { border-style: none; }
-.inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; }
+.inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; width: 37%; }
 .inner-table { border-color: #ccccdd; }
 .header-column { background-color: #c6e6e6; }
 /* Odd lines */ .odd  { background-color: white; }  /* Even lines */ .even { background-color: #f0f0f0; }
@@ -102,7 +102,7 @@ a.hover-underline:hover { text-decoration: underline; }
 					<td>
 						<table class="inner-table-infos" width="100%" summary="Informations about this GWC">
 							<tr>
-								<th width="150">- Running since:</th>
+								<th>- Running since:</th>
 								<td style="color: #994433;">
 <?php
 									if(file_exists(DATA_DIR."/running_since.dat"))
@@ -114,11 +114,11 @@ a.hover-underline:hover { text-decoration: underline; }
 								</td>
 							</tr>
 							<tr>
-								<th width="150">- Version:</th>
+								<th>- Version:</th>
 								<td style="color: #008000;" title="<?php echo GetMainFileRev(); ?>"><b><?php echo VER; ?></b></td>
 							</tr>
 							<tr>
-								<th width="150">- Supported networks:</th>
+								<th>- Supported networks:</th>
 								<td style="color: #994433;">
 <?php
 									global $SUPPORTED_NETWORKS;
@@ -137,7 +137,7 @@ a.hover-underline:hover { text-decoration: underline; }
 							</tr>
 <?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
 							<tr>
-								<th width="150">- GeoIP type:</th>
+								<th>- GeoIP type:</th>
 								<td style="color: #994433;"><b><?php if($geoip) echo $geoip->GetType(); ?></b></td>
 							</tr>
 <?php
@@ -145,11 +145,11 @@ a.hover-underline:hover { text-decoration: underline; }
 							{
 ?>
 								<tr>
-									<th width="150">- GeoIP DB version:</th>
+									<th>- GeoIP DB version:</th>
 									<td style="color: #008000;"><b><?php echo htmlentities($geoip->GetDBVersion()); ?></b></td>
 								</tr>
 								<tr>
-									<th width="150">- GeoIP DB copyright:</th>
+									<th>- GeoIP DB copyright:</th>
 									<td style="color: #994433;"><?php echo htmlentities($geoip->GetDBCopyright()); ?></td>
 								</tr>
 <?php
@@ -166,7 +166,7 @@ a.hover-underline:hover { text-decoration: underline; }
 								<td>&nbsp;</td>
 							</tr>
 							<tr>
-								<th width="150">- Maintainer:</th>
+								<th>- Maintainer:</th>
 								<td style="color: #0044FF;"><?php echo '<b',$mail,'>',htmlentities(MAINTAINER_NICK),'</b>'; ?></td>
 							</tr>
 <?php
@@ -174,7 +174,7 @@ a.hover-underline:hover { text-decoration: underline; }
 							{
 ?>
 								<tr>
-									<th width="150">- Maintainer website:</th>
+									<th>- Maintainer website:</th>
 									<td style="color: #0044FF;">
 <?php
 										$website = htmlentities(MAINTAINER_WEBSITE);
@@ -411,7 +411,7 @@ a.hover-underline:hover { text-decoration: underline; }
 					<td>
 						<table class="inner-table-infos" width="100%" summary="Statistics about this GWC">
 							<tr>
-								<th width="150">- Total requests:</th>
+								<th>- Total requests:</th>
 								<td style="color: #994433;">
 <?php
 									if(STATS_ENABLED)
@@ -422,7 +422,7 @@ a.hover-underline:hover { text-decoration: underline; }
 								</td>
 							</tr>
 							<tr>
-								<th width="150">- Requests this hour:</th>
+								<th>- Requests this hour:</th>
 								<td style="color: #994433;">
 <?php
 									if(STATS_ENABLED)
@@ -433,7 +433,7 @@ a.hover-underline:hover { text-decoration: underline; }
 								</td>
 							</tr>
 							<tr>
-								<th width="150">- Updates this hour:</th>
+								<th>- Updates this hour:</th>
 								<td style="color: #994433;">
 <?php
 									if(STATS_ENABLED)
