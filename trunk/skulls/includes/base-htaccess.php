@@ -23,7 +23,7 @@ FileETag None
   RewriteEngine On
 
   <Files "skulls">
-    ### This should block, for the main php script, the extension strip that is enabled on some servers by re-adding the extension ###
+    # This should block, for the main php script, the extension strip that is enabled on some servers by re-adding the extension
     RewriteCond "%{REQUEST_URI}" "^(.*)/skulls$"
     RewriteRule "" "%1/skulls.php" [L,R=permanent]
   </Files>
