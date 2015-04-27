@@ -35,6 +35,7 @@ function ShowHtmlPage($num, $header, $footer)
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <meta name="robots" content="<?php if($num === 1) echo 'index, follow'; else echo 'noindex, nofollow'; ?>, noarchive, noimageindex">
+<meta name="description" content="Skulls is a Multi-Network WebCache used from p2p clients to bootstrap.">
 <meta name="keywords" content="skulls, gwebcache, gwc, p2p, bootstrap, gnutella, gnutella2">
 <meta name="author" content="ale5000">
 <meta name="generator" content="Notepad++">
