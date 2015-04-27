@@ -1,5 +1,5 @@
 <?php die(); ?>
-### Settings ###
+### Main settings ###
 ServerSignature Off
 DirectoryIndex index.html
 Options -Indexes
@@ -18,11 +18,11 @@ FileETag None
   Deny from Env=GoAway
 </Files>
 
-### Charset ###
+### Set charsets ###
 AddDefaultCharset UTF-8
 AddCharset        UTF-8 .css .js
 
-### MIME types ###
+### Set MIME types ###
 AddType text/html              .html .htm
 AddType text/css               .css
 AddType application/javascript .js
@@ -34,7 +34,7 @@ AddType image/x-icon           .ico
 <IfModule mod_expires.c>
   ExpiresActive On
 
-  # 1 days - Check also the extension to avoid setting it also on other files (like .php)
+  # 1 day - Check also the extension to avoid setting it also on other files (like .php)
   <FilesMatch "\.(html|htm)$">
     ExpiresByType text/html             A86400
   </FilesMatch>
@@ -67,13 +67,11 @@ AddType image/x-icon           .ico
 
 ### Deny access to .htaccess ###
 <Files ".htaccess">
-  Order Allow,Deny
   Deny from All
 </Files>
 <Files "base-htaccess.php">
-  Order Allow,Deny
   Deny from All
 </Files>
 
 # This should block, for the GWC, the extension strip that is enabled on some servers
-RedirectMatch permanent "^(.*)\/skulls$" $1/skulls.php
+RedirectMatch permanent "^(.*)/skulls$" "$1/skulls.php"
