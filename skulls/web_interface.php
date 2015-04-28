@@ -317,36 +317,36 @@ function ShowHtmlPage($num, $header, $footer)
 									else
 										$output .= $cache_url;
 
-									$output .= "</a></td>";
+									$output .= '</a></td>';
 									if(strpos($cache_name, NAME) === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"".GWC_SITE."\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
+										$output .= '<td style="padding-right: 20pt;"><a href="'.GWC_SITE.'" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
 									elseif(NAME !== 'Sk'.'ulls' && strpos($cache_name, 'Sk'.'ulls') === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/skulls/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									//elseif(strpos($cache_name, "Bazooka") === 0)
-										//$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www.bazookanetworks.com/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "Beacon Cache") === 0)  /* Beacon Cache and Beacon Cache II */
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/beaconcache/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "Cachechu") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://github.com/kevogod/cachechu\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "GhostWhiteCrab") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "PHPGnuCacheII") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gwcii.sourceforge.net/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "jumswebcache") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://www1.mager.org/GWebCache/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "MWebCache") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://mute-net.sourceforge.net/mWebCache.shtml\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "node.gwc") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://andrewgilmore.co.uk/project/nodegwc\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "GWebCache") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://gnucleus.sourceforge.net/gwebcache/\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
-									elseif(strpos($cache_name, "DKAC/Enticing-Enumon") === 0)
-										$output .= "<td style=\"padding-right: 20pt;\"><a href=\"http://dkac.trillinux.org/dkac/dkac.php\" class=\"hover-underline\" style=\"color: black;\" rel=\"external\">".$cache_name."</a></td>";
+										$output .= '<td style="padding-right: 20pt;"><a href="http://sourceforge.net/projects/sk'.'ulls/" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									//elseif(strpos($cache_name, 'Bazooka') === 0)
+										//$output .= '<td style="padding-right: 20pt;"><a href="http://www.bazookanetworks.com/" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'Beacon Cache') === 0)  /* Beacon Cache and Beacon Cache II */
+										$output .= '<td style="padding-right: 20pt;"><a href="http://sourceforge.net/projects/beaconcache/" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'Cachechu') === 0)
+										$output .= '<td style="padding-right: 20pt;"><a href="http://github.com/kevogod/cachechu" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'GhostWhiteCrab') === 0)
+										$output .= '<td style="padding-right: 20pt;"><a href="http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'PHPGnuCacheII') === 0)
+										$output .= '<td style="padding-right: 20pt;"><a href="http://gwcii.sourceforge.net/" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'jumswebcache') === 0)
+										$output .= '<td style="padding-right: 20pt;"><a href="http://www1.mager.org/GWebCache/" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'MWebCache') === 0)
+										$output .= '<td style="padding-right: 20pt;"><a href="http://mute-net.sourceforge.net/mWebCache.shtml" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'node.gwc') === 0)
+										$output .= '<td style="padding-right: 20pt;"><a href="http://andrewgilmore.co.uk/project/nodegwc" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'GWebCache') === 0)
+										$output .= '<td style="padding-right: 20pt;"><a href="http://gnucleus.sourceforge.net/gwebcache/" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
+									elseif(strpos($cache_name, 'DKAC/Enticing-Enumon') === 0)
+										$output .= '<td style="padding-right: 20pt;"><a href="http://dkac.trillinux.org/dkac/dkac.php" class="hover-underline" style="color: black;" rel="external">'.$cache_name.'</a></td>';
 									else
-										$output .= "<td style=\"padding-right: 20pt;\">".$cache_name."</td>";
-									$output .= "<td style=\"padding-right: 20pt;\">".ucfirst($net)."</td>";
-									$output .= "<td style=\"padding-right: 20pt;\"><strong>".ReplaceVendorCode($client, $version)."</strong></td>";
-									$output .= "<td>".rtrim($time).'</td></tr>'."\n";
+										$output .= '<td style="padding-right: 20pt;">'.$cache_name.'</td>';
+									$output .= '<td style="padding-right: 20pt;">'.ucfirst($net).'</td>';
+									$output .= '<td style="padding-right: 20pt;"><div class="bold">'.ReplaceVendorCode($client, $version).'</div></td>';
+									$output .= '<td>'.rtrim($time).'</td></tr>'."\n";
 
 									if($type == "tcp") echo $output;
 									else $udp .= $output;
