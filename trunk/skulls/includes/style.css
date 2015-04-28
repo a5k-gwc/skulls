@@ -6,7 +6,7 @@ h1.title { text-align: left; }
 table { border-spacing: 0; border-collapse: collapse; }
 table, .container { border: 1px solid red; background: white; color: black; }
 th, td, .container { padding: 0.4em; }  th { text-align: left; }
-strong, th { font-weight: bold; }
+strong, th, .bold { font-weight: bold; }
 img { border-style: none; }
 
 /* The line "display: inline-block;" gives hasLayout, the line "display: inline;" reset the display as desired, without taking back hasLayout. */
