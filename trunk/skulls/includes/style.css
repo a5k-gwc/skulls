@@ -18,14 +18,15 @@ div.container { *display: inline; }  /* The asterisk makes it usable only by IE 
 .main-title, .good { color: green; }  .bad { color: red; }  .unknown { color: #ffd700; }
 .title { padding-left: 0.2em; }
 .page-list { padding-left: 0.8em; padding-bottom: 1.5em; }
-.page-title { background: #ccff99; }
+.page-title { background: #ccff99; color: #0044ff; }
 .inner-table-infos { border-style: none; }
 .inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; width: 37%; }
 .inner-table { border-color: #ccccdd; }
 .header-column { background: #c6e6e6; }
 /* Odd lines */ .odd  { background: white; }  /* Even lines */ .even { background: #f0f0f0; }
+.gwc-home-link { color: black; }
 
 a { outline-style: none; }
 a:focus { color: lime; }
-.hover-underline, .gwc { text-decoration: none; }
-.hover-underline:hover { text-decoration: underline; }
+.hover-underline, .gwc-home-link, .gwc { text-decoration: none; }
+.hover-underline:hover, .gwc-home-link:hover { text-decoration: underline; }
