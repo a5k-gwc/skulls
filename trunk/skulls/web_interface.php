@@ -435,6 +435,8 @@ function ShowHtmlPage($num, $header, $footer)
 	</div><div class="spacer"></div>
 <?php
 	}
+
+	if($footer !== "") echo '<div class="center">',$footer,'</div><div class="spacer"></div>',"\n";
 ?>	
 	<script type="text/javascript">
 	<!--
@@ -457,48 +459,46 @@ function ShowHtmlPage($num, $header, $footer)
 	if($num == 3)	// WebCache
 	{
 ?>
-<script type="text/javascript">
-<!--
-var links = document.getElementsByTagName("a");
-var links_count = links.length;
-var timer, i, c;
+	<script type="text/javascript">
+	<!--
+	var links = document.getElementsByTagName("a");
+	var links_count = links.length;
+	var timer, i, c;
 
-function resetVars()
-{
-	timer = null;
-	i = 0;
-	c = 0;
-}
-resetVars();
-
-function sendLink()
-{
-	if( c < 20 && i < links_count )
+	function resetVars()
 	{
-		if( links[i].className == "gwc" )
+		timer = null;
+		i = 0;
+		c = 0;
+	}
+	resetVars();
+
+	function sendLink()
+	{
+		if( c < 20 && i < links_count )
 		{
-			try{ document.location.href = links[i].href; }
-			catch(e){ alert("Error, gwc: isn't associated to a p2p application."); clearInterval(timer); resetVars(); }
-			c++;
+			if( links[i].className == "gwc" )
+			{
+				try{ document.location.href = links[i].href; }
+				catch(e){ alert("Error, gwc: isn't associated to a p2p application."); clearInterval(timer); resetVars(); }
+				c++;
+			}
+			i++;
 		}
-		i++;
+		else
+		{
+			clearInterval(timer); resetVars();
+		}
 	}
-	else
-	{
-		clearInterval(timer); resetVars();
-	}
-}
 
-function sendGWCs()
-{
-	timer = setInterval("sendLink()", 25);
-}
-//-->
-</script>
+	function sendGWCs()
+	{
+		timer = setInterval("sendLink()", 25);
+	}
+	//-->
+	</script>
 <?php
 	}
-
-	if($footer !== "") echo '<div class="center">',$footer,'</div><div class="spacer"></div>',"\n";
 ?>
 	<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.gif" alt="Sticker"></a></div>
 </body>
