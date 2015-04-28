@@ -429,7 +429,7 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 		$port = 80;
 	}
 
-	$fp = @fsockopen($host_name, $port, $errno, $errstr, (float)TIMEOUT);
+	$fp = @fsockopen($host_name, $port, $errno, $errstr, (FSOCKOPEN ? 10 : 5));
 	$status = NULL;
 	$msg = NULL;
 	$msg_error = NULL;
@@ -455,7 +455,7 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 			while ( !feof($fp) )
 			{
 				$line = rtrim( fgets( $fp, 1024 ) );
-				if(DEBUG) echo rtrim($line)."<br>";
+				if(DEBUG) echo $line.'<br>';
 
 				if( strtolower( substr( $line, 0, 2 ) ) == "v|" )
 				{
@@ -478,17 +478,17 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 						$msg_info = $returned_data[3];
 						$msg_error = $returned_data[4];
 					}
-					elseif(DEBUG) echo "<font color=\"red\"><b>Loop</b></font><br>";
+					elseif(DEBUG) echo '<div class="bad"><strong>Loop</strong></div>';
 				}
 				elseif( strtolower( substr( $line, 0, 7 ) ) == "i|info|" )
 				{
 					$received_data = explode("|", $line);
-					$msg_info .= $received_data[2]."<br>";
+					$msg_info .= '<div>'.$received_data[2].'</div>';
 				}
 				elseif( strtolower( substr( $line, 0, 8 ) ) == "i|error|" )
 				{
 					$received_data = explode("|", $line);
-					$msg_error .= $received_data[2]."<br>";
+					$msg_error .= '<div>'.$received_data[2].'</div>';
 				}
 				elseif(strpos($line, "404 Not Found") > -1)
 				{
@@ -507,7 +507,7 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 		fclose ($fp);
 	}
 
-	if(DEBUG) echo "Status: ".RemoveGarbage($status)."<br>---------------<br>";
+	if(DEBUG) echo '<div>Status: '.RemoveGarbage($status).'</div><div>---------------</div>';
 	return RemoveGarbage($status)."|".RemoveGarbage($msg)."||".RemoveGarbage($msg_info)."|".RemoveGarbage($msg_error);
 }
 
@@ -554,7 +554,7 @@ function CheckUpdates()
 
 		if($ip == "127.0.0.1")
 		{
-			echo "<font color=\"gold\"><b>Update check not allowed from localhost</b></font><br>";
+			echo '<div class="unknown"><strong>Update check not allowed from localhost</strong></div>';
 			return NULL;
 		}
 
@@ -568,27 +568,27 @@ function CheckUpdates()
 
 	if($status === 'SOCK_ERROR' || $status === '403')
 	{
-		echo '<div><b>Update check process: ';
+		echo '<div class="bold">Update check process: ';
 		if(FSOCKOPEN)
-			echo '<span class="bad">',$msg,'</span>';
+			echo '<span class="bad"><strong>',$msg,'</strong></span>';
 		else
 			echo '<span class="unknown">Unable to check without fsockopen</span>';
-		echo '</b></div>',"\n";
+		echo '</div>',"\n";
 	}
 	elseif($status === 'REQUEST_ERROR')
 	{
-		echo '<div><b>Update check process: <span class="bad">'.$msg.'</span></b></div>',"\n";
+		echo '<div class="bold">Update check process: <span class="bad"><strong>'.$msg.'</strong></span></div>',"\n";
 	}
 	elseif($status === 'OK')
 	{
-		if(DEBUG) echo '<div><b>Update check process: <span class="good">OK</span></b></div>',"\n";
-		if($msg_error !== "") echo '<div class="bad"><b>ERRORS: '.$msg_error.'</b></div>',"\n";
+		if(DEBUG) echo '<div class="bold">Update check process: <span class="good">OK</span></div>',"\n";
+		if($msg_error !== "") echo '<div class="bold"><div class="bad">ERRORS: <strong>'.$msg_error.'</strong></div></div>',"\n";
 	}
 	elseif($status === '404')
-		echo '<div><b>Update check process: <span class="bad">Invalid query or file deleted</span></b></div>',"\n";
+		echo '<div class="bold">Update check process: <span class="bad"><strong>Invalid query or file deleted</strong></span></div>',"\n";
 	else
 	{
-		echo '<div><b>Update check process: <span class="bad">Server response incorrect, maybe there are problems in the update server</span></b></div>',"\n";
+		echo '<div class="bold">Update check process: <span class="bad"><strong>Server response incorrect, maybe there are problems in the update server</strong></span></div>',"\n";
 		$status = 'INCORRECT';
 	}
 
