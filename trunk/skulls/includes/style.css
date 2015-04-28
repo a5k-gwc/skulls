@@ -1,9 +1,10 @@
-body { margin: 0; padding: 2em; background: yellow; color: black; font-family: Verdana; font-size: 65%; }
+body { margin: 0; padding: 2em; background: yellow; color: black; font-family: Verdana, Geneva, sans-serif; font-size: 65%; }
+/* http://www.ampsoft.net/webdesign-l/WindowsMacFonts.html */  /* http://www.techonthenet.com/css/properties/font_family.php */
 h1 { margin: 0; font-size: 1.5em; font-weight: bold; }
 h1, .center { text-align: center; }  .center div { text-align: left; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }
 h1.title { text-align: left; }
 table { border-spacing: 0; border-collapse: collapse; }
-table, .container { border: 1px solid red; background: white; }
+table, .container { border: 1px solid red; background: white; color: black; }
 th, td, .container { padding: 0.4em; }  th { text-align: left; }
 strong, th { font-weight: bold; }
 img { border-style: none; }
@@ -14,7 +15,7 @@ div.container { display: -moz-inline-stack; display: inline-block; }
 div.container { *display: inline; }  /* The asterisk makes it usable only by IE 7 and earlier (that is exactly where we need it) */
 
 .spacer { margin-bottom: 2em; }
-.main-title, .good { color: green; }  .bad { color: red; }  .unknown { color: gold; }
+.main-title, .good { color: green; }  .bad { color: red; }  .unknown { color: #ffd700; }
 .title { padding-left: 0.2em; }
 .page-list { padding-left: 0.8em; padding-bottom: 1.5em; }
 .page-title { background: #ccff99; }
@@ -24,5 +25,7 @@ div.container { *display: inline; }  /* The asterisk makes it usable only by IE 
 .header-column { background: #c6e6e6; }
 /* Odd lines */ .odd  { background: white; }  /* Even lines */ .even { background: #f0f0f0; }
 
-a.hover-underline:link, a.hover-underline:visited, a.hover-underline:active, .gwc { text-decoration: none; }
-a.hover-underline:hover { text-decoration: underline; }
+a { outline-style: none; }
+a:focus { color: lime; }
+.hover-underline, .gwc { text-decoration: none; }
+.hover-underline:hover { text-decoration: underline; }
