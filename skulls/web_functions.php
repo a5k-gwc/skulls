@@ -641,9 +641,8 @@ function ShowUpdateCheck()
 		{
 			if($result['update_info'] != "") echo '<div>',$result["update_info"],'</div>',"\n";
 			echo '<br><div><span class="',$class,'"><b>There is a new version of ',NAME,', ';
-			echo 'please visit the official site of <a href="',GWC_SITE,'" class="hover-underline" rel="external">',NAME,'</a> to obtain the latest version.</b></span></div>';
+			echo 'please visit the official site of <a href="',GWC_SITE,'" class="hover-underline" rel="external">',NAME,'</a> to obtain the latest version.</b></span></div>',"\n";
 		}
 	}
-	echo "\n";
 }
 ?>
