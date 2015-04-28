@@ -26,21 +26,20 @@ function ShowHtmlPage($num, $header, $footer)
 		include "functions.php";
 
 	Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
+	$maintainer = htmlentities(MAINTAINER_NICK);
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER; ?></title>
+<title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER,' (by ',$maintainer,')'; ?></title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" type="text/css" href="includes/style.css">
-<meta name="robots" content="<?php if($num === 1) echo 'index, follow'; else echo 'noindex, nofollow'; ?>, noarchive, noimageindex">
-<meta name="description" content="Skulls is a Multi-Network WebCache used from p2p clients to bootstrap.">
+<meta name="robots" content="<?php if($num === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
+<meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from p2p clients to bootstrap (maintained by <?php echo $maintainer; ?>).">
 <meta name="keywords" content="skulls, gwebcache, gwc, p2p, bootstrap, gnutella, gnutella2">
-<meta name="author" content="ale5000">
-<meta name="generator" content="Notepad++">
 </head>
 
 <body>
@@ -136,7 +135,7 @@ function ShowHtmlPage($num, $header, $footer)
 							</tr>
 							<tr>
 								<th>- Maintainer:</th>
-								<td style="color: #0044FF;"><?php echo '<b',$mail,'>',htmlentities(MAINTAINER_NICK),'</b>'; ?></td>
+								<td style="color: #0044FF;"><?php echo '<b',$mail,'>',$maintainer,'</b>'; ?></td>
 							</tr>
 <?php
 							if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
@@ -294,7 +293,7 @@ function ShowHtmlPage($num, $header, $footer)
 									}
 									else
 										$output .= "&nbsp;&nbsp;&nbsp;";
-									$output .= '<a href="'.$cache_url.'" rel="external nofollow">';
+									$output .= '<a href="'.$cache_url.'" rel="external">';
 
 									if(strpos($cache_url, "://") > -1)
 									{
@@ -319,29 +318,29 @@ function ShowHtmlPage($num, $header, $footer)
 
 									$output .= '</a></td>';
 									if(strpos($cache_name, NAME) === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="'.GWC_SITE.'" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="'.GWC_SITE.'" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(NAME !== 'Sk'.'ulls' && strpos($cache_name, 'Sk'.'ulls') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/sk'.'ulls/" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/sk'.'ulls/" rel="external nofollow">'.$cache_name.'</a></td>';
 									//elseif(strpos($cache_name, 'Bazooka') === 0)
-										//$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://www.bazookanetworks.com/" rel="external">'.$cache_name.'</a></td>';
+										//$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://www.bazookanetworks.com/" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'Beacon Cache') === 0)  /* Beacon Cache and Beacon Cache II */
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/beaconcache/" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/beaconcache/" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'Cachechu') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://github.com/kevogod/cachechu" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://github.com/kevogod/cachechu" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'GhostWhiteCrab') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'PHPGnuCacheII') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://gwcii.sourceforge.net/" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://gwcii.sourceforge.net/" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'jumswebcache') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://www1.mager.org/GWebCache/" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://www1.mager.org/GWebCache/" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'MWebCache') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://mute-net.sourceforge.net/mWebCache.shtml" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://mute-net.sourceforge.net/mWebCache.shtml" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'node.gwc') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://andrewgilmore.co.uk/project/nodegwc" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://andrewgilmore.co.uk/project/nodegwc" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'GWebCache') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://gnucleus.sourceforge.net/gwebcache/" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://gnucleus.sourceforge.net/gwebcache/" rel="external nofollow">'.$cache_name.'</a></td>';
 									elseif(strpos($cache_name, 'DKAC/Enticing-Enumon') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://dkac.trillinux.org/dkac/dkac.php" rel="external">'.$cache_name.'</a></td>';
+										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://dkac.trillinux.org/dkac/dkac.php" rel="external nofollow">'.$cache_name.'</a></td>';
 									else
 										$output .= '<td style="padding-right: 20pt;">'.$cache_name.'</td>';
 									$output .= '<td style="padding-right: 20pt;">'.ucfirst($net).'</td>';
