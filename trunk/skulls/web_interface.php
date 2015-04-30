@@ -38,7 +38,7 @@ function ShowHtmlPage($num, $header, $footer)
 
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 <meta name="robots" content="<?php if($num === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
-<meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from p2p clients to bootstrap (maintained by <?php echo $maintainer; ?>).">
+<meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from p2p clients to bootstrap.">
 <meta name="keywords" content="skulls, gwebcache, gwc, p2p, bootstrap, gnutella, gnutella2">
 </head>
 
@@ -55,7 +55,7 @@ function ShowHtmlPage($num, $header, $footer)
 				<td class="page-list">
 					<a href="?showinfo=1">General Details</a> /
 					<a href="?showhosts=1&amp;net=all">Hosts</a> /
-					<a href="?showurls=1">Alternative WebCaches</a> /
+					<a href="?showurls=1">Alternative GWCs</a> /
 					<a href="?stats=1">Statistics</a>
 				</td>
 			</tr>
@@ -86,7 +86,7 @@ function ShowHtmlPage($num, $header, $footer)
 								<td style="color: #008000;" title="<?php echo GetMainFileRev(); ?>"><b><?php echo VER; ?></b></td>
 							</tr>
 							<tr>
-								<th>- Supported networks:</th>
+								<th>- Networks:</th>
 								<td style="color: #994433;">
 <?php
 									global $SUPPORTED_NETWORKS;
@@ -117,7 +117,7 @@ function ShowHtmlPage($num, $header, $footer)
 									<td style="color: #008000;"><b><?php echo htmlentities($geoip->GetDBVersion()); ?></b></td>
 								</tr>
 								<tr>
-									<th>- GeoIP DB copyright:</th>
+									<th>- GeoIP DB (c)opy:</th>
 									<td style="color: #994433;"><?php echo htmlentities($geoip->GetDBCopyright()); ?></td>
 								</tr>
 <?php
@@ -142,7 +142,7 @@ function ShowHtmlPage($num, $header, $footer)
 							{
 ?>
 								<tr>
-									<th>- Maintainer website:</th>
+									<th>- Maintainer site:</th>
 									<td style="color: #0044FF;">
 <?php
 										$website = htmlentities(MAINTAINER_WEBSITE);
