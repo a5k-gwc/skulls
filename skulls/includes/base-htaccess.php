@@ -6,7 +6,6 @@ Options -Indexes
 FileETag None
 
 <IfModule mod_headers.c>
-  Header unset ETag
   Header unset X-Powered-By
 </IfModule>
 
@@ -62,9 +61,10 @@ AddType image/x-icon           .ico
     ExpiresByType text/html             A86400
   </FilesMatch>
   # 1 day
-  ExpiresByType text/css               A86400
   ExpiresByType application/javascript A86400
   ExpiresByType text/javascript        A86400
+  # 7 days
+  ExpiresByType text/css               A604800
   # 7 days
   ExpiresByType image/gif              A604800
   ExpiresByType image/png              A604800
