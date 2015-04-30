@@ -1,6 +1,7 @@
 <?php die(); ?>
 ### Main settings ###
 ServerSignature Off
+DirectorySlash On
 DirectoryIndex index.html
 Options -Indexes
 FileETag None
@@ -73,6 +74,10 @@ AddType image/x-icon           .ico
 
 ### Enable compression ###
 <IfModule mod_deflate.c>
+  # Apache 2.0.26 and later
+  RemoveOutputFilter .php
+
+  # Apache 2.0.33 and later
   <IfModule mod_filter.c>
     <FilesMatch "\.(html|htm)$">
       # Check also the extension to avoid setting it also on other files (like .php) that could set compression by itself
@@ -81,6 +86,7 @@ AddType image/x-icon           .ico
     AddOutputFilterByType DEFLATE text/css application/javascript text/javascript
   </IfModule>
 
+  # Apache all
   <IfModule !mod_filter.c>
     <FilesMatch "\.(html|htm|css|js)$">
       SetOutputFilter DEFLATE
