@@ -248,7 +248,7 @@ function ShowHtmlPage($num, $header, $footer)
 				$elements = count($cache_file);
 ?>
 				<tr class="page-title"> 
-					<td><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:sendGWCs();" rel="nofollow">Add first 20 caches to your P2P application</a></td>
+					<td><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Send GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></td>
 				</tr>
 				<tr>
 					<td>
@@ -441,9 +441,9 @@ function ShowHtmlPage($num, $header, $footer)
 	<!--
 	function UseRelExternal()
 	{
-		var links; if(document.links) links = document.links; else links = GetElemsByTag("a"); if(!links) return false;
+		var links; if(document.links) links = document.links; else if(document.getElementsByTagName) links = document.getElementsByTagName("a"); if(!links) return false;
 
-		var links_count = links.length, ext_links_event = function(e){ var e = e || window.event; if(e.preventDefault) e.preventDefault(); else e.returnValue = false; window.open(this.href, "_blank"); };
+		var links_count = links.length, ext_links_event = function(e){ var e = e || window.event; if(e.preventDefault) e.preventDefault(); else e.returnValue = false; this.blur(); window.open(this.href, "_blank"); };
 		for(var i=0; i<links_count; i++)
 			if((' '+links[i].rel+' ').indexOf(" external ") != -1 && !links[i].onclick)
 				links[i].onclick = ext_links_event;
@@ -490,8 +490,11 @@ function ShowHtmlPage($num, $header, $footer)
 		}
 	}
 
-	function sendGWCs()
+	function sendGWCs(e)
 	{
+		var e = e || window.event; if(e.preventDefault) e.preventDefault(); else e.returnValue = false;
+		var target = e.target || e.srcElement; if(target.nodeType == 3) target = target.parentNode;  /* Defeat Safari bug */
+		target.blur();
 		timer = setInterval("sendLink()", 25);
 	}
 	//-->
