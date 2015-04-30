@@ -49,7 +49,7 @@ function ShowHtmlPage($num, $header, $footer)
 	<div class="center">
 		<table summary="">
 			<tr>
-				<td><h1 class="title"><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1></td>
+				<td class="title"><h1><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1></td>
 			</tr>
 			<tr>
 				<td class="page-list">
