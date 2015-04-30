@@ -1,11 +1,10 @@
-body { margin: 0; padding: 2em; background: yellow; color: black; font-family: Verdana, Geneva, sans-serif; font-size: 65%; }
+body { margin: 2em; padding: 0; background: yellow; color: black; font-family: Verdana, Geneva, sans-serif; font-size: 65%; }
 /* http://www.ampsoft.net/webdesign-l/WindowsMacFonts.html */  /* http://www.techonthenet.com/css/properties/font_family.php */
 h1 { margin: 0; font-size: 1.5em; font-weight: bold; }
-h1, .center { text-align: center; }  .center div { text-align: left; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }
-h1.title { text-align: left; }
+.center { text-align: center; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }  .center div { text-align: left; }
 table { border-spacing: 0; border-collapse: collapse; }
-table, .container { border: 1px solid red; background: white; color: black; }
-th, td, .container { padding: 0.4em; }  th { text-align: left; }
+.container, table { border: 1px solid red; background: white; }  .container, th, td { padding: 0.4em; }  th { text-align: left; }
+.title{ padding: 0.6em; padding-bottom: 0; }
 strong, th, .bold { font-weight: bold; }
 img { border-style: none; }
 
@@ -14,16 +13,15 @@ img { border-style: none; }
 div.container { display: -moz-inline-stack; display: inline-block; }
 div.container { *display: inline; }  /* The asterisk makes it usable only by IE 7 and earlier (that is exactly where we need it) */
 
-.spacer { margin-bottom: 2em; }
+.spacer { margin: 2em; }
 .main-title, .good { color: green; }  .bad { color: red; }  .unknown { color: #ffd700; }
-.title { padding-left: 0.2em; }
-.page-list { padding-left: 0.8em; padding-bottom: 1.5em; }
+.page-list { padding: 0.6em; padding-left: 0.8em; padding-bottom: 1em; line-height: 2.3; }
 .page-title { background: #ccff99; color: #0044ff; }
 .inner-table-infos { border-style: none; }
-.inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; width: 37%; }
+.inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; width: 37%; min-width: 10.8em; }
 .inner-table { border-color: #ccccdd; }
 .header-column { background: #c6e6e6; }
-/* Odd lines */ .odd  { background: white; }  /* Even lines */ .even { background: #f0f0f0; }
+/* Odd lines */ .odd { background: white; }  /* Even lines */ .even { background: #f0f0f0; }
 .gwc-home-link { color: black; }
 
 a { outline-style: none; }
