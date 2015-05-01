@@ -47,7 +47,7 @@ function ShowHtmlPage($num, $header, $footer)
 	if($header !== "") echo '<div class="center">',$header,'</div><div class="spacer"></div>',"\n";
 ?>
 	<div class="center">
-		<table summary="">
+		<table>
 			<tr>
 				<td class="title"><h1><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1></td>
 			</tr>
@@ -83,7 +83,7 @@ function ShowHtmlPage($num, $header, $footer)
 							</tr>
 							<tr>
 								<th>- Version:</th>
-								<td style="color: #008000;" title="<?php echo GetMainFileRev(); ?>"><b><?php echo VER; ?></b></td>
+								<td class="bold" style="color: #008000;" title="<?php echo GetMainFileRev(); ?>"><?php echo VER; ?></td>
 							</tr>
 							<tr>
 								<th>- Networks:</th>
@@ -106,7 +106,7 @@ function ShowHtmlPage($num, $header, $footer)
 <?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
 							<tr>
 								<th>- GeoIP type:</th>
-								<td style="color: #994433;"><b><?php if($geoip) echo $geoip->GetType(); ?></b></td>
+								<td class="bold" style="color: #994433;"><?php if($geoip) echo $geoip->GetType(); ?></td>
 							</tr>
 <?php
 							if($geoip && $geoip->IsEnabled())
@@ -114,7 +114,7 @@ function ShowHtmlPage($num, $header, $footer)
 ?>
 								<tr>
 									<th>- GeoIP DB version:</th>
-									<td style="color: #008000;"><b><?php echo htmlentities($geoip->GetDBVersion()); ?></b></td>
+									<td class="bold" style="color: #008000;"><?php echo htmlentities($geoip->GetDBVersion()); ?></td>
 								</tr>
 								<tr>
 									<th>- GeoIP DB (c)opy:</th>
@@ -135,7 +135,7 @@ function ShowHtmlPage($num, $header, $footer)
 							</tr>
 							<tr>
 								<th>- Maintainer:</th>
-								<td style="color: #0044FF;"><?php echo '<b',$mail,'>',$maintainer,'</b>'; ?></td>
+								<?php echo '<td class="bold" style="color: #0044FF;"',$mail,'>',$maintainer,'</td>',"\n"; ?>
 							</tr>
 <?php
 							if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
@@ -202,7 +202,7 @@ function ShowHtmlPage($num, $header, $footer)
 							</tr>
 							<?php
 							if( $elements === 0 )
-								print("<tr align=\"center\"><td colspan=\"4\" style=\"height: 30px;\">There are no <strong>hosts</strong> listed at this time.</td></tr>\n");
+								echo '<tr><td class="empty-list" colspan="4">There are no <strong>hosts</strong> listed at this time.</td></tr>',"\n";
 							else
 							{
 								include './geoip/geoip.php';
@@ -216,7 +216,7 @@ function ShowHtmlPage($num, $header, $footer)
 									$host = $h_ip.':'.$h_port;
 									$url = strtolower($net).':host:';
 
-									echo '<tr class="',$color,'" align="left">';
+									echo '<tr class="',$color,'">';
 									echo '<td style="padding-right: 10pt;">';
 									if($geoip)
 									{
@@ -262,7 +262,7 @@ function ShowHtmlPage($num, $header, $footer)
 							</tr>
 							<?php
 							if( $elements === 0 )
-								print("<tr align=\"center\"><td colspan=\"5\" style=\"height: 30px;\">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>\n");
+								echo '<tr><td class="empty-list" colspan="5">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>',"\n";
 							else
 							{
 								$udp = "";
@@ -283,8 +283,8 @@ function ShowHtmlPage($num, $header, $footer)
 									}
 									$color = (($elements - $i) % 2 === 0 ? 'even' : 'odd');
 
-									$output = "<tr class=\"".$color."\" align=\"left\">";
-									$output .= "<td style=\"padding-right: 10pt;\">";
+									$output = '<tr class="'.$color.'">';
+									$output .= '<td style="padding-right: 10pt;">';
 
 									if(strpos($cache_url, "://") > -1)
 									{

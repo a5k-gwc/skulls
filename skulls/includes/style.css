@@ -21,8 +21,12 @@ div.container { *display: inline; }  /* The asterisk makes it usable only by IE 
 .inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; width: 37%; min-width: 10.8em; }
 .inner-table { border-color: #ccccdd; }
 .header-column { background: #c6e6e6; }
+.empty-list { height: 3em; text-align: center; }
 /* Odd lines */ .odd { background: white; }  /* Even lines */ .even { background: #f0f0f0; }
 .gwc-home-link { color: black; }
+
+.update-infos { font-weight: bold; }
+.major-change { color: red; }
 
 a { outline-style: none; }
 a:focus { color: lime; }
