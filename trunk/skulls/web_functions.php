@@ -408,7 +408,7 @@ function ReplaceVendorCode($vendor, $version)
 	if($cache > 1) $version .= ' (GWC)';
 
 	if( $url !== "" )
-		return '<a href="'.$url.'" rel="external">'.$client_name.' '.$version.'</a>';
+		return '<a href="'.$url.'" rel="external nofollow">'.$client_name.' '.$version.'</a>';
 	else
 		return $client_name.' '.$version;
 }
@@ -634,8 +634,8 @@ function ShowUpdateCheck()
 		}
 
 		if($need_update) $class = "bad"; else $class = "good";
-		echo '<div><b>Latest version: <span class="good">',$result['latest_ver'],'</span></b></div>';
-		echo '<div><b>This version: <span class="',$class,'">',SHORT_VER,'</span></b></div>',"\n";
+		echo '<div class="bold">Latest version: <span class="good">',$result['latest_ver'],'</span></div>';
+		echo '<div class="bold">This version: <span class="',$class,'">',SHORT_VER,'</span></div>',"\n";
 
 		if($need_update)
 		{
