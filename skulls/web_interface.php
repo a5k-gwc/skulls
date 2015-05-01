@@ -492,7 +492,7 @@ function ShowHtmlPage($num, $header, $footer)
 
 	function sendGWCs(e)
 	{
-		var e = e || window.event; if(e.preventDefault) e.preventDefault(); else e.returnValue = false;
+		if(e.preventDefault) e.preventDefault(); else e.returnValue = false;
 		var target = e.target || e.srcElement; if(target.nodeType == 3) target = target.parentNode;  /* Defeat Safari bug */
 		target.blur();
 		timer = setInterval("sendLink()", 25);
