@@ -1043,15 +1043,41 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 	echo $output;
 }
 
-function StartCompression($COMPRESSION)
+function DetectEncoding($user_agent)
 {
-	if($COMPRESSION == "deflate")
-		{ $compressed = TRUE; ob_start("gzcompress"); }
-	else
-		{ $compressed = FALSE; }
-	if($compressed) header("Content-Encoding: deflate");
+	$ACCEPT_ENCODING = empty($_SERVER['HTTP_ACCEPT_ENCODING']) ? "" : $_SERVER['HTTP_ACCEPT_ENCODING'];
 
-	return $compressed;
+	/* The deflate compression in HTTP 1.1 is the format specified by RFC 1950 instead Internet Explorer incorrectly interpret it as RFC 1951 (buggy IE, what surprise!!!) */
+	if(strpos($ACCEPT_ENCODING, 'deflate') !== false && strpos($user_agent, ' MSIE ') === false)
+		return 'deflate';
+	if(strpos($ACCEPT_ENCODING, 'gzip') !== false)
+		return 'gzip';
+
+	return 'none';
+}
+
+function StartCompression($compression, $user_agent, $web_interface = false)
+{
+	if($web_interface) header('Vary: Accept-Encoding');
+
+	/* If the compression parameter has an unsupported value then just use Accept-Encoding */
+	if( $compression === null || ($compression !== 'none' && $compression !== 'deflate' && $compression !== 'gzip') )
+		$compression = DetectEncoding($user_agent);
+
+	if($compression === 'deflate')
+	{
+		header('Content-Encoding: deflate');
+		ob_start('gzcompress');
+		return true;
+	}
+	if($web_interface && $compression === 'gzip')
+	{
+		header('Content-Encoding: gzip');
+		ob_start('gzencode');
+		return true;
+	}
+
+	return false;
 }
 
 function CleanStats($request)
@@ -1206,9 +1232,6 @@ $UA_ORIGINAL = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT']
 $USER_AGENT = str_replace('/', ' ', $UA_ORIGINAL);
 
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none
-$ACCEPT_ENCODING = !empty($_SERVER["HTTP_ACCEPT_ENCODING"]) ? $_SERVER["HTTP_ACCEPT_ENCODING"] : NULL;
-/* The deflate compression in HTTP 1.1 is the format specified by RFC 1950 instead Internet Explorer incorrectly interpret it as RFC 1951 (buggy IE, what surprise!!!) */
-if($COMPRESSION === null && strpos($ACCEPT_ENCODING, "deflate") !== false && strpos($UA_ORIGINAL, '; MSIE ') === false && !DEBUG) $COMPRESSION = "deflate";
 
 $HOST = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $IP = null; $PORT = null; $GOOD_PORT = true;
@@ -1303,7 +1326,7 @@ if($web)
 {
 	include "web_interface.php";
 
-	$compressed = StartCompression($COMPRESSION);
+	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL, true);
 	ShowHtmlPage($web, $header, $footer);
 	if($compressed) ob_end_flush();
 }
@@ -1418,7 +1441,7 @@ else
 			header('X-Remote-IP: '.$REMOTE_IP);
 	}
 
-	$compressed = StartCompression($COMPRESSION);
+	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL);
 
 	//$CACHE_IS_VALID = true;
 	if($CACHE !== null)
