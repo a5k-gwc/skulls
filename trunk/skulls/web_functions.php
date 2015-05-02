@@ -438,7 +438,7 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 
 	if(!$fp)
 	{
-		$status = 'SOCK_ERROR';
+		$status = 'CONN_ERR';
 		$msg = 'Connection error '.$errno.' ('.rtrim($errstr).')';
 	}
 	else
@@ -539,12 +539,11 @@ function CheckUpdates()
 		list($status, $msg, $latest_check, $msg_info, $msg_error) = explode("|", $file[0]);
 
 		$time_diff = time() - ( @strtotime( $latest_check ) + @date("Z") );	// GMT
-		if($status === 'SOCK_ERROR') $time_diff = floor($time_diff / 3600);	// Hours
-		else $time_diff = floor($time_diff / 86400);						// Days
+		$time_diff = floor($time_diff / 86400);								// Days
 
 		if($time_diff < 1)
 			$cached = TRUE;
-		elseif($status == "OK" && $time_diff < 4)
+		elseif($status === 'OK' && $time_diff < 4)
 			$cached = TRUE;
 	}
 
@@ -566,7 +565,7 @@ function CheckUpdates()
 		$msg_error = $returned_data[4];
 	}
 
-	if($status === 'SOCK_ERROR' || $status === '403')
+	if($status === 'CONN_ERR' || $status === '403')
 	{
 		echo '<div class="bold">Update check process: ';
 		if(FSOCKOPEN)
