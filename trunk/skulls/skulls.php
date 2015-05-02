@@ -134,7 +134,7 @@ function ValidateIdentity($vendor, $ver)
 function VerifyUserAgent($vendor, $user_agent)
 {
 	/* Block Google and MSIE from making queries */
-	if(strpos($user_agent, 'Googlebot') !== false || strpos($user_agent, '; MSIE ') !== false)
+	if(strpos($user_agent, 'Googlebot') !== false || strpos($user_agent, ' MSIE ') !== false)
 		return false;
 
 	if($vendor === 'RAZM')
