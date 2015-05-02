@@ -536,15 +536,22 @@ function CheckUpdates()
 	$cached = FALSE;
 	if(count($file))
 	{
+		$USER_AGENT = empty($_SERVER['HTTP_USER_AGENT']) ? "" : $_SERVER['HTTP_USER_AGENT'];
 		list($status, $msg, $latest_check, $msg_info, $msg_error) = explode("|", $file[0]);
 
-		$time_diff = time() - ( @strtotime( $latest_check ) + @date("Z") );	// GMT
-		$time_diff = floor($time_diff / 86400);								// Days
+		/* Use only cached update check for not-human requests */
+		if(strpos($USER_AGENT, 'Googlebot') !== false || strpos($USER_AGENT, 'libwww-perl') === 0 || strpos($USER_AGENT, 'Python-urllib') === 0)
+			$cached = true;
+		else
+		{
+			$time_diff = time() - ( @strtotime( $latest_check ) + @date("Z") );	// GMT
+			$time_diff = floor($time_diff / 86400);								// Days
 
-		if($time_diff < 1)
-			$cached = TRUE;
-		elseif($status === 'OK' && $time_diff < 4)
-			$cached = TRUE;
+			if($time_diff < 1)
+				$cached = TRUE;
+			elseif($status === 'OK' && $time_diff < 4)
+				$cached = TRUE;
+		}
 	}
 
 	if(!$cached)
