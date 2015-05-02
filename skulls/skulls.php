@@ -1408,13 +1408,6 @@ else
 	}
 	$CLUSTER = null;
 
-	$compressed = StartCompression($COMPRESSION);
-
-	//$CACHE_IS_VALID = true;
-	if($CACHE !== null)
-		if(!CanonicalizeURL($CACHE))
-			$CACHE = 'BLOCKED';
-
 	if(!$NO_IP_HEADER)
 	{
 		if(!empty($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP'] !== 'unknown')
@@ -1424,6 +1417,13 @@ else
 		else
 			header('X-Remote-IP: '.$REMOTE_IP);
 	}
+
+	$compressed = StartCompression($COMPRESSION);
+
+	//$CACHE_IS_VALID = true;
+	if($CACHE !== null)
+		if(!CanonicalizeURL($CACHE))
+			$CACHE = 'BLOCKED';
 
 	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		$supported_net = TRUE;
