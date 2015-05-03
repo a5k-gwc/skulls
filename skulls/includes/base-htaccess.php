@@ -72,11 +72,12 @@ AddType image/x-icon           .ico
   ExpiresByType image/x-icon           A604800
 </IfModule>
 
-### Enable compression ###
-<IfModule mod_deflate.c>
-  # Apache 2.0.26 and later
-  RemoveOutputFilter .php
+### Enable compression (excluding php files) ###
+<Files "*.php">
+  SetEnv no-gzip 1
+</Files>
 
+<IfModule mod_deflate.c>
   <IfModule mod_headers.c>
     <FilesMatch "\.(html?|css|js)$">
       Header set Vary Accept-Encoding
@@ -85,16 +86,15 @@ AddType image/x-icon           .ico
 
   # Apache 2.0.33 and later
   <IfModule mod_filter.c>
-    <FilesMatch "\.(html|htm)$">
-      # Check also the extension to avoid setting it also on other files (like .php) that could set compression by itself
+    # Check also extension to avoid compressing also php files (they are also served as text/html) that set compression by themself
+    <FilesMatch "\.html?$">
       AddOutputFilterByType DEFLATE text/html
     </FilesMatch>
     AddOutputFilterByType DEFLATE text/css application/javascript text/javascript
   </IfModule>
 
-  # Apache all
   <IfModule !mod_filter.c>
-    <FilesMatch "\.(html|htm|css|js)$">
+    <FilesMatch "\.(html?|css|js)$">
       SetOutputFilter DEFLATE
     </FilesMatch>
   </IfModule>
