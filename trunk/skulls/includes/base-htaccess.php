@@ -77,6 +77,12 @@ AddType image/x-icon           .ico
   # Apache 2.0.26 and later
   RemoveOutputFilter .php
 
+  <IfModule mod_headers.c>
+    <FilesMatch "\.(html?|css|js)$">
+      Header set Vary Accept-Encoding
+    </FilesMatch>
+  </IfModule>
+
   # Apache 2.0.33 and later
   <IfModule mod_filter.c>
     <FilesMatch "\.(html|htm)$">
