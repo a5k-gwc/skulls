@@ -34,8 +34,8 @@ function ShowHtmlPage($num, $header, $footer)
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER,' (by ',$maintainer,')'; ?></title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 <meta name="robots" content="<?php if($num === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
 <meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from p2p clients to bootstrap.">
@@ -443,7 +443,7 @@ function ShowHtmlPage($num, $header, $footer)
 	{
 		var links; if(document.links) links = document.links; else if(document.getElementsByTagName) links = document.getElementsByTagName("a"); if(!links) return false;
 
-		var links_count = links.length, ext_links_event = function(e){ var e = e || window.event; if(e.preventDefault) e.preventDefault(); else e.returnValue = false; this.blur(); window.open(this.href, "_blank"); };
+		var links_count = links.length, ext_links_event = function(e){ var e = e || window.event; if(e.preventDefault) e.preventDefault(); else e.returnValue = false; this.blur(); window.open(this.href, '_' + "blank"); };
 		for(var i=0; i<links_count; i++)
 			if((' '+links[i].rel+' ').indexOf(" external ") != -1 && !links[i].onclick)
 				links[i].onclick = ext_links_event;
