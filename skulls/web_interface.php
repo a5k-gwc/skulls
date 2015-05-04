@@ -502,7 +502,7 @@ function ShowHtmlPage($num, $header, $footer)
 <?php
 	}
 ?>
-	<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.gif" alt="Sticker"></a></div>
+	<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.png" alt="Sticker"></a></div>
 </body>
 </html>
 <?php
