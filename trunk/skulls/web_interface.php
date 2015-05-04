@@ -73,7 +73,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 						<table class="inner-table-infos" width="100%" summary="Informations about this GWC">
 							<tr>
 								<th>- Running since:</th>
-								<td style="color: #994433;">
+								<td class="brown">
 <?php
 									if(file_exists(DATA_DIR."/running_since.dat"))
 									{
@@ -85,11 +85,11 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 							</tr>
 							<tr>
 								<th>- Version:</th>
-								<td class="bold" style="color: #008000;" title="<?php echo GetMainFileRev(); ?>"><?php echo VER; ?></td>
+								<td class="green" title="<?php echo GetMainFileRev(); ?>"><span class="bold"><?php echo VER; ?></span></td>
 							</tr>
 							<tr>
 								<th>- Networks:</th>
-								<td style="color: #994433;">
+								<td class="brown">
 <?php
 									global $SUPPORTED_NETWORKS;
 									for( $i = 0; $i < NETWORKS_COUNT; $i++ )
@@ -108,7 +108,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 <?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
 							<tr>
 								<th>- GeoIP type:</th>
-								<td class="bold" style="color: #994433;"><?php if($geoip) echo $geoip->GetType(); ?></td>
+								<td class="brown"><span class="bold"><?php if($geoip) echo $geoip->GetType(); ?></span></td>
 							</tr>
 <?php
 							if($geoip && $geoip->IsEnabled())
@@ -116,11 +116,11 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 ?>
 								<tr>
 									<th>- GeoIP DB version:</th>
-									<td class="bold" style="color: #008000;"><?php echo htmlentities($geoip->GetDBVersion()); ?></td>
+									<td class="green"><span class="bold"><?php echo htmlentities($geoip->GetDBVersion()); ?></span></td>
 								</tr>
 								<tr>
 									<th>- GeoIP DB (c)opy:</th>
-									<td style="color: #994433;"><?php echo htmlentities($geoip->GetDBCopyright()); ?></td>
+									<td class="brown"><?php echo htmlentities($geoip->GetDBCopyright()); ?></td>
 								</tr>
 <?php
 							}
@@ -137,7 +137,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 							</tr>
 							<tr>
 								<th>- Maintainer:</th>
-								<?php echo '<td class="bold" style="color: #0044FF;"',$mail,'>',$maintainer,'</td>',"\n"; ?>
+								<?php echo '<td class="blue"',$mail,'><span class="bold">',$maintainer,'</span></td>',"\n"; ?>
 							</tr>
 <?php
 							if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
@@ -145,7 +145,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 ?>
 								<tr>
 									<th>- Maintainer site:</th>
-									<td style="color: #0044FF;">
+									<td class="blue">
 <?php
 										$website = htmlentities(MAINTAINER_WEBSITE);
 										echo '<a href="',$website,'" class="hover-underline" rel="external">',$website,'</a>',"\n";
@@ -219,7 +219,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 									$url = strtolower($net).':host:';
 
 									echo '<tr class="',$color,'">';
-									echo '<td style="padding-right: 10pt;">';
+									echo '<td>';
 									if($geoip)
 									{
 										$country_name = $geoip->GetCountryNameByIP($h_ip);
@@ -229,9 +229,9 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 									echo '<a href="',$url,$host,'" rel="nofollow">',$host,'</a>';
 									if($h_leaves !== "")
 										echo ' (',$h_leaves,')';
-									echo '</td>';
-									echo '<td style="padding-right: 20pt;"><strong title="',$h_ua,'">',ReplaceVendorCode($h_vendor, $h_ver),'</strong></td>';
-									echo '<td style="padding-right: 20pt;"><a href="?showhosts=1&amp;net=',strtolower($net),'">',$net,'</a></td>';
+									echo '&emsp;</td>';
+									echo '<td><strong title="',$h_ua,'">',ReplaceVendorCode($h_vendor, $h_ver),'</strong>&emsp;</td>';
+									echo '<td><a href="?showhosts=1&amp;net=',strtolower($net),'">',$net,'</a>&emsp;</td>';
 									echo '<td>',$h_age,'</td></tr>',"\n";
 								}
 
@@ -286,7 +286,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 									$color = (($elements - $i) % 2 === 0 ? 'even' : 'odd');
 
 									$output = '<tr class="'.$color.'">';
-									$output .= '<td style="padding-right: 10pt;">';
+									$output .= '<td>';
 
 									if(strpos($cache_url, "://") > -1)
 									{
@@ -318,35 +318,35 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 									else
 										$output .= $cache_url;
 
-									$output .= '</a></td>';
+									$output .= '</a>&emsp;</td><td>';
 									if(strpos($cache_name, NAME) === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="'.GWC_SITE.'" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="'.GWC_SITE.'" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(NAME !== 'Sk'.'ulls' && strpos($cache_name, 'Sk'.'ulls') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/sk'.'ulls/" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://sourceforge.net/projects/sk'.'ulls/" rel="external nofollow">'.$cache_name.'</a>';
 									//elseif(strpos($cache_name, 'Bazooka') === 0)
-										//$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://www.bazookanetworks.com/" rel="external nofollow">'.$cache_name.'</a></td>';
+										//$output .= '<a class="gwc-home-link" href="http://www.bazookanetworks.com/" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'Beacon Cache') === 0)  /* Beacon Cache and Beacon Cache II */
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/beaconcache/" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://sourceforge.net/projects/beaconcache/" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'Cachechu') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://github.com/kevogod/cachechu" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://github.com/kevogod/cachechu" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'GhostWhiteCrab') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'PHPGnuCacheII') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://gwcii.sourceforge.net/" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://gwcii.sourceforge.net/" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'jumswebcache') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://www1.mager.org/GWebCache/" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://www1.mager.org/GWebCache/" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'MWebCache') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://mute-net.sourceforge.net/mWebCache.shtml" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://mute-net.sourceforge.net/mWebCache.shtml" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'node.gwc') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://andrewgilmore.co.uk/project/nodegwc" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://andrewgilmore.co.uk/project/nodegwc" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'GWebCache') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://gnucleus.sourceforge.net/gwebcache/" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://gnucleus.sourceforge.net/gwebcache/" rel="external nofollow">'.$cache_name.'</a>';
 									elseif(strpos($cache_name, 'DKAC/Enticing-Enumon') === 0)
-										$output .= '<td style="padding-right: 20pt;"><a class="gwc-home-link" href="http://dkac.trillinux.org/dkac/dkac.php" rel="external nofollow">'.$cache_name.'</a></td>';
+										$output .= '<a class="gwc-home-link" href="http://dkac.trillinux.org/dkac/dkac.php" rel="external nofollow">'.$cache_name.'</a>';
 									else
-										$output .= '<td style="padding-right: 20pt;">'.$cache_name.'</td>';
-									$output .= '<td style="padding-right: 20pt;">'.ucfirst($net).'</td>';
-									$output .= '<td style="padding-right: 20pt;"><div class="bold">'.ReplaceVendorCode($client, $version).'</div></td>';
+										$output .= $cache_name;
+									$output .= '&emsp;</td><td>'.ucfirst($net).'&emsp;</td>';
+									$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version).'</span>&emsp;</td>';
 									$output .= '<td>'.rtrim($time).'</td></tr>'."\n";
 
 									if($type == "tcp") echo $output;
@@ -382,7 +382,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 						<table class="inner-table-infos" width="100%" summary="Statistics about this GWC">
 							<tr>
 								<th>- Total requests:</th>
-								<td style="color: #994433;">
+								<td class="brown">
 <?php
 									if(STATS_ENABLED)
 										echo ReadStatsTotalReqs();
@@ -393,7 +393,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 							</tr>
 							<tr>
 								<th>- Requests this hour:</th>
-								<td style="color: #994433;">
+								<td class="brown">
 <?php
 									if(STATS_ENABLED)
 										echo ($other_reqs + $upd_reqs + $blocked_reqs),' (',$blocked_reqs,' blocked)';
@@ -404,7 +404,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 							</tr>
 							<tr>
 								<th>- Updates this hour:</th>
-								<td style="color: #994433;">
+								<td class="brown">
 <?php
 									if(STATS_ENABLED)
 										echo $upd_reqs,' (',$upd_bad_reqs,' bad)';
@@ -420,7 +420,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 			}
 ?>
 			<tr>
-				<td style="padding: 5pt;"><strong><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" rel="external"><?php echo GWC_SITE; ?></a></strong></td>
+				<td class="project-link"><strong><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" rel="external"><?php echo GWC_SITE; ?></a></strong></td>
 			</tr>
 		</table>
 	</div><div class="spacer"></div>
