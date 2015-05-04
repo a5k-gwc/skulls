@@ -12,7 +12,7 @@ img { border-style: none; }
 div.container { display: -moz-inline-stack; display: inline-block; }
 
 .spacer { margin: 2em; }
-.main-title, .good { color: green; }  .bad { color: red; }  .unknown { color: #ffd700; }
+.main-title, .green, .good { color: green; }  .bad { color: red; }  .unknown { color: #ffd700; }  .brown { color: #994433; }  .blue  { color: #0044ff; }
 .page-list { padding: 0.6em; padding-left: 0.8em; padding-bottom: 1em; line-height: 2.3; }
 .page-title { background: #ccff99; color: #0044ff; }
 .inner-table-infos { border-style: none; }
@@ -22,6 +22,7 @@ div.container { display: -moz-inline-stack; display: inline-block; }
 .empty-list { height: 3em; text-align: center; }
 /* Odd lines */ .odd { background: white; }  /* Even lines */ .even { background: #f0f0f0; }
 .gwc-home-link { color: black; }
+.project-link { padding: 0.7em; }
 
 .update-infos { font-weight: bold; }
 .major-change { color: red; }
