@@ -250,7 +250,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 				$elements = count($cache_file);
 ?>
 				<tr class="page-title"> 
-					<td><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong>&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Send GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></td>
+					<td><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></td>
 				</tr>
 				<tr>
 					<td>
@@ -294,7 +294,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 										$output .= '<a class="gwc" href="'.$prefix.$cache_url.'?nets='.str_replace(' ', "", strtolower($net)).'" rel="nofollow">+</a> ';
 									}
 									else
-										$output .= "&nbsp;&nbsp;&nbsp;";
+										$output .= " &nbsp; ";
 									$output .= '<a href="'.$cache_url.'" rel="external">';
 
 									if(strpos($cache_url, "://") > -1)
