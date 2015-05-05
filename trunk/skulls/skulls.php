@@ -888,6 +888,7 @@ function CheckIfDummyHostIsNeeded($vendor, $ver)
 
 function HostFile($net)
 {
+	$now = time(); $offset = date("Z");
 	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
 	$count_host = count($host_file);
 
@@ -898,7 +899,9 @@ function HostFile($net)
 
 	for( $i = 0; $i < $max_hosts; $i++ )
 	{
-		list( , $h_ip, $h_port, ) = explode('|', $host_file[$count_host - 1 - $i], 4);
+		list($h_age, $h_ip, $h_port,) = explode('|', $host_file[$count_host - 1 - $i], 4);
+		$h_age = TimeSinceSubmissionInSeconds( $now, $h_age, $offset );
+		if($h_age > MAX_HOST_AGE) break;
 		echo $h_ip,':',$h_port,"\r\n";
 	}
 }
