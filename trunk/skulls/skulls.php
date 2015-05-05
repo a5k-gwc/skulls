@@ -21,13 +21,14 @@ $SUPPORTED_NETWORKS = null;
 include 'vars.php';
 $UDP['ukhl'] = 0;	// The support isn't complete
 
-define( 'NAME', 'Skulls' );
-define( 'VENDOR', 'SKLL' );											// Four uppercase letters vendor code
-define( 'SHORT_VER', '0.3.1' );										// Numeric version (without letters)
-define( 'VER', SHORT_VER.'c' );										// Full version (it can contain letters)
-define( 'GWC_SITE', 'http://sourceforge.net/projects/skulls/' );	// Official site of this GWebCache
-define( 'OPEN_SOURCE', '1' );
-define( 'DEBUG', 0 );
+define('NAME', 'Skulls');
+define('VENDOR', 'SKLL');										/* Vendor code (four uppercase letters) */
+define('SHORT_VER', '0.3.1');									/* Numeric version (without letters) */
+define('VER', SHORT_VER.'c');									/* Full version (it can contain letters) */
+define('GWC_SITE', 'http://sourceforge.net/projects/skulls/');	/* Official site of this GWC */
+define('OPEN_SOURCE', '1');
+define('MAX_HOST_AGE', 259200);									/* 3 days */
+define('DEBUG', 0);
 
 function GetMainFileRev()
 {
@@ -964,7 +965,7 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dum
 		{
 			list( $h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */, ) = explode('|', $host_file[$count_host - 1 - $i], 13);
 			$h_age = TimeSinceSubmissionInSeconds( $now, $h_age, $offset );
-			if($h_age > 259200) break;  /* 3 days */
+			if($h_age > MAX_HOST_AGE) break;  /* 3 days */
 			$host = 'H|'.$h_ip.':'.$h_port.'|'.$h_age;
 			if($separators > 1) $host .= '||';
 			if($getleaves) $host .= $h_leaves;
