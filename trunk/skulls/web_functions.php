@@ -545,7 +545,7 @@ function CheckUpdates()
 			$cached = true;
 		else
 		{
-			$time_diff = time() - ( @strtotime( $latest_check ) + @date("Z") );	// GMT
+			$time_diff = time() - ( strtotime( $latest_check ) + date("Z") );	// GMT
 			$time_diff = floor($time_diff / 86400);								// Days
 
 			if($time_diff < 1)
