@@ -947,13 +947,12 @@ function UrlFile($net, $client)
 function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dummy_host)
 {
 	$output = "";
-	$now = time();
-	$offset = date("Z");
+	$now = time(); $offset = date("Z");
 	$separators = 0;
 	if($getvendors) $separators = 3;
 	elseif($getleaves) $separators = 2;
 
-	$count_host = 0;
+	$hosts_sent = 0;
 	if($get)
 	{
 		$host_file = file(DATA_DIR."/hosts_".$net.".dat");
@@ -966,25 +965,26 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dum
 
 		for( $i=0; $i<$max_hosts; $i++ )
 		{
-			list( $h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */, ) = explode('|', $host_file[$count_host - 1 - $i], 13);
+			list($h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */,) = explode('|', $host_file[$count_host - 1 - $i], 13);
 			$h_age = TimeSinceSubmissionInSeconds( $now, $h_age, $offset );
-			if($h_age > MAX_HOST_AGE) break;  /* 3 days */
+			if($h_age > MAX_HOST_AGE) break;
 			$host = 'H|'.$h_ip.':'.$h_port.'|'.$h_age;
 			if($separators > 1) $host .= '||';
 			if($getleaves) $host .= $h_leaves;
 			if($separators > 2) $host .= '|';
 			if($getvendors && $h_vendor !== 'KICKSTART') $host .= $h_vendor;
 			$output .= $host."\r\n";
+			$hosts_sent++;
 		}
 		/* Workaround for a bug, some old Shareaza versions doesn't send updates if we don't have any host */
-		if($count_host === 0 && $add_dummy_host)
+		if($hosts_sent === 0 && $add_dummy_host)
 		{
 			$output .= "H|1.1.1.1:7331|100000\r\n";
-			$count_host = 1;
+			$hosts_sent = 1;
 		}
 	}
 
-	$count_out_cache = 0;
+	$gwcs_sent = 0;
 	if(FSOCKOPEN)
 	{
 		$cache_file = file(DATA_DIR."/caches.dat");
@@ -1024,7 +1024,7 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dum
 					$n++;
 				}
 			}
-			$count_out_cache = $n;
+			$gwcs_sent = $n;
 		}
 
 		if($uhc)
@@ -1044,13 +1044,13 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dum
 					$n++;
 				}
 			}
-			$count_out_cache += $n;
+			$gwcs_sent += $n;
 		}
 	}
 
-	if( $count_host === 0 )
+	if( $hosts_sent === 0 )
 		$output .= "I|NO-HOSTS\r\n";
-	if( $count_out_cache === 0 )
+	if( $gwcs_sent === 0 )
 		$output .= "I|NO-URL\r\n";
 	/* I|NO-URL-NO-HOSTS combined reply is no longer used */
 
