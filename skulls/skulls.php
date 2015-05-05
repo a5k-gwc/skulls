@@ -902,7 +902,7 @@ function HostFile($net)
 	}
 }
 
-function UrlFile($net)
+function UrlFile($net, $client)
 {
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
@@ -930,13 +930,17 @@ function UrlFile($net)
 
 		if($show && strpos($cache, "://") > -1)
 		{
+			if($client === 'TEST')
+			{
+				list(, $tmp) = explode('://', $cache, 2); list($tmp, ) = explode('/', $tmp, 2); if(!preg_match('/[A-Za-z]/', $tmp)) continue;
+			}
 			echo $cache."\r\n";
 			$n++;
 		}
 	}
 }
 
-function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
+function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dummy_host)
 {
 	$output = "";
 	$now = time();
@@ -959,7 +963,9 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 		for( $i=0; $i<$max_hosts; $i++ )
 		{
 			list( $h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */, ) = explode('|', $host_file[$count_host - 1 - $i], 13);
-			$host = 'H|'.$h_ip.':'.$h_port.'|'.TimeSinceSubmissionInSeconds( $now, $h_age, $offset );
+			$h_age = TimeSinceSubmissionInSeconds( $now, $h_age, $offset );
+			if($h_age > 259200) break;  /* 3 days */
+			$host = 'H|'.$h_ip.':'.$h_port.'|'.$h_age;
 			if($separators > 1) $host .= '||';
 			if($getleaves) $host .= $h_leaves;
 			if($separators > 2) $host .= '|';
@@ -1005,6 +1011,10 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $add_dummy_host)
 
 				if($show && strpos($cache, "://") > -1)
 				{
+					if($client === 'TEST')
+					{
+						list(, $tmp) = explode('://', $cache, 2); list($tmp, ) = explode('/', $tmp, 2); if(!preg_match('/[A-Za-z]/', $tmp)) continue;
+					}
 					$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds( $now, rtrim($time), $offset );
 					$output .= $cache."\r\n";
 					$n++;
@@ -1587,7 +1597,7 @@ else
 	{
 		$dummy_host_needed = CheckIfDummyHostIsNeeded($CLIENT, $VERSION);
 
-		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $UHC, $UKHL, $dummy_host_needed);
+		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $UHC, $UKHL, $CLIENT, $dummy_host_needed);
 		if($UHC || $UKHL)
 		{
 			echo "I|uhc|".$UDP["uhk"]."\r\n";
@@ -1600,7 +1610,7 @@ else
 			HostFile($NET);
 
 		if($URLFILE && FSOCKOPEN)
-			UrlFile($NET);
+			UrlFile($NET, $CLIENT);
 
 		if($PV >= 3 && ($HOSTFILE || $URLFILE))
 			echo "nets: ".strtolower(NetsToString())."\r\n";
