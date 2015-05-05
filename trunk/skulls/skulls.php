@@ -1326,7 +1326,10 @@ if($web)
 {
 	include "web_interface.php";
 
-	header('Cache-Control: max-age=180');
+	if($web === 1)
+		header('Cache-Control: max-age=43200');  /* 12 hours */
+	else
+		header('Cache-Control: max-age=60');     /* 1 minute */
 	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL, true);
 	ShowHtmlPage($web, $PHP_SELF, $header, $footer);
 	if($compressed) ob_end_flush();
