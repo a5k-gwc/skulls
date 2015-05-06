@@ -140,7 +140,8 @@ function VerifyUserAgent($vendor, $user_agent)
 
 	if($vendor === 'RAZM')
 	{  /* Block empty User-Agent, User-Agent without version and rip-offs; bad clients */
-		if($user_agent === "" || $user_agent === 'Shareaza' || strpos($user_agent, 'Shareaza PRO') === 0 || strpos($user_agent, 'dianlei') === 0)
+		if($user_agent === "" || $user_agent === 'Shareaza' || strpos($user_agent, 'Shareaza PRO') === 0
+		   || strpos($user_agent, 'dianlei') === 0 || strpos($user_agent, 'Python-urllib') === 0)
 			return false;
 	}
 	elseif($vendor === 'LIMM')
