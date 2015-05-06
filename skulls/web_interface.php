@@ -22,6 +22,8 @@ include "web_functions.php";
 function ShowHtmlPage($num, $php_self, $header, $footer)
 {
 	global $NET, $SUPPORTED_NETWORKS;
+	if($NET === null) $NET = 'all';
+
 	if(!function_exists("Initialize"))
 		include "functions.php";
 
