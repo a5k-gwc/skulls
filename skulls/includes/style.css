@@ -27,8 +27,10 @@ div.container { display: -moz-inline-stack; display: inline-block; }
 .update-infos { font-weight: bold; }
 .major-change { color: red; }
 
-a { outline-style: none; }
+a { -moz-outline-style: none; outline-style: none; }
+a img { -moz-outline: 1px none black; outline: 1px none black; }
 a:focus { color: lime; }
+a:focus img{ -moz-outline-style: solid; outline-style: solid; }
 .hover-underline, .gwc-home-link, .gwc { text-decoration: none; }
 .hover-underline:hover, .gwc-home-link:hover { text-decoration: underline; }
 
