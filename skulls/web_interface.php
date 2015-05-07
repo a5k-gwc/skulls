@@ -29,13 +29,15 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 
 	Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
 	$maintainer = htmlentities(MAINTAINER_NICK);
+	$title = NAME.'! Multi-Network WebCache '.VER;
+	if($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 4) $title .= ' - Stats';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title><?php echo NAME; ?>! Multi-Network WebCache <?php echo VER,' (by ',$maintainer,')'; ?></title>
+<title><?php echo $title,' (by ',$maintainer,')'; ?></title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="includes/style.css">
@@ -47,6 +49,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 </head>
 
 <body>
+	<div id="accessibility-links"><a class="accessible" href="#main">[Skip to content]</a></div>
 <?php
 	if($header !== "") echo '<div class="center">',$header,'</div><div class="spacer"></div>',"\n";
 ?>
@@ -57,7 +60,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 			</tr>
 			<tr>
 				<td class="page-list">
-					<a href="?showinfo=1">General Details</a> /
+					<a href="?showinfo=1">Home</a> /
 					<a href="?showhosts=1&amp;net=all">Hosts</a> /
 					<a href="?showurls=1">Alternative GWCs</a> /
 					<a href="?stats=1">Statistics</a>
@@ -67,7 +70,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 			if($num == 1)	// Info
 			{
 ?>
-				<tr class="page-title"> 
+				<tr id="main" class="page-title">
 					<td><strong>Cache Info</strong></td>
 				</tr>
 				<tr>
@@ -192,7 +195,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 					$elements = count($host_file["host"]);
 				}
 ?>
-				<tr class="page-title"> 
+				<tr id="main" class="page-title">
 					<td><strong><?php echo ucfirst($NET); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</strong></td>
 				</tr>
 				<tr>
@@ -251,7 +254,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 				$cache_file = file(DATA_DIR."/caches.dat");
 				$elements = count($cache_file);
 ?>
-				<tr class="page-title"> 
+				<tr id="main" class="page-title">
 					<td><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></td>
 				</tr>
 				<tr>
@@ -376,7 +379,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 					$other_reqs = ReadStats(STATS_OTHER);
 				}
 ?>
-				<tr class="page-title"> 
+				<tr id="main" class="page-title">
 					<td><strong>Statistics</strong></td>
 				</tr>
 				<tr>
@@ -508,7 +511,6 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 ?>
 	<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.png" alt="Sticker"></a></div>
 </body>
-</html>
-<?php
+</html><?php
 }
 ?>

@@ -31,3 +31,7 @@ a { outline-style: none; }
 a:focus { color: lime; }
 .hover-underline, .gwc-home-link, .gwc { text-decoration: none; }
 .hover-underline:hover, .gwc-home-link:hover { text-decoration: underline; }
+
+.accessible { margin: 0; padding: 0; position: absolute; top: -1000px; left: auto; right: auto; width: 1px; height: 1px; overflow: hidden;
+			  speak: normal; voice-family: female; }
+.accessible:focus { top: 0; width: auto; height: auto; }
