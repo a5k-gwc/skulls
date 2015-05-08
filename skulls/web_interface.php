@@ -237,7 +237,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 				$cache_file = file(DATA_DIR."/caches.dat");
 				$elements = count($cache_file);
 ?>
-				<div id="main" class="page-title"><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></strong></div>
+				<div id="main" class="page-title"><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current GWCs in cache">
 						<tr class="header-column">
