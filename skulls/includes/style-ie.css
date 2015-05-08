@@ -1,4 +1,12 @@
+/* The asterisk makes it used only by IE 5-7 */
+
 /*** Support for display: inline-block; ***/
-/* The line "display: inline-block;" gives hasLayout, the line "display: inline;" reset the display as desired, without taking back hasLayout. */
-/* So we need both values for IE 7 and earlier but they mustn't be in a single rule, otherwise it doesn't work completely. */
-div.container { *display: inline; }  /* The asterisk makes it usable only by IE 7 and earlier (that is exactly where we need it) */
+/* On IE5-7 the line "display: inline-block;" gives hasLayout, the line "display: inline;" reset the display as desired, without taking back hasLayout. */
+/* So we need both values but they mustn't be in a single rule, otherwise it doesn't work completely. */
+div.container { *display: inline; }  
+div.container table { *width: auto; *display: inline; }
+
+/* On IE5-7 the active state corresponds to the focus state of standard compliant browsers */
+a:active { *color: lime; *ie-dummy: expression(this.hideFocus=true); }
+a:active img{ *border-style: solid; }
+.accessible:active { *top: 0; *width: auto; *height: auto; }
