@@ -50,10 +50,19 @@ function IsSecureConnection()
 {
 	if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 		return true;
-
 	if(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
 		return true;
+	return false;
+}
 
+function IsWebInterface()
+{
+	if(empty($_SERVER['QUERY_STRING']))
+		return true;
+	if(!empty($_GET['showinfo']) || !empty($_GET['showhosts']) || !empty($_GET['showurls']) || !empty($_GET['stats']) || !empty($_GET['data']))
+		return true;
+	if(!empty($_GET['compression']) && strpos($_SERVER['QUERY_STRING'], '&') === false)
+		return true;
 	return false;
 }
 
@@ -74,7 +83,7 @@ if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === nu
 $unreliable_host = false;
 if(empty($_SERVER['HTTP_HOST']))
 {
-	if(!empty($_SERVER['QUERY_STRING']))  /* Allow only for the web interface */
+	if(!IsWebInterface())
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		die("ERROR: Missing Host header\r\n");
@@ -1291,9 +1300,6 @@ $SHOWDATA = !empty($_GET['data']) ? $_GET['data'] : 0;
 
 $KICK_START = !empty($_GET['kickstart']) ? $_GET['kickstart'] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter (it is used the first time to populate the cache, it MUST be disabled after that).
 
-if( empty($_SERVER['QUERY_STRING']) )
-	$SHOWINFO = 1;
-
 if( isset($noload) ) die();
 
 if(MAINTAINER_NICK === 'your nickname here' || MAINTAINER_NICK === "")
@@ -1332,14 +1338,14 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 }
 
 
-if( $SHOWINFO )
-	$web = 1;
-elseif( $SHOWHOSTS )
+if( $SHOWHOSTS )
 	$web = 2;
 elseif( $SHOWCACHES )
 	$web = 3;
 elseif( $SHOWSTATS || $SHOWDATA )
 	$web = 4;
+elseif(IsWebInterface())
+	$web = 1;
 else
 	$web = 0;
 
