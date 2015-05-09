@@ -1,12 +1,14 @@
-body { margin: 2em; padding: 0; background: yellow; color: black; font-family: Verdana, Geneva, sans-serif; font-size: 65%; }
+body { margin: 2em; padding: 0; background: yellow; font-size: 0.65em; font-family: Verdana, Geneva, sans-serif; color: black; }
+body { font-size: 65%; }
 /* http://www.ampsoft.net/webdesign-l/WindowsMacFonts.html */  /* http://www.techonthenet.com/css/properties/font_family.php */
-h1 { margin: 0; font-size: 1.5em; font-weight: bold; }
+h1 { margin: 0; font-weight: bold; font-size: 1.5em; }
 .center { text-align: center; }  .center table { margin-left: auto; margin-right: auto; text-align: left; }  .center div { text-align: left; }
 table { border-spacing: 0; border-collapse: collapse; border: 1px solid #ccccdd; width: 100%; background: white; color: inherit; font-size: 1em; }
 th, td { padding: 0.4em; }  th { text-align: left; }
 strong, th, .bold { font-weight: bold; }
 img { border: 1px none black; -moz-outline: 1px none black; outline: 1px none black; }
-a { -moz-outline-style: none; outline-style: none; }
+a { -moz-outline-style: none; outline-style: none; color: blue; }
+a:visited { color: purple; }
 .title-spacing { margin: 0.4em; }
 .padding, #page-title { padding: 0.4em; }
 
