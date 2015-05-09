@@ -49,31 +49,37 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 </head>
 
 <body>
-	<div id="accessibility-links"><a class="accessible" href="#main">[Skip to content]</a></div>
+	<div class="header">
+		<div id="accessible-links"><a href="#content">[Skip to content]</a></div>
 <?php
-	if($header !== "") echo '<div class="center">',$header,'</div><div class="spacer"></div>',"\n";
+		if($header !== "") echo "\t\t",'<div class="center">',$header,'</div> <div class="spacer"></div>',"\n";
 ?>
+	</div>
+
 	<div class="center">
 		<div class="container">
-			<h1 class="title-spacing"><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1>
-			<div class="page-list"><a href="?showinfo=1">Home</a> / <a href="?showhosts=1&amp;net=all">Hosts</a> / <a href="?showurls=1">Alternative GWCs</a> / <a href="?stats=1">Statistics</a></div>
+			<div class="header">
+				<h1 class="title-spacing"><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1>
+				<div id="page-list"><a href="?showinfo=1">Home</a> / <a href="?showhosts=1&amp;net=all">Hosts</a> / <a href="?showurls=1">Alternative GWCs</a> / <a href="?stats=1">Statistics</a></div>
+			</div>
+			<div id="content">
 <?php
 			if($num == 1)	// Info
 			{
 ?>
-				<div id="main" class="page-title"><strong>Cache Info</strong></div>
+				<div id="page-title"><strong>Cache Info</strong></div>
 				<div class="padding">
 					<table class="inner-table-infos" summary="Informations about this GWC">
 						<tr>
 							<th>- Running since:</th>
 							<td class="brown">
-	<?php
+<?php
 								if(file_exists(DATA_DIR."/running_since.dat"))
 								{
 									$running_since = file(DATA_DIR."/running_since.dat");
 									echo $running_since[0],"\n";
 								}
-	?>
+?>
 							</td>
 						</tr>
 						<tr>
@@ -83,7 +89,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 						<tr>
 							<th>- Networks:</th>
 							<td class="brown">
-	<?php
+<?php
 								global $SUPPORTED_NETWORKS;
 								for( $i = 0; $i < NETWORKS_COUNT; $i++ )
 								{
@@ -92,21 +98,22 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 										echo ", ";
 								}
 								echo "\n";
-	?>
+?>
 							</td>
 						</tr>
 						<tr>
+							<td></td>
 							<td>&nbsp;</td>
 						</tr>
-	<?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
+<?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
 						<tr>
 							<th>- GeoIP type:</th>
 							<td class="brown"><span class="bold"><?php if($geoip) echo $geoip->GetType(); ?></span></td>
 						</tr>
-	<?php
+<?php
 						if($geoip && $geoip->IsEnabled())
 						{
-	?>
+?>
 							<tr>
 								<th>- GeoIP DB version:</th>
 								<td class="green"><span class="bold"><?php echo htmlentities($geoip->GetDBVersion()); ?></span></td>
@@ -115,7 +122,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 								<th>- GeoIP DB (c)opy:</th>
 								<td class="brown"><?php echo htmlentities($geoip->GetDBCopyright()); ?></td>
 							</tr>
-	<?php
+<?php
 						}
 						if($geoip) $geoip->Destroy(); $geoip = null;
 
@@ -124,30 +131,31 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 							$mail = "";
 						elseif($mail !== "")
 							$mail = ' title="'.htmlentities($mail).'"';
-	?>
+?>
 						<tr>
+							<td></td>
 							<td>&nbsp;</td>
 						</tr>
 						<tr>
 							<th>- Maintainer:</th>
 							<?php echo '<td class="blue"',$mail,'><span class="bold">',$maintainer,'</span></td>',"\n"; ?>
 						</tr>
-	<?php
+<?php
 						if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
 						{
-	?>
+?>
 							<tr>
 								<th>- Maintainer site:</th>
 								<td class="blue">
-	<?php
+<?php
 									$website = htmlentities(MAINTAINER_WEBSITE);
 									echo '<a href="',$website,'" class="hover-underline" rel="external">',$website,'</a>',"\n";
-	?>
+?>
 								</td>
 							</tr>
-	<?php
+<?php
 						}
-	?>
+?>
 					</table>
 				</div>
 <?php
@@ -182,7 +190,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 					$elements = count($host_file["host"]);
 				}
 ?>
-				<div id="main" class="page-title"><strong><?php echo ucfirst($NET); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</strong></div>
+				<div id="page-title"><strong><?php echo ucfirst($NET); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</strong></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current hosts in cache">
 						<tr class="header-column">
@@ -191,7 +199,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 							<th>Network</th>
 							<th>Last updated</th>
 						</tr>
-						<?php
+<?php
 						if( $elements === 0 )
 							echo '<tr><td class="empty-list" colspan="4">There are no <strong>hosts</strong> listed at this time.</td></tr>',"\n";
 						else
@@ -218,16 +226,16 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 								echo '<a href="',$url,$host,'" rel="nofollow">',$host,'</a>';
 								if($h_leaves !== "")
 									echo ' (',$h_leaves,')';
-								echo '&emsp;</td>';
-								echo '<td><strong title="',$h_ua,'">',ReplaceVendorCode($h_vendor, $h_ver),'</strong>&emsp;</td>';
-								echo '<td><a href="?showhosts=1&amp;net=',strtolower($net),'">',$net,'</a>&emsp;</td>';
+								echo ' &nbsp;</td>';
+								echo '<td><strong title="',$h_ua,'">',ReplaceVendorCode($h_vendor, $h_ver),'</strong> &nbsp;</td>';
+								echo '<td><a href="?showhosts=1&amp;net=',strtolower($net),'">',$net,'</a> &nbsp;</td>';
 								echo '<td>',$h_age,'</td></tr>',"\n";
 							}
 
 							if($geoip) $geoip->Destroy();
 							$geoip = null;
 						}
-						?>
+?>
 					</table>
 				</div>
 <?php
@@ -237,7 +245,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 				$cache_file = file(DATA_DIR."/caches.dat");
 				$elements = count($cache_file);
 ?>
-				<div id="main" class="page-title"><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></div>
+				<div id="page-title"><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current GWCs in cache">
 						<tr class="header-column">
@@ -247,7 +255,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 							<th>Submitting client</th>
 							<th>Last checked</th>
 						</tr>
-						<?php
+<?php
 						if( $elements === 0 )
 							echo '<tr><td class="empty-list" colspan="5">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>',"\n";
 						else
@@ -303,7 +311,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 								else
 									$output .= $cache_url;
 
-								$output .= '</a>&emsp;</td><td>';
+								$output .= '</a> &nbsp;</td><td>';
 								if(strpos($cache_name, NAME) === 0)
 									$output .= '<a class="gwc-home-link" href="'.GWC_SITE.'" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(NAME !== 'Sk'.'ulls' && strpos($cache_name, 'Sk'.'ulls') === 0)
@@ -330,8 +338,8 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 									$output .= '<a class="gwc-home-link" href="http://dkac.trillinux.org/dkac/dkac.php" rel="external nofollow">'.$cache_name.'</a>';
 								else
 									$output .= $cache_name;
-								$output .= '&emsp;</td><td>'.ucfirst($net).'&emsp;</td>';
-								$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version).'</span>&emsp;</td>';
+								$output .= ' &nbsp;</td><td>'.ucfirst($net).' &nbsp;</td>';
+								$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version).'</span> &nbsp;</td>';
 								$output .= '<td>'.rtrim($time).'</td></tr>'."\n";
 
 								if($type == "tcp") echo $output;
@@ -339,7 +347,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 							}
 							echo $udp;
 						}
-						?>
+?>
 					</table>
 				</div>
 <?php
@@ -358,40 +366,43 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 					$other_reqs = ReadStats(STATS_OTHER);
 				}
 ?>
-				<div id="main" class="page-title"><strong>Statistics</strong></div>
+				<div id="page-title"><strong>Statistics</strong></div>
 				<div class="padding">
 					<table class="inner-table-infos" summary="Statistics about this GWC">
 						<tr>
 							<th>- Total requests:</th>
 							<td class="brown">
-	<?php
+<?php
 								if(STATS_ENABLED)
 									echo ReadStatsTotalReqs();
 								else
 									echo 'Disabled';
-	?>
+								echo "\n";
+?>
 							</td>
 						</tr>
 						<tr>
 							<th>- Requests this hour:</th>
 							<td class="brown">
-	<?php
+<?php
 								if(STATS_ENABLED)
 									echo ($other_reqs + $upd_reqs + $blocked_reqs),' (',$blocked_reqs,' blocked)';
 								else
 									echo 'Disabled';
-	?>
+								echo "\n";
+?>
 							</td>
 						</tr>
 						<tr>
 							<th>- Updates this hour:</th>
 							<td class="brown">
-	<?php
+<?php
 								if(STATS_ENABLED)
 									echo $upd_reqs,' (',$upd_bad_reqs,' bad)';
 								else
 									echo 'Disabled';
-	?>
+								echo "\n";
+?>
 							</td>
 						</tr>
 					</table>
@@ -399,22 +410,30 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 <?php
 			}
 ?>
-			<div class="project-link"><strong><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" rel="external"><?php echo GWC_SITE; ?></a></strong></div>
+			</div>
+			<div id="project-link"><strong><?php echo NAME; ?>'s project page: <a href="<?php echo GWC_SITE; ?>" rel="external"><?php echo GWC_SITE; ?></a></strong></div>
 		</div>
 	</div>
 	<div class="spacer"></div>
 <?php
-
 	if($num == 1)	// Info
 	{
 ?>
-	<div class="center"><div class="container"><div class="padding"><?php ShowUpdateCheck(); ?></div></div></div>
+	<div class="center"><div class="container"><div class="padding">
+		<?php ShowUpdateCheck(); ?>
+	</div></div></div>
 	<div class="spacer"></div>
 <?php
 	}
+?>
 
-	if($footer !== "") echo '<div class="center">',$footer,'</div><div class="spacer"></div>',"\n";
-?>	
+	<div class="footer">
+<?php
+		if($footer !== "") echo "\t\t",'<div class="center">',$footer,'</div> <div class="spacer"></div>',"\n";
+?>
+		<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.png" alt="Sticker"></a></div>
+	</div>
+
 	<script type="text/javascript">
 	<!--
 	function UseRelExternal()
@@ -436,6 +455,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 	if($num == 3)	// WebCache
 	{
 ?>
+
 	<script type="text/javascript">
 	<!--
 	var links = document.getElementsByTagName("a");
@@ -480,7 +500,6 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 <?php
 	}
 ?>
-	<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.png" alt="Sticker"></a></div>
 </body>
 </html><?php
 }
