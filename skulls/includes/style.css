@@ -14,8 +14,9 @@ a { -moz-outline-style: none; outline-style: none; }
 div.container { display: -moz-inline-stack; display: inline-block; }  /* IE compatibility added inside style-ie.css */
 
 .spacer { margin: 2em; }
-.main-title, .green, .good { color: green; }  .bad { color: red; }  .unknown { color: #ffd700; }  .brown { color: #994433; }  .blue { color: #0044ff; }
-#page-list { margin: 0.6em; margin-left: 0.8em; margin-bottom: 1em; line-height: 2.3; }
+.main-title, .green, .good { color: green; }  .bad { color: red; }  .unknown { color: #ffd700; }
+.brown { color: #994433; }  .blue { color: #0044ff; }
+#page-list { margin: 0.6em 0.6em 1em 0.8em; line-height: 2.3; }
 #page-title { background: #ccff99; color: #0044ff; }
 .inner-table-infos { border-style: none; }
 .inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; width: 37%; min-width: 10.8em; }
@@ -26,7 +27,7 @@ div.container { display: -moz-inline-stack; display: inline-block; }  /* IE comp
 #project-link { padding: 0.7em; }
 
 .update-infos { font-weight: bold; }
-.major-change { background: inherit; color: red; }
+.major-change { color: red; }
 
 a:focus { color: lime; }
 a:focus img { -moz-outline-style: solid; outline-style: solid; }
