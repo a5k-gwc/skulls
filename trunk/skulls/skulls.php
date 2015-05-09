@@ -71,14 +71,20 @@ if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === nu
 	die("ERROR: Service disabled\r\n");
 }
 
+$unreliable_host = false;
 if(empty($_SERVER['HTTP_HOST']))
 {
-	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-	die("ERROR: Missing Host header\r\n");
+	if(!empty($_SERVER['QUERY_STRING']))  /* Allow only for the web interface */
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		die("ERROR: Missing Host header\r\n");
+	}
+	$unreliable_host = true;
+	$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME']; if(!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] !== '80') $_SERVER['HTTP_HOST'] .= ':'.$_SERVER['SERVER_PORT'];
 }
 
 $MY_URL = (IsSecureConnection() ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
-if(CACHE_URL !== $MY_URL && CACHE_URL !== "")
+if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$unreliable_host)
 {
 	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 	header('Location: '.CACHE_URL);
