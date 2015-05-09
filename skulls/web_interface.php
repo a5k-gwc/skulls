@@ -28,8 +28,9 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 		include "functions.php";
 
 	Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
-	$maintainer = htmlentities(MAINTAINER_NICK);
+	$main_filename = basename($php_self);
 	$title = NAME.'! Multi-Network WebCache '.VER;
+	$maintainer = htmlentities(MAINTAINER_NICK);
 	if($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 4) $title .= ' - Stats';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -60,7 +61,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 		<div class="container">
 			<div class="header">
 				<h1 class="title-spacing"><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1>
-				<div id="page-list"><a href="?showinfo=1">Home</a> / <a href="?showhosts=1&amp;net=all">Hosts</a> / <a href="?showurls=1">Alternative GWCs</a> / <a href="?stats=1">Statistics</a></div>
+				<div id="page-list"><a href="<?php echo $main_filename; ?>?showinfo=1">Home</a> / <a href="<?php echo $main_filename; ?>?showhosts=1&amp;net=all">Hosts</a> / <a href="<?php echo $main_filename; ?>?showurls=1">Alternative GWCs</a> / <a href="<?php echo $main_filename; ?>?stats=1">Statistics</a></div>
 			</div>
 			<div id="content">
 <?php
