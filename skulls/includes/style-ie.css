@@ -7,6 +7,6 @@ div.container { *display: inline; }
 div.container table { *width: auto; *display: inline; }
 
 /* On IE5-7 the active state corresponds to the focus state of standard compliant browsers */
-a:active { *color: lime; *ie-dummy: expression(this.hideFocus=true); }
+a:active { *color: lime; *clear: expression( this.style.clear = "none", (typeof this.hideFocus != "undefined"? this.hideFocus = true : this.onfocus = this.blur) ); }
 a:active img{ *border-style: solid; }
-#accessible-links a:active { *top: 0; *width: auto; *height: auto; }
+#accessible-links a:active { *top: 0.5em; *width: auto; *height: auto; }
