@@ -102,8 +102,8 @@ AddType image/x-icon           .ico
 
 ### Deny access to .htaccess ###
 <Files ".htaccess">
-  Deny from All
+  Order Allow,Deny
 </Files>
 <Files "base-htaccess.php">
-  Deny from All
+  Order Allow,Deny
 </Files>
