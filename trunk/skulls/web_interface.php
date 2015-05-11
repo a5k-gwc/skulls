@@ -19,7 +19,7 @@
 
 include "web_functions.php";
 
-function ShowHtmlPage($num, $php_self, $header, $footer)
+function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 {
 	global $NET, $SUPPORTED_NETWORKS;
 	if($NET === null) $NET = 'all';
@@ -28,7 +28,10 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 		include "functions.php";
 
 	Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
-	$main_filename = basename($php_self);
+
+	$base_link = basename($php_self).'?';
+	if($compression !== null) $base_link .= 'compression='.$compression.'&amp;';
+
 	$title = NAME.'! Multi-Network WebCache '.VER;
 	$maintainer = htmlentities(MAINTAINER_NICK);
 	if($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 4) $title .= ' - Stats';
@@ -61,7 +64,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 		<div class="container">
 			<div class="header">
 				<h1 class="title-spacing"><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1>
-				<div id="page-list"><a href="<?php echo $main_filename; ?>?showinfo=1">Home</a> / <a href="<?php echo $main_filename; ?>?showhosts=1&amp;net=all">Hosts</a> / <a href="<?php echo $main_filename; ?>?showurls=1">Alternative GWCs</a> / <a href="<?php echo $main_filename; ?>?stats=1">Statistics</a></div>
+				<div id="page-list"><a href="<?php echo $base_link; ?>showinfo=1">Home</a> / <a href="<?php echo $base_link; ?>showhosts=1">Hosts</a> / <a href="<?php echo $base_link; ?>showurls=1">Alternative GWCs</a> / <a href="<?php echo $base_link; ?>stats=1">Statistics</a></div>
 			</div>
 			<div id="content">
 <?php
@@ -229,7 +232,7 @@ function ShowHtmlPage($num, $php_self, $header, $footer)
 									echo ' (',$h_leaves,')';
 								echo ' &nbsp;</td>';
 								echo '<td><strong title="',$h_ua,'">',ReplaceVendorCode($h_vendor, $h_ver),'</strong> &nbsp;</td>';
-								echo '<td><a href="?showhosts=1&amp;net=',strtolower($net),'">',$net,'</a> &nbsp;</td>';
+								echo '<td><a href="',$base_link,'showhosts=1&amp;net=',strtolower($net),'">',$net,'</a> &nbsp;</td>';
 								echo '<td>',$h_age,'</td></tr>',"\n";
 							}
 
