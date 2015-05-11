@@ -1358,7 +1358,7 @@ if($web)
 	else
 		header('Cache-Control: max-age=60');     /* 1 minute */
 	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL, true);
-	ShowHtmlPage($web, $PHP_SELF, $header, $footer);
+	ShowHtmlPage($web, $PHP_SELF, $COMPRESSION, $header, $footer);
 	if($compressed) ob_end_flush();
 }
 elseif( $KICK_START )
