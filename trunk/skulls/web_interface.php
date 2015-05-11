@@ -164,7 +164,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 				</div>
 <?php
 			}
-			elseif($num == 2)	// Host
+			elseif($num == 2)	// Hosts
 			{
 				$max_hosts = MAX_HOSTS;
 				$elements = 0;
@@ -244,7 +244,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 				</div>
 <?php
 			}
-			elseif($num == 3)	// WebCache
+			elseif($num == 3)	// GWCs
 			{
 				$cache_file = file(DATA_DIR."/caches.dat");
 				$elements = count($cache_file);
@@ -292,7 +292,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								}
 								else
 									$output .= " &nbsp; ";
-								$output .= '<a href="'.$cache_url.'" rel="external">';
+								$output .= '<a'.(strpos($cache_url, 'https') === 0 ? ' class="https"' : "").' href="'.$cache_url.'" rel="external">';
 
 								if(strpos($cache_url, "://") > -1)
 								{
