@@ -555,35 +555,37 @@ function ConnectionTest()
 
 function PingGWC($gwc_url, $query)
 {
-	$errno = -1; $errstr = "";
-	list( , $cache ) = explode("://", $gwc_url);	// It remove "http://" from $cache - $cache = www.test.com:80/page.php
-	$main_url = explode("/", $cache);				// $main_url[0] = www.test.com:80		$main_url[1] = page.php
+	$errno = -1; $errstr = ""; $our_url = "";
+	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
+	list($gwc_host, $gwc_path) = explode('/', $gwc_base_url, 2);
+	$secure_http = ($gwc_scheme === 'https');
+	unset($gwc_scheme, $gwc_base_url);
 
-	/* Separate hostname from port */
-	if(strpos($main_url[0], ':') !== false)
-		{ list($host_name, $host_port) = explode(':', $main_url[0], 2); $host_port = (int)$host_port; }
+	if(strpos($gwc_host, ':') !== false)
+		{ list($gwc_hostname, $gwc_port) = explode(':', $gwc_host, 2); $gwc_port = (int)$gwc_port; }
 	else
-		{ $host_name = $main_url[0]; $host_port = 80; }
+		{ $gwc_hostname = $gwc_host; $gwc_port = ($secure_http? 443 : 80); }
+	unset($gwc_host);
 
-	$fp = @fsockopen($host_name, $host_port, $errno, $errstr, (float)TIMEOUT);
+	$is_default_port = ((!$secure_http && $gwc_port === 80) || ($secure_http && $gwc_port === 443));
+	$host_header = $gwc_hostname; if(!$is_default_port) $host_header .= ':'.$gwc_port;
+	if(DEBUG) echo "\r\n",'D|Secure http: ',(int)($secure_http),"\r\n\r\n";
+
+	$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
 	if(!$fp)
 	{
 		$cache_data = 'CONN_ERR|'.$errno;				// CONN_ERR|Error number
-		if(DEBUG) echo "\r\n".'D|update|ERROR|'.$errno.'|'.rtrim($errstr)."\r\n";
+		if(DEBUG) echo 'D|update|ERROR|',$errno,'|',rtrim($errstr),"\r\n";
 	}
 	else
 	{
-		$pong = "";
-		$oldpong = "";
-		$nets_list1 = null;
+		$pong = ""; $oldpong = ""; $nets_list1 = null;
 		$error = "";
 
-		$our_url = "";
 		if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
-		$host = $host_name.($host_port === 80 ? "" : ':'.$host_port);
-		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url."\r\n";
-		$out = "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) ).'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host."\r\n".$common_headers;
-		if(DEBUG) echo "\r\n".$out;
+		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
+		$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_header."\r\n".$common_headers."\r\n";
+		if(DEBUG) echo $out;
 
 		if( !fwrite($fp, $out) )
 		{

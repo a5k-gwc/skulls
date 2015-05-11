@@ -31,6 +31,7 @@ div.container { display: -moz-inline-stack; display: inline-block; }  /* IE comp
 .major-change { color: red; }
 
 a { color: blue; }
+a.https { color: #ffd700; }
 a:visited { color: purple; }
 a:focus { color: lime; }
 a:focus img { -moz-outline-style: solid; outline-style: solid; }
