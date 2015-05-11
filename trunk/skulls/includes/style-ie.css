@@ -7,6 +7,9 @@ div.container { *display: inline; }
 div.container table { *width: auto; *display: inline; }
 
 /* On IE5-7 the active state corresponds to the focus state of standard compliant browsers */
-a:active { *color: lime; *clear: expression( this.style.clear = "none", (typeof this.hideFocus != "undefined"? this.hideFocus = true : this.onfocus = this.blur) ); }
-a:active img{ *border-style: solid; }
+a:active { *color: lime; *clear: expression(this.style.clear = "none", this.hideFocus = true); }
+a:active img{ *clear: expression(this.style.clear = "none", this.parentNode.className = this.parentNode.className || "image-link"); }
+a { *border-width: 1px; }
+a.image-link:active { *float: left; *margin: -1px; *border-style: solid; }
+
 #accessible-links a:active { *top: 0.5em; *width: auto; *height: auto; }
