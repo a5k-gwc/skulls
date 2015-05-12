@@ -55,6 +55,15 @@ function IsSecureConnection()
 	return false;
 }
 
+function NormalizePort($secure_http, $port)
+{
+	if(!$port) return null;
+	if($secure_http) { if($port === 443) return null; }
+	else { if($port === 80) return null; }
+
+	return ':'.$port;
+}
+
 function IsWebInterface()
 {
 	if(empty($_SERVER['QUERY_STRING']))
@@ -73,6 +82,8 @@ if(function_exists('header_remove'))
 
 $PHP_SELF = $_SERVER['PHP_SELF'];
 $REMOTE_IP = $_SERVER['REMOTE_ADDR'];
+$SECURE_HTTP = IsSecureConnection();
+$unreliable_host = false;
 
 if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === null)
 {
@@ -80,19 +91,19 @@ if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === nu
 	die("ERROR: Service disabled\r\n");
 }
 
-$unreliable_host = false;
 if(empty($_SERVER['HTTP_HOST']))
 {
+	$unreliable_host = true;
 	if(!IsWebInterface())
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		die("ERROR: Missing Host header\r\n");
 	}
-	$unreliable_host = true;
-	$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME']; if(!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] !== '80') $_SERVER['HTTP_HOST'] .= ':'.$_SERVER['SERVER_PORT'];
+	$server_port = (isset($_SERVER['SERVER_PORT']) ? (int)$_SERVER['SERVER_PORT'] : null);
+	$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].NormalizePort($SECURE_HTTP, $server_port); unset($server_port);
 }
 
-$MY_URL = (IsSecureConnection() ? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
+$MY_URL = ($SECURE_HTTP? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
 if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$unreliable_host)
 {
 	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
@@ -216,6 +227,8 @@ function CanonicalizeURL(&$full_url)
 	if(strpos($full_url, '://') !== false)
 	{
 		list($scheme, $url) = explode('://', $full_url, 2);
+		$scheme = strtolower($scheme);
+		$secure_http = ($scheme === 'https');
 
 		/* Drop everything after "?" */
 		if(strpos($url, '?') !== false)
@@ -265,14 +278,14 @@ function CanonicalizeURL(&$full_url)
 		if(strpos($host, ':') !== false)
 			{ list($host_name, $host_port) = explode(':', $host, 2); if(!ctype_digit($host_port)) return false; $host_port = (int)$host_port; }
 		else
-			{ $host_name = $host; $host_port = 80; }
+			{ $host_name = $host; $host_port = ($secure_http? 443 : 80); }
 		/* ToDO: Verify port */
 		/* ToDO: Remove dot at the end of hostname if present */
 
 		if(substr($host_name, -9) === '.nyud.net' || substr($host_name, -10) === '.nyucd.net')
 			return false;  /* Block Coral Content Distribution Network */
 
-		$full_url = strtolower($scheme).'://'.strtolower($host_name).($host_port === 80 ? "" : ':'.$host_port).$path;
+		$full_url = $scheme.'://'.strtolower($host_name).NormalizePort($secure_http, $host_port).$path;
 	}
 	else
 	{
@@ -567,9 +580,8 @@ function PingGWC($gwc_url, $query)
 		{ $gwc_hostname = $gwc_host; $gwc_port = ($secure_http? 443 : 80); }
 	unset($gwc_host);
 
-	$is_default_port = ((!$secure_http && $gwc_port === 80) || ($secure_http && $gwc_port === 443));
-	$host_header = $gwc_hostname; if(!$is_default_port) $host_header .= ':'.$gwc_port;
-	if(DEBUG) echo "\r\n",'D|Secure http: ',(int)($secure_http),"\r\n\r\n";
+	$host_header = $gwc_hostname.NormalizePort($secure_http, $gwc_port);
+	if(DEBUG) echo "\r\n",'D|update|Secure http: ',(int)($secure_http),"\r\n\r\n";
 
 	$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
 	if(!$fp)
