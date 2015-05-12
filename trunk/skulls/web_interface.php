@@ -292,7 +292,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								}
 								else
 									$output .= " &nbsp; ";
-								$output .= '<a'.(strpos($cache_url, 'https') === 0 ? ' class="https"' : "").' href="'.$cache_url.'" rel="external">';
+								$output .= '<a'.(strpos($cache_url, 'https:') === 0 ? ' class="https"' : "").' href="'.$cache_url.'" rel="external">';
 
 								if(strpos($cache_url, "://") > -1)
 								{
