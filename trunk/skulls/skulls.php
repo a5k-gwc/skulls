@@ -279,13 +279,15 @@ function CanonicalizeURL(&$full_url)
 			{ list($host_name, $host_port) = explode(':', $host, 2); if(!ctype_digit($host_port)) return false; $host_port = (int)$host_port; }
 		else
 			{ $host_name = $host; $host_port = ($secure_http? 443 : 80); }
+		$host_name = strtolower(trim($host_name));
+
 		/* ToDO: Verify port */
 		/* ToDO: Remove dot at the end of hostname if present */
 
 		if(substr($host_name, -9) === '.nyud.net' || substr($host_name, -10) === '.nyucd.net')
 			return false;  /* Block Coral Content Distribution Network */
 
-		$full_url = $scheme.'://'.strtolower($host_name).NormalizePort($secure_http, $host_port).$path;
+		$full_url = $scheme.'://'.$host_name.NormalizePort($secure_http, $host_port).$path;
 	}
 	else
 	{
@@ -568,7 +570,7 @@ function ConnectionTest()
 
 function PingGWC($gwc_url, $query)
 {
-	$errno = -1; $errstr = ""; $our_url = "";
+	$errno = -1; $errstr = ""; $our_url = null;
 	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
 	list($gwc_host, $gwc_path) = explode('/', $gwc_base_url, 2);
 	$secure_http = ($gwc_scheme === 'https');
@@ -581,7 +583,7 @@ function PingGWC($gwc_url, $query)
 	unset($gwc_host);
 
 	$host_header = $gwc_hostname.NormalizePort($secure_http, $gwc_port);
-	if(DEBUG) echo "\r\n",'D|update|Secure http: ',(int)($secure_http),"\r\n\r\n";
+	if(DEBUG) echo "\r\nD|update|Secure http|",(int)($secure_http),"\r\n\r\n";
 
 	$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
 	if(!$fp)
@@ -627,7 +629,7 @@ function PingGWC($gwc_url, $query)
 			if(!empty($pong))
 			{
 				$received_data = explode("|", $pong);
-				$gwc_name = RemoveGarbage(rawurldecode($received_data[2]));
+				$gwc_name = RemoveGarbage(trim(rawurldecode($received_data[2])));
 				$cache_data = "P|".$gwc_name;
 
 				if($nets_list1 !== null)
@@ -650,7 +652,7 @@ function PingGWC($gwc_url, $query)
 			}
 			elseif(!empty($oldpong))
 			{
-				$oldpong = RemoveGarbage(rawurldecode(substr($oldpong, 5)));
+				$oldpong = RemoveGarbage(trim(rawurldecode(substr($oldpong, 4))));
 				$cache_data = "P|".$oldpong;
 
 				/* Needed to force specs v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
@@ -723,7 +725,7 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 
 	if($congestion_check && $received_data[0] === 'CONN_ERR' && !ConnectionTest())
 		$cache_data[0] = 'CONGESTION';
-	elseif($received_data[0] === 'CONN_ERR' || $received_data[0] === 'ERR' || $received_data[1] == "")
+	elseif($received_data[0] === 'CONN_ERR' || $received_data[0] === 'ERR' || $received_data[1] === "")
 		$cache_data[0] = "FAIL";
 	else
 	{
