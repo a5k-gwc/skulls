@@ -284,6 +284,8 @@ function CanonicalizeURL(&$full_url)
 		/* ToDO: Verify port */
 		/* ToDO: Remove dot at the end of hostname if present */
 
+		if(strpos($host_name, 'xn--') === 0)
+			return false;  /* Block already IDN encoded domains, URLs must be submitted in the original form and IDN encoded only for querying them */
 		if(substr($host_name, -9) === '.nyud.net' || substr($host_name, -10) === '.nyucd.net')
 			return false;  /* Block Coral Content Distribution Network */
 
@@ -570,7 +572,7 @@ function ConnectionTest()
 
 function PingGWC($gwc_url, $query)
 {
-	$errno = -1; $errstr = ""; $our_url = null;
+	$errno = -1; $errstr = ""; $our_url = null; $gwc_idn_hostname = false;
 	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
 	list($gwc_host, $gwc_path) = explode('/', $gwc_base_url, 2);
 	$secure_http = ($gwc_scheme === 'https');
@@ -582,10 +584,13 @@ function PingGWC($gwc_url, $query)
 		{ $gwc_hostname = $gwc_host; $gwc_port = ($secure_http? 443 : 80); }
 	unset($gwc_host);
 
-	$host_header = $gwc_hostname.NormalizePort($secure_http, $gwc_port);
-	if(DEBUG) echo "\r\nD|update|Secure http|",(int)($secure_http),"\r\n\r\n";
+	/* It needs the PHP Intl extension (bundled version with --enable-intl or PECL) enabled on the server */
+	if(function_exists('idn_to_ascii')) $gwc_idn_hostname = idn_to_ascii($gwc_hostname);
+	if($gwc_idn_hostname === false) $gwc_idn_hostname = $gwc_hostname;
+	$host_header = $gwc_idn_hostname.NormalizePort($secure_http, $gwc_port);
+	if(DEBUG) echo "\r\nD|update|Secure http|",(int)($secure_http),"\r\nD|update|Hostname|",$gwc_hostname,"\r\nD|update|IDN Hostname|",$gwc_idn_hostname,"\r\n\r\n";
 
-	$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
+	$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_idn_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
 	if(!$fp)
 	{
 		$cache_data = 'CONN_ERR|'.$errno;				// CONN_ERR|Error number
