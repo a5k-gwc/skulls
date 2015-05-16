@@ -33,7 +33,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 	if($compression !== null) $base_link .= 'compression='.$compression.'&amp;';
 
 	$title = NAME.'! Multi-Network WebCache '.VER;
-	$maintainer = htmlentities(MAINTAINER_NICK);
+	$maintainer = htmlentities(MAINTAINER_NICK, ENT_QUOTES, 'UTF-8');
 	if($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 4) $title .= ' - Stats';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -120,11 +120,11 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 ?>
 							<tr>
 								<th>- GeoIP DB version:</th>
-								<td class="green"><span class="bold"><?php echo htmlentities($geoip->GetDBVersion()); ?></span></td>
+								<td class="green"><span class="bold"><?php echo htmlentities($geoip->GetDBVersion(), ENT_QUOTES, 'UTF-8'); ?></span></td>
 							</tr>
 							<tr>
 								<th>- GeoIP DB (c)opy:</th>
-								<td class="brown"><?php echo htmlentities($geoip->GetDBCopyright()); ?></td>
+								<td class="brown"><?php echo htmlentities($geoip->GetDBCopyright(), ENT_QUOTES, 'UTF-8'); ?></td>
 							</tr>
 <?php
 						}
@@ -134,7 +134,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 						if($mail === 'name AT server DOT com')
 							$mail = "";
 						elseif($mail !== "")
-							$mail = ' title="'.htmlentities($mail).'"';
+							$mail = ' title="'.htmlentities($mail, ENT_QUOTES, 'UTF-8').'"';
 ?>
 						<tr>
 							<td></td>
@@ -152,7 +152,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								<th>- Maintainer site:</th>
 								<td class="blue">
 <?php
-									$website = htmlentities(MAINTAINER_WEBSITE);
+									$website = htmlentities(MAINTAINER_WEBSITE, ENT_QUOTES, 'UTF-8');
 									echo '<a href="',$website,'" class="hover-underline" rel="external">',$website,'</a>',"\n";
 ?>
 								</td>
@@ -194,7 +194,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 					$elements = count($host_file["host"]);
 				}
 ?>
-				<div id="page-title"><strong><?php echo ucfirst($NET); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</strong></div>
+				<div id="page-title"><strong><?php echo htmlentities(ucfirst($NET), ENT_QUOTES, 'UTF-8'); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</strong></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current hosts in cache">
 						<tr class="header-column">
@@ -268,7 +268,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 							for($i = $elements - 1; $i >= 0; $i--)
 							{
 								list ($cache_url, $cache_name, $net, $client, $version, $time) = explode("|", $cache_file[$i], 6);
-								$cache_name = htmlentities($cache_name);
+								$cache_name = htmlentities($cache_name, ENT_QUOTES, 'UTF-8');
 								if( strpos($net, "-") > -1 )
 								{
 									$networks = explode( "-", $net );
