@@ -477,6 +477,8 @@ function CheckBlockedGWC($gwc_url)
 	if(
 		$gwc_url === 'http://cache.trillinux.org/g2/bazooka.php'	/* Bugged - Return hosts with negative age */
 		|| $gwc_url === 'http://fascination77.free.fr/cachechu/'	/* Bugged - Call to undefined function: stream_socket_client() */
+		|| $gwc_url === 'http://cache.peernix.com/gwc/'				/* Duplicate URL */
+		|| $gwc_url === 'http://cache.peernix.com/gwc'				/* Duplicate URL */
 		|| $gwc_url === 'http://gwc.iblinx.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://gamagic.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://0517play.com:4400/gwc/cgi-bin/fc'	/* No longer exist */
