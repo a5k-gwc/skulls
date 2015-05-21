@@ -643,6 +643,30 @@ function PingGWC($gwc_url, $query)
 			}
 		}
 	}
+	elseif(0)  /* cURL */
+	{
+		$ch = curl_init($gwc_url.'?'.$query);
+		if($ch === false)
+		{
+			if(DEBUG) echo 'D|update|curl_init-failed',"\r\n";
+			return 'ERR|curl_init-failed';
+		}
+
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (float)TIMEOUT);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		$headers = array();
+		$headers[] = 'Host: '.$host_header;
+		$headers[] = 'Connection: close';
+		$headers[] = 'User-Agent: '.NAME.' '.VER;
+		if(CACHE_URL !== "") $headers[] = 'X-GWC-URL: '.CACHE_URL;
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+		$response = curl_exec($ch);
+		curl_close($ch);
+
+		echo $response;
+	}
 
 	if(!empty($pong))
 	{
