@@ -662,8 +662,7 @@ function PingGWC($gwc_url, $query)
 		if(CACHE_URL !== "") $headers[] = 'X-GWC-URL: '.CACHE_URL;
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-		$response = curl_exec($ch);
-		if($response === false) return 'ERR|curl_exec-FAILED';
+		$response = curl_exec($ch); if($response === false) { curl_close($ch); return 'ERR|curl_exec-FAILED'; }
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
