@@ -577,7 +577,8 @@ function ConnectionTest()
 
 function PingGWC($gwc_url, $query)
 {
-	$errno = -1; $errstr = ""; $our_url = null; $gwc_idn_hostname = false;
+	$cache_data = 'ERR|0'; $our_url = null; $gwc_idn_hostname = false;
+
 	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
 	list($gwc_host, $gwc_path) = explode('/', $gwc_base_url, 2);
 	$secure_http = ($gwc_scheme === 'https');
@@ -595,101 +596,108 @@ function PingGWC($gwc_url, $query)
 	$host_header = $gwc_idn_hostname.NormalizePort($secure_http, $gwc_port);
 	if(DEBUG) echo "\r\nD|update|Secure http|",(int)($secure_http),"\r\nD|update|Hostname|",$gwc_hostname,"\r\nD|update|IDN Hostname|",$gwc_idn_hostname,"\r\n\r\n";
 
-	$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_idn_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
-	if(!$fp)
+	if(FSOCKOPEN)
 	{
-		$cache_data = 'CONN_ERR|'.$errno;				// CONN_ERR|Error number
-		if(DEBUG) echo 'D|update|ERROR|',$errno,'|',rtrim($errstr),"\r\n";
-	}
-	else
-	{
-		$pong = ""; $oldpong = ""; $nets_list1 = null;
-		$error = "";
-
-		if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
-		$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
-		$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_header."\r\n".$common_headers."\r\n";
-		if(DEBUG) echo $out;
-
-		if( !fwrite($fp, $out) )
+		$errno = -1; $errstr = "";
+		$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_idn_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
+		if($fp === false)
 		{
-			$cache_data = "ERR|Request error";		// ERR|Error name
-			fclose($fp);
+			if(DEBUG) echo 'D|update|CONN-ERR|',$errno,'|',rtrim($errstr),"\r\n";
+			return 'CONN_ERR|'.$errno;
 		}
 		else
 		{
-			while( !feof($fp) )
+			$pong = ""; $oldpong = ""; $nets_list1 = null;
+			$error = "";
+
+			if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
+			$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
+			$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_header."\r\n".$common_headers."\r\n";
+			if(DEBUG) echo $out;
+
+			if(fwrite($fp, $out) !== strlen($out))
 			{
-				$line = rtrim(fgets($fp, 1024));
-				if(DEBUG) echo $line."\r\n";
-
-				if( strtolower( substr( $line, 0, 7 ) ) === "i|pong|" )
-					$pong = rtrim($line);
-				elseif(substr($line, 0, 4) === "PONG")
-					$oldpong = rtrim($line);
-				elseif(strtolower( substr($line, 0, 11) ) === "i|networks|")
-					$nets_list1 = strtolower( substr($line, 11) );
-				elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
-					$error .= rtrim($line)." - ";
-				elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
-					$error .= rtrim($line)." - ";
-			}
-			fclose($fp);
-
-			if(!empty($pong))
-			{
-				$received_data = explode("|", $pong);
-				$gwc_name = RemoveGarbage(trim(rawurldecode($received_data[2])));
-				$cache_data = "P|".$gwc_name;
-
-				if($nets_list1 !== null)
-					$nets = RemoveGarbage(str_replace( array('-', '|'), array('%2D', '-'), $nets_list1 ));
-				elseif(count($received_data) > 3 && $received_data[3] != "")
-				{
-					if(substr($received_data[3], 0, 4) === "http")  /* Workaround for compatibility with PHPGnuCacheII */
-						$nets = "gnutella-gnutella2";
-					else
-						$nets = RemoveGarbage(strtolower($received_data[3]));
-				}
-				elseif(strpos($gwc_name, 'GhostWhiteCrab') === 0)  /* On GhostWhiteCrab if the network is gnutella then the networks list is missing :( */
-					$nets = "gnutella";
-				elseif( !empty($oldpong) )
-					$nets = "gnutella-gnutella2";
-				else
-					$nets = "gnutella2";
-
-				$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
-			}
-			elseif(!empty($oldpong))
-			{
-				$oldpong = RemoveGarbage(trim(rawurldecode(substr($oldpong, 4))));
-				$cache_data = "P|".$oldpong;
-
-				/* Needed to force specs v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
-				if(strpos($oldpong, 'Cachechu') === 0)
-					return PingGWC($gwc_url, $query.'&update=1');
-
-				if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
-					//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
-					substr($oldpong, 0, 12) == "jumswebcache" ||
-					substr($oldpong, 0, 11) == "GWebCache 2" )
-					$nets = "gnutella-gnutella2";
-				elseif(substr($oldpong, 0, 9) == "MWebCache")
-					$nets = "mute";
-				else
-					$nets = "gnutella";
-
-				$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+				fclose($fp); if(DEBUG) echo 'D|update|REQ-ERR',"\r\n";
+				return 'ERR|REQ-ERR';
 			}
 			else
 			{
-				$error = RemoveGarbage(strtolower($error));
-				$cache_data = "ERR|".$error;	// ERR|Error name
+				$i = 0;
+				while($i++ < 128)
+				{
+					$line = fgets($fp, 256);
+					if($line === false) break;
+					$line = rtrim($line);
+					if(DEBUG) echo $i,' ',$line,"\r\n";
+
+					if( strtolower( substr( $line, 0, 7 ) ) === "i|pong|" )
+						$pong = rtrim($line);
+					elseif(substr($line, 0, 4) === "PONG")
+						$oldpong = rtrim($line);
+					elseif(strtolower( substr($line, 0, 11) ) === "i|networks|")
+						$nets_list1 = strtolower( substr($line, 11) );
+					elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
+						$error .= rtrim($line)." - ";
+					elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
+						$error .= rtrim($line)." - ";
+				}
+				fclose($fp);
+
+				if(!empty($pong))
+				{
+					$received_data = explode("|", $pong);
+					$gwc_name = RemoveGarbage(trim(rawurldecode($received_data[2])));
+					$cache_data = "P|".$gwc_name;
+
+					if($nets_list1 !== null)
+						$nets = RemoveGarbage(str_replace( array('-', '|'), array('%2D', '-'), $nets_list1 ));
+					elseif(count($received_data) > 3 && $received_data[3] != "")
+					{
+						if(substr($received_data[3], 0, 4) === "http")  /* Workaround for compatibility with PHPGnuCacheII */
+							$nets = "gnutella-gnutella2";
+						else
+							$nets = RemoveGarbage(strtolower($received_data[3]));
+					}
+					elseif(strpos($gwc_name, 'GhostWhiteCrab') === 0)  /* On GhostWhiteCrab if the network is gnutella then the networks list is missing :( */
+						$nets = "gnutella";
+					elseif( !empty($oldpong) )
+						$nets = "gnutella-gnutella2";
+					else
+						$nets = "gnutella2";
+
+					$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+				}
+				elseif(!empty($oldpong))
+				{
+					$oldpong = RemoveGarbage(trim(rawurldecode(substr($oldpong, 4))));
+					$cache_data = "P|".$oldpong;
+
+					/* Needed to force specs v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
+					if(strpos($oldpong, 'Cachechu') === 0)
+						return PingGWC($gwc_url, $query.'&update=1');
+
+					if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
+						//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
+						substr($oldpong, 0, 12) == "jumswebcache" ||
+						substr($oldpong, 0, 11) == "GWebCache 2" )
+						$nets = "gnutella-gnutella2";
+					elseif(substr($oldpong, 0, 9) == "MWebCache")
+						$nets = "mute";
+					else
+						$nets = "gnutella";
+
+					$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+				}
+				else
+				{
+					$error = RemoveGarbage(strtolower($error));
+					$cache_data = "ERR|".$error;	// ERR|Error name
+				}
 			}
 		}
 	}
 
-	if(DEBUG) echo "\r\nD|update|Result: ".$cache_data."\r\n\r\n";
+	if(DEBUG) echo "\r\nD|update|Result|",$cache_data,"\r\n\r\n";
 	return $cache_data;
 }
 
