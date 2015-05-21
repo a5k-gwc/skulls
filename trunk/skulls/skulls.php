@@ -577,7 +577,8 @@ function ConnectionTest()
 
 function PingGWC($gwc_url, $query)
 {
-	$cache_data = 'ERR|0'; $our_url = null; $gwc_idn_hostname = false;
+	define('LINES_LIMIT', 128);
+	$our_url = null; $gwc_idn_hostname = false;
 
 	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
 	list($gwc_host, $gwc_path) = explode('/', $gwc_base_url, 2);
@@ -594,66 +595,64 @@ function PingGWC($gwc_url, $query)
 	if(function_exists('idn_to_ascii')) $gwc_idn_hostname = idn_to_ascii($gwc_hostname);
 	if($gwc_idn_hostname === false) $gwc_idn_hostname = $gwc_hostname;
 	$host_header = $gwc_idn_hostname.NormalizePort($secure_http, $gwc_port);
-	if(DEBUG) echo "\r\nD|update|Secure http|",(int)($secure_http),"\r\nD|update|Hostname|",$gwc_hostname,"\r\nD|update|IDN Hostname|",$gwc_idn_hostname,"\r\n\r\n";
+	if(DEBUG) echo "\r\nD|update|GWC|HOSTNAME|",$gwc_hostname,"\r\nD|update|GWC|IDN-HOSTNAME|",$gwc_idn_hostname,"\r\nD|update|GWC|SECURE-HTTP|",(int)$secure_http,"\r\n";
 
-	$pong = ""; $oldpong = ""; $error = ""; $nets_list1 = null;
+	$cache_data = null; $pong = ""; $oldpong = ""; $error = ""; $nets_list1 = null;
 	if(FSOCKOPEN)
 	{
 		$errno = -1; $errstr = "";
 		$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_idn_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
 		if($fp === false)
 		{
-			if(DEBUG) echo 'D|update|CONN-ERR|',$errno,'|',rtrim($errstr),"\r\n";
-			return 'CONN_ERR|'.$errno;
+			if(DEBUG) echo 'D|update|GWC|CONN-ERR|',$errno,'|',rtrim($errstr),"\r\n";
+			return 'CONN-ERR|'.$errno;
 		}
 		else
 		{
 			if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 			$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
 			$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_header."\r\n".$common_headers."\r\n";
-			if(DEBUG) echo $out;
+			if(DEBUG) echo "\r\n",rtrim($out),"\r\n";
 
 			if(fwrite($fp, $out) !== strlen($out))
 			{
-				fclose($fp); if(DEBUG) echo 'D|update|REQ-ERR',"\r\n";
+				fclose($fp); if(DEBUG) echo 'D|update|GWC|REQ-ERR',"\r\n";
 				return 'ERR|REQ-ERR';
 			}
 			else
 			{
 				$i = 0;
-				while($i++ < 128)
+				while($i++ < LINES_LIMIT)
 				{
 					$line = fgets($fp, 256);
 					if($line === false) break;
 					$line = rtrim($line);
-					if(DEBUG) echo $i,' ',$line,"\r\n";
+					if(DEBUG) echo "\r\n",$i,' ',$line;
 
 					if( strtolower( substr( $line, 0, 7 ) ) === "i|pong|" )
-						$pong = rtrim($line);
+						$pong = $line;
 					elseif(substr($line, 0, 4) === "PONG")
-						$oldpong = rtrim($line);
+						$oldpong = $line;
 					elseif(strtolower( substr($line, 0, 11) ) === "i|networks|")
 						$nets_list1 = strtolower( substr($line, 11) );
 					elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
-						$error .= rtrim($line)." - ";
+						$error .= $line.'-';
 					elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
-						$error .= rtrim($line)." - ";
+						$error .= $line.'-';
 				}
 				fclose($fp);
 			}
 		}
 	}
-	elseif(0)  /* cURL */
+	elseif(extension_loaded('curl'))  /* cURL */
 	{
 		$ch = curl_init($gwc_url.'?'.$query);
-		if($ch === false)
-		{
-			if(DEBUG) echo 'D|update|curl_init-failed',"\r\n";
-			return 'ERR|curl_init-failed';
-		}
+		if($ch === false) return 'ERR|curl_init-FAILED';
 
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (float)TIMEOUT);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int)TIMEOUT);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 
 		$headers = array();
 		$headers[] = 'Host: '.$host_header;
@@ -663,10 +662,35 @@ function PingGWC($gwc_url, $query)
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 		$response = curl_exec($ch);
+		if($response === false) return 'ERR|curl_exec-FAILED';
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 		curl_close($ch);
 
-		echo $response;
+		if(DEBUG) echo 'D|update|GWC|HTTP-CODE|',(int)$http_code,"\r\n";
+		if($http_code === false || $http_code < 200 || $http_code > 299)
+			return 'ERR|HTTP-CODE|'.(int)$http_code;
+
+		$i = -1; $lines = explode("\n", $response, LINES_LIMIT+1); $response = null; $tot_lines = count($lines);
+		if($tot_lines === LINES_LIMIT+1 || rtrim($lines[$tot_lines-1]) === "") { $lines[$tot_lines-1] = null; $tot_lines--; }
+		while(++$i < $tot_lines)
+		{
+			$line = rtrim($lines[$i]);
+			if(DEBUG) echo "\r\n",$i+1,' ',$line;
+
+			if( strtolower( substr( $line, 0, 7 ) ) === "i|pong|" )
+				$pong = $line;
+			elseif(substr($line, 0, 4) === "PONG")
+				$oldpong = $line;
+			elseif(strtolower( substr($line, 0, 11) ) === "i|networks|")
+				$nets_list1 = strtolower( substr($line, 11) );
+			elseif(substr($line, 0, 5) == "ERROR")
+				$error .= $line.'-';
+			elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
+				$error .= $line.'-';
+		}
 	}
+	else
+		return 'ERR|DISABLED';
 
 	if(!empty($pong))
 	{
@@ -719,7 +743,6 @@ function PingGWC($gwc_url, $query)
 		$cache_data = "ERR|".$error;	// ERR|Error name
 	}
 
-	if(DEBUG) echo "\r\nD|update|Result|",$cache_data,"\r\n\r\n";
 	return $cache_data;
 }
 
@@ -732,7 +755,7 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 	{
 		$udp = FALSE;
 		$query = "ping=1&multi=1&getnetworks=1&pv=2&client=".VENDOR."&version=".SHORT_VER."&cache=1";
-		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list    or    ERR|Error name    or    CONN_ERR|Error number
+		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list    or    ERR|Error name    or    CONN-ERR|Error number
 	}
 	else
 	{
@@ -762,10 +785,11 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 		unset($received_data);
 		$received_data = explode("|", $result);
 	}
+	if(DEBUG) echo "\r\nD|update|GWC|Result|",$result,"\r\n\r\n";
 
-	if($congestion_check && $received_data[0] === 'CONN_ERR' && !ConnectionTest())
+	if($congestion_check && $received_data[0] === 'CONN-ERR' && !ConnectionTest())
 		$cache_data[0] = 'CONGESTION';
-	elseif($received_data[0] === 'CONN_ERR' || $received_data[0] === 'ERR' || $received_data[1] === "")
+	elseif($received_data[0] === 'CONN-ERR' || $received_data[0] === 'ERR' || $received_data[1] === "")
 		$cache_data[0] = "FAIL";
 	else
 	{
@@ -1057,7 +1081,7 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dum
 	}
 
 	$gwcs_sent = 0;
-	if(FSOCKOPEN)
+	if(FSOCKOPEN || extension_loaded('curl'))
 	{
 		$cache_file = file(DATA_DIR."/caches.dat");
 		$count_cache = count($cache_file);
@@ -1581,7 +1605,7 @@ else
 		if( $CACHE != NULL && $supported_net )
 		{
 			$result = -1;
-			if(!FSOCKOPEN) // Cache adding disabled
+			if(!FSOCKOPEN && !extension_loaded('curl')) // Cache adding disabled
 				print "I|update|WARNING|URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
@@ -1640,7 +1664,7 @@ else
 		if( $CACHE != NULL && $supported_net )
 		{
 			$result = -1;
-			if(!FSOCKOPEN) // Cache adding disabled
+			if(!FSOCKOPEN && !extension_loaded('curl')) // Cache adding disabled
 				print "WARNING: URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
@@ -1682,7 +1706,7 @@ else
 		if($HOSTFILE)
 			HostFile($NET);
 
-		if($URLFILE && FSOCKOPEN)
+		if($URLFILE && (FSOCKOPEN || extension_loaded('curl')))
 			UrlFile($NET, $CLIENT);
 
 		if($PV >= 3 && ($HOSTFILE || $URLFILE))

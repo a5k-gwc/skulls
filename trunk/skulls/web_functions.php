@@ -438,7 +438,7 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 
 	if(!$fp)
 	{
-		$status = 'CONN_ERR';
+		$status = 'CONN-ERR';
 		$msg = 'Connection error '.$errno.' ('.rtrim($errstr).')';
 	}
 	else
@@ -573,7 +573,7 @@ function CheckUpdates()
 		$msg_error = $returned_data[4];
 	}
 
-	if($status === 'CONN_ERR' || $status === '403')
+	if($status === 'CONN-ERR' || $status === '403')
 	{
 		echo '<div class="bold">Update check process: ';
 		if(FSOCKOPEN)
