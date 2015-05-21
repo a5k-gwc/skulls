@@ -596,6 +596,7 @@ function PingGWC($gwc_url, $query)
 	$host_header = $gwc_idn_hostname.NormalizePort($secure_http, $gwc_port);
 	if(DEBUG) echo "\r\nD|update|Secure http|",(int)($secure_http),"\r\nD|update|Hostname|",$gwc_hostname,"\r\nD|update|IDN Hostname|",$gwc_idn_hostname,"\r\n\r\n";
 
+	$pong = ""; $oldpong = ""; $error = ""; $nets_list1 = null;
 	if(FSOCKOPEN)
 	{
 		$errno = -1; $errstr = "";
@@ -607,9 +608,6 @@ function PingGWC($gwc_url, $query)
 		}
 		else
 		{
-			$pong = ""; $oldpong = ""; $nets_list1 = null;
-			$error = "";
-
 			if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 			$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
 			$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_header."\r\n".$common_headers."\r\n";
@@ -642,59 +640,59 @@ function PingGWC($gwc_url, $query)
 						$error .= rtrim($line)." - ";
 				}
 				fclose($fp);
-
-				if(!empty($pong))
-				{
-					$received_data = explode("|", $pong);
-					$gwc_name = RemoveGarbage(trim(rawurldecode($received_data[2])));
-					$cache_data = "P|".$gwc_name;
-
-					if($nets_list1 !== null)
-						$nets = RemoveGarbage(str_replace( array('-', '|'), array('%2D', '-'), $nets_list1 ));
-					elseif(count($received_data) > 3 && $received_data[3] != "")
-					{
-						if(substr($received_data[3], 0, 4) === "http")  /* Workaround for compatibility with PHPGnuCacheII */
-							$nets = "gnutella-gnutella2";
-						else
-							$nets = RemoveGarbage(strtolower($received_data[3]));
-					}
-					elseif(strpos($gwc_name, 'GhostWhiteCrab') === 0)  /* On GhostWhiteCrab if the network is gnutella then the networks list is missing :( */
-						$nets = "gnutella";
-					elseif( !empty($oldpong) )
-						$nets = "gnutella-gnutella2";
-					else
-						$nets = "gnutella2";
-
-					$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
-				}
-				elseif(!empty($oldpong))
-				{
-					$oldpong = RemoveGarbage(trim(rawurldecode(substr($oldpong, 4))));
-					$cache_data = "P|".$oldpong;
-
-					/* Needed to force specs v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
-					if(strpos($oldpong, 'Cachechu') === 0)
-						return PingGWC($gwc_url, $query.'&update=1');
-
-					if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
-						//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
-						substr($oldpong, 0, 12) == "jumswebcache" ||
-						substr($oldpong, 0, 11) == "GWebCache 2" )
-						$nets = "gnutella-gnutella2";
-					elseif(substr($oldpong, 0, 9) == "MWebCache")
-						$nets = "mute";
-					else
-						$nets = "gnutella";
-
-					$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
-				}
-				else
-				{
-					$error = RemoveGarbage(strtolower($error));
-					$cache_data = "ERR|".$error;	// ERR|Error name
-				}
 			}
 		}
+	}
+
+	if(!empty($pong))
+	{
+		$received_data = explode("|", $pong);
+		$gwc_name = RemoveGarbage(trim(rawurldecode($received_data[2])));
+		$cache_data = "P|".$gwc_name;
+
+		if($nets_list1 !== null)
+			$nets = RemoveGarbage(str_replace( array('-', '|'), array('%2D', '-'), $nets_list1 ));
+		elseif(count($received_data) > 3 && $received_data[3] != "")
+		{
+			if(substr($received_data[3], 0, 4) === "http")  /* Workaround for compatibility with PHPGnuCacheII */
+				$nets = "gnutella-gnutella2";
+			else
+				$nets = RemoveGarbage(strtolower($received_data[3]));
+		}
+		elseif(strpos($gwc_name, 'GhostWhiteCrab') === 0)  /* On GhostWhiteCrab if the network is gnutella then the networks list is missing :( */
+			$nets = "gnutella";
+		elseif( !empty($oldpong) )
+			$nets = "gnutella-gnutella2";
+		else
+			$nets = "gnutella2";
+
+		$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+	}
+	elseif(!empty($oldpong))
+	{
+		$oldpong = RemoveGarbage(trim(rawurldecode(substr($oldpong, 4))));
+		$cache_data = "P|".$oldpong;
+
+		/* Needed to force specs v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
+		if(strpos($oldpong, 'Cachechu') === 0)
+			return PingGWC($gwc_url, $query.'&update=1');
+
+		if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
+			//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
+			substr($oldpong, 0, 12) == "jumswebcache" ||
+			substr($oldpong, 0, 11) == "GWebCache 2" )
+			$nets = "gnutella-gnutella2";
+		elseif(substr($oldpong, 0, 9) == "MWebCache")
+			$nets = "mute";
+		else
+			$nets = "gnutella";
+
+		$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+	}
+	else
+	{
+		$error = RemoveGarbage(strtolower($error));
+		$cache_data = "ERR|".$error;	// ERR|Error name
 	}
 
 	if(DEBUG) echo "\r\nD|update|Result|",$cache_data,"\r\n\r\n";
