@@ -567,6 +567,40 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	fclose($file);
 }
 
+function cURL_SetOptions($ch, $host, $port)
+{
+	$headers = array();
+	$headers[] = 'Host: '.$host;
+	$headers[] = 'Connection: close';
+	$headers[] = 'User-Agent: '.NAME.' '.VER;
+	if(CACHE_URL !== "") $headers[] = 'X-GWC-URL: '.CACHE_URL;
+
+	if(DEBUG) curl_setopt($ch, CURLOPT_VERBOSE, true);
+
+	if(
+		!curl_setopt($ch, CURLOPT_PORT, $port);
+		|| !curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)
+		|| !curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int)CONNECT_TIMEOUT)
+		|| !curl_setopt($ch, CURLOPT_TIMEOUT, (int)TIMEOUT)
+		|| !curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false)
+		|| !curl_setopt($ch, CURLOPT_FORBID_REUSE, true)
+		|| !curl_setopt($ch, CURLOPT_FRESH_CONNECT, true)
+		|| !curl_setopt($ch, CURLOPT_HTTPHEADER, $headers)
+	)
+		return false;
+
+	if(defined('CURLOPT_BINARYTRANSFER'))
+		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);  /* Used only in PHP 5.1.0-5.1.2 */
+
+	return true;
+}
+
+function cURL_OnError($ch, $function_name, $initialized = true)
+{
+	if($initialized) curl_close($ch);
+	return 'ERR|cURL-'.$function_name.'-FAILED';
+}
+
 function ConnectionTest()
 {
 	$fp = @fsockopen('google.com', 80, $errno, $errstr, 5);
@@ -648,34 +682,21 @@ function PingGWC($gwc_url, $query)
 	elseif(extension_loaded('curl'))  /* cURL */
 	{
 		$ch = curl_init($gwc_url.'?'.$query);
-		if($ch === false) return 'ERR|curl_init-FAILED';
+		if($ch === false) return cURL_OnError(null, 'init', false);
 
-		if(DEBUG) curl_setopt($ch, CURLOPT_VERBOSE, true);
-		curl_setopt($ch, CURLOPT_PORT, $gwc_port);
+		if(!cURL_SetOptions($ch, $host_header, $gwc_port)) return cURL_OnError($ch, 'setopt');
 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);  /* Used only in PHP 5.1.0-5.1.2 */
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int)CONNECT_TIMEOUT);
-		curl_setopt($ch, CURLOPT_TIMEOUT, (int)TIMEOUT);
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+		$response = curl_exec($ch);
+		if($response === false) return cURL_OnError($ch, 'exec');
 
-		curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
-		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
-
-		$headers = array();
-		$headers[] = 'Host: '.$host_header;
-		$headers[] = 'Connection: close';
-		$headers[] = 'User-Agent: '.NAME.' '.VER;
-		if(CACHE_URL !== "") $headers[] = 'X-GWC-URL: '.CACHE_URL;
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$response = curl_exec($ch); if($response === false) { curl_close($ch); return 'ERR|curl_exec-FAILED'; }
 		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		if($http_code === false) return cURL_OnError($ch, 'getinfo');
+
 		curl_close($ch);
 
-		if(DEBUG) echo 'D|update|GWC|HTTP-CODE|',(int)$http_code,"\r\n";
-		if($http_code === false || $http_code < 200 || $http_code > 299)
-			return 'ERR|HTTP-CODE|'.(int)$http_code;
+		if(DEBUG) echo 'D|update|GWC|HTTP-CODE|',$http_code,"\r\n";
+		if($http_code < 200 || $http_code > 299)
+			return 'ERR|HTTP-CODE-'.$http_code;
 
 		$i = -1; $lines = explode("\n", $response, LINES_LIMIT+1); $response = null; $tot_lines = count($lines);
 		if($tot_lines === LINES_LIMIT+1 || rtrim($lines[$tot_lines-1]) === "") { $lines[$tot_lines-1] = null; $tot_lines--; }
