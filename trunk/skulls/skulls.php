@@ -578,7 +578,7 @@ function cURL_SetOptions($ch, $host, $port)
 	if(DEBUG) curl_setopt($ch, CURLOPT_VERBOSE, true);
 
 	if(
-		!curl_setopt($ch, CURLOPT_PORT, $port);
+		!curl_setopt($ch, CURLOPT_PORT, $port)
 		|| !curl_setopt($ch, CURLOPT_RETURNTRANSFER, true)
 		|| !curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int)CONNECT_TIMEOUT)
 		|| !curl_setopt($ch, CURLOPT_TIMEOUT, (int)TIMEOUT)
@@ -646,7 +646,8 @@ function PingGWC($gwc_url, $query)
 		{
 			if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 			$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
-			$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_header."\r\n".$common_headers."\r\n";
+			$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\n";
+			$out .= "Host: ".$host_header."\r\n".$common_headers."\r\n";
 			if(DEBUG) echo "\r\n",rtrim($out),"\r\n";
 
 			if(fwrite($fp, $out) !== strlen($out))
