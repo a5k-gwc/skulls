@@ -650,10 +650,17 @@ function PingGWC($gwc_url, $query)
 		$ch = curl_init($gwc_url.'?'.$query);
 		if($ch === false) return 'ERR|curl_init-FAILED';
 
+		if(DEBUG) curl_setopt($ch, CURLOPT_VERBOSE, true);
+		curl_setopt($ch, CURLOPT_PORT, $gwc_port);
+
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);  /* Used only in PHP 5.1.0-5.1.2 */
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int)CONNECT_TIMEOUT);
 		curl_setopt($ch, CURLOPT_TIMEOUT, (int)TIMEOUT);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+
+		curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
+		curl_setopt($ch, CURLOPT_FRESH_CONNECT, true);
 
 		$headers = array();
 		$headers[] = 'Host: '.$host_header;
