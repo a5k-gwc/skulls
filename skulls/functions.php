@@ -188,7 +188,7 @@ function KickStart($net, $cache){
 		$port = 80;
 	}
 
-	$fp = @fsockopen($host_name, $port, $errno, $errstr, (float)TIMEOUT);
+	$fp = @fsockopen($host_name, $port, $errno, $errstr, (float)CONNECT_TIMEOUT);
 
 	if(!$fp)
 	{
