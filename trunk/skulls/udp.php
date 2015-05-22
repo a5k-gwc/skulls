@@ -44,7 +44,7 @@ function PingUDP($cache){
 
 	list( , $host_name, $port) = $splitted_url;
 
-	$fp = @fsockopen("udp://".$host_name, $port, $errno, $errstr, (float)TIMEOUT);
+	$fp = @fsockopen("udp://".$host_name, $port, $errno, $errstr, (float)CONNECT_TIMEOUT);
 	if(!$fp)
 	{
 		$cache_data = "ERR|".$errno;						// ERR|Error name
@@ -59,7 +59,7 @@ function PingUDP($cache){
 		}
 		else
 		{
-			stream_set_timeout($fp, (int)TIMEOUT - 2);
+			stream_set_timeout($fp, (int)CONNECT_TIMEOUT - 2);
 			$line = fread($fp, 2048);
 			//if(DEBUG) echo $line."\r\n";
 

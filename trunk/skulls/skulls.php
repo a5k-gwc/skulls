@@ -602,7 +602,7 @@ function PingGWC($gwc_url, $query)
 	if(FSOCKOPEN)
 	{
 		$errno = -1; $errstr = "";
-		$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_idn_hostname, $gwc_port, $errno, $errstr, (float)TIMEOUT);
+		$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_idn_hostname, $gwc_port, $errno, $errstr, (float)CONNECT_TIMEOUT);
 		if($fp === false)
 		{
 			if(DEBUG) echo 'D|update|GWC|CONN-ERR|',$errno,'|',rtrim($errstr),"\r\n";
@@ -651,7 +651,7 @@ function PingGWC($gwc_url, $query)
 		if($ch === false) return 'ERR|curl_init-FAILED';
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int)TIMEOUT);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int)CONNECT_TIMEOUT);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 
