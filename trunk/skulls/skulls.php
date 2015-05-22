@@ -647,7 +647,7 @@ function PingGWC($gwc_url, $query)
 			if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 			$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
 			$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\n";
-			$out .= "Host: ".$host_header."\r\n".$common_headers."\r\n";
+			$out .= 'Host: '.$host_header."\r\n".$common_headers."\r\n";
 			if(DEBUG) echo "\r\n",rtrim($out),"\r\n";
 
 			if(fwrite($fp, $out) !== strlen($out))
