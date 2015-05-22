@@ -32,6 +32,7 @@ define( 'MAX_UDP_CACHES_OUT',		5 );
 
 define( 'RECHECK_CACHES',			24 );	// Hours to recheck a good cache
 define( 'CONNECT_TIMEOUT',			10 );	// Socket connection timeout
+define( 'TIMEOUT',					15 );	// Socket timeout
 
 define( 'DATA_DIR', 'data' );				// Directory where data files are stored (you should use relative path, you can leave it as is by default)
 

@@ -652,7 +652,7 @@ function PingGWC($gwc_url, $query)
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, (int)CONNECT_TIMEOUT);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+		curl_setopt($ch, CURLOPT_TIMEOUT, (int)TIMEOUT);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 
 		$headers = array();
