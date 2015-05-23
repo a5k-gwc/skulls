@@ -575,7 +575,11 @@ function cURL_SetOptions($ch, $host, $port)
 	$headers[] = 'User-Agent: '.NAME.' '.VER;
 	if(CACHE_URL !== "") $headers[] = 'X-GWC-URL: '.CACHE_URL;
 
-	if(DEBUG) curl_setopt($ch, CURLOPT_VERBOSE, true);
+	if(DEBUG)
+	{
+		curl_setopt($ch, CURLOPT_VERBOSE, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	}
 
 	if(
 		!curl_setopt($ch, CURLOPT_PORT, $port)
@@ -597,7 +601,11 @@ function cURL_SetOptions($ch, $host, $port)
 
 function cURL_OnError($ch, $function_name, $initialized = true)
 {
-	if($initialized) curl_close($ch);
+	if($initialized)
+	{
+		if(DEBUG) echo 'D|update|GWC|cURL|Error ',curl_errno($ch),' (',curl_error($ch),')',"\r\n";
+		curl_close($ch);
+	}
 	return 'ERR|cURL-'.$function_name.'-FAILED';
 }
 
