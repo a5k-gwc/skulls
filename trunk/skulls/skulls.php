@@ -568,10 +568,10 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 	fclose($file);
 }
 
-function cURL_SetOptions($ch, $host, $port)
+function cURL_SetOptions($ch, $idn_host, $port)
 {
 	$headers = array();
-	$headers[] = 'Host: '.$host;
+	$headers[] = 'Host: '.$idn_host;
 	$headers[] = 'Connection: close';
 	$headers[] = 'User-Agent: '.NAME.' '.VER;
 	if(CACHE_URL !== "") $headers[] = 'X-GWC-URL: '.CACHE_URL;
@@ -604,7 +604,7 @@ function cURL_OnError($ch, $function_name, $initialized = true)
 {
 	if($initialized)
 	{
-		if(DEBUG) echo 'D|update|GWC|cURL|Error ',curl_errno($ch),' (',curl_error($ch),')',"\r\n";
+		if(DEBUG) echo 'D|update|GWC|cURL|Error ',curl_errno($ch),'|',rtrim(curl_error($ch)),"\r\n";
 		curl_close($ch);
 	}
 	return 'ERR|cURL-'.$function_name.'-FAILED';
@@ -637,7 +637,7 @@ function PingGWC($gwc_url, $query)
 	/* It needs the PHP Intl extension (bundled version with --enable-intl or PECL) enabled on the server */
 	if(function_exists('idn_to_ascii')) $gwc_idn_hostname = idn_to_ascii($gwc_hostname);
 	if($gwc_idn_hostname === false) $gwc_idn_hostname = $gwc_hostname;
-	$host_header = $gwc_idn_hostname.NormalizePort($secure_http, $gwc_port);
+	$gwc_idn_host = $gwc_idn_hostname.NormalizePort($secure_http, $gwc_port);
 	if(DEBUG) echo "\r\nD|update|GWC|HOSTNAME|",$gwc_hostname,"\r\nD|update|GWC|IDN-HOSTNAME|",$gwc_idn_hostname,"\r\nD|update|GWC|SECURE-HTTP|",(int)$secure_http,"\r\n";
 
 	$cache_data = null; $pong = ""; $oldpong = ""; $error = ""; $nets_list1 = null;
@@ -655,7 +655,7 @@ function PingGWC($gwc_url, $query)
 			if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 			$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
 			$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\n";
-			$out .= 'Host: '.$host_header."\r\n".$common_headers."\r\n";
+			$out .= 'Host: '.$gwc_idn_host."\r\n".$common_headers."\r\n";
 			if(DEBUG) echo "\r\n",rtrim($out),"\r\n";
 
 			if(fwrite($fp, $out) !== strlen($out))
@@ -693,7 +693,7 @@ function PingGWC($gwc_url, $query)
 		$ch = curl_init($gwc_url.'?'.$query);
 		if($ch === false) return cURL_OnError(null, 'init', false);
 
-		if(!cURL_SetOptions($ch, $host_header, $gwc_port)) return cURL_OnError($ch, 'setopt');
+		if(!cURL_SetOptions($ch, $gwc_idn_host, $gwc_port)) return cURL_OnError($ch, 'setopt');
 
 		$response = curl_exec($ch);
 		if($response === false) return cURL_OnError($ch, 'exec');
