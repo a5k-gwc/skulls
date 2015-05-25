@@ -690,6 +690,8 @@ function PingGWC($gwc_url, $query)
 	}
 	elseif(extension_loaded('curl'))  /* cURL */
 	{
+		$gwc_url = ($secure_http? 'https' : 'http').'://'.$gwc_idn_host.'/'.$gwc_path; /* Rewrite url with idn host */
+
 		$ch = curl_init($gwc_url.'?'.$query);
 		if($ch === false) return cURL_OnError(null, 'init', false);
 
