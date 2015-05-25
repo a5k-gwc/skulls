@@ -34,6 +34,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 	$title = NAME.'! Multi-Network WebCache '.VER;
 	$maintainer = htmlentities(MAINTAINER_NICK, ENT_QUOTES, 'UTF-8');
+	$idn_support = (function_exists('idn_to_ascii'));
 	if($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 4) $title .= ' - Stats';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -104,6 +105,10 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								echo "\n";
 ?>
 							</td>
+						</tr>
+						<tr>
+							<th>- IDN support:</th>
+							<td class="<?php echo ($idn_support? 'good' : 'bad'); ?>"><span class="bold"><?php echo ($idn_support? 'Yes' : 'No'); ?></span></td>
 						</tr>
 						<tr>
 							<td></td>
