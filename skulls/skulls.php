@@ -28,6 +28,7 @@ define('VER', SHORT_VER.'c');									/* Full version (it can contain letters) *
 define('GWC_SITE', 'http://sourceforge.net/projects/skulls/');	/* Official site of this GWC */
 define('OPEN_SOURCE', '1');
 define('MAX_HOST_AGE', 259200);									/* 3 days */
+define('RESPONSE_LINES_LIMIT', 64);
 define('DEBUG', 0);
 
 function GetMainFileRev()
@@ -620,7 +621,6 @@ function ConnectionTest()
 
 function PingGWC($gwc_url, $query)
 {
-	define('LINES_LIMIT', 128);
 	$our_url = null; $gwc_idn_hostname = false;
 
 	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
@@ -666,7 +666,7 @@ function PingGWC($gwc_url, $query)
 			else
 			{
 				$i = 0;
-				while($i++ < LINES_LIMIT)
+				while($i++ < RESPONSE_LINES_LIMIT)
 				{
 					$line = fgets($fp, 256);
 					if($line === false) break;
@@ -707,8 +707,8 @@ function PingGWC($gwc_url, $query)
 		if($http_code < 200 || $http_code > 299)
 			return 'ERR|HTTP-CODE-'.$http_code;
 
-		$i = -1; $lines = explode("\n", $response, LINES_LIMIT+1); $response = null; $tot_lines = count($lines);
-		if($tot_lines === LINES_LIMIT+1 || rtrim($lines[$tot_lines-1]) === "") { $lines[$tot_lines-1] = null; $tot_lines--; }
+		$i = -1; $lines = explode("\n", $response, RESPONSE_LINES_LIMIT+1); $response = null; $tot_lines = count($lines);
+		if($tot_lines === RESPONSE_LINES_LIMIT+1 || rtrim($lines[$tot_lines-1]) === "") { $lines[$tot_lines-1] = null; $tot_lines--; }
 		while(++$i < $tot_lines)
 		{
 			$line = rtrim($lines[$i]);
