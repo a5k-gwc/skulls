@@ -285,7 +285,7 @@ function CanonicalizeURL(&$full_url)
 		/* ToDO: Verify port */
 		/* ToDO: Remove dot at the end of hostname if present */
 
-		if(strpos($host_name, 'xn--') === 0)
+		if(strpos($host_name, '.xn--') !== false || strpos($host_name, 'xn--') === 0)
 			return false;  /* Block already IDN encoded domains, URLs must be submitted in the original form and IDN encoded only for querying them */
 		if(substr($host_name, -9) === '.nyud.net' || substr($host_name, -10) === '.nyucd.net')
 			return false;  /* Block Coral Content Distribution Network */
