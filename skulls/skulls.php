@@ -223,7 +223,7 @@ function ValidatePort($port)
 function CanonicalizeURL(&$full_url)
 {
 	/* $_GET parameters are already "urldecoded" by PHP, so do NOT urldecode again */
-	if(DEBUG) echo 'D|update|URL sent: ',$full_url,"\r\n";
+	if(DEBUG) echo 'D|update|URL received: ',$full_url,"\r\n";
 
 	if(strpos($full_url, '://') !== false)
 	{
