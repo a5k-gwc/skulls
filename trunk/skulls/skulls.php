@@ -707,7 +707,8 @@ function PingGWC($gwc_url, $query)
 
 		if(DEBUG) echo 'D|update|GWC|HTTP-CODE|',$http_code,"\r\n";
 		if($http_code < 200 || $http_code > 299)
-			return 'ERR|HTTP-CODE-'.$http_code;
+			if($http_code !== 404)  /* A GWC may return 404 if it is queried with a missing net parameter, we cope with this case later */
+				return 'ERR|HTTP-CODE-'.$http_code;
 
 		$i = -1; $lines = explode("\n", $response, RESPONSE_LINES_LIMIT+1); $response = null; $tot_lines = count($lines);
 		if($tot_lines === RESPONSE_LINES_LIMIT+1 || rtrim($lines[$tot_lines-1]) === "") { $lines[$tot_lines-1] = null; $tot_lines--; }
@@ -727,6 +728,7 @@ function PingGWC($gwc_url, $query)
 			elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
 				$error .= $line.'-';
 		}
+		if($http_code === 404) { $pong = ""; $oldpong = ""; }
 	}
 	else
 		return 'ERR|DISABLED';
