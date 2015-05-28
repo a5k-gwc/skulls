@@ -1396,6 +1396,15 @@ $STATFILE = !empty($_GET["statfile"]) ? $_GET["statfile"] : 0;
 
 $AGE = empty($_GET['age']) ? 0 : $_GET['age'];
 
+/*
+The "gwcs" parameter is almost identical to "urlfile" but can be combined with the hostfile request.
+This is necessary to keep backwards-compatibility with some implementations which are supposed
+to ignore unknown requests but are not required to handle combined "urlfile" and "hostfile" requests
+(Note: this GWC unlike some others also support combined requests of every possible type).
+*/
+$GWCS = empty($_GET['gwcs']) ? 0 : $_GET['gwcs'];
+if($GWCS) $URLFILE = 1;
+
 //$ALLFILE = !empty($_GET["allfile"]) ? $_GET["allfile"] : 0;
 $BFILE = !empty($_GET["bfile"]) ? $_GET["bfile"] : 0;
 if($BFILE) { $HOSTFILE = 1; $URLFILE = 1; }
@@ -1576,7 +1585,7 @@ else
 		$DETECTED_PV = 4;
 	elseif(($PV >= 2 && $PV < 3) || $GET || $UPDATE || $SUPPORT || $INFO || isset($_GET['cluster']))
 		$DETECTED_PV = 2;
-	elseif($PV >= 3)
+	elseif($PV >= 3 || $GWCS)
 		$DETECTED_PV = 3;
 	elseif($PV >= 1 || $HOSTFILE || $URLFILE || $BFILE || $STATFILE || $HOST !== null || $CACHE !== null)
 		$DETECTED_PV = 1;
