@@ -1389,7 +1389,6 @@ $IP = null; $PORT = null; $GOOD_PORT = true;
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
 $LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
 $MAX_LEAVES = isset($_GET['x_max']) ? $_GET['x_max'] : null;
-$CLUSTER = !empty($_GET['cluster']) ? $_GET['cluster'] : null;
 
 $HOSTFILE = !empty($_GET["hostfile"]) ? $_GET["hostfile"] : 0;
 $URLFILE = !empty($_GET["urlfile"]) ? $_GET["urlfile"] : 0;
@@ -1595,7 +1594,7 @@ else
 
 	if(!$GET && !$PING && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE === null && $HOST === null && !$INFO)
 	{
-		echo "ERROR: Invalid command - Request rejected\r\n";
+		echo "ERROR: Invalid query\r\n";
 		UpdateStats(STATS_BLOCKED);
 		if(LOG_MAJOR_ERRORS) Logging("invalid-queries", $CLIENT, $VERSION, $NET);
 		die();
@@ -1611,7 +1610,6 @@ else
 		$MAX_LEAVES = null;
 		if(LOG_MAJOR_ERRORS) Logging("invalid-max-leaves", $CLIENT, $VERSION, $NET);
 	}
-	$CLUSTER = null;
 
 	if(!$NO_IP_HEADER)
 	{
