@@ -325,38 +325,34 @@ function RemoveGarbage($value)
 	return str_replace("\0", "", $value);
 }
 
-function Pong($support, $multi, $net, $client, $version, $supported_net, $remote_ip)
+function Pong($detected_pv, $net_list_sent_elsewhere, $multi, $net, $client, $version, $remote_ip)
 {
 	if($remote_ip === '127.0.0.1')  /* Prevent caches that point to 127.0.0.1 to being added to cache list, in this case we actually ping ourselves so the cache may look working while it isn't */
 		return;
+	$send_old_pong = false; $send_pong = false;
 
-	$pong = 'I|pong|'.NAME.' '.VER;
+	/* v2.x, v4+ */
+	if($detected_pv >= 4 || ($detected_pv >= 2 && $detected_pv < 3)) $send_pong = true;
+	/* v1.x, v3.x */
+	elseif($detected_pv >= 1) $send_old_pong = true;
+	/* v0 - if the spec version isn't clear we send both pong */
+	else { $send_old_pong = true; $send_pong = true; }
 
-	if($support)
+	if($send_old_pong)
+		echo 'PONG ',NAME,' ',VER,"\r\n";
+	if($send_pong)
 	{
-		echo $pong."\r\n";
-	}
-	elseif($multi)
-	{
-		$nets = strtolower(NetsToString());
-		echo $pong.'|'.$nets."\r\n";
-	}
-	elseif($supported_net)
-	{
-		if($net === 'gnutella' || $net === 'mute')
-			echo 'PONG '.NAME.' '.VER."\r\n";
-
-		global $SUPPORTED_NETWORKS;
-		if(NETWORKS_COUNT > 1 || strtolower($SUPPORTED_NETWORKS[0]) !== 'gnutella')
+		echo 'I|pong|',NAME,' ',VER;
+		if(!$net_list_sent_elsewhere)
 		{
-			$nets = strtolower(NetsToString());
-			if($client === 'TEST' && $net === 'gnutella2' && strpos($version, 'Bazooka') === 0)
-				echo $pong.'|gnutella2||COMPAT|'.$nets."\r\n";	/* Workaround for compatibility with Bazooka (it expect only gnutella2 instead of a supported network list and chokes on the rest) */
-			elseif($client === 'GCII' && $net === 'gnutella2')
-				echo $pong.'|||COMPAT|'.$nets."\r\n";			/* Workaround for compatibility with PHPGnuCacheII (it expects our url instead of a supported network list, keep it empty is also fine) */
-			else
-				echo $pong.'|'.$nets."\r\n";
+			if($client === 'TEST' && !$multi && $net === 'gnutella2' && strpos($version, 'Bazooka') === 0)
+				echo '|gnutella2||COMPAT';	/* Workaround for compatibility with Bazooka (it expect only gnutella2 instead of a supported network list and chokes on the rest) */
+			elseif($client === 'GCII' && !$multi && $net === 'gnutella2')
+				echo '|||COMPAT';			/* Workaround for compatibility with PHPGnuCacheII (it expects our url instead of a supported network list, keep it empty is also fine) */
+
+			echo '|',strtolower(NetsToString());
 		}
+		echo "\r\n";
 	}
 }
 
@@ -1561,14 +1557,31 @@ else
 
 	WriteStatsTotalReqs();
 
-	/*** Smart spec detection ***/
+	/*
+		Existing GWC specs: v1, v1.1, v2, v2.1, v3, v4
+		Note: GWC v3 is an extension of GWC v1
+		Note: GWC v4 is an extension of GWC v2.1
+
+		Priority order (in case there are parameters of different specs mixed togheter):
+		- v2.1, v4 and higher
+		- v2
+		- v3
+		- v1, v1.1
+	*/
+
+	/*** Smart spec detection - START ***/
 	$PV = empty($_GET['pv']) ? 0 : (float)$_GET['pv'];
 	$DETECTED_PV = 0;
 
-	if($PV >= 2 || $GET || $UPDATE || $GETNETWORKS || $SUPPORT || $INFO || $MULTI)
+	if($PV >= 4 || $MULTI || $GETNETWORKS)
+		$DETECTED_PV = 4;
+	elseif(($PV >= 2 && $PV < 3) || $GET || $UPDATE || $SUPPORT || $INFO || isset($_GET['cluster']))
 		$DETECTED_PV = 2;
+	elseif($PV >= 3)
+		$DETECTED_PV = 3;
 	elseif($PV >= 1 || $HOSTFILE || $URLFILE || $BFILE || $STATFILE || $HOST !== null || $CACHE !== null)
 		$DETECTED_PV = 1;
+	/*** Smart spec detection - END ***/
 
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
 	if($GETNETWORKS)
@@ -1626,7 +1639,9 @@ else
 	}
 
 	if($PING)
-		Pong($SUPPORT, $MULTI, $NET, $CLIENT, $VERSION, $supported_net, $REMOTE_IP);
+		if($supported_net || $MULTI)
+			Pong($DETECTED_PV, $SUPPORT, $MULTI, $NET, $CLIENT, $VERSION, $REMOTE_IP);
+
 	if($SUPPORT)
 		Support($SUPPORT, $SUPPORTED_NETWORKS);
 
@@ -1767,8 +1782,8 @@ else
 		if($URLFILE && (FSOCKOPEN || extension_loaded('curl')))
 			UrlFile($NET, $AGE, $CLIENT);
 
-		if($PV >= 3 && ($HOSTFILE || $URLFILE))
-			echo "nets: ".strtolower(NetsToString())."\r\n";
+		//if($PV === 3 && ($HOSTFILE || $URLFILE))
+			//echo "nets: ".strtolower(NetsToString())."\r\n";
 	}
 
 	if($INFO)
