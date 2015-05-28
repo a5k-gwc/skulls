@@ -1394,6 +1394,7 @@ $HOSTFILE = !empty($_GET["hostfile"]) ? $_GET["hostfile"] : 0;
 $URLFILE = !empty($_GET["urlfile"]) ? $_GET["urlfile"] : 0;
 $STATFILE = !empty($_GET["statfile"]) ? $_GET["statfile"] : 0;
 
+//$ALLFILE = !empty($_GET["allfile"]) ? $_GET["allfile"] : 0;
 $BFILE = !empty($_GET["bfile"]) ? $_GET["bfile"] : 0;
 if($BFILE) { $HOSTFILE = 1; $URLFILE = 1; }
 
