@@ -32,7 +32,7 @@ $html_footer = "</body></html>\r\n";
 if(rtrim($file_content[0]) == REVISION)
 {
 	echo $doctype.$html_header;
-	echo "There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.<br>\r\nTo check if Skulls is updated you must go on skulls.php<br>\r\n";
+	echo "There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.<br>\r\n";
 	echo $html_footer;
 	die();
 }
@@ -340,7 +340,7 @@ else
 		else
 		{
 			echo "<font color=\"green\"><b>Already updated.</b></font><br>";
-			echo "<b>This file checks only if data files are updated, it doesn't check if Skulls is updated.<br>To check if Skulls is updated you must go on skulls.php</b><br>";
+			echo "<b>This file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.</b><br>\r\n";
 		}
 	}
 	else
