@@ -1023,7 +1023,7 @@ function CheckIfDummyHostIsNeeded($vendor, $ver)
 	return false;
 }
 
-function HostFile($net)
+function HostFile($net, $age)
 {
 	$now = time(); $offset = date("Z");
 	$host_file = file(DATA_DIR."/hosts_".$net.".dat");
@@ -1037,20 +1037,21 @@ function HostFile($net)
 	for( $i = 0; $i < $max_hosts; $i++ )
 	{
 		list($h_age, $h_ip, $h_port,) = explode('|', $host_file[$count_host - 1 - $i], 4);
-		$h_age = TimeSinceSubmissionInSeconds( $now, $h_age, $offset );
+		$h_age = TimeSinceSubmissionInSeconds($now, $h_age, $offset);
 		if($h_age > MAX_HOST_AGE) break;
-		echo $h_ip,':',$h_port,"\r\n";
+		echo $h_ip,':',$h_port; if($age) echo '|',$h_age; echo "\r\n";
 	}
 }
 
-function UrlFile($net, $client)
+function UrlFile($net, $age, $client)
 {
+	$now = time(); $offset = date("Z");
 	$cache_file = file(DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
 
 	for( $n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i-- )
 	{
-		list( $cache, , $cache_net, ) = explode("|", $cache_file[$i]);
+		list($cache, , $cache_net, , , $h_age) = explode("|", $cache_file[$i]);
 
 		$show = FALSE;
 		if(strpos($cache_net, "-") > -1)
@@ -1075,7 +1076,7 @@ function UrlFile($net, $client)
 			{
 				list(, $tmp) = explode('://', $cache, 2); list($tmp, ) = explode('/', $tmp, 2); if(!preg_match('/[A-Za-z]/', $tmp)) continue;
 			}
-			echo $cache."\r\n";
+			echo $cache; if($age) echo '|',TimeSinceSubmissionInSeconds($now, $h_age, $offset); echo "\r\n";
 			$n++;
 		}
 	}
@@ -1397,6 +1398,8 @@ $CLUSTER = !empty($_GET['cluster']) ? $_GET['cluster'] : null;
 $HOSTFILE = !empty($_GET["hostfile"]) ? $_GET["hostfile"] : 0;
 $URLFILE = !empty($_GET["urlfile"]) ? $_GET["urlfile"] : 0;
 $STATFILE = !empty($_GET["statfile"]) ? $_GET["statfile"] : 0;
+
+$AGE = empty($_GET['age']) ? 0 : $_GET['age'];
 
 //$ALLFILE = !empty($_GET["allfile"]) ? $_GET["allfile"] : 0;
 $BFILE = !empty($_GET["bfile"]) ? $_GET["bfile"] : 0;
@@ -1759,10 +1762,10 @@ else
 	elseif($supported_net)
 	{
 		if($HOSTFILE)
-			HostFile($NET);
+			HostFile($NET, $AGE);
 
 		if($URLFILE && (FSOCKOPEN || extension_loaded('curl')))
-			UrlFile($NET, $CLIENT);
+			UrlFile($NET, $AGE, $CLIENT);
 
 		if($PV >= 3 && ($HOSTFILE || $URLFILE))
 			echo "nets: ".strtolower(NetsToString())."\r\n";
