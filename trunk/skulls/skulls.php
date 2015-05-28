@@ -1081,12 +1081,13 @@ function UrlFile($net, $client)
 	}
 }
 
-function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dummy_host)
+function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $client, $add_dummy_host)
 {
 	$output = "";
 	$now = time(); $offset = date("Z");
 	$separators = 0;
-	if($getvendors) $separators = 3;
+	if($getmaxleaves) $separators = 5;
+	elseif($getvendors) $separators = 3;
 	elseif($getleaves) $separators = 2;
 
 	$hosts_sent = 0;
@@ -1102,7 +1103,7 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dum
 
 		for( $i=0; $i<$max_hosts; $i++ )
 		{
-			list($h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */,) = explode('|', $host_file[$count_host - 1 - $i], 13);
+			list($h_age, $h_ip, $h_port, $h_leaves, $h_max_leaves, , $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */,) = explode('|', $host_file[$count_host - 1 - $i], 13);
 			$h_age = TimeSinceSubmissionInSeconds( $now, $h_age, $offset );
 			if($h_age > MAX_HOST_AGE) break;
 			$host = 'H|'.$h_ip.':'.$h_port.'|'.$h_age;
@@ -1110,6 +1111,9 @@ function Get($net, $get, $getleaves, $getvendors, $uhc, $ukhl, $client, $add_dum
 			if($getleaves) $host .= $h_leaves;
 			if($separators > 2) $host .= '|';
 			if($getvendors && $h_vendor !== 'KICKSTART') $host .= $h_vendor;
+			if($separators > 3) $host .= '|';
+			if($separators > 4) $host .= '|';
+			if($getmaxleaves) $host .= $h_max_leaves;
 			$output .= $host."\r\n";
 			$hosts_sent++;
 		}
@@ -1409,6 +1413,7 @@ $GETNETWORKS = empty($_GET['getnetworks']) ? 0 : $_GET['getnetworks'];
 
 $GETLEAVES = empty($_GET['getleaves']) ? 0 : $_GET['getleaves'];
 $GETVENDORS = empty($_GET['getvendors']) ? 0 : $_GET['getvendors'];
+$GETMAXLEAVES = empty($_GET['getmaxleaves']) ? 0 : $_GET['getmaxleaves'];
 
 $NO_IP_HEADER = empty($_GET['noipheader']) ? 0 : $_GET['noipheader'];
 
@@ -1744,7 +1749,7 @@ else
 	{
 		$dummy_host_needed = CheckIfDummyHostIsNeeded($CLIENT, $VERSION);
 
-		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $UHC, $UKHL, $CLIENT, $dummy_host_needed);
+		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $GETMAXLEAVES, $UHC, $UKHL, $CLIENT, $dummy_host_needed);
 		if($UHC || $UKHL)
 		{
 			echo "I|uhc|".$UDP["uhk"]."\r\n";
