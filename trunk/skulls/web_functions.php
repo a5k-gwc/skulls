@@ -359,9 +359,14 @@ function ReplaceVendorCode($vendor, $version)
 			$url = 'http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/';
 			$cache = 2;
 			break;
-		case 'GCII':
+		case 'GCII':  /* Example query => ?client=GCII&version=2.1.1&ping=1&net=gnutella2 */
 			$client_name = 'PHPGnuCacheII';
 			$url = 'http://gwcii.sourceforge.net/';
+			$cache = 2;
+			break;
+		case 'GUAR':  /* ?client=GUAR&version=GUAR+0.3&getnetworks=1&cache=1&net=...&ping=1&get=1&hostfile=1&urlfile=1 */
+			$client_name = 'Guarana';
+			$url = 'http://github.com/leite/guarana';
 			$cache = 2;
 			break;
 		case 'JGWC':
@@ -376,7 +381,7 @@ function ReplaceVendorCode($vendor, $version)
 			/* http://sourceforge.net/p/mute-net/support-requests/7/ */
 			$cache = 2;
 			break;
-		case 'NGWC':  /* Example query => ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
+		case 'NGWC':  /* Example query => ?ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
 			$client_name = 'node.gwc';
 			$url = 'http://andrewgilmore.co.uk/project/nodegwc';
 			/* http://github.com/agilmore/node.gwc */
