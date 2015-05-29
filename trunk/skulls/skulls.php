@@ -667,17 +667,18 @@ function PingGWC($gwc_url, $query)
 					$line = fgets($fp, 256);
 					if($line === false) break;
 					$line = rtrim($line);
+					$line_lc = strtolower($line);
 					if(DEBUG) echo "\r\n",$i,' ',$line;
 
-					if( strtolower( substr( $line, 0, 7 ) ) === "i|pong|" )
+					if(substr($line_lc, 0, 7) === 'i|pong|')
 						$pong = $line;
-					elseif(substr($line, 0, 4) === "PONG")
+					elseif(substr($line_lc, 0, 4) === 'pong')
 						$oldpong = $line;
-					elseif(strtolower( substr($line, 0, 11) ) === "i|networks|")
-						$nets_list1 = strtolower( substr($line, 11) );
-					elseif(substr($line, 0, 5) == "ERROR" || strpos($line, "404 Not Found") > -1 || strpos($line, "403 Forbidden") > -1)
+					elseif(substr($line_lc, 0, 11) === 'i|networks|')
+						$nets_list1 = substr($line_lc, 11);
+					elseif(substr($line_lc, 0, 5) === 'error' || strpos($line, '404 Not Found') !== false || strpos($line, '403 Forbidden') !== false)
 						$error .= $line.'-';
-					elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
+					elseif(substr($line_lc, 0, 2) === 'i|' && strpos($line_lc, 'not') !== false && strpos($line_lc, 'supported') !== false)
 						$error .= $line.'-';
 				}
 				fclose($fp);
@@ -702,8 +703,8 @@ function PingGWC($gwc_url, $query)
 		curl_close($ch);
 
 		if(DEBUG) echo 'D|update|GWC|HTTP-CODE|',$http_code,"\r\n";
-		if($http_code < 200 || $http_code > 299)
-			if($http_code !== 404)  /* A GWC may return 404 if it is queried with a missing net parameter, we cope with this case later */
+		if($http_code > 299 || $http_code < 200)
+			if($http_code !== 404 && $http_code !== 403)  /* A GWC may return 404 if it is queried with a missing net parameter, we cope with this case later */
 				return 'ERR|HTTP-CODE-'.$http_code;
 
 		$i = -1; $lines = explode("\n", $response, RESPONSE_LINES_LIMIT+1); $response = null; $tot_lines = count($lines);
@@ -711,20 +712,21 @@ function PingGWC($gwc_url, $query)
 		while(++$i < $tot_lines)
 		{
 			$line = rtrim($lines[$i]);
+			$line_lc = strtolower($line);
 			if(DEBUG) echo "\r\n",$i+1,' ',$line;
 
-			if( strtolower( substr( $line, 0, 7 ) ) === "i|pong|" )
+			if(substr($line_lc, 0, 7) === 'i|pong|')
 				$pong = $line;
-			elseif(substr($line, 0, 4) === "PONG")
+			elseif(substr($line_lc, 0, 4) === 'pong')
 				$oldpong = $line;
-			elseif(strtolower( substr($line, 0, 11) ) === "i|networks|")
-				$nets_list1 = strtolower( substr($line, 11) );
-			elseif(substr($line, 0, 5) == "ERROR")
+			elseif(substr($line_lc, 0, 11) === 'i|networks|')
+				$nets_list1 = substr($line_lc, 11);
+			elseif(substr($line_lc, 0, 5) === 'error')
 				$error .= $line.'-';
-			elseif( strtolower(substr($line, 0, 2)) == "i|" && strpos($line, "not") > -1 && strpos($line, "supported") > -1 )
+			elseif(substr($line_lc, 0, 2) === 'i|' && strpos($line_lc, 'not') !== false && strpos($line_lc, 'supported') !== false)
 				$error .= $line.'-';
 		}
-		if($http_code === 404) { $pong = ""; $oldpong = ""; }
+		if($http_code === 404 || $http_code === 403) { $pong = ""; $oldpong = ""; }
 	}
 	else
 		return 'ERR|DISABLED';
@@ -774,7 +776,7 @@ function PingGWC($gwc_url, $query)
 	}
 	else
 	{
-		$error = RemoveGarbage(strtolower($error));
+		$error = RemoveGarbage($error);
 		$cache_data = "ERR|".$error;	// ERR|Error name
 	}
 
@@ -802,10 +804,12 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 
 	if($received_data[0] === 'ERR' && !$udp)
 	{
-		if( strpos($received_data[1], "not supported") > -1
-			|| strpos($received_data[1], "unsupported network") > -1
-			|| strpos($received_data[1], "no network") > -1
-			|| strpos($received_data[1], "net-not-supported") > -1
+		$error = strtolower($received_data[1]);
+		if(
+			strpos($error, "network not supported") !== false
+			|| strpos($error, "unsupported network") !== false
+			|| strpos($error, "no network") !== false
+			|| strpos($error, "net-not-supported") !== false
 		)	// Workaround for compatibility with some GWCs using v2 spec
 		{										// FOR GWCS DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$query .= "&net=gnutella2";
