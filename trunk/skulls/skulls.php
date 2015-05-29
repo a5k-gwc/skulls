@@ -758,7 +758,7 @@ function PingGWC($gwc_url, $query)
 		$oldpong = RemoveGarbage(trim(rawurldecode(substr($oldpong, 4))));
 		$cache_data = "P|".$oldpong;
 
-		/* Needed to force specs v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
+		/* Needed to force spec v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
 		if(strpos($oldpong, 'Cachechu') === 0)
 			return PingGWC($gwc_url, $query.'&update=1');
 
@@ -808,7 +808,7 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 			|| strpos($received_data[1], "unsupported network") > -1
 			|| strpos($received_data[1], "no network") > -1
 			|| strpos($received_data[1], "net-not-supported") > -1
-		)	// Workaround for compatibility with some GWCs using v2 specs
+		)	// Workaround for compatibility with some GWCs using v2 spec
 		{										// FOR GWCS DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$query .= "&net=gnutella2";
 			$result = PingGWC($cache, $query);
@@ -1574,7 +1574,7 @@ else
 		- v1.1
 		- v1
 
-		The following parameters can be used in every version of the spec: client, version, ping, pv, getspecs, net, x.leaves, x.max, uptime
+		The following parameters can be used in every version of the spec: client, version, ping, pv, getspec, net, x.leaves, x.max, uptime
 		The following parameters alone imply spec v1 but together with others are used also in other spec versions: url, ip
 	*/
 
@@ -1823,6 +1823,14 @@ else
 		UpdateStats($is_good_update? STATS_UPD : STATS_UPD_BAD);
 	else
 		UpdateStats(STATS_OTHER);
+
+	if(!empty($_GET['getspec']))
+	{
+		if($DETECTED_PV >=2 && $DETECTED_PV !== 3)
+			echo 'I|pv-detect|',$DETECTED_PV,"\r\n";  /* v2.x, v4+ */
+		else
+			echo 'pv-detect: ',$DETECTED_PV,"\r\n";   /* v0, v1.x, v3.x */
+	}
 
 	if($STATFILE)
 	{
