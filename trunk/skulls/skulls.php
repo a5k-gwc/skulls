@@ -1403,11 +1403,9 @@ to ignore unknown requests but are not required to handle combined "urlfile" and
 (Note: this GWC unlike some others also support combined requests of every possible type).
 */
 $GWCS = empty($_GET['gwcs']) ? 0 : $_GET['gwcs'];
-if($GWCS) $URLFILE = 1;
 
 //$ALLFILE = !empty($_GET["allfile"]) ? $_GET["allfile"] : 0;
 $BFILE = !empty($_GET["bfile"]) ? $_GET["bfile"] : 0;
-if($BFILE) { $HOSTFILE = 1; $URLFILE = 1; }
 
 $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
@@ -1566,34 +1564,49 @@ else
 	WriteStatsTotalReqs();
 
 	/*
-		Existing GWC specs: v1, v1.1, v2, v2.1, v3, v4
-		Note: GWC v3 is an extension of GWC v1
-		Note: GWC v4 is an extension of GWC v2.1
+		Existing GWC specs: v1, v1.1, v2, v2.1, v3, v4  ( GWC v3 is an extension of GWC v1  /  GWC v4 is an extension of GWC v2.1 )
 
 		Priority order (in case there are parameters of different specs mixed togheter):
-		- v2.1, v4 and higher
+		- v4 and higher
+		- v2.1
 		- v2
 		- v3
-		- v1, v1.1
+		- v1.1
+		- v1
+
+		The following parameters can be used in every version of the spec: client, version, ping, pv, getspecs, net, x.leaves, x.max, uptime
+		The following parameters alone imply spec v1 but together with others are used also in other spec versions: url, ip
 	*/
 
 	/*** Smart spec detection - START ***/
 	$PV = empty($_GET['pv']) ? 0 : (float)$_GET['pv'];
 	$DETECTED_PV = 0;
 
-	if($PV >= 4 || $MULTI || $GETNETWORKS)
+	if($PV >= 4 || $MULTI)
 		$DETECTED_PV = 4;
-	elseif(($PV >= 2 && $PV < 3) || $GET || $UPDATE || $SUPPORT || $INFO || isset($_GET['cluster']))
-		$DETECTED_PV = 2;
-	elseif($PV >= 3 || $GWCS)
-		$DETECTED_PV = 3;
-	elseif($PV >= 1 || $HOSTFILE || $URLFILE || $BFILE || $STATFILE || $HOST !== null || $CACHE !== null)
-		$DETECTED_PV = 1;
+	elseif($PV < 3)
+	{
+		if($PV >= 2.1 || $GETNETWORKS || $SUPPORT || $INFO)
+			$DETECTED_PV = 2.1;
+		elseif($PV >= 2 || $GET || $UPDATE)
+			$DETECTED_PV = 2;
+	}
+
+	if($DETECTED_PV === 0)  /* Only if not yet detected */
+	{
+		if($PV >= 3 || $GWCS)
+			$DETECTED_PV = 3;
+		elseif($PV >= 1.1 || $AGE)
+			$DETECTED_PV = 1.1;
+		elseif($PV >= 1 || $HOSTFILE || $URLFILE || $BFILE || $STATFILE || $HOST !== null || $CACHE !== null)
+			$DETECTED_PV = 1;
+	}
 	/*** Smart spec detection - END ***/
 
+	if($BFILE) { $HOSTFILE = 1; $URLFILE = 1; }
+	elseif($GWCS) $URLFILE = 1;
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
-	if($GETNETWORKS)
-		$SUPPORT = 2;
+	if($GETNETWORKS) $SUPPORT = 2;
 
 	if($IS_A_CACHE || $CLIENT === 'TEST')
 	{
