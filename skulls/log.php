@@ -22,16 +22,20 @@ if( !defined("DATA_DIR") )
 if( !file_exists("log/") )
 	mkdir("log/", 0777);
 
-function Logging($filename, $CLIENT, $VERSION, $NET)
+function Logging($filename, $detected_pv = null)
 {
-	global $UA_ORIGINAL;
-	$HTTP_X_FORWARDED_FOR = isset($_SERVER["HTTP_X_FORWARDED_FOR"]) ? $_SERVER["HTTP_X_FORWARDED_FOR"] : "";
-	$HTTP_CLIENT_IP = isset($_SERVER["HTTP_CLIENT_IP"]) ? $_SERVER["HTTP_CLIENT_IP"] : "";
+	global $CLIENT, $VERSION, $NET, $UA_ORIGINAL;
+	$REMOTE_IP = empty($_SERVER['REMOTE_ADDR'])? null : $_SERVER['REMOTE_ADDR'];
+	$ACCEPT_ENCODING = empty($_SERVER['HTTP_ACCEPT_ENCODING'])? null : $_SERVER['HTTP_ACCEPT_ENCODING'];
+	$X_FORWARDED_FOR = empty($_SERVER['HTTP_X_FORWARDED_FOR'])? null : $_SERVER['HTTP_X_FORWARDED_FOR'];
+	$CLIENT_IP = empty($_SERVER['HTTP_CLIENT_IP'])? null : $_SERVER['HTTP_CLIENT_IP'];
+	$line = gmdate('Y/m/d H:i:s').'|'.$detected_pv.'|'.$NET.'|'.$CLIENT.' '.$VERSION.'|'.$ACCEPT_ENCODING.'|'.$UA_ORIGINAL.'|?'.$_SERVER['QUERY_STRING'].'|'.$REMOTE_IP.'|'.$X_FORWARDED_FOR.'|'.$CLIENT_IP."\r\n";
 
-	$file = fopen("log/".$filename.".log", "ab");
-	flock($file, 2);
-	fwrite($file, gmdate("Y/m/d H:i:s")." | ".$CLIENT." ".$VERSION." | ".$UA_ORIGINAL." | ".$NET." | ".$_SERVER["QUERY_STRING"]." | ".$_SERVER["REMOTE_ADDR"]." | ".$HTTP_X_FORWARDED_FOR." | ".$HTTP_CLIENT_IP."\r\n");
-	flock($file, 3);
+	$file = fopen('log/'.$filename.'.log', 'ab');
+	if($file === false) return;
+	flock($file, LOCK_EX);
+	fwrite($file, $line);
+	flock($file, LOCK_UN);
 	fclose($file);
 }
 ?>
