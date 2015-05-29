@@ -77,14 +77,8 @@ function IsWebInterface()
 }
 
 DisableAutomaticCompression();
-
-if(function_exists('header_remove'))
-	header_remove('X-Powered-By');
-
+if(function_exists('header_remove')) header_remove('X-Powered-By');
 $PHP_SELF = $_SERVER['PHP_SELF'];
-$REMOTE_IP = $_SERVER['REMOTE_ADDR'];
-$SECURE_HTTP = IsSecureConnection();
-$unreliable_host = false;
 
 if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === null)
 {
@@ -92,9 +86,12 @@ if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === nu
 	die("ERROR: Service disabled\r\n");
 }
 
+$SECURE_HTTP = IsSecureConnection();
+$UNRELIABLE_HOST = false;
+
 if(empty($_SERVER['HTTP_HOST']))
 {
-	$unreliable_host = true;
+	$UNRELIABLE_HOST = true;
 	if(!IsWebInterface())
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
@@ -105,7 +102,7 @@ if(empty($_SERVER['HTTP_HOST']))
 }
 
 $MY_URL = ($SECURE_HTTP? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
-if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$unreliable_host)
+if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$UNRELIABLE_HOST)
 {
 	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 	header('Location: '.CACHE_URL);
@@ -399,7 +396,7 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("unsupported-nets", $CLIENT, $VERSION, $NET);
+		Logging("unsupported-nets");
 	}
 
 	return FALSE;
@@ -441,7 +438,7 @@ function CheckIPValidity($remote_ip, $ip)
 	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("invalid-hosts", $CLIENT, $VERSION, $NET);
+		Logging("invalid-hosts");
 	}
 
 	return FALSE;
@@ -461,7 +458,7 @@ function CheckURLValidity($cache)
 	if(LOG_MINOR_ERRORS)
 	{
 		global $CLIENT, $VERSION, $NET;
-		Logging("invalid-urls", $CLIENT, $VERSION, $NET);
+		Logging("invalid-urls");
 	}
 
 	return FALSE;
@@ -1369,6 +1366,7 @@ ini_set('default_charset', 'UTF-8');
 if(function_exists('date_default_timezone_get'))
 	date_default_timezone_set(@date_default_timezone_get());
 
+$REMOTE_IP = $_SERVER['REMOTE_ADDR'];
 $PHP_VERSION = (float)PHP_VERSION;
 
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
@@ -1523,7 +1521,7 @@ else
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
-		if(LOG_MINOR_ERRORS) Logging('unidentified-clients', $CLIENT, $VERSION, $NET);
+		if(LOG_MINOR_ERRORS) Logging('unidentified-clients');
 		die();
 	}
 
@@ -1551,7 +1549,7 @@ else
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		if(STATS_FOR_BAD_CLIENTS) { UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs(); }
-		if(LOG_MINOR_ERRORS) Logging('bad-or-blocked-clients', $CLIENT, $VERSION, $NET);
+		if(LOG_MINOR_ERRORS) Logging('bad-or-blocked-clients');
 		die();
 	}
 
@@ -1559,7 +1557,7 @@ else
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
-		if(LOG_MINOR_ERRORS) Logging('old-clients', $CLIENT, $VERSION, $NET);
+		if(LOG_MINOR_ERRORS) Logging('old-clients');
 		die();
 	}
 
@@ -1630,19 +1628,19 @@ else
 	{
 		echo "ERROR: Invalid query\r\n";
 		UpdateStats(STATS_BLOCKED);
-		if(LOG_MAJOR_ERRORS) Logging("invalid-queries", $CLIENT, $VERSION, $NET);
+		if(LOG_MAJOR_ERRORS) Logging('invalid-queries', $DETECTED_PV);
 		die();
 	}
 
 	if($LEAVES !== null && ( !ctype_digit($LEAVES) || $LEAVES > 2047 ))
 	{
 		$LEAVES = null;
-		if(LOG_MAJOR_ERRORS) Logging("invalid-leaves", $CLIENT, $VERSION, $NET);
+		if(LOG_MAJOR_ERRORS) Logging('invalid-leaves', $DETECTED_PV);
 	}
 	if($MAX_LEAVES !== null && ( !ctype_digit($MAX_LEAVES) || $MAX_LEAVES > 2047 ))
 	{
 		$MAX_LEAVES = null;
-		if(LOG_MAJOR_ERRORS) Logging("invalid-max-leaves", $CLIENT, $VERSION, $NET);
+		if(LOG_MAJOR_ERRORS) Logging('invalid-max-leaves', $DETECTED_PV);
 	}
 
 	if(!$NO_IP_HEADER)
