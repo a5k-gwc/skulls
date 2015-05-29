@@ -332,7 +332,7 @@ function Pong($detected_pv, $net_list_sent_elsewhere, $multi, $net, $client, $ve
 	$send_old_pong = false; $send_pong = false;
 
 	/* v2.x, v4+ */
-	if($detected_pv >= 4 || ($detected_pv >= 2 && $detected_pv < 3)) $send_pong = true;
+	if($detected_pv >= 2 && $detected_pv !== 3) $send_pong = true;
 	/* v1.x, v3.x */
 	elseif($detected_pv >= 1) $send_old_pong = true;
 	/* v0 - if the spec version isn't clear we send both pong */
@@ -1802,8 +1802,8 @@ else
 		if($URLFILE && (FSOCKOPEN || extension_loaded('curl')))
 			UrlFile($NET, $AGE, $CLIENT);
 
-		//if($PV === 3 && ($HOSTFILE || $URLFILE))
-			//echo "nets: ".strtolower(NetsToString())."\r\n";
+		if($DETECTED_PV === 3 && ($HOSTFILE || $URLFILE))
+			echo "nets: ".strtolower(NetsToString())."\r\n";
 	}
 
 	if($INFO)
