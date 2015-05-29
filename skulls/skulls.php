@@ -737,19 +737,16 @@ function PingGWC($gwc_url, $query)
 
 		if($nets_list1 !== null)
 			$nets = RemoveGarbage(str_replace( array('-', '|'), array('%2D', '-'), $nets_list1 ));
-		elseif(count($received_data) > 3 && $received_data[3] != "")
-		{
-			if(substr($received_data[3], 0, 4) === "http")  /* Workaround for compatibility with PHPGnuCacheII */
-				$nets = "gnutella-gnutella2";
-			else
-				$nets = RemoveGarbage(strtolower($received_data[3]));
-		}
+		elseif(!empty($received_data[3]) && strpos($received_data[3], 'http') !== 0)
+			$nets = RemoveGarbage(strtolower($received_data[3]));
 		elseif(strpos($gwc_name, 'GhostWhiteCrab') === 0)  /* On GhostWhiteCrab if the network is gnutella then the networks list is missing :( */
 			$nets = "gnutella";
-		elseif( !empty($oldpong) )
-			$nets = "gnutella-gnutella2";
+		elseif(strpos($gwc_name, 'PHPGnuCacheII') === 0)   /* Workaround for compatibility with PHPGnuCacheII, it send its own url instead of the networks list */
+			$nets = "gnutella2-gnutella";
+		elseif(!empty($oldpong))
+			$nets = "gnutella2-gnutella";  /* Guessed */
 		else
-			$nets = "gnutella2";
+			$nets = "gnutella2";           /* Guessed */
 
 		$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
 	}
@@ -758,19 +755,20 @@ function PingGWC($gwc_url, $query)
 		$oldpong = RemoveGarbage(trim(rawurldecode(substr($oldpong, 4))));
 		$cache_data = "P|".$oldpong;
 
-		/* Needed to force spec v2 since it ignore all other ways, well it also break code by inserting the network list inside pong with the wrong separator */
-		if(strpos($oldpong, 'Cachechu') === 0)
-			return PingGWC($gwc_url, $query.'&update=1');
+		/* Needed to force v2 spec since they ignore the other ways */
+		if(strpos($oldpong, 'Cachechu') === 0 || strpos($oldpong, 'PHPGnuCacheII') === 0)
+			if(strpos($query, 'update=1') === false)
+				return PingGWC($gwc_url, $query.'&update=1');
 
-		if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
-			//substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
+		// Workaround for compatibility
+		if( //substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
 			substr($oldpong, 0, 12) == "jumswebcache" ||
 			substr($oldpong, 0, 11) == "GWebCache 2" )
-			$nets = "gnutella-gnutella2";
+			$nets = "gnutella2-gnutella";
 		elseif(substr($oldpong, 0, 9) == "MWebCache")
 			$nets = "mute";
 		else
-			$nets = "gnutella";
+			$nets = "gnutella";  /* Guessed */
 
 		$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
 	}
@@ -1563,6 +1561,16 @@ else
 
 	WriteStatsTotalReqs();
 
+	$FORCE_PV2 = false;
+	if($CLIENT === 'TEST')
+	{
+		$IS_A_CACHE = 1; if($NET === 'gnutella2' && strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true;
+	}
+	elseif($CLIENT === 'GCII')
+	{
+		$IS_A_CACHE = 1; if($NET === 'gnutella2') $FORCE_PV2 = true;
+	}
+
 	/*
 		Existing GWC specs: v1, v1.1, v2, v2.1, v3, v4  ( GWC v3 is an extension of GWC v1  /  GWC v4 is an extension of GWC v2.1 )
 
@@ -1588,7 +1596,7 @@ else
 	{
 		if($PV >= 2.1 || $GETNETWORKS || $SUPPORT || $INFO)
 			$DETECTED_PV = 2.1;
-		elseif($PV >= 2 || $GET || $UPDATE)
+		elseif($PV >= 2 || $GET || $UPDATE || $FORCE_PV2)
 			$DETECTED_PV = 2;
 	}
 
@@ -1608,7 +1616,7 @@ else
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
 	if($GETNETWORKS) $SUPPORT = 2;
 
-	if($IS_A_CACHE || $CLIENT === 'TEST')
+	if($IS_A_CACHE)
 	{
 		$HOST = null;       /* Block host submission by GWCs, they don't do it */
 		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header to GWCs, they don't need it */
