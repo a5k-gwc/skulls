@@ -218,7 +218,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 							for( $i = $elements - 1; $i >= 0; $i-- )
 							{
-								list( $h_age, $h_ip, $h_port, $h_leaves, , , $h_vendor, $h_ver, $h_ua, /* $h_suspect */, ) = explode('|', $host_file['host'][$i], 13);
+								list( $h_age, $h_ip, $h_port, $h_leaves, $h_max_leaves, , $h_vendor, $h_ver, $h_ua, /* $h_suspect */, ) = explode('|', $host_file['host'][$i], 13);
 								if(isset($host_file['net'][$i])) $net = $host_file['net'][$i];
 								$color = (($elements - $i) % 2 === 0 ? 'even' : 'odd');
 								$host = $h_ip.':'.$h_port;
@@ -234,7 +234,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								}
 								echo '<a href="',$url,$host,'" rel="nofollow">',$host,'</a>';
 								if($h_leaves !== "")
-									echo ' (',$h_leaves,')';
+									echo ' (',$h_leaves,(empty($h_max_leaves)? null : '/'.$h_max_leaves),')';
 								echo ' &nbsp;</td>';
 								echo '<td><strong title="',$h_ua,'">',ReplaceVendorCode($h_vendor, $h_ver),'</strong> &nbsp;</td>';
 								echo '<td><a href="',$base_link,'showhosts=1&amp;net=',strtolower($net),'">',$net,'</a> &nbsp;</td>';
