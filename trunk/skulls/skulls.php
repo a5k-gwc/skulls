@@ -1389,6 +1389,7 @@ $IP = null; $PORT = null; $GOOD_PORT = true;
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
 $LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
 $MAX_LEAVES = isset($_GET['x_max']) ? $_GET['x_max'] : null;
+$UPTIME = isset($_GET['uptime']) ? $_GET['uptime'] : null;
 
 $HOSTFILE = !empty($_GET["hostfile"]) ? $_GET["hostfile"] : 0;
 $URLFILE = !empty($_GET["urlfile"]) ? $_GET["urlfile"] : 0;
@@ -1632,15 +1633,24 @@ else
 		die();
 	}
 
-	if($LEAVES !== null && ( !ctype_digit($LEAVES) || $LEAVES > 2047 ))
+	if($LEAVES !== null && (!ctype_digit($LEAVES) || $LEAVES > 2047))
 	{
-		$LEAVES = null;
-		if(LOG_MAJOR_ERRORS) Logging('invalid-leaves', $DETECTED_PV);
+		$LEAVES = null; if(LOG_MAJOR_ERRORS) Logging('invalid-leaves', $DETECTED_PV);
 	}
-	if($MAX_LEAVES !== null && ( !ctype_digit($MAX_LEAVES) || $MAX_LEAVES > 2047 ))
+	if($MAX_LEAVES !== null && (!ctype_digit($MAX_LEAVES) || $MAX_LEAVES < 1 || $MAX_LEAVES > 2047))
 	{
-		$MAX_LEAVES = null;
-		if(LOG_MAJOR_ERRORS) Logging('invalid-max-leaves', $DETECTED_PV);
+		$MAX_LEAVES = null; $HOST = null; if(LOG_MAJOR_ERRORS) Logging('invalid-max-leaves', $DETECTED_PV);
+	}
+	if($UPTIME !== null)
+	{
+		if(!ctype_digit($UPTIME) || $UPTIME > 31536000)
+		{
+			$UPTIME = null; if(LOG_MAJOR_ERRORS) Logging('invalid-uptimes', $DETECTED_PV);
+		}
+		elseif($UPTIME < 60)
+		{
+			$UPTIME = null; $HOST = null; if(LOG_MAJOR_ERRORS) Logging('short-uptimes', $DETECTED_PV);
+		}
 	}
 
 	if(!$NO_IP_HEADER)
@@ -1683,7 +1693,7 @@ else
 			$result = -1;
 			if( CheckIPValidity($REMOTE_IP, $HOST) )
 			{
-				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
+				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|Host already updated\r\n";
@@ -1754,7 +1764,7 @@ else
 		{
 			$result = -1;
 			if( CheckIPValidity($REMOTE_IP, $HOST) )
-				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, "", $CLIENT, $VERSION, $UA_ORIGINAL);
+				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
 
