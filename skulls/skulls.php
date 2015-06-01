@@ -1529,7 +1529,10 @@ else
 	/* Separate ip from port for the submitted host, it will be used later */
 	if($HOST !== null)
 	{
-		list($IP, $PORT) = explode(':', $HOST, 2);
+		if(strpos($HOST, ':') === false)
+			{$IP = $HOST; $PORT = 0;}
+		else
+			list($IP, $PORT) = explode(':', $HOST, 2);
 		$GOOD_PORT = ValidatePort($PORT);
 	}
 
