@@ -8,12 +8,11 @@ admin/update.php can be used to update data files if you have installed an old v
 
 
 WARNING
-I STRONGLY SUGGEST you use a CNAME (canonical name) for the cache such as http://gwc.your-site.com/skulls.php instead of http://your-site.com/skulls.php
-So if you ever want to take it down all you will have to do is delete the CNAME.
-If you don't know what is a CNAME then look here: http://en.wikipedia.org/wiki/Domain_name_system
+I STRONGLY SUGGEST you use a separate sub-domain for the GWC such as http://gwc.your-site.com/skulls.php instead of http://your-site.com/skulls.php
+So if you ever want to take it down all you will have to do is delete the sub-domain.
 
-P2P clients have long memories, it takes a long time (maybe forever) until the name of your cache has vanished.
-If you don't follow this warning you will still be hit by cache requests after you have stopped running the cache.
+P2P clients have long memories, it could take a long time (maybe forever) until the url of your GWC has vanished.
+If you don't follow this warning you will still be hit by GWC requests even after you have stopped running the GWC.
 
 
 INSTALLATION PROCEDURE
