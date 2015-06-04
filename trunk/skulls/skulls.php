@@ -1440,8 +1440,6 @@ if(MAINTAINER_NICK === 'your nickname here' || MAINTAINER_NICK === "")
 	die();
 }
 
-if($NET === 'gnutella1')
-	$NET = 'gnutella';
 if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
 {
 	include "log.php";
@@ -1626,6 +1624,14 @@ else
 	{
 		$HOST = null;       /* Block host submission by GWCs, they don't do it */
 		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header to GWCs, they don't need it */
+	}
+
+	/* There are some bad link examples over the internet, block invalid network names before anyone start using them */
+	if($NET === 'gnutella1' || $NET === 'shareaza' || $NET === 'foksy')
+	{
+		UpdateStats(STATS_BLOCKED);
+		if(LOG_MAJOR_ERRORS) Logging('invalid-network-names', $DETECTED_PV);
+		die("ERROR: Invalid network name\r\n");
 	}
 
 	if(!$GET && !$PING && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE === null && $HOST === null && !$INFO)
