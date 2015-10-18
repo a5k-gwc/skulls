@@ -1700,7 +1700,8 @@ else
 		if( $HOST != NULL && $supported_net )
 		{
 			$result = -1;
-			if( CheckIPValidity($REMOTE_IP, $HOST) )
+			include './update.php';
+			if( CheckIPValidity($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
 			{
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 
@@ -1772,7 +1773,8 @@ else
 		if( $HOST != NULL && $supported_net )
 		{
 			$result = -1;
-			if( CheckIPValidity($REMOTE_IP, $HOST) )
+			include './update.php';
+			if( CheckIPValidity($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
