@@ -31,6 +31,7 @@ function CIDRCalculateStartOfRange($ip, $cidr)
 
 function IsIPInBlockRange($ip, $cidr_range)
 {
+	if($cidr_range === "") { if(DEBUG) echo 'Empty line in blocklist.',"\r\n\r\n"; return false; }
 	if(strpos($cidr_range, '/') === false) $cidr_range .= '/32';
 	$cidr = explode('/', $cidr_range, 2); if(!ctype_digit($cidr[1])) { if(DEBUG) echo 'Invalid CIDR range: ',$cidr_range,"\r\n\r\n"; return false; }
 	$cidr[1] = (int)$cidr[1];
