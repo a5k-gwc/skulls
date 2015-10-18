@@ -1858,9 +1858,9 @@ else
 	if(!empty($_GET['getspec']))
 	{
 		if($DETECTED_PV >=2 && $DETECTED_PV !== 3)
-			echo 'I|pv-detect|',$DETECTED_PV,"\r\n";  /* v2.x, v4+ */
+			echo 'I|pv|',$DETECTED_PV,"\r\n";  /* v2.x, v4+ */
 		else
-			echo 'pv-detect: ',$DETECTED_PV,"\r\n";   /* v0, v1.x, v3.x */
+			echo 'pv: ',$DETECTED_PV,"\r\n";   /* v0, v1.x, v3.x */
 	}
 
 	if($STATFILE)
