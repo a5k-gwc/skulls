@@ -4,7 +4,7 @@ Skulls! Multi-Network WebCache
 skulls.php is the main file.
 
 admin/test.php can be used to verify settings that must be changed in vars.php.
-admin/update.php can be used to update data files if you have installed an old version of this cache (it doesn't check if Skulls is updated).
+admin/update.php can be used to update data files if you have installed an old version of this GWC (it doesn't check if Skulls is updated).
 
 
 WARNING
@@ -20,7 +20,7 @@ INSTALLATION PROCEDURE
 2. Go on http://gwc.your-site.com/admin/test.php in your browser
 3. Then open vars.php with notepad and change the settings that you see in step 2
 4. In vars.php change also MAINTAINER_EMAIL (optional), MAINTAINER_WEBSITE (optional) and MAINTAINER_NICK
-5. Put the full url of the cache in CACHE_URL inside vars.php, example: http://gwc.your-site.com/skulls.php (optional but recommended)
+5. Put the full url of your GWC in CACHE_URL inside vars.php, example: http://gwc.your-site.com/skulls.php (optional but recommended)
 6. Send updated vars.php to your web server
 7. Go on http://gwc.your-site.com/skulls.php in your browser, if you don't see any error you are OK
 Note: You must be sure that there aren't any problems before go to the step 8
