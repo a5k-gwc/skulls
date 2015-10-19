@@ -79,11 +79,11 @@ function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE)
 		}
 		else $errors .= "<font color=\"red\">Error during reading of ".DATA_DIR."/running_since.dat</font><br>";
 	}
-	if(!file_exists(DATA_DIR."/caches.dat"))
+	if(!file_exists(DATA_DIR."/alt-gwcs.dat"))
 	{
-		$file = @fopen(DATA_DIR."/caches.dat", "wb");
+		$file = @fopen(DATA_DIR."/alt-gwcs.dat", "wb");
 		if($file !== FALSE) fclose($file);
-		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/caches.dat</font><br>";
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/alt-gwcs.dat</font><br>";
 	}
 	if(!file_exists(DATA_DIR."/failed_urls.dat"))
 	{
