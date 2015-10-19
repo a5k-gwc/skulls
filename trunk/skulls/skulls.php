@@ -493,11 +493,11 @@ function CleanFailedUrls()
 	for($i = 0; $i < $file_count; $i++)
 	{
 		$failed_urls_file[$i] = rtrim($failed_urls_file[$i]);
-		list( , $failed_time) = explode("|", $failed_urls_file[$i]);
-		$time_diff = $now - ( strtotime( $failed_time ) + $offset );	// GMT
+		list(, $failed_time) = explode('|', $failed_urls_file[$i]);
+		$time_diff = $now - (strtotime($failed_time) + $offset);	// GMT
 		$time_diff = floor($time_diff / 86400);	// Days
 
-		if( $time_diff < 2 ) fwrite($file, $failed_urls_file[$i]."\r\n");
+		if($time_diff < 2) fwrite($file, $failed_urls_file[$i]."\r\n");
 	}
 
 	flock($file, LOCK_UN);
@@ -515,10 +515,10 @@ function CheckFailedUrl($url)
 		if($url == $read[0])
 		{
 			$read[1] = trim($read[1]);
-			$time_diff = $now - ( strtotime( $read[1] ) + $offset );	// GMT
+			$time_diff = $now - (strtotime($read[1]) + $offset);	// GMT
 			$time_diff = floor($time_diff / 86400);	// Days
 
-			if( $time_diff < 2 ) return TRUE;
+			if($time_diff < 2) return TRUE;
 		}
 	}
 
@@ -551,7 +551,7 @@ function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version
 
 	$file = fopen(DATA_DIR.'/caches.dat', 'wb');
 	flock($file, LOCK_EX);
-	if($cache != NULL)
+	if($cache !== null)
 		fwrite($file, $new_cache_file.$cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
 	else
 		fwrite($file, $new_cache_file);
@@ -876,7 +876,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	}
 	else
 	{
-		if($file_count > MAX_HOSTS || $file_count > 100)
+		if($file_count > MAX_HOSTS || $file_count > 200)
 		{
 			ReplaceHost($file_path, 0, $this_host, $host_file, true);
 			return 3; // OK, pushed old data
@@ -929,7 +929,7 @@ function WriteCacheFile($cache, $net, $client, $version)
 
 	if($cache_exists)
 	{
-		$time_diff = time() - (strtotime( $time ) + date('Z'));	// GMT
+		$time_diff = time() - (strtotime($time) + date('Z'));	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 		if(RECHECK_CACHES < 12) $recheck_caches = 12; else $recheck_caches = RECHECK_CACHES;
 
@@ -939,19 +939,19 @@ function WriteCacheFile($cache, $net, $client, $version)
 		{
 			$cache_data = CheckGWC($cache, $net, true);
 
-			if($cache_data[0] == "FAIL")
+			if($cache_data[0] === 'FAIL')
 			{
 				AddFailedUrl($cache);
 				ReplaceCache($cache_file, $i, NULL, NULL, NULL, NULL);
 				return 5; // Ping failed
 			}
-			elseif($cache_data[0] == "UNSUPPORTED")
+			elseif($cache_data[0] === 'UNSUPPORTED')
 			{
 				AddFailedUrl($cache);
 				ReplaceCache($cache_file, $i, NULL, NULL, NULL, NULL);
 				return 6; // Unsupported network
 			}
-			elseif($cache_data[0] == "CONGESTION")
+			elseif($cache_data[0] === 'CONGESTION')
 			{
 				return 7; // Possible network congestion
 			}
@@ -970,12 +970,12 @@ function WriteCacheFile($cache, $net, $client, $version)
 		{
 			$cache_data = CheckGWC($cache, $net);
 
-			if($cache_data[0] == "FAIL")
+			if($cache_data[0] === 'FAIL')
 			{
 				AddFailedUrl($cache);
 				return 5; // Ping failed
 			}
-			elseif($cache_data[0] == "UNSUPPORTED")
+			elseif($cache_data[0] === 'UNSUPPORTED')
 			{
 				AddFailedUrl($cache);
 				return 6; // Unsupported network
@@ -1044,7 +1044,7 @@ function UrlFile($net, $age, $client)
 
 	for($n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i--)
 	{
-		list($cache, , $cache_net, , , $h_age) = explode("|", $cache_file[$i], 7);
+		list($cache, , $cache_net, , , $h_age) = explode('|', $cache_file[$i], 7);
 
 		$show = FALSE;
 		if(strpos($cache_net, '-') > -1)
@@ -1154,7 +1154,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 					{
 						list(, $tmp) = explode('://', $cache, 2); list($tmp, ) = explode('/', $tmp, 2); if(!preg_match('/[A-Za-z]/', $tmp)) continue;
 					}
-					$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
+					$cache = 'U|'.$cache.'|'.TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
 					$output .= $cache."\r\n";
 					$n++;
 				}
@@ -1166,7 +1166,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 		{
 			for($n=0, $i=$count_cache-1; $n<MAX_UHC_CACHES_OUT && $i>=0; $i--)
 			{
-				list($cache, , $cache_net, , , $time) = explode("|", $cache_file[$i], 7);
+				list($cache, , $cache_net, , , $time) = explode('|', $cache_file[$i], 7);
 
 				$show = FALSE;
 				if($cache_net === 'gnutella' && !(strpos($cache, '://') > -1))
@@ -1174,7 +1174,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 
 				if($show)
 				{
-					$cache = "U|".$cache."|".TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
+					$cache = 'U|'.$cache.'|'.TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
 					$output .= $cache."\r\n";
 					$n++;
 				}
@@ -1183,9 +1183,9 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 		}
 	}
 
-	if( $hosts_sent === 0 )
+	if($hosts_sent === 0)
 		$output .= "I|NO-HOSTS\r\n";
-	if( $gwcs_sent === 0 )
+	if($gwcs_sent === 0)
 		$output .= "I|NO-URL\r\n";
 	/* I|NO-URL-NO-HOSTS combined reply is no longer used */
 
