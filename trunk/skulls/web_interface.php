@@ -254,7 +254,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 				$cache_file = file(DATA_DIR."/caches.dat");
 				$elements = count($cache_file);
 ?>
-				<div id="page-title"><strong>Alternative WebCaches (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 caches to your P2P application</a></div>
+				<div id="page-title"><strong>Alternative GWCs (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 GWCs to your P2P application</a></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current GWCs in cache">
 						<tr class="header-column">
@@ -266,13 +266,13 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 						</tr>
 <?php
 						if( $elements === 0 )
-							echo '<tr><td class="empty-list" colspan="5">There are no <strong>alternative webcaches</strong> listed at this time.</td></tr>',"\n";
+							echo '<tr><td class="empty-list" colspan="5">There are no <strong>alternative GWCs</strong> listed at this time.</td></tr>',"\n";
 						else
 						{
 							$udp = "";
 							for($i = $elements - 1; $i >= 0; $i--)
 							{
-								list ($cache_url, $cache_name, $net, $client, $version, $time) = explode("|", $cache_file[$i], 6);
+								list($cache_url, $cache_name, $net, $client, $version, $time) = explode("|", $cache_file[$i], 6);
 								$cache_name = htmlentities($cache_name, ENT_QUOTES, 'UTF-8');
 								if( strpos($net, "-") > -1 )
 								{
@@ -292,7 +292,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 								if(strpos($cache_url, "://") > -1)
 								{
-									$prefix = "gwc:";
+									$prefix = 'gwc:';
 									$output .= '<a class="gwc" href="'.$prefix.$cache_url.'?nets='.str_replace(' ', "", strtolower($net)).'" rel="nofollow">+</a> ';
 								}
 								else
