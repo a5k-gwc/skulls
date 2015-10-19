@@ -545,14 +545,14 @@ function ReplaceHost($file_path, $line, $this_host, &$host_file, $recover_limit 
 	fclose($file);
 }
 
-function ReplaceCache($cache_file, $line, $cache, $cache_data, $client, $version)
+function ReplaceCache($file_path, $line, &$cache_file, $this_alt_gwc)
 {
 	$new_cache_file = implode( "", array_merge( array_slice($cache_file, 0, $line), array_slice($cache_file, ($line + 1)) ) );
 
-	$file = fopen(DATA_DIR.'/caches.dat', 'wb');
+	$file = fopen($file_path, 'wb');
 	flock($file, LOCK_EX);
-	if($cache !== null)
-		fwrite($file, $new_cache_file.$cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
+	if($this_alt_gwc !== null)
+		fwrite($file, $new_cache_file.$this_alt_gwc);
 	else
 		fwrite($file, $new_cache_file);
 	flock($file, LOCK_UN);
@@ -911,21 +911,22 @@ function WriteCacheFile($cache, $net, $client, $version)
 
 	$client = RemoveGarbage($client);
 	$version = RemoveGarbage($version);
-	$cache_file = file(DATA_DIR.'/caches.dat');
+	$file_path = DATA_DIR.'/alt-gwcs.dat';
+	$cache_file = file($file_path);
 	$file_count = count($cache_file);
 	$cache_exists = FALSE;
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list($read,) = explode('|', $cache_file[$i], 2);
+		list($time,, $read,) = explode('|', $cache_file[$i], 4);
 
 		if(strtolower($cache) == strtolower($read))
 		{
-			list(, , , , , $time) = explode('|', rtrim($cache_file[$i]));
 			$cache_exists = TRUE;
 			break;
 		}
 	}
+	$this_alt_gwc = null;
 
 	if($cache_exists)
 	{
@@ -942,13 +943,13 @@ function WriteCacheFile($cache, $net, $client, $version)
 			if($cache_data[0] === 'FAIL')
 			{
 				AddFailedUrl($cache);
-				ReplaceCache($cache_file, $i, NULL, NULL, NULL, NULL);
+				ReplaceCache($file_path, $i, $cache_file, null);
 				return 5; // Ping failed
 			}
 			elseif($cache_data[0] === 'UNSUPPORTED')
 			{
 				AddFailedUrl($cache);
-				ReplaceCache($cache_file, $i, NULL, NULL, NULL, NULL);
+				ReplaceCache($file_path, $i, $cache_file, null);
 				return 6; // Unsupported network
 			}
 			elseif($cache_data[0] === 'CONGESTION')
@@ -957,7 +958,11 @@ function WriteCacheFile($cache, $net, $client, $version)
 			}
 			else
 			{
-				ReplaceCache($cache_file, $i, $cache, $cache_data, $client, $version);
+				list(,$temp) = explode('://', $cache, 2); list($temp,) = explode('/', $temp, 2); $temp .= '.';
+				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
+
+				ReplaceCache($file_path, $i, $cache_file, $this_alt_gwc);
 				return 1; // Updated timestamp
 			}
 		}
@@ -982,16 +987,20 @@ function WriteCacheFile($cache, $net, $client, $version)
 			}
 			else
 			{
+				list(,$temp) = explode('://', $cache, 2); list($temp,) = explode('/', $temp, 2); $temp .= '.';
+				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
+
 				if($file_count >= MAX_CACHES || $file_count > 100)
 				{
-					ReplaceCache($cache_file, 0, $cache, $cache_data, $client, $version);
+					ReplaceCache($file_path, 0, $cache_file, $this_alt_gwc);
 					return 3; // OK, pushed old data
 				}
 				else
 				{
-					$file = fopen(DATA_DIR.'/caches.dat', 'ab');
+					$file = fopen($file_path, 'ab');
 					flock($file, LOCK_EX);
-					fwrite($file, $cache."|".$cache_data[0]."|".$cache_data[1]."|".$client."|".$version."|".gmdate("Y/m/d h:i:s A")."\r\n");
+					fwrite($file, $this_alt_gwc);
 					flock($file, LOCK_UN);
 					fclose($file);
 					return 2; // OK
@@ -1039,12 +1048,12 @@ function HostFile($net, $age)
 function UrlFile($net, $age, $client)
 {
 	$now = time(); $offset = date('Z');
-	$cache_file = file(DATA_DIR.'/caches.dat');
+	$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
 	$count_cache = count($cache_file);
 
 	for($n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i--)
 	{
-		list($cache, , $cache_net, , , $h_age) = explode('|', $cache_file[$i], 7);
+		list($gwc_age,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 6);
 
 		$show = FALSE;
 		if(strpos($cache_net, '-') > -1)
@@ -1069,7 +1078,7 @@ function UrlFile($net, $age, $client)
 			{
 				list(, $tmp) = explode('://', $cache, 2); list($tmp, ) = explode('/', $tmp, 2); if(!preg_match('/[A-Za-z]/', $tmp)) continue;
 			}
-			echo $cache; if($age) echo '|',TimeSinceSubmissionInSeconds($now, $h_age, $offset); echo "\r\n";
+			echo $cache; if($age) echo '|',TimeSinceSubmissionInSeconds($now, $gwc_age, $offset); echo "\r\n";
 			$n++;
 		}
 	}
@@ -1122,14 +1131,14 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 	$gwcs_sent = 0;
 	if(FSOCKOPEN || extension_loaded('curl'))
 	{
-		$cache_file = file(DATA_DIR.'/caches.dat');
+		$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
 		$count_cache = count($cache_file);
 
 		if($get)
 		{
 			for($n=0, $i=$count_cache-1; $n<MAX_CACHES_OUT && $i>=0; $i--)
 			{
-				list($cache, , $cache_net, , , $time) = explode('|', $cache_file[$i], 7);
+				list($time,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 6);
 
 				$show = FALSE;
 				if(strpos($cache_net, '-') > -1)
@@ -1166,7 +1175,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 		{
 			for($n=0, $i=$count_cache-1; $n<MAX_UHC_CACHES_OUT && $i>=0; $i--)
 			{
-				list($cache, , $cache_net, , , $time) = explode('|', $cache_file[$i], 7);
+				list($time,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 6);
 
 				$show = FALSE;
 				if($cache_net === 'gnutella' && !(strpos($cache, '://') > -1))
