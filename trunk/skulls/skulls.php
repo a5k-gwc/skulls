@@ -1763,7 +1763,7 @@ else
 			else // Invalid URL
 				print("I|update|WARNING|Invalid URL"."\r\n");
 
-			if($is_good_update !== null)
+			if($is_good_update === null)
 			{
 				if($result >= 0 || $result <= 3)
 					$is_good_update = true;
@@ -1809,7 +1809,7 @@ else
 			else // Invalid URL
 				print "WARNING: Invalid URL"."\r\n";
 
-			if($is_good_update !== null)
+			if($is_good_update === null)
 			{
 				if($result >= 0 || $result <= 3)
 					$is_good_update = true;
