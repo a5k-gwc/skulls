@@ -1113,7 +1113,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 			if($separators > 1) $host .= '||';
 			if($getleaves) $host .= $h_leaves;
 			if($separators > 2) $host .= '|';
-			if($getvendors && $h_vendor !== 'KICKSTART') $host .= $h_vendor;
+			if($getvendors) $host .= $h_vendor;
 			if($separators > 3) $host .= '|';
 			if($separators > 4) $host .= '|';
 			if($getmaxleaves) $host .= $h_max_leaves;

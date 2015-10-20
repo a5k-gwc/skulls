@@ -197,7 +197,9 @@ function KickStart($net, $cache){
 	}
 	else
 	{
-		fwrite( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: Close\r\n\r\n" );
+		include './update.php';
+
+		fwrite( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&getvendors=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n" );
 		while( !feof($fp) )
 		{
 			$is_host = FALSE;
@@ -232,7 +234,14 @@ function KickStart($net, $cache){
 
 			if($is_host)
 			{
-				$result = WriteHostFile($net, $ip_port[0], rtrim($host[1]), "", "", "", 'KICKSTART', '1.0', "", '0');
+				$gwc_vendor = null;
+				if(!IsIPInBlockList($ip_port[0]))
+				{
+					if(!empty($host[5])) $gwc_vendor = RemoveGarbage($host[5]);
+					$result = WriteHostFile($net, $ip_port[0], rtrim($ip_port[1]), "", "", "", $gwc_vendor, "", 'KICKSTART');
+				}
+				else
+					$result = 9;
 
 				if( $result == 0 ) // Exists
 					echo "<b>I|update|OK|Host already updated</b><br>\r\n";
@@ -245,6 +254,8 @@ function KickStart($net, $cache){
 					echo "<b>I|update|OK|Host added successfully (pushed old data)</b><br>\r\n";
 					break;
 				}
+				elseif( $result == 9 ) // Blocked host
+					echo '<b class="bad">I|update|WARNING|Invalid host</b><br>',"\r\n";
 				else
 					echo "<font color=\"red\"><b>I|update|ERROR|Unknown error 3, return value = ".$result."</b></font><br>\r\n";
 			}
