@@ -958,7 +958,7 @@ function WriteCacheFile($cache, $net, $client, $version)
 			}
 			else
 			{
-				list(,$temp) = explode('://', $cache, 2); list($temp,) = explode('/', $temp, 2); $temp .= '.';
+				list(,$temp) = explode('://', $cache, 2); list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
 				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
 				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
 
@@ -987,7 +987,7 @@ function WriteCacheFile($cache, $net, $client, $version)
 			}
 			else
 			{
-				list(,$temp) = explode('://', $cache, 2); list($temp,) = explode('/', $temp, 2); $temp .= '.';
+				list(,$temp) = explode('://', $cache, 2); list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
 				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
 				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
 
