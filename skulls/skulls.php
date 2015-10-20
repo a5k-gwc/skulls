@@ -783,19 +783,19 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 	global $SUPPORTED_NETWORKS;
 
 	$nets = NULL;
-	if(strpos($cache, "://") > -1)
+	if(strpos($cache, '://') > -1)
 	{
 		$udp = FALSE;
-		$query = "ping=1&multi=1&getnetworks=1&pv=2&client=".VENDOR."&version=".SHORT_VER."&cache=1";
+		$query = 'ping=1&multi=1&getnetworks=1&pv=2&client='.VENDOR.'&version='.SHORT_VER.'&cache=1';
 		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list    or    ERR|Error name    or    CONN-ERR|Error number
 	}
 	else
 	{
 		$udp = TRUE;
-		include "udp.php";
+		include './udp.php';
 		$result = PingUDP($cache);
 	}
-	$received_data = explode("|", $result);
+	$received_data = explode('|', $result);
 
 	if($received_data[0] === 'ERR' && !$udp)
 	{
@@ -813,18 +813,18 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 		}
 		elseif( strpos($received_data[1], "access denied by acl") > -1 )
 		{
-			$query = "ping=1&multi=1&pv=2&client=TEST&version=".VENDOR."%20".SHORT_VER."&cache=1";
+			$query = 'ping=1&multi=1&pv=2&client=TEST&version='.VENDOR.'%20'.SHORT_VER.'&cache=1';
 			$result = PingGWC($cache, $query);
 		}
 		unset($received_data);
-		$received_data = explode("|", $result);
+		$received_data = explode('|', $result);
 	}
 	if(DEBUG) echo "\r\nD|update|GWC|Result|",$result,"\r\n\r\n";
 
 	if($congestion_check && $received_data[0] === 'CONN-ERR' && !ConnectionTest())
 		$cache_data[0] = 'CONGESTION';
 	elseif($received_data[0] === 'CONN-ERR' || $received_data[0] === 'ERR' || $received_data[1] === "")
-		$cache_data[0] = "FAIL";
+		$cache_data[0] = 'FAIL';
 	else
 	{
 		if($nets == NULL) $nets = $received_data[2];
@@ -834,7 +834,7 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 			$cache_data[1] = $nets;
 		}
 		else
-			$cache_data[0] = "UNSUPPORTED";
+			$cache_data[0] = 'UNSUPPORTED';
 	}
 
 	return $cache_data;
