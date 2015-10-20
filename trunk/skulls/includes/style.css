@@ -30,10 +30,9 @@ div.container { display: -moz-inline-stack; display: inline-block; }  /* IE comp
 .update-infos { font-weight: bold; }
 .major-change { color: red; }
 
-a { color: blue; }
-a.https { color: #ffd700; }
-a:visited { color: purple; }
-a:focus { color: lime; }
+a { color: blue; }  a.https { color: #ffd700; }  a.udp { color: #006600; }
+a:visited { color: purple; }  a.https:visited { color: #ff9900; }  a.udp:visited { color: #000033; }
+a:focus, a.https:focus, a.udp:focus { color: lime; }
 a:focus img { -moz-outline-style: solid; outline-style: solid; }
 .hover-underline, .gwc-home-link, .gwc { text-decoration: none; }
 .hover-underline:hover, .gwc-home-link:hover { text-decoration: underline; }
