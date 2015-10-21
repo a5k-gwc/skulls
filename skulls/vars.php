@@ -26,7 +26,7 @@ define( 'LOG_MINOR_ERRORS',			0 );	// Enable logging of minor errors (NOTE: This
 define( 'MAX_HOSTS',				100 );	// Maximum number of host stored for EACH network (If there are 2 networks and this value is 30 then 30 x 2 = 60 - Setting this value too high DECREASE SPEED of the webcache)
 define( 'MAX_HOSTS_OUT',			50 );	// Maximum number of host sent in each request (By setting this value too high you can WASTE BANDWIDTH, by setting too low you can increase the number of requests)
 
-define( 'MAX_CACHES',				100 );	// Maximum number of cache stored for ALL networks (Setting this value too high DECREASE SPEED of the webcache)
+define( 'MAX_CACHES',				50 );	// Maximum number of cache stored for ALL networks (Setting this value too high DECREASE SPEED of the webcache)
 define( 'MAX_CACHES_OUT',			15 );	// Maximum number of cache sent in each request (By setting this value too high you can WASTE BANDWIDTH, by setting too low you can increase the number of requests)
 define( 'MAX_UDP_CACHES_OUT',		5 );
 
