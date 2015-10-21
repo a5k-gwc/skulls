@@ -354,13 +354,12 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 						}
 ?>
 					</table>
-				</div>
-				<div>&nbsp;</div>
+				</div><div>&nbsp;</div>
 <?php
 				$cache_file = file(DATA_DIR.'/alt-udps.dat');
 				$elements = count($cache_file);
 ?>
-				<div id="page-title"><strong>Alternative UDP host caches (<?php echo $elements." of ".MAX_CACHES; ?>)</strong></div>
+				<div class="page-titles"><strong>Alternative UDP host caches (<?php echo $elements." of ".MAX_CACHES; ?>)</strong></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current UDP host caches in cache">
 						<tr class="header-column">
