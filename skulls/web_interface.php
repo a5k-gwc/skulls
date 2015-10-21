@@ -251,10 +251,11 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 			}
 			elseif($num == 3)	// GWCs
 			{
+				include './geoip/geoip.php';
 				$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
 				$elements = count($cache_file);
 ?>
-				<div id="page-title"><strong>Alternative GWCs (<?php echo count($cache_file)." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 GWCs to your P2P application</a></div>
+				<div id="page-title"><strong>Alternative GWCs (<?php echo $elements." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 GWCs to your P2P application</a></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current GWCs in cache">
 						<tr class="header-column">
@@ -269,10 +270,8 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 							echo '<tr><td class="empty-list" colspan="5">There are no <strong>alternative GWCs</strong> listed at this time.</td></tr>',"\n";
 						else
 						{
-							include './geoip/geoip.php';
 							$geoip = new GeoIPWrapper();
 
-							$udp = "";
 							for($i = $elements - 1; $i >= 0; $i--)
 							{
 								list($time, $gwc_ip, $cache_url, $cache_name, $net, /**/, $gwc_server, $client, $version, /* UA */,) = explode("|", $cache_file[$i], 11);
@@ -293,13 +292,8 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								$output = '<tr class="'.$color.'">';
 								$output .= '<td>';
 
-								if(strpos($cache_url, "://") > -1)
-								{
-									$prefix = 'gwc:';
-									$output .= '<a class="gwc" href="'.$prefix.$cache_url.'?nets='.str_replace(' ', "", strtolower($net)).'" rel="nofollow">+</a> ';
-								}
-								else
-									$output .= " &nbsp; ";
+								$prefix = 'gwc:';
+								$output .= '<a class="gwc" href="'.$prefix.$cache_url.'?nets='.str_replace(' ', "", strtolower($net)).'" rel="nofollow">+</a> ';
 
 								if($geoip)
 								{
@@ -309,16 +303,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								}
 								$output .= '<a'.(strpos($cache_url, 'https:') === 0 ? ' class="https"' : "").' href="'.$cache_url.'" rel="external">';
 
-								if(strpos($cache_url, "://") > -1)
-								{
-									$type = "tcp";
-									list( , $cache_url) = explode("://", $cache_url);
-								}
-								else
-								{
-									$type = "udp";
-									$cache_url = substr($cache_url, strpos($cache_url, ":")+1);
-								}
+								list(,$cache_url) = explode("://", $cache_url);
 								$max_length = 40;
 
 								$pos = strpos($cache_url, "/");
@@ -361,10 +346,75 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version).'</span> &nbsp;</td>';
 								$output .= '<td>'.rtrim($time).'</td></tr>'."\n";
 
-								if($type == "tcp") echo $output;
-								else $udp .= $output;
+								echo $output;
 							}
-							echo $udp;
+
+							if($geoip) $geoip->Destroy();
+							$geoip = null;
+						}
+?>
+					</table>
+				</div>
+				<div>&nbsp;</div>
+<?php
+				$cache_file = file(DATA_DIR.'/alt-udps.dat');
+				$elements = count($cache_file);
+?>
+				<div id="page-title"><strong>Alternative UDP host caches (<?php echo $elements." of ".MAX_CACHES; ?>)</strong></div>
+				<div class="padding">
+					<table class="inner-table" summary="Current UDP host caches in cache">
+						<tr class="header-column">
+							<th>URL</th>
+							<th>Name</th>
+							<th>Network</th>
+							<th>Submitting client</th>
+							<th>Last checked</th>
+						</tr>
+<?php
+						if( $elements === 0 )
+							echo '<tr><td class="empty-list" colspan="5">There are no <strong>alternative UDP host caches</strong> listed at this time.</td></tr>',"\n";
+						else
+						{
+							$geoip = new GeoIPWrapper();
+
+							for($i = $elements - 1; $i >= 0; $i--)
+							{
+								list($time, $gwc_ip, $cache_url, $cache_name, $net, /**/, $gwc_server, $client, $version, /* UA */,) = explode("|", $cache_file[$i], 11);
+								$cache_name = htmlentities($cache_name, ENT_QUOTES, 'UTF-8');
+								$color = (($elements - $i) % 2 === 0 ? 'even' : 'odd');
+
+								$output = '<tr class="'.$color.'">';
+								$output .= '<td>';
+
+								if($net === 'gnutella')
+									$prefix = 'uhc:';
+								elseif($net === 'gnutella2')
+									$prefix = 'ukhl:';
+								else
+									$prefix = $net.':'.'udp:';
+								$output .= '<a class="gwc" href="'.$prefix.$cache_url.'" rel="nofollow">+</a> ';
+
+								if($geoip)
+								{
+									$country_name = $geoip->GetCountryNameByIP($gwc_ip);
+									$country_code = $geoip->GetCountryCodeByIP($gwc_ip);
+									$output .= '<img width="16" height="11" src="'.$geoip->GetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
+								}
+
+								$output .= '<a class="udp" href="http://'.$cache_url.'" rel="external">';
+								$max_length = 40;
+								$pos = strpos($cache_url, '/'); if($pos !== false) $cache_url = substr($cache_url, 0, $pos);
+								if(strlen($cache_url) > $max_length)
+									$output .= substr($cache_url, 0, $max_length).'...';
+								else
+									$output .= $cache_url;
+								$output .= '</a> &nbsp;</td><td><span title="'.$gwc_server.'">'.$cache_name;
+								$output .= '</span> &nbsp;</td><td>'.ucfirst($net).' &nbsp;</td>';
+								$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version).'</span> &nbsp;</td>';
+								$output .= '<td>'.rtrim($time).'</td></tr>'."\n";
+
+								echo $output;
+							}
 
 							if($geoip) $geoip->Destroy();
 							$geoip = null;

@@ -85,6 +85,12 @@ function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE)
 		if($file !== FALSE) fclose($file);
 		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/alt-gwcs.dat</font><br>";
 	}
+	if(!file_exists(DATA_DIR."/alt-udps.dat"))
+	{
+		$file = @fopen(DATA_DIR."/alt-udps.dat", "wb");
+		if($file !== FALSE) fclose($file);
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/alt-udps.dat</font><br>";
+	}
 	if(!file_exists(DATA_DIR."/failed_urls.dat"))
 	{
 		$file = @fopen(DATA_DIR."/failed_urls.dat", "wb");
