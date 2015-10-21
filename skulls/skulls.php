@@ -130,7 +130,7 @@ function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 	}
 	$vendor = strtoupper($vendor);
 
-	/* Change vendor code of mod versions of Shareaza */
+	/* Change vendor code of mod versions */
 	if($vendor === 'RAZA')
 	{
 		if(strpos($user_agent, 'Shareaza ') !== 0 || strpos($user_agent, 'PRO') !== false || $ver === '9.9.9.9')
