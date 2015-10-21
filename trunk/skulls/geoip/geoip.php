@@ -45,7 +45,7 @@ class GeoIPWrapper
 	{
 		/* GeoIP PECL manual: http://php.net/manual/book.geoip.php */
 		if(function_exists('geoip_country_code_by_name'))  /* It needs the GeoIP PECL extension >= 0.2.0 installed on the server */
-			if(ini_set('geoip.custom_directory', $this->curr_dir) !== false)
+			if(ini_set('geoip.custom_directory', $this->curr_dir.'/../ext') !== false)
 			{
 				$this->is_pecl = true;
 				return true;
@@ -62,7 +62,7 @@ class GeoIPWrapper
 			return false;
 
 		include_once $path;
-		$this->api_handle = geoip_open($this->curr_dir.'/GeoIP.dat', GEOIP_STANDARD);
+		$this->api_handle = geoip_open($this->curr_dir.'/../ext/GeoIP.dat', GEOIP_STANDARD);
 		if($this->api_handle === null)
 			{ trigger_error('GeoIPWrapper - Initialization of API failed', E_USER_ERROR); return false; }
 
@@ -80,7 +80,7 @@ class GeoIPWrapper
 	function _GetDBInfoDirectlyFromFile()  /* This code will possibly break in the future but I haven't found a better way to get the DB version */
 	{
 		$read_data = false; $null = "\0"; $max_length = 200;
-		$fp = @fopen($this->curr_dir.'/GeoIP.dat', 'rb');
+		$fp = @fopen($this->curr_dir.'/../ext/GeoIP.dat', 'rb');
 
 		if($fp !== false)
 		{
