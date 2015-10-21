@@ -199,7 +199,7 @@ function KickStart($net, $cache){
 	{
 		include './update.php';
 
-		fwrite( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&getvendors=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n" );
+		fwrite( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&getvendors=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." ".$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n" );
 		while( !feof($fp) )
 		{
 			$is_host = FALSE;
@@ -238,7 +238,7 @@ function KickStart($net, $cache){
 				if(!IsIPInBlockList($ip_port[0]))
 				{
 					if(!empty($host[5])) $gwc_vendor = RemoveGarbage($host[5]);
-					$result = WriteHostFile($net, $ip_port[0], rtrim($ip_port[1]), "", "", "", $gwc_vendor, "", 'KICKSTART');
+					$result = WriteHostFile($net, $ip_port[0], rtrim($ip_port[1]), "", "", "", $gwc_vendor, "", 'KickStart');
 				}
 				else
 					$result = 9;

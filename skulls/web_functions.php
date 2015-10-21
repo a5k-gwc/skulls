@@ -315,10 +315,6 @@ function ReplaceVendorCode($vendor, $version)
 			break;
 
 		/* Special cases */
-		case 'KICKSTART':
-			$client_name = 'KickStart';
-			$cache = 0;
-			break;
 		case 'Submit':
 			$client_name = 'Manual submission';
 			$cache = 0;

@@ -1501,7 +1501,7 @@ if($web)
 elseif( $KICK_START )
 {
 	if( !KICK_START_ENABLED )
-		die("ERROR: Kickstart is disabled\r\n");
+		die("ERROR: KickStart is disabled\r\n");
 
 	if( $NET == NULL )
 		die("ERROR: Network not specified\r\n");
