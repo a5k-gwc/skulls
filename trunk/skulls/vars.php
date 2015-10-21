@@ -50,10 +50,4 @@ $SUPPORTED_NETWORKS[] = 'Gnutella2';
 $SUPPORTED_NETWORKS[] = 'Kad';
 $SUPPORTED_NETWORKS[] = 'MUTE';
 //$SUPPORTED_NETWORKS[] = 'Foxy';
-
-// UDP (Currently it is incomplete)
-// 0: Disabled, 1: Enabled
-$UDP['uhc'] = 0;
-$UDP['ukhl'] = 0;
-
 ?>

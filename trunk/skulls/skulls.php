@@ -19,7 +19,6 @@
 
 $SUPPORTED_NETWORKS = null;
 include 'vars.php';
-$UDP['ukhl'] = 0;	// The support isn't complete
 
 define('NAME', 'Skulls');
 define('VENDOR', 'SKLL');										/* Vendor code (four uppercase letters) */
@@ -446,12 +445,8 @@ function CheckIPValidity($remote_ip, $ip)
 
 function CheckURLValidity($cache)
 {
-	global $UDP;
-	$uhc = $UDP["uhc"] == 1 && substr($cache, 0, 4) == "uhc:";
-	$ukhl = $UDP["ukhl"] == 1 && substr($cache, 0, 5) == "ukhl:";
-
 	if(strlen($cache) > 10)
-		if( substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://" || $uhc || $ukhl )
+		if(substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://")
 			if( !(strpos($cache, "?") > -1 || strpos($cache, "&") > -1 || strpos($cache, "#") > -1) )
 				return TRUE;
 
@@ -462,6 +457,20 @@ function CheckURLValidity($cache)
 	}
 
 	return FALSE;
+}
+
+function CheckUDPURLValidity($cache)
+{
+	if(strlen($cache) > 6 && strpos($cache, 'udp:') === 0)
+		return true;
+
+	if(LOG_MINOR_ERRORS)
+	{
+		global $CLIENT, $VERSION, $NET;
+		Logging("invalid-udp-urls");
+	}
+
+	return false;
 }
 
 /* When bugs of GWCs are fixed, ask on http://sourceforge.net/p/skulls/discussion/ and the GWCs will be unlocked */
@@ -898,7 +907,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	}
 }
 
-function WriteCacheFile($cache, $net, $client, $version)
+function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 {
 	global $MY_URL;
 
@@ -911,7 +920,6 @@ function WriteCacheFile($cache, $net, $client, $version)
 
 	$client = RemoveGarbage($client);
 	$version = RemoveGarbage($version);
-	$file_path = DATA_DIR.'/alt-gwcs.dat';
 	$cache_file = file($file_path);
 	$file_count = count($cache_file);
 	$cache_exists = FALSE;
@@ -938,7 +946,7 @@ function WriteCacheFile($cache, $net, $client, $version)
 			return 0; // Exists
 		else
 		{
-			$cache_data = CheckGWC($cache, $net, true);
+			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$cache, $net, true);
 
 			if($cache_data[0] === 'FAIL')
 			{
@@ -958,7 +966,8 @@ function WriteCacheFile($cache, $net, $client, $version)
 			}
 			else
 			{
-				list(,$temp) = explode('://', $cache, 2); list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
+				$temp = $cache; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
+				list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
 				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
 				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
 
@@ -973,7 +982,7 @@ function WriteCacheFile($cache, $net, $client, $version)
 			return 4; // Blocked URL
 		else
 		{
-			$cache_data = CheckGWC($cache, $net);
+			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$cache, $net);
 
 			if($cache_data[0] === 'FAIL')
 			{
@@ -987,7 +996,8 @@ function WriteCacheFile($cache, $net, $client, $version)
 			}
 			else
 			{
-				list(,$temp) = explode('://', $cache, 2); list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
+				$temp = $cache; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
+				list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
 				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
 				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
 
@@ -1084,7 +1094,7 @@ function UrlFile($net, $age, $client)
 	}
 }
 
-function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $client, $add_dummy_host)
+function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $getudp, $client, $add_dummy_host)
 {
 	$output = "";
 	$now = time(); $offset = date('Z');
@@ -1129,6 +1139,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 	}
 
 	$gwcs_sent = 0;
+	$udps_sent = 0;
 	if(FSOCKOPEN || extension_loaded('curl'))
 	{
 		$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
@@ -1171,24 +1182,19 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 			$gwcs_sent = $n;
 		}
 
-		if($uhc)
+		if($getudp && $net === 'gnutella')
 		{
-			for($n=0, $i=$count_cache-1; $n<MAX_UHC_CACHES_OUT && $i>=0; $i--)
+			$cache_file = file(DATA_DIR.'/alt-udps.dat');
+			$count_cache = count($cache_file);
+
+			for($n=0, $i=$count_cache-1; $n<MAX_UDP_CACHES_OUT && $i>=0; $i--)
 			{
 				list($time,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 6);
-
-				$show = FALSE;
-				if($cache_net === 'gnutella' && !(strpos($cache, '://') > -1))
-					$show = TRUE;
-
-				if($show)
-				{
-					$cache = 'U|'.$cache.'|'.TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
-					$output .= $cache."\r\n";
-					$n++;
-				}
+				$cache = 'UC|'.$cache.'|'.TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
+				$output .= $cache."\r\n";
+				$n++;
 			}
-			$gwcs_sent += $n;
+			$udps_sent = $n;
 		}
 	}
 
@@ -1196,6 +1202,8 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $uhc, $ukhl, $c
 		$output .= "I|NO-HOSTS\r\n";
 	if($gwcs_sent === 0)
 		$output .= "I|NO-URL\r\n";
+	if($getudp && $udps_sent === 0)
+		$output .= "I|NO-UDP-URL\r\n";
 	/* I|NO-URL-NO-HOSTS combined reply is no longer used */
 
 	echo $output;
@@ -1381,8 +1389,6 @@ $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
 $IS_A_CACHE = !empty($_GET["cache"]) ? $_GET["cache"] : 0;		// This must be added to every request made by a cache, to let it know that we are a cache and not a client
 $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;			// It is added to every ping request (it has no effect on other things), it tell to the pinged cache to ignore the "net" parameter and outputting the pong using this format, if possible, "I|pong|[cache name] [cache version]|[supported networks list]" - example: I|pong|Skulls 0.3.0|gnutella-gnutella2
-$UHC = !empty($_GET["uhc"]) && $PHP_VERSION >= 4.3 ? $_GET["uhc"] : 0;
-$UKHL = !empty($_GET["ukhl"]) && $PHP_VERSION >= 4.3 ? $_GET["ukhl"] : 0;
 
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;				// This tell to the cache to show info like the name, the version, the vendor code, the home page of the cache, the nick and the website of the maintainer (the one that has put the cache on a webserver)
 
@@ -1393,7 +1399,8 @@ $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) :
 
 $HOST = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $IP = null; $PORT = null; $GOOD_PORT = true;
-$CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : NULL );
+$CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : null );
+$UDP_CACHE = (!empty($_GET["udpurl"]) && $PHP_VERSION >= 4.3)? $_GET["udpurl"] : null;
 $LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
 $MAX_LEAVES = isset($_GET['x_max']) ? $_GET['x_max'] : null;
 $UPTIME = isset($_GET['uptime']) ? $_GET['uptime'] : null;
@@ -1416,6 +1423,7 @@ $GWCS = empty($_GET['gwcs']) ? 0 : $_GET['gwcs'];
 $BFILE = !empty($_GET["bfile"]) ? $_GET["bfile"] : 0;
 
 $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
+$GETUDP = (!empty($_GET["getudp"]) && $PHP_VERSION >= 4.3)? $_GET["getudp"] : 0; /* Currently it is tied to the normal 'get' but in the future will be able to get queried alone */
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 
 $CLIENT = !empty($_GET['client']) ? $_GET['client'] : "";
@@ -1641,7 +1649,7 @@ else
 		die("ERROR: Invalid network name\r\n");
 	}
 
-	if(!$GET && !$PING && !$UHC && !$UKHL && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE === null && $HOST === null && !$INFO)
+	if(!$GET && !$GETUDP && !$PING && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE === null && $UDP_CACHE === null && $HOST === null && !$INFO)
 	{
 		echo "ERROR: Invalid query\r\n";
 		UpdateStats(STATS_BLOCKED);
@@ -1691,7 +1699,7 @@ else
 	else
 	{
 		$supported_net = FALSE;
-		if(($PING && !$MULTI && !$SUPPORT) || $GET || $HOSTFILE || $URLFILE || $CACHE != NULL || $HOST != NULL) echo "ERROR: Network not supported\r\n";
+		if(($PING && !$MULTI && !$SUPPORT) || $GET || $GETUDP || $HOSTFILE || $URLFILE || $CACHE != NULL || $UDP_CACHE != NULL || $HOST != NULL) echo "ERROR: Network not supported\r\n";
 	}
 
 	if($PING)
@@ -1732,14 +1740,24 @@ else
 				$is_good_update = false;
 		}
 
-		if( $CACHE != NULL && $supported_net )
+		if( ($CACHE !== null || $UDP_CACHE !== null) && $supported_net )
 		{
-			$result = -1;
+			$result = -1; $is_udp = false;
 			if(!FSOCKOPEN && !extension_loaded('curl')) // Cache adding disabled
 				print "I|update|WARNING|URL adding is disabled\r\n";
-			elseif( CheckURLValidity($CACHE) )
+			elseif( ($UDP_CACHE !== null && $NET === 'gnutella' && !CheckUDPURLValidity($UDP_CACHE)))  // Invalid URL
+				print("I|update|WARNING|Invalid UDP URL"."\r\n");
+			elseif( ($CACHE !== null && !CheckURLValidity($CACHE)))  // Invalid URL
+				print("I|update|WARNING|Invalid URL"."\r\n");
+			else
 			{
-				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
+				if($UDP_CACHE !== null && $NET === 'gnutella')
+				{
+					$is_udp = true;
+					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $NET, $CLIENT, $VERSION);
+				}
+				elseif($CACHE !== null)
+					$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $NET, $CLIENT, $VERSION);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|URL already updated\r\n";
@@ -1752,7 +1770,12 @@ else
 				elseif( $result == 4 ) // Blocked or failed URL
 					print "I|update|OK|Blocked URL\r\n";
 				elseif( $result == 5 ) // Ping failed
-					print "I|update|WARNING|Ping of ".$CACHE." failed\r\n";
+				{
+					if($is_udp)
+						print "I|update|WARNING|Ping of ".$UDP_CACHE." failed\r\n";
+					else
+						print "I|update|WARNING|Ping of ".$CACHE." failed\r\n";
+				}
 				elseif( $result == 6 ) // Unsupported network
 					print "I|update|WARNING|Network of URL not supported\r\n";
 				elseif( $result == 7 ) // Possible network congestion
@@ -1760,8 +1783,6 @@ else
 				else
 					print "I|update|ERROR|Unknown error 2, return value = ".$result."\r\n";
 			}
-			else // Invalid URL
-				print("I|update|WARNING|Invalid URL"."\r\n");
 
 			if($is_good_update === null)
 			{
@@ -1799,7 +1820,7 @@ else
 				print "WARNING: URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
-				$result = WriteCacheFile($CACHE, $NET, $CLIENT, $VERSION);
+				$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $NET, $CLIENT, $VERSION);
 
 				if( $result == 5 ) // Ping failed
 					print "WARNING: Ping of ".$CACHE." failed\r\n";
@@ -1821,16 +1842,11 @@ else
 
 	if(!$supported_net) $GET = 0;
 
-	if($GET || $UHC || $UKHL)
+	if($GET /*|| $GETUDP*/)
 	{
 		$dummy_host_needed = CheckIfDummyHostIsNeeded($CLIENT, $VERSION);
 
-		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $GETMAXLEAVES, $UHC, $UKHL, $CLIENT, $dummy_host_needed);
-		if($UHC || $UKHL)
-		{
-			echo "I|uhc|".$UDP["uhk"]."\r\n";
-			echo "I|ukhl|".$UDP["ukhl"]."\r\n";
-		}
+		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed);
 	}
 	elseif($supported_net)
 	{
