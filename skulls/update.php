@@ -36,6 +36,19 @@ function IsIPInBlockRange($ip, $cidr_range)
 	$cidr = explode('/', $cidr_range, 2); if(!ctype_digit($cidr[1])) { if(DEBUG) echo 'Invalid CIDR range: ',$cidr_range,"\r\n\r\n"; return false; }
 	$cidr[1] = (int)$cidr[1];
 
+	/* Optimization of the single IP blocking */
+	if($cidr[1] === 32)
+	{
+		if(DEBUG > 3)
+		{
+			echo 'CIDR Range: ',$cidr[0],"\r\n";
+			echo 'Wildcard Bits: 0.0.0.0',"\r\n";
+			echo 'Start IP: ',$cidr[0],"\r\n";
+			echo 'End IP: ',$cidr[0],"\r\n\r\n";
+		}
+		return $ip === ip2long($cidr[0]);
+	}
+
 	$cidr_prefix = CIDRPrefixLength2long($cidr[1]);
 	if($cidr_prefix === false) { if(DEBUG) echo 'Invalid CIDR range: ',$cidr_range,"\r\n\r\n"; return false; }
 
@@ -54,8 +67,7 @@ function IsIPInBlockRange($ip, $cidr_range)
 			echo 'End IP: ',long2ip($ip2),"\r\n\r\n";
 		}
 	}
-
-	return (($ip1 <= $ip) && ($ip <= $ip2));
+	return ($ip1 <= $ip) && ($ip <= $ip2);
 }
 
 function IsIPInBlockList($ip)
