@@ -18,9 +18,9 @@
 //
 
 function PingUDP($cache){
-	$splitted_url = explode(":", $cache);
+	$splitted_url = explode(':', $cache);
 
-	$GUID = VENDOR."ALPA"."\347\271\061\151\240\205\096\191";
+	$GUID = VENDOR.'BETA'."\347\271\061\151\240\205\096\191";
 
 	if($splitted_url[0] == "uhc")
 	{
