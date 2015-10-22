@@ -66,12 +66,14 @@ function NormalizePort($secure_http, $port)
 
 function IsWebInterface()
 {
-	if(empty($_SERVER['QUERY_STRING']))
+	if(empty($_SERVER['QUERY_STRING']) || isset($_GET['showinfo']) || isset($_GET['showhosts']) || isset($_GET['showurls']) || isset($_GET['stats']))
 		return true;
-	if(!empty($_GET['showinfo']) || !empty($_GET['showhosts']) || !empty($_GET['showurls']) || !empty($_GET['stats']) || !empty($_GET['data']))
+
+	$param_count = count($_GET);
+	if(isset($_GET['compression'])) $param_count--; if(isset($_GET['data'])) $param_count--; if(isset($_GET['ckattempt'])) $param_count--;
+	if($param_count === 0)
 		return true;
-	if(!empty($_GET['compression']) && strpos($_SERVER['QUERY_STRING'], '&') === false)
-		return true;
+
 	return false;
 }
 
