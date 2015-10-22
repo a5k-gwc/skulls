@@ -32,22 +32,22 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 	$base_link = basename($php_self).'?';
 	if($compression !== null) $base_link .= 'compression='.$compression.'&amp;';
 
-	$title = NAME.'! Multi-Network WebCache '.VER;
 	$maintainer = htmlentities(MAINTAINER_NICK, ENT_QUOTES, 'UTF-8');
-	$idn_support = (function_exists('idn_to_ascii'));
-	if($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 4) $title .= ' - Stats';
+	$title = NAME.'! Multi-Network WebCache '.VER;
+	if($num === 1); elseif($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 4) $title .= ' - Stats';
+	$title .= ' (by '.$maintainer.')';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title><?php echo $title,' (by ',$maintainer,')'; ?></title>
+<title><?php echo $title; ?></title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 <!--[if lte IE 9]><link rel="stylesheet" type="text/css" href="includes/style-ie.css"><![endif]-->
-<?php if($num === 1) echo '<link rel="canonical" href="',$php_self,'">',"\n"; ?>
+<?php if($num === 1 && !empty($_SERVER['QUERY_STRING'])) echo '<link rel="canonical" href="',$php_self,'">',"\n"; ?>
 <meta name="robots" content="<?php if($num === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
 <meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from p2p clients to bootstrap.">
 <meta name="keywords" content="<?php echo strtolower(NAME); ?>, gwebcache, gwc, p2p, bootstrap, gnutella, gnutella2">
@@ -71,6 +71,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 <?php
 			if($num == 1)	// Info
 			{
+				$idn_support = (function_exists('idn_to_ascii'));
 ?>
 				<div id="page-title"><strong>Cache Info</strong></div>
 				<div class="padding">
