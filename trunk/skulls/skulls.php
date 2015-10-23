@@ -930,7 +930,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list($time,, $read,) = explode('|', $cache_file[$i], 4);
+		list($time, $gwc_ip, $read,) = explode('|', $cache_file[$i], 4);
 
 		if(strtolower($cache) == strtolower($read))
 		{
@@ -939,6 +939,8 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 		}
 	}
 	$this_alt_gwc = null;
+	$temp = $cache; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
+	list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
 
 	if($cache_exists)
 	{
@@ -970,8 +972,6 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 			}
 			else
 			{
-				$temp = $cache; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
-				list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
 				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
 				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
 
@@ -1000,8 +1000,6 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 			}
 			else
 			{
-				$temp = $cache; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
-				list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
 				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
 				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
 
