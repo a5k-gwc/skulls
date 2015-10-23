@@ -20,6 +20,7 @@
 /*
 This product includes GeoLite data created by MaxMind, available at http://www.maxmind.com/
 Database download: http://dev.maxmind.com/geoip/legacy/geolite/ 
+Used GeoLite Country and GeoLite ASN.
 
 This product includes country flag icons created by Mark James, available at http://www.famfamfam.com/
 Flag icons download: http://www.famfamfam.com/lab/icons/flags/
@@ -227,6 +228,17 @@ class GeoIPWrapper
 		}
 
 		return 'geoip/flags/unknown.png';
+	}
+
+	/* Only PECL for now */
+	function GetASNByIP($ip)
+	{
+		if(!$this->enabled) return null;
+		if($this->is_pecl)
+			if(function_exists('geoip_asnum_by_name'))
+				return htmlentities(@geoip_asnum_by_name($ip), ENT_QUOTES, 'ISO-8859-1');
+
+		return null;
 	}
 }
 ?>
