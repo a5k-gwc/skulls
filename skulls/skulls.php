@@ -930,7 +930,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list($time, $gwc_ip, $read,) = explode('|', $cache_file[$i], 4);
+		list($time,, $gwc_ip, $read,) = explode('|', $cache_file[$i], 5);
 
 		if(strtolower($cache) == strtolower($read))
 		{
@@ -939,8 +939,9 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 		}
 	}
 	$this_alt_gwc = null;
+	$new_specs_only = '0';
 	$temp = $cache; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
-	list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2); $temp .= '.';
+	list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2);
 
 	if($cache_exists)
 	{
@@ -972,8 +973,9 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 			}
 			else
 			{
-				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
+				$gwc_ip = gethostbyname($temp.'.');
+				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($cache, 'https') === 0) $new_specs_only = '1';
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
 
 				ReplaceCache($file_path, $i, $cache_file, $this_alt_gwc);
 				return 1; // Updated timestamp
@@ -1000,8 +1002,9 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 			}
 			else
 			{
-				$gwc_ip = gethostbyname($temp); if($gwc_ip === $temp) $gwc_ip = "";
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
+				$gwc_ip = gethostbyname($temp.'.');
+				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($cache, 'https') === 0) $new_specs_only = '1';
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
 
 				if($file_count >= MAX_CACHES || $file_count > 100)
 				{
@@ -1065,7 +1068,7 @@ function UrlFile($net, $age, $client)
 
 	for($n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i--)
 	{
-		list($gwc_age,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 6);
+		list($gwc_age, $new_specs_only,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 7);
 
 		$show = FALSE;
 		if(strpos($cache_net, '-') > -1)
@@ -1151,7 +1154,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $getudp, $clien
 		{
 			for($n=0, $i=$count_cache-1; $n<MAX_CACHES_OUT && $i>=0; $i--)
 			{
-				list($time,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 6);
+				list($time, $new_specs_only,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 7);
 
 				$show = FALSE;
 				if(strpos($cache_net, '-') > -1)
@@ -1191,7 +1194,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $getudp, $clien
 
 			for($n=0, $i=$count_cache-1; $n<MAX_UDP_CACHES_OUT && $i>=0; $i--)
 			{
-				list($time,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 6);
+				list($time,,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 7);
 				$cache = 'UC|'.$cache.'|'.TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
 				$output .= $cache."\r\n";
 				$n++;
