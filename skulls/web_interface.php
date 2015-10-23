@@ -227,15 +227,15 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 								echo '<tr class="',$color,'">';
 								echo '<td>';
-								$provider = null;
+								$asn = null;
 								if($geoip)
 								{
 									$country_name = $geoip->GetCountryNameByIP($h_ip);
 									$country_code = $geoip->GetCountryCodeByIP($h_ip);
 									echo '<img width="16" height="11" src="'.$geoip->GetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
-									$provider = $geoip->GetASNByIP($h_ip);
+									$asn = $geoip->GetASNByIP($h_ip);
 								}
-								echo '<a href="',$url,$host,'" rel="nofollow" title="'.$provider.'">',$host,'</a>';
+								echo '<a href="',$url,$host,'" rel="nofollow" title="'.$asn.'">',$host,'</a>';
 								if($h_leaves !== "")
 									echo ' (',$h_leaves,(empty($h_max_leaves)? null : '/'.$h_max_leaves),')';
 								echo ' &nbsp;</td>';
