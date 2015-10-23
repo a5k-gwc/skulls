@@ -1605,14 +1605,14 @@ else
 	*/
 
 	/*** Smart spec detection - START ***/
-	$PV = empty($_GET['pv']) ? 0 : (float)$_GET['pv'];
+	$PV = empty($_GET['pv']) ? 0 : (float)($_GET['pv']);
 	$DETECTED_PV = 0;
 
 	if($PV >= 4 || $MULTI)
 		$DETECTED_PV = 4;
 	elseif($PV < 3)
 	{
-		if($PV >= 2.1 || $GETNETWORKS || $SUPPORT || $INFO)
+		if($PV >= 2.1 || $GETNETWORKS || $GETUDP || $SUPPORT || $INFO || $UDP_CACHE !== null)
 			$DETECTED_PV = 2.1;
 		elseif($PV >= 2 || $GET || $UPDATE || $FORCE_PV2)
 			$DETECTED_PV = 2;
