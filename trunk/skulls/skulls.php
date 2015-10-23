@@ -1060,7 +1060,7 @@ function HostFile($net, $age)
 	}
 }
 
-function UrlFile($net, $age, $client)
+function UrlFile($detected_pv, $net, $age, $client)
 {
 	$now = time(); $offset = date('Z');
 	$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
@@ -1089,17 +1089,14 @@ function UrlFile($net, $age, $client)
 
 		if($show && strpos($cache, '://') > -1)
 		{
-			if($client === 'TEST')
-			{
-				list(, $tmp) = explode('://', $cache, 2); list($tmp, ) = explode('/', $tmp, 2); if(!preg_match('/[A-Za-z]/', $tmp)) continue;
-			}
+			if((bool)$new_specs_only && $detected_pv < 2.1) continue;
 			echo $cache; if($age) echo '|',TimeSinceSubmissionInSeconds($now, $gwc_age, $offset); echo "\r\n";
 			$n++;
 		}
 	}
 }
 
-function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $getudp, $client, $add_dummy_host)
+function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getmaxleaves, $getudp, $client, $add_dummy_host)
 {
 	$output = "";
 	$now = time(); $offset = date('Z');
@@ -1175,10 +1172,7 @@ function Get($net, $get, $getleaves, $getvendors, $getmaxleaves, $getudp, $clien
 
 				if($show && strpos($cache, '://') > -1)
 				{
-					if($client === 'TEST')
-					{
-						list(, $tmp) = explode('://', $cache, 2); list($tmp, ) = explode('/', $tmp, 2); if(!preg_match('/[A-Za-z]/', $tmp)) continue;
-					}
+					if((bool)$new_specs_only && $detected_pv < 2.1) continue;
 					$cache = 'U|'.$cache.'|'.TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
 					$output .= $cache."\r\n";
 					$n++;
@@ -1851,7 +1845,7 @@ else
 	{
 		$dummy_host_needed = CheckIfDummyHostIsNeeded($CLIENT, $VERSION);
 
-		Get($NET, $GET, $GETLEAVES, $GETVENDORS, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed);
+		Get($DETECTED_PV, $NET, $GET, $GETLEAVES, $GETVENDORS, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed);
 	}
 	elseif($supported_net)
 	{
@@ -1859,7 +1853,7 @@ else
 			HostFile($NET, $AGE);
 
 		if($URLFILE && (FSOCKOPEN || extension_loaded('curl')))
-			UrlFile($NET, $AGE, $CLIENT);
+			UrlFile($DETECTED_PV, $NET, $AGE, $CLIENT);
 
 		if($DETECTED_PV === 3 && ($HOSTFILE || $URLFILE))
 			echo "nets: ".strtolower(NetsToString())."\r\n";
