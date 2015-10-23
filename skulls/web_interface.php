@@ -304,7 +304,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 									$country_code = $geoip->GetCountryCodeByIP($gwc_ip);
 									$output .= '<img width="16" height="11" src="'.$geoip->GetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
 								}
-								$output .= '<a'.(strpos($cache_url, 'https:') === 0 ? ' class="https"' : "").' href="'.$cache_url.'" rel="external" title="'.$gwc_ip.'">';
+								$output .= '<span'.(strpos($cache_url, 'https:') === 0? ' class="https"' : "").'><a class="url" href="'.$cache_url.'" rel="external" title="'.$gwc_ip.'">';
 
 								list(,$cache_url) = explode("://", $cache_url);
 								$max_length = 40;
@@ -318,7 +318,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								else
 									$output .= $cache_url;
 
-								$output .= '</a> &nbsp;</td><td><span title="'.$gwc_server.'">';
+								$output .= '</a></span> &nbsp;</td><td><span title="'.$gwc_server.'">';
 								if(strpos($cache_name, NAME) === 0)
 									$output .= '<a class="gwc-home-link" href="'.GWC_SITE.'" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(NAME !== 'Sk'.'ulls' && strpos($cache_name, 'Sk'.'ulls') === 0)
@@ -402,7 +402,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 									$country_code = $geoip->GetCountryCodeByIP($gwc_ip);
 									$output .= '<img width="16" height="11" src="'.$geoip->GetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
 								}
-								$output .= '<a class="udp" href="http://'.$cache_url.'" rel="external" title="'.$gwc_ip.'">';
+								$output .= '<span class="udp"><a class="url" href="http://'.$cache_url.'" rel="external" title="'.$gwc_ip.'">';
 
 								$max_length = 40;
 								$pos = strpos($cache_url, '/'); if($pos !== false) $cache_url = substr($cache_url, 0, $pos);
@@ -411,7 +411,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								else
 									$output .= $cache_url;
 
-								$output .= '</a> &nbsp;</td><td><span title="'.$gwc_server.'">'.$cache_name;
+								$output .= '</a></span> &nbsp;</td><td><span title="'.$gwc_server.'">'.$cache_name;
 								$output .= '</span> &nbsp;</td><td>'.ucfirst($net).' &nbsp;</td>';
 								$output .= '<td><span class="bold" title="'.$user_agent.'">'.ReplaceVendorCode($client, $version).'</span> &nbsp;</td>';
 								$output .= '<td>'.rtrim($time).'</td></tr>'."\n";

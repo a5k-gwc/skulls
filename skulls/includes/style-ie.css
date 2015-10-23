@@ -7,7 +7,7 @@ div.container { *display: inline; }
 div.container table { *width: auto; *display: inline; }
 
 /* On IE5-7 the active state corresponds to the focus state of standard compliant browsers */
-a:active, a.https:active, a.udp:active { *color: lime; }
+a:active, a.url:active { *color: lime; }
 a:active { *clear: expression(this.style.clear = "none", this.hideFocus = true); }
 a:active img{ *clear: expression(this.style.clear = "none", this.parentNode.className = this.parentNode.className || "image-link"); }
 a { *border-width: 1px; }
