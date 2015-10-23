@@ -302,7 +302,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 									$country_code = $geoip->GetCountryCodeByIP($gwc_ip);
 									$output .= '<img width="16" height="11" src="'.$geoip->GetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
 								}
-								$output .= '<a'.(strpos($cache_url, 'https:') === 0 ? ' class="https"' : "").' href="'.$cache_url.'" rel="external">';
+								$output .= '<a'.(strpos($cache_url, 'https:') === 0 ? ' class="https"' : "").' href="'.$cache_url.'" rel="external" title="'.$gwc_ip.'">';
 
 								list(,$cache_url) = explode("://", $cache_url);
 								$max_length = 40;
@@ -400,14 +400,15 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 									$country_code = $geoip->GetCountryCodeByIP($gwc_ip);
 									$output .= '<img width="16" height="11" src="'.$geoip->GetCountryFlag($country_code).'" alt="'.$country_code.'" title="'.$country_name.'"> ';
 								}
+								$output .= '<a class="udp" href="http://'.$cache_url.'" rel="external" title="'.$gwc_ip.'">';
 
-								$output .= '<a class="udp" href="http://'.$cache_url.'" rel="external">';
 								$max_length = 40;
 								$pos = strpos($cache_url, '/'); if($pos !== false) $cache_url = substr($cache_url, 0, $pos);
 								if(strlen($cache_url) > $max_length)
 									$output .= substr($cache_url, 0, $max_length).'...';
 								else
 									$output .= $cache_url;
+
 								$output .= '</a> &nbsp;</td><td><span title="'.$gwc_server.'">'.$cache_name;
 								$output .= '</span> &nbsp;</td><td>'.ucfirst($net).' &nbsp;</td>';
 								$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version).'</span> &nbsp;</td>';
