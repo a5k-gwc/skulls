@@ -1592,13 +1592,7 @@ else
 	/*
 		Existing GWC specs: v1, v1.1, v2, v2.1, v3, v4  ( GWC v3 is an extension of GWC v1  /  GWC v4 is an extension of GWC v2.1 )
 
-		Priority order (in case there are parameters of different specs mixed togheter):
-		- v4 and higher
-		- v2.1
-		- v2
-		- v3
-		- v1.1
-		- v1
+		Priority order (in case there are parameters of different specs mixed togheter): v4 and higher, v2.1, v2, v3, v1.1, v1
 
 		The following parameters can be used in every version of the spec: client, version, ping, pv, getspec, net, x.leaves, x.max, uptime
 		The following parameters alone imply spec v1 but together with others are used also in other spec versions: url, ip
@@ -1612,9 +1606,9 @@ else
 		$DETECTED_PV = 4;
 	elseif($PV < 3)
 	{
-		if($PV >= 2.1 || $GETNETWORKS || $GETUDP || $SUPPORT || $INFO || $UDP_CACHE !== null)
+		if($PV >= 2.1 || $GETNETWORKS || $GETLEAVES || $GETVENDORS || $GETMAXLEAVES || $GETUDP || $INFO || $UDP_CACHE !== null)
 			$DETECTED_PV = 2.1;
-		elseif($PV >= 2 || $GET || $UPDATE || $FORCE_PV2)
+		elseif($PV >= 2 || $GET || $UPDATE || $SUPPORT || $FORCE_PV2)
 			$DETECTED_PV = 2;
 	}
 
