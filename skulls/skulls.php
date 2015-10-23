@@ -911,7 +911,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	}
 }
 
-function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
+function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version, $user_agent)
 {
 	global $MY_URL;
 
@@ -975,7 +975,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 			{
 				$gwc_ip = gethostbyname($temp.'.');
 				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($cache, 'https') === 0) $new_specs_only = '1';
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.RemoveGarbage($user_agent)."|\n";
 
 				ReplaceCache($file_path, $i, $cache_file, $this_alt_gwc);
 				return 1; // Updated timestamp
@@ -1004,7 +1004,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version)
 			{
 				$gwc_ip = gethostbyname($temp.'.');
 				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($cache, 'https') === 0) $new_specs_only = '1';
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'./*UA reporting client.*/"|\n";
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[0].'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.RemoveGarbage($user_agent)."|\n";
 
 				if($file_count >= MAX_CACHES || $file_count > 100)
 				{
@@ -1753,10 +1753,10 @@ else
 				if($UDP_CACHE !== null && $NET === 'gnutella')
 				{
 					$is_udp = true;
-					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $NET, $CLIENT, $VERSION);
+					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
 				}
 				elseif($CACHE !== null)
-					$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $NET, $CLIENT, $VERSION);
+					$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|URL already updated\r\n";
@@ -1819,7 +1819,7 @@ else
 				print "WARNING: URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
-				$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $NET, $CLIENT, $VERSION);
+				$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
 
 				if( $result == 5 ) // Ping failed
 					print "WARNING: Ping of ".$CACHE." failed\r\n";
