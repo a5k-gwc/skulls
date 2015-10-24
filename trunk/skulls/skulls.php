@@ -22,8 +22,8 @@ include 'vars.php';
 
 define('NAME', 'Skulls');
 define('VENDOR', 'SKLL');										/* Vendor code (four uppercase letters) */
-define('SHORT_VER', '0.3.1');									/* Numeric version (without letters) */
-define('VER', SHORT_VER.'c');									/* Full version (it can contain letters) */
+define('SHORT_VER', '0.3.2');									/* Numeric version (without letters) */
+define('VER', SHORT_VER.'');									/* Full version (it can contain letters) */
 define('GWC_SITE', 'http://sourceforge.net/projects/skulls/');	/* Official site of this GWC */
 define('OPEN_SOURCE', '1');
 define('MAX_HOST_AGE', 259200);									/* 3 days */
