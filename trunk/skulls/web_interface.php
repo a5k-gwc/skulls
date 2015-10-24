@@ -277,7 +277,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 							for($i = $elements - 1; $i >= 0; $i--)
 							{
-								list($time,, $gwc_ip, $cache_url, $net, /* Net parameter needed */, /*$gwc_vendor.*/, /* $gwc_version */, $cache_name, $gwc_server, $client, $version, $user_agent,) = explode("|", $cache_file[$i], 14);
+								list($time, /* New specs only */, $gwc_ip, $cache_url, $net, /* Net parameter needed */, /*$gwc_vendor.*/, /* $gwc_version */, $cache_name, $gwc_server, $client, $version, $user_agent,) = explode("|", $cache_file[$i], 14);
 								$cache_name = htmlentities($cache_name, ENT_QUOTES, 'UTF-8');
 								if( strpos($net, "-") > -1 )
 								{
@@ -381,7 +381,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 							for($i = $elements - 1; $i >= 0; $i--)
 							{
-								list($time,, $gwc_ip, $cache_url, $net, /* Net parameter needed */, /*$gwc_vendor.*/, /* $gwc_version */, $cache_name, $gwc_server, $client, $version, $user_agent,) = explode("|", $cache_file[$i], 14);
+								list($time, /* New specs only */, $gwc_ip, $cache_url, $net, /* Net parameter needed */, /*$gwc_vendor.*/, /* $gwc_version */, $cache_name, $gwc_server, $client, $version, $user_agent,) = explode("|", $cache_file[$i], 14);
 								$cache_name = htmlentities($cache_name, ENT_QUOTES, 'UTF-8');
 								$color = (($elements - $i) % 2 === 0 ? 'even' : 'odd');
 
