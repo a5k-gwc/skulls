@@ -1191,7 +1191,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getmaxleaves, $
 
 			for($n=0, $i=$count_cache-1; $n<MAX_UDP_CACHES_OUT && $i>=0; $i--)
 			{
-				list($time,,, $cache,, $cache_net,) = explode('|', $cache_file[$i], 7);
+				list($time, /* New specs only */,, $cache, $cache_net,) = explode('|', $cache_file[$i], 6);
 				$cache = 'UC|'.$cache.'|'.TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
 				$output .= $cache."\r\n";
 				$n++;
