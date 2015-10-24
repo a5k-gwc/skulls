@@ -622,7 +622,7 @@ function ConnectionTest()
 	return true;
 }
 
-function PingGWC($gwc_url, $query)
+function PingGWC($gwc_url, $query, $net_param = null)
 {
 	$our_url = null; $gwc_idn_hostname = false;
 
@@ -643,6 +643,7 @@ function PingGWC($gwc_url, $query)
 	$gwc_idn_host = $gwc_idn_hostname.NormalizePort($secure_http, $gwc_port);
 	if(DEBUG) echo "\r\nD|update|GWC|HOSTNAME|",$gwc_hostname,"\r\nD|update|GWC|IDN-HOSTNAME|",$gwc_idn_hostname,"\r\nD|update|GWC|SECURE-HTTP|",(int)$secure_http,"\r\n";
 
+	$final_query = $query; if($net_param !== null) $final_query .= '&net='.$net_param;
 	$cache_data = null; $pong = ""; $oldpong = ""; $error = ""; $nets_list1 = null;
 	if(FSOCKOPEN)
 	{
@@ -657,7 +658,7 @@ function PingGWC($gwc_url, $query)
 		{
 			if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 			$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
-			$out = 'GET /'.$gwc_path.'?'.$query.' '.$_SERVER['SERVER_PROTOCOL']."\r\n";
+			$out = 'GET /'.$gwc_path.'?'.$final_query.' '.$_SERVER['SERVER_PROTOCOL']."\r\n";
 			$out .= 'Host: '.$gwc_idn_host."\r\n".$common_headers."\r\n";
 			if(DEBUG) echo "\r\n",rtrim($out),"\r\n";
 
@@ -696,7 +697,7 @@ function PingGWC($gwc_url, $query)
 	{
 		$gwc_url = ($secure_http? 'https' : 'http').'://'.$gwc_idn_host.'/'.$gwc_path; /* Rewrite url with idn host */
 
-		$ch = curl_init($gwc_url.'?'.$query);
+		$ch = curl_init($gwc_url.'?'.$final_query);
 		if($ch === false) return cURL_OnError(null, 'init', false);
 
 		if(!cURL_SetOptions($ch, $gwc_idn_host, $gwc_port)) return cURL_OnError($ch, 'setopt');
@@ -742,7 +743,7 @@ function PingGWC($gwc_url, $query)
 	{
 		$received_data = explode("|", $pong);
 		$gwc_name = RemoveGarbage(trim(rawurldecode($received_data[2])));
-		$cache_data = "P|".$gwc_name;
+		$cache_data = 'P|'.$gwc_name;
 
 		if($nets_list1 !== null)
 			$nets = RemoveGarbage(str_replace( array('-', '|'), array('%2D', '-'), $nets_list1 ));
@@ -757,17 +758,17 @@ function PingGWC($gwc_url, $query)
 		else
 			$nets = "gnutella2";           /* Guessed */
 
-		$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+		$cache_data .= '|'.$nets.'|'.$net_param;		// P|Name of the GWC|Networks list|Net parameter needed for query
 	}
 	elseif(!empty($oldpong))
 	{
 		$oldpong = RemoveGarbage(trim(rawurldecode(substr($oldpong, 4))));
-		$cache_data = "P|".$oldpong;
+		$cache_data = 'P|'.$oldpong;
 
 		/* Needed to force v2 spec since they ignore the other ways */
 		if(strpos($oldpong, 'Cachechu') === 0 || strpos($oldpong, 'PHPGnuCacheII') === 0)
 			if(strpos($query, 'update=1') === false)
-				return PingGWC($gwc_url, $query.'&update=1');
+				return PingGWC($gwc_url, $query.'&update=1', $net_param);
 
 		// Workaround for compatibility
 		if( //substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
@@ -779,27 +780,27 @@ function PingGWC($gwc_url, $query)
 		else
 			$nets = "gnutella";  /* Guessed */
 
-		$cache_data .= "|".$nets;		// P|Name of the GWC|Networks list
+		$cache_data .= '|'.$nets.'|'.$net_param;		// P|Name of the GWC|Networks list|Net parameter needed for query
 	}
 	else
 	{
 		$error = RemoveGarbage($error);
-		$cache_data = "ERR|".$error;	// ERR|Error name
+		$cache_data = 'ERR|'.$error;	// ERR|Error name
 	}
 
 	return $cache_data;
 }
 
-function CheckGWC($cache, $cache_network, $congestion_check = false)
+function CheckGWC($cache, $net_param = null, $congestion_check = false)
 {
 	global $SUPPORTED_NETWORKS;
 
-	$nets = NULL;
+	$nets = null;
 	if(strpos($cache, '://') > -1)
 	{
 		$udp = FALSE;
 		$query = 'ping=1&multi=1&getnetworks=1&pv=2&client='.VENDOR.'&version='.SHORT_VER.'&cache=1';
-		$result = PingGWC($cache, $query);		// $result =>	P|Name of the GWC|Networks list    or    ERR|Error name    or    CONN-ERR|Error number
+		$result = PingGWC($cache, $query, $net_param);  /* $result => P|Name of the GWC|Networks list|Net parameter needed for query   or   ERR|Error name   or   CONN-ERR|Error number */
 	}
 	else
 	{
@@ -807,7 +808,7 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 		include './udp.php';
 		$result = PingUDP($cache);
 	}
-	$received_data = explode('|', $result);
+	$received_data = explode('|', $result, 4);
 
 	if($received_data[0] === 'ERR' && !$udp)
 	{
@@ -818,32 +819,33 @@ function CheckGWC($cache, $cache_network, $congestion_check = false)
 			|| strpos($error, "no network") !== false
 			|| strpos($error, "net-not-supported") !== false
 		)	// Workaround for compatibility with some GWCs using v2 spec
-		{										// FOR GWCS DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
-			$query .= "&net=gnutella2";
-			$result = PingGWC($cache, $query);
+		{	// FOR GWCs DEVELOPERS: If you want to avoid the necessity to make double ping, make your GWC pingable without the network parameter or with the wrong network parameter when there are ping=1 and multi=1
+			$result = PingGWC($cache, $query, 'gnutella2');
 			$nets = "gnutella2";
 		}
 		elseif( strpos($received_data[1], "access denied by acl") > -1 )
 		{
 			$query = 'ping=1&multi=1&pv=2&client=TEST&version='.VENDOR.'%20'.SHORT_VER.'&cache=1';
-			$result = PingGWC($cache, $query);
+			$result = PingGWC($cache, $query, $net_param);
 		}
 		unset($received_data);
-		$received_data = explode('|', $result);
+		$received_data = explode('|', $result, 4);
 	}
 	if(DEBUG) echo "\r\nD|update|GWC|Result|",$result,"\r\n\r\n";
 
+	$cache_data = null;
 	if($congestion_check && $received_data[0] === 'CONN-ERR' && !ConnectionTest())
 		$cache_data[0] = 'CONGESTION';
 	elseif($received_data[0] === 'CONN-ERR' || $received_data[0] === 'ERR' || $received_data[1] === "")
 		$cache_data[0] = 'FAIL';
 	else
 	{
-		if($nets == NULL) $nets = $received_data[2];
+		if($nets === null) $nets = $received_data[2];
 		if(CheckNetworkString($SUPPORTED_NETWORKS, $nets))
 		{
 			$cache_data[0] = $received_data[1];
 			$cache_data[1] = $nets;
+			$cache_data[2] = $received_data[3];
 		}
 		else
 			$cache_data[0] = 'UNSUPPORTED';
@@ -911,7 +913,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	}
 }
 
-function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version, $user_agent)
+function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $user_agent)
 {
 	global $MY_URL;
 
@@ -930,11 +932,12 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version, $u
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list($time,, $gwc_ip, $read,) = explode('|', $cache_file[$i], 5);
+		list($time,, $gwc_ip, $read,, $net_param,) = explode('|', $cache_file[$i], 7);
 
 		if(strtolower($cache) == strtolower($read))
 		{
 			$cache_exists = TRUE;
+			if($net_param === "") $net_param = null;
 			break;
 		}
 	}
@@ -953,7 +956,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version, $u
 			return 0; // Exists
 		else
 		{
-			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$cache, $net, true);
+			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$cache, $net_param, true);
 
 			if($cache_data[0] === 'FAIL')
 			{
@@ -975,7 +978,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version, $u
 			{
 				$gwc_ip = gethostbyname($temp.'.');
 				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($cache, 'https') === 0) $new_specs_only = '1';
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.RemoveGarbage($user_agent)."|\n";
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.RemoveGarbage($user_agent)."|\n";
 
 				ReplaceCache($file_path, $i, $cache_file, $this_alt_gwc);
 				return 1; // Updated timestamp
@@ -988,7 +991,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version, $u
 			return 4; // Blocked URL
 		else
 		{
-			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$cache, $net);
+			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$cache);
 
 			if($cache_data[0] === 'FAIL')
 			{
@@ -1004,7 +1007,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $net, $client, $version, $u
 			{
 				$gwc_ip = gethostbyname($temp.'.');
 				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($cache, 'https') === 0) $new_specs_only = '1';
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[1].'|'./*gwc_net_parameter_needed.*/'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.RemoveGarbage($user_agent)."|\n";
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.RemoveGarbage($user_agent)."|\n";
 
 				if($file_count >= MAX_CACHES || $file_count > 100)
 				{
@@ -1747,10 +1750,10 @@ else
 				if($UDP_CACHE !== null && $NET === 'gnutella')
 				{
 					$is_udp = true;
-					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
+					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $CLIENT, $VERSION, $UA_ORIGINAL);
 				}
 				elseif($CACHE !== null)
-					$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
+					$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $UA_ORIGINAL);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|URL already updated\r\n";
@@ -1813,7 +1816,7 @@ else
 				print "WARNING: URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
-				$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $NET, $CLIENT, $VERSION, $UA_ORIGINAL);
+				$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $UA_ORIGINAL);
 
 				if( $result == 5 ) // Ping failed
 					print "WARNING: Ping of ".$CACHE." failed\r\n";
