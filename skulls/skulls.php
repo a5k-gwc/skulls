@@ -932,7 +932,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $user_ag
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list($time,, $gwc_ip, $read,, $net_param,) = explode('|', $cache_file[$i], 7);
+		list($time, /* New specs only */, $gwc_ip, $read, /* Networks */, $net_param,) = explode('|', $cache_file[$i], 7);
 
 		if(strtolower($cache) == strtolower($read))
 		{
@@ -1602,7 +1602,7 @@ else
 	*/
 
 	/*** Smart spec detection - START ***/
-	$PV = empty($_GET['pv']) ? 0 : (float)($_GET['pv']);
+	$PV = empty($_GET['pv'])? 0 : ((float)$_GET['pv']);
 	$DETECTED_PV = 0;
 
 	if($PV >= 4 || $MULTI)
