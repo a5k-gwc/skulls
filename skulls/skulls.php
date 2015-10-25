@@ -66,7 +66,10 @@ function NormalizePort($secure_http, $port)
 
 function IsWebInterface()
 {
-	if(empty($_SERVER['QUERY_STRING']) || isset($_GET['showinfo']) || isset($_GET['showhosts']) || isset($_GET['showurls']) || isset($_GET['stats']))
+	if(isset($_GET['client']))
+		return false;
+	if(empty($_SERVER['QUERY_STRING']) || isset($_GET['showinfo']) || isset($_GET['showhosts'])
+	   || isset($_GET['showurls']) || isset($_GET['stats']))
 		return true;
 
 	$param_count = count($_GET);
@@ -1485,27 +1488,17 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 }
 
 
-if( $SHOWHOSTS )
-	$web = 2;
-elseif( $SHOWCACHES )
-	$web = 3;
-elseif( $SHOWSTATS || $SHOWDATA )
-	$web = 4;
-elseif(IsWebInterface())
-	$web = 1;
-else
-	$web = 0;
-
-if($web)
+if(IsWebInterface())
 {
-	include "web_interface.php";
-
-	if($web === 1)
+	$page_number = ($SHOWINFO? 1 : ($SHOWHOSTS? 2 : ($SHOWCACHES? 3 : ($SHOWSTATS? 4 : ($SHOWDATA? 4 : 1)))));
+	if($page_number === 1)
 		header('Cache-Control: max-age=43200');  /* 12 hours */
 	else
 		header('Cache-Control: max-age=60');     /* 1 minute */
+
+	include './web_interface.php';
 	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL, true);
-	ShowHtmlPage($web, $PHP_SELF, $COMPRESSION, $header, $footer);
+	ShowHtmlPage($page_number, $PHP_SELF, $COMPRESSION, $header, $footer);
 	if($compressed) ob_end_flush();
 }
 elseif( $KICK_START )
