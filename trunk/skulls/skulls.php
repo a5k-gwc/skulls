@@ -176,10 +176,9 @@ function NormalizeIdentity(&$vendor, &$ver, $ua)
 
 function ValidateIdentity($vendor, $ver)
 {
-	if($ver === "")
-		return false;  /* Version missing */
-	if(strlen($vendor) < 4)
-		return false;  /* Vendor missing or too short */
+	/* Version missing; vendor missing or too short */
+	if($ver === "" || strlen($vendor) < 4)
+		return false;  
 
 	return true;
 }
