@@ -125,7 +125,7 @@ function GetMicrotime()
 	return (float)$usec + (float)$sec; 
 }
 
-function NormalizeIdentity(&$vendor, &$ver, $user_agent)
+function NormalizeIdentity(&$vendor, &$ver, $ua)
 {
 	/* Check if vendor and version are mixed inside vendor */
 	if($ver === "" && strlen($vendor) > 4)
@@ -138,14 +138,14 @@ function NormalizeIdentity(&$vendor, &$ver, $user_agent)
 	/* Change vendor code of mod versions */
 	if($vendor === 'RAZA')
 	{
-		if(strpos($user_agent, 'Shareaza ') !== 0 || strpos($user_agent, 'PRO') !== false || $ver === '9.9.9.9')
+		if(strpos($ua, 'Shareaza ') !== 0 || strpos($ua, 'PRO') !== false || $ver === '9.9.9.9')
 			$vendor = 'RAZM';
 	}
 	elseif($vendor === 'LIME')
 	{
-		if(strpos($user_agent, 'Cabos') !== false)
+		if(strpos($ua, 'Cabos') !== false)
 			$vendor = 'CABO';
-		elseif(strpos($user_agent, 'LimeWire') !== 0 || (float)$ver >= 5.7)
+		elseif(strpos($ua, 'LimeWire') !== 0 || (float)$ver >= 5.7)
 			$vendor = 'LIMM';
 	}
 }
@@ -160,21 +160,21 @@ function ValidateIdentity($vendor, $ver)
 	return true;
 }
 
-function VerifyUserAgent($vendor, $user_agent)
+function VerifyUserAgent($vendor, $ua)
 {
 	/* Block Google and MSIE from making queries */
-	if(strpos($user_agent, 'Googlebot') !== false || strpos($user_agent, ' MSIE ') !== false)
+	if(strpos($ua, 'Googlebot') !== false || strpos($ua, ' MSIE ') !== false)
 		return false;
 
 	if($vendor === 'RAZM')
 	{  /* Block empty User-Agent, User-Agent without version and rip-offs; bad clients */
-		if($user_agent === "" || $user_agent === 'Shareaza' || strpos($user_agent, 'Shareaza PRO') === 0
-		   || strpos($user_agent, 'dianlei') === 0 || strpos($user_agent, 'Python-urllib') === 0)
+		if($ua === "" || $ua === 'Shareaza' || strpos($ua, 'Shareaza PRO') === 0
+		   || strpos($ua, 'dianlei') === 0 || strpos($ua, 'Python-urllib') === 0)
 			return false;
 	}
 	elseif($vendor === 'LIMM')
 	{  /* Block empty User-Agent; bad clients */
-		if($user_agent === "")
+		if($ua === "")
 			return false;
 	}
 
