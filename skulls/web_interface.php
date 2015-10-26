@@ -136,11 +136,9 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 						}
 						if($geoip) $geoip->Destroy(); $geoip = null;
 
-						$mail = str_replace('@', ' AT ', MAINTAINER_EMAIL);
-						if($mail === 'name AT server DOT com')
-							$mail = "";
-						elseif($mail !== "")
-							$mail = ' title="'.htmlentities($mail, ENT_QUOTES, 'UTF-8').'"';
+						$mail = null;
+						if(MAINTAINER_EMAIL !== 'name AT server DOT com' && MAINTAINER_EMAIL !== "")
+							$mail = ' title="'.htmlentities(str_replace('@', ' AT ', MAINTAINER_EMAIL), ENT_QUOTES, 'UTF-8').'"';
 ?>
 						<tr>
 							<td></td>
@@ -214,8 +212,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 							echo '<tr><td class="empty-list" colspan="4">There are no <strong>hosts</strong> listed at this time.</td></tr>',"\n";
 						else
 						{
-							include './geoip/geoip.php';
-							$geoip = new GeoIPWrapper();
+							include './geoip/geoip.php'; $geoip = new GeoIPWrapper();
 
 							for( $i = $elements - 1; $i >= 0; $i-- )
 							{
@@ -244,8 +241,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 								echo '<td>',$h_age,'</td></tr>',"\n";
 							}
 
-							if($geoip) $geoip->Destroy();
-							$geoip = null;
+							if($geoip) $geoip->Destroy(); $geoip = null;
 						}
 ?>
 					</table>
@@ -254,7 +250,8 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 			}
 			elseif($num == 3)	// GWCs
 			{
-				include './geoip/geoip.php';
+				include './geoip/geoip.php'; $geoip = new GeoIPWrapper();
+
 				$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
 				$elements = count($cache_file);
 ?>
@@ -273,8 +270,6 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 							echo '<tr><td class="empty-list" colspan="5">There are no <strong>alternative GWCs</strong> listed at this time.</td></tr>',"\n";
 						else
 						{
-							$geoip = new GeoIPWrapper();
-
 							for($i = $elements - 1; $i >= 0; $i--)
 							{
 								list($time, /* New specs only */, $gwc_ip, $cache_url, $net, /* Net parameter needed */, /*$gwc_vendor.*/, /* $gwc_version */, $cache_name, $gwc_server, $client, $version, $is_a_gwc_param, $user_agent,) = explode("|", $cache_file[$i], 15);
@@ -351,9 +346,6 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 								echo $output;
 							}
-
-							if($geoip) $geoip->Destroy();
-							$geoip = null;
 						}
 ?>
 					</table>
@@ -377,8 +369,6 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 							echo '<tr><td class="empty-list" colspan="5">There are no <strong>alternative UDP host caches</strong> listed at this time.</td></tr>',"\n";
 						else
 						{
-							$geoip = new GeoIPWrapper();
-
 							for($i = $elements - 1; $i >= 0; $i--)
 							{
 								list($time, /* New specs only */, $gwc_ip, $cache_url, $net, /* Net parameter needed */, /*$gwc_vendor.*/, /* $gwc_version */, $cache_name, $gwc_server, $client, $version, $is_a_gwc_param, $user_agent,) = explode("|", $cache_file[$i], 15);
@@ -418,14 +408,12 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 								echo $output;
 							}
-
-							if($geoip) $geoip->Destroy();
-							$geoip = null;
 						}
 ?>
 					</table>
 				</div>
 <?php
+				if($geoip) $geoip->Destroy(); $geoip = null;
 			}
 			elseif($num == 4)	// Statistics
 			{
