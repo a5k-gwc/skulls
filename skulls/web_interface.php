@@ -506,7 +506,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 <?php
 		if($footer !== "") echo "\t\t",'<div class="center">',$footer,'</div> <div class="spacer"></div>',"\n";
 ?>
-		<div><a href="http://www1429309663.blogrover.com/" rel="nofollow"><img width="80" height="15" src="images/sticker.png" alt="Sticker"></a></div>
+		<div><a href="http://www1429309663.blogrover.com/" onclick="this.blur();" rel="nofollow"><img width="80" height="15" src="images/sticker.png" alt="Sticker"></a></div>
 	</div>
 
 	<script type="text/javascript">
