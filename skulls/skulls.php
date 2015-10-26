@@ -120,9 +120,33 @@ define('STATS_UPD_BAD', 2);
 define('STATS_BLOCKED', 3);
 
 function GetMicrotime()
-{ 
+{
 	list($usec, $sec) = explode(' ', microtime(), 2);
-	return (float)$usec + (float)$sec; 
+	return (float)$usec + (float)$sec;
+}
+
+function IsFakeClient(&$vendor, $ver, $ua)
+{
+	/* Block empty User-Agent, User-Agent without version and other rip-offs */
+	if($vendor === 'RAZA')
+	{
+		if($ua === "" || $ua === 'Shareaza' || strpos($ua, 'Shareaza PRO') === 0 || strpos($ua, 'dianlei') === 0
+		  || strpos($ua, 'Python-urllib') === 0 || $ver === '1.0.0.0' || $ver === '3.0.0.0')
+		{
+			$vendor = 'RAZM';
+			return true;
+		}
+	}
+	/* Block empty User-Agent and other rip-offs */
+	elseif($vendor === 'LIME')
+	{
+		if($ua === "" || $ver === '1.1.1.6' || (int)$ver >= 8)
+		{
+			$vendor = 'LIMM';
+			return true;
+		}
+	}
+	return false;
 }
 
 function NormalizeIdentity(&$vendor, &$ver, $ua)
@@ -138,7 +162,7 @@ function NormalizeIdentity(&$vendor, &$ver, $ua)
 	/* Change vendor code of mod versions */
 	if($vendor === 'RAZA')
 	{
-		if(strpos($ua, 'Shareaza ') !== 0 || strpos($ua, 'PRO') !== false || $ver === '9.9.9.9')
+		if(strpos($ua, 'Shareaza') !== 0)
 			$vendor = 'RAZM';
 	}
 	elseif($vendor === 'LIME')
@@ -160,47 +184,35 @@ function ValidateIdentity($vendor, $ver)
 	return true;
 }
 
-function VerifyUserAgent($vendor, $ua)
+function VerifyUserAgent($ua)
 {
 	/* Block Google and MSIE from making queries */
 	if(strpos($ua, 'Googlebot') !== false || strpos($ua, ' MSIE ') !== false)
 		return false;
-
-	if($vendor === 'RAZM')
-	{  /* Block empty User-Agent, User-Agent without version and rip-offs; bad clients */
-		if($ua === "" || $ua === 'Shareaza' || strpos($ua, 'Shareaza PRO') === 0
-		   || strpos($ua, 'dianlei') === 0 || strpos($ua, 'Python-urllib') === 0)
-			return false;
-	}
-	elseif($vendor === 'LIMM')
-	{  /* Block empty User-Agent; bad clients */
-		if($ua === "")
-			return false;
-	}
 
 	return true;
 }
 
 function VerifyVersion($client, $version)
 {
-	/* Block some old versions and some bad versions */
+	/* Block some old versions */
 	$float_ver = (float)$version;
 	switch($client)
 	{
-		case 'RAZA':  /* 3.0, 3.0.0.0 and 3.3.1.0 are fakes */
-			if($float_ver < 2.3 || $version === '3.0' || $version === '3.0.0.0' || $version === '3.3.1.0')
+		case 'RAZA':
+			if($float_ver < 2.3)
 				return false;
 			break;
 		case 'RAZM':
 			if($float_ver < 2)
 				return false;
 			break;
-		case 'LIME':  /* Note: invalid new versions are switched to LIMM, so no need to check here */
+		case 'LIME':
 			if($float_ver < 3)
 				return false;
 			break;
 		case 'LIMM':
-			if($float_ver < 2 || $float_ver >= 8)
+			if($float_ver < 2)
 				return false;
 			break;
 		case 'BEAR':
@@ -1519,6 +1531,14 @@ elseif( $KICK_START )
 }
 else
 {
+	if(IsFakeClient($CLIENT, $VERSION, $UA_ORIGINAL))
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		if(STATS_FOR_BAD_CLIENTS) { UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs(); }
+		if(LOG_MINOR_ERRORS) Logging('fake-clients');
+		die();
+	}
+
 	if(!CONTENT_TYPE_WORKAROUND)
 		header('Content-Type: text/plain; charset=UTF-8');
 	else
@@ -1556,12 +1576,12 @@ else
 
 	if($NET === null) $NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
-	/* Block also missing REMOTE_ADDR, although it is unlikely, apparently it could happen in some configurations */
-	if(!VerifyUserAgent($CLIENT, $UA_ORIGINAL) || !$GOOD_PORT || empty($REMOTE_IP) || $REMOTE_IP === 'unknown')
+	/* Block also missing remote IP, although it is unlikely, apparently it could happen in some configurations */
+	if(!VerifyUserAgent($UA_ORIGINAL) || !$GOOD_PORT || empty($REMOTE_IP) || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-		if(STATS_FOR_BAD_CLIENTS) { UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs(); }
-		if(LOG_MINOR_ERRORS) Logging('bad-or-blocked-clients');
+		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
+		if(LOG_MINOR_ERRORS) Logging('blocked-clients');
 		die();
 	}
 
