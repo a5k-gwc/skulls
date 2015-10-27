@@ -126,11 +126,11 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 ?>
 							<tr>
 								<th>- GeoIP DB version:</th>
-								<td class="green"><span class="bold"><?php echo htmlentities($geoip->GetDBVersion(), ENT_QUOTES, 'UTF-8'); ?></span></td>
+								<td class="green"><span class="bold"><?php echo $geoip->GetDBVersion(); ?></span></td>
 							</tr>
 							<tr>
 								<th>- GeoIP DB (c)opy:</th>
-								<td class="brown"><?php echo htmlentities($geoip->GetDBCopyright(), ENT_QUOTES, 'UTF-8'); ?></td>
+								<td class="brown"><?php echo $geoip->GetDBCopyright(); ?></td>
 							</tr>
 <?php
 						}

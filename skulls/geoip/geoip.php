@@ -75,7 +75,7 @@ class GeoIPWrapper
 		$db_info = @geoip_database_info(GEOIP_COUNTRY_EDITION);
 		if($db_info === null) return false;
 
-		return $db_info;
+		return htmlentities($db_info, ENT_QUOTES, 'ISO-8859-1');
 	}
 
 	function _GetDBInfoDirectlyFromFile()  /* This code will possibly break in the future but I haven't found a better way to get the DB version */
@@ -98,7 +98,7 @@ class GeoIPWrapper
 			if($read_data[$i] === $null)
 				break;
 
-		return substr($read_data, $i+1);
+		return htmlentities(substr($read_data, $i+1), ENT_QUOTES, 'ISO-8859-1');
 	}
 
 	function _GetDBVersionAndCopyright()
