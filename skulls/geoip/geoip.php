@@ -111,7 +111,7 @@ class GeoIPWrapper
 				$db_info = $this->_GetDBInfoDirectlyFromFile();
 
 			if($db_info === false) return false;
-			$db_info = str_replace('(c)', '©', $db_info);
+			$db_info = str_replace('(c)', '&copy;', $db_info);
 
 			$cr_pos = strpos($db_info, 'Copyright');
 			if($cr_pos !== false)
