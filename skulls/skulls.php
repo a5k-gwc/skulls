@@ -840,7 +840,7 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 		}
 		elseif( strpos($received_data[1], "access denied by acl") > -1 )
 		{
-			$query = 'ping=1&multi=1&pv=2&client=TEST&version='.VENDOR.'%20'.SHORT_VER.'&cache=1';
+			$query = 'ping=1&multi=1&getnetworks=1&pv=2&client=TEST&version='.VENDOR.'%20'.SHORT_VER.'&cache=1';
 			$result = PingGWC($cache, $query, $net_param);
 		}
 		unset($received_data);
@@ -931,11 +931,10 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $is_a_gwc_param, $user_agent)
 {
 	global $MY_URL;
+	$cache = RemoveGarbage($cache);
 
 	if($cache === $MY_URL)  /* It doesn't allow to insert itself in the GWC list */
 		return 0; // Exists
-
-	$cache = RemoveGarbage($cache);
 	if(CheckFailedUrl($cache))
 		return 4; // Failed URL
 
