@@ -1584,14 +1584,6 @@ else
 		die();
 	}
 
-	if(!VerifyVersion($CLIENT, $VERSION))
-	{
-		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
-		if(LOG_MINOR_ERRORS) Logging('old-clients');
-		die();
-	}
-
 	WriteStatsTotalReqs();
 
 	$FORCE_PV2 = false; $MARK_AS_GWC = false;
@@ -1641,6 +1633,14 @@ else
 	{
 		$HOST = null;       /* Block host submission by GWCs, they don't do it */
 		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header to GWCs, they don't need it */
+	}
+
+	if(!VerifyVersion($CLIENT, $VERSION))
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		UpdateStats(STATS_BLOCKED);
+		if(LOG_MINOR_ERRORS) Logging('old-clients', $DETECTED_PV);
+		die("ERROR: Update your client\r\n");
 	}
 
 	/* There are some bad link examples over the internet, block invalid network names before anyone start using them */
