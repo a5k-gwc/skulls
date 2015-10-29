@@ -1398,7 +1398,6 @@ if(function_exists('date_default_timezone_get'))
 	date_default_timezone_set(@date_default_timezone_get());
 
 $REMOTE_IP = $_SERVER['REMOTE_ADDR'];
-$PHP_VERSION = (float)PHP_VERSION;
 
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 
@@ -1416,7 +1415,7 @@ $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) :
 $HOST = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $IP = null; $PORT = null; $GOOD_PORT = true;
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : null );
-$UDP_CACHE = (!empty($_GET["udpurl"]) && $PHP_VERSION >= 4.3)? $_GET["udpurl"] : null;
+$UDP_CACHE = (!empty($_GET["udpurl"]))? $_GET["udpurl"] : null;
 $LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
 $MAX_LEAVES = isset($_GET['x_max']) ? $_GET['x_max'] : null;
 $UPTIME = isset($_GET['uptime']) ? $_GET['uptime'] : null;
@@ -1439,7 +1438,7 @@ $GWCS = empty($_GET['gwcs']) ? 0 : $_GET['gwcs'];
 $BFILE = !empty($_GET["bfile"]) ? $_GET["bfile"] : 0;
 
 $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
-$GETUDP = (!empty($_GET["getudp"]) && $PHP_VERSION >= 4.3)? $_GET["getudp"] : 0; /* Currently it is tied to the normal 'get' but in the future will be able to get queried alone */
+$GETUDP = (!empty($_GET["getudp"]))? $_GET["getudp"] : 0; /* Currently it is tied to the normal 'get' but in the future will be able to get queried alone */
 $UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
 
 $CLIENT = !empty($_GET['client']) ? $_GET['client'] : "";
