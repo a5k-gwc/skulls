@@ -1911,71 +1911,74 @@ else
 	$clean_file = NULL;
 	$changed = FALSE;
 	$file = fopen( DATA_DIR."/last_action.dat", "r+b" );
-	flock($file, LOCK_EX);
-	$last_action_string = fgets($file, 50);
-
-	/* ToDO: clean this */
-	if($last_action_string != "")
+	if($file !== false)
 	{
-		list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
-		$time_diff = time() - ( strtotime( $last_action_date ) + date("Z") );	// GMT
-		$time_diff = floor($time_diff / 3600);	// Hours
-		if($time_diff >= 1 && $CACHE == NULL)
-		{
-			define('CLEAN_STATS_OTHER',   0);
-			define('CLEAN_STATS_BLOCKED', 1);
-			define('CLEAN_STATS_UPD',     2);
-			define('CLEAN_STATS_UPD_BAD', 3);
-			define('CLEAN_FAILED_URLS',   4);
+		flock($file, LOCK_EX);
+		$last_action_string = fgets($file, 50);
 
-			$last_action++;
-			switch($last_action)
+		/* ToDO: clean this */
+		if($last_action_string != "")
+		{
+			list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
+			$time_diff = time() - ( strtotime( $last_action_date ) + date("Z") );	// GMT
+			$time_diff = floor($time_diff / 3600);	// Hours
+			if($time_diff >= 1 && $CACHE == NULL)
 			{
-				default:
-					$last_action = 0;
-				case CLEAN_STATS_OTHER:
-					$clean_file = "stats";
-					$clean_type = "other";
-					break;
-				case CLEAN_STATS_BLOCKED:
-					$clean_file = "stats";
-					$clean_type = "blocked";
-					break;
-				case CLEAN_STATS_UPD:
-					$clean_file = "stats";
-					$clean_type = "upd";
-					break;
-				case CLEAN_STATS_UPD_BAD:
-					$clean_file = "stats";
-					$clean_type = "upd-bad";
-					break;
-				case CLEAN_FAILED_URLS:
-					$clean_file = "failed_urls";
-					break;
+				define('CLEAN_STATS_OTHER',   0);
+				define('CLEAN_STATS_BLOCKED', 1);
+				define('CLEAN_STATS_UPD',     2);
+				define('CLEAN_STATS_UPD_BAD', 3);
+				define('CLEAN_FAILED_URLS',   4);
+
+				$last_action++;
+				switch($last_action)
+				{
+					default:
+						$last_action = 0;
+					case CLEAN_STATS_OTHER:
+						$clean_file = "stats";
+						$clean_type = "other";
+						break;
+					case CLEAN_STATS_BLOCKED:
+						$clean_file = "stats";
+						$clean_type = "blocked";
+						break;
+					case CLEAN_STATS_UPD:
+						$clean_file = "stats";
+						$clean_type = "upd";
+						break;
+					case CLEAN_STATS_UPD_BAD:
+						$clean_file = "stats";
+						$clean_type = "upd-bad";
+						break;
+					case CLEAN_FAILED_URLS:
+						$clean_file = "failed_urls";
+						break;
+				}
+				if(!STATS_ENABLED && $clean_file == "stats") $clean_file = NULL;
+				$changed = TRUE;
 			}
-			if(!STATS_ENABLED && $clean_file == "stats") $clean_file = NULL;
+		}
+		else { $last_ver = 0; $last_action = -1; }
+
+		if($last_ver != VER || $last_stats_status != STATS_ENABLED)
+		{
+			if( !function_exists("Initialize") )
+			{
+				include "functions.php";
+			}
+			Initialize($SUPPORTED_NETWORKS);
 			$changed = TRUE;
 		}
-	}
-	else { $last_ver = 0; $last_action = -1; }
-
-	if($last_ver != VER || $last_stats_status != STATS_ENABLED)
-	{
-		if( !function_exists("Initialize") )
+		if($changed)
 		{
-			include "functions.php";
+			$last_action_date = gmdate("Y/m/d H:i");
+			rewind($file);
+			fwrite($file, VER."|".STATS_ENABLED."|".$last_action."|".$last_action_date."|");
 		}
-		Initialize($SUPPORTED_NETWORKS);
-		$changed = TRUE;
+		flock($file, LOCK_UN);
+		fclose($file);
 	}
-	if($changed)
-	{
-		$last_action_date = gmdate("Y/m/d H:i");
-		rewind($file);
-		fwrite($file, VER."|".STATS_ENABLED."|".$last_action."|".$last_action_date."|");
-	}
-	flock($file, LOCK_UN);
-	fclose($file);
 
 	if($compressed) ob_end_flush();
 
