@@ -60,7 +60,7 @@ function IsIPInBlockRange($ip, $cidr_range)
 function IsIPInBlockList($ip)
 {
 	$ip = ip2long($ip);
-	$fp = fopen('./ext/gwc-blocklist.dat', 'rb'); if($fp === false) return false;
+	$fp = fopen('./ext/gwc-blocklist.dat', 'rb'); if($fp === false) return true;
 
 	while(true)
 	{
@@ -74,6 +74,7 @@ function IsIPInBlockList($ip)
 			return true;
 		}
 	}
+
 	fclose($fp);
 	return false;
 }
