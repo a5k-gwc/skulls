@@ -46,10 +46,10 @@ echo "<html><head><title>Test</title><meta name=\"robots\" content=\"noindex,nof
 echo "<br><br>";
 
 $php_version = PHP_VERSION;
-if((float)$php_version >= 4.1)
+if((float)$php_version >= 4.3)
 	echo "<b>PHP version: <font color=\"green\">OK</font></b>";
 else
-	echo "<b>PHP version: <font color=\"red\">".$php_version."</font> (This version of PHP is too old, the minimum version is 4.1)</b>";
+	echo "<b>PHP version: <font color=\"red\">".$php_version."</font> (This version of PHP is too old, the minimum version is 4.3)</b>";
 
 echo "<br><br>\r\n";
 
