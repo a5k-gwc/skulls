@@ -498,6 +498,7 @@ function CheckBlockedGWC($gwc_url)
 		|| $gwc_url === 'http://fascination77.free.fr/cachechu/'	/* Bugged - Call to undefined function: stream_socket_client() */
 		|| $gwc_url === 'http://peerproject.org/webcache/'			/* Duplicate URL */
 		|| $gwc_url === 'http://gweb.dwbo.nl/'						/* No longer exist */
+		|| $gwc_url === 'http://gofoxy.net/gwc/cgi-bin/fc'			/* No longer exist */
 		|| $gwc_url === 'http://gwc.gofoxy.net:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://gwc.iblinx.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://gamagic.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
