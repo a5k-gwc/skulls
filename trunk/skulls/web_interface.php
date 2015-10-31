@@ -73,7 +73,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 			{
 				$idn_support = (function_exists('idn_to_ascii'));
 ?>
-				<div id="page-title"><strong>Cache Info</strong></div>
+				<div class="page-title"><strong>Cache Info</strong></div>
 				<div class="padding">
 					<table class="inner-table-infos" summary="Informations about this GWC">
 						<tr>
@@ -198,7 +198,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 					$elements = count($host_file["host"]);
 				}
 ?>
-				<div id="page-title"><strong><?php echo htmlentities(ucfirst($NET), ENT_QUOTES, 'UTF-8'); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</strong></div>
+				<div class="page-title"><strong><?php echo htmlentities(ucfirst($NET), ENT_QUOTES, 'UTF-8'); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</strong></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current hosts in cache">
 						<tr class="header-column">
@@ -255,7 +255,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 				$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
 				$elements = count($cache_file);
 ?>
-				<div id="page-title"><strong>Alternative GWCs (<?php echo $elements." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 GWCs to your P2P application</a></div>
+				<div class="page-title"><strong>Alternative GWCs (<?php echo $elements." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 GWCs to your P2P application</a></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current GWCs in cache">
 						<tr class="header-column">
@@ -354,7 +354,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 				$cache_file = file(DATA_DIR.'/alt-udps.dat');
 				$elements = count($cache_file);
 ?>
-				<div class="page-titles"><strong>Alternative UDP host caches (<?php echo $elements." of ".MAX_CACHES; ?>)</strong></div>
+				<div class="page-title"><strong>Alternative UDP host caches (<?php echo $elements." of ".MAX_CACHES; ?>)</strong></div>
 				<div class="padding">
 					<table class="inner-table" summary="Current UDP host caches in cache">
 						<tr class="header-column">
@@ -429,7 +429,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 					$other_reqs = ReadStats(STATS_OTHER);
 				}
 ?>
-				<div id="page-title"><strong>Statistics</strong></div>
+				<div class="page-title"><strong>Statistics</strong></div>
 				<div class="padding">
 					<table class="inner-table-infos" summary="Statistics about this GWC">
 						<tr>
