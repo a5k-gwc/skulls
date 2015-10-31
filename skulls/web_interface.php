@@ -34,7 +34,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 
 	$maintainer = htmlentities(MAINTAINER_NICK, ENT_QUOTES, 'UTF-8');
 	$title = NAME.'! Multi-Network WebCache '.VER;
-	if($num === 1); elseif($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 4) $title .= ' - Stats';
+	if($num === 1); elseif($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 5) $title .= ' - Stats';
 	$title .= ' (by '.$maintainer.')';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
@@ -65,7 +65,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 		<div class="container">
 			<div class="header">
 				<h1 class="title-spacing"><span class="main-title"><?php echo NAME; ?>!</span> Multi-Network WebCache <?php echo VER; ?></h1>
-				<div id="page-list"><a href="<?php echo $base_link; ?>showinfo=1">Home</a> / <a href="<?php echo $base_link; ?>showhosts=1">Hosts</a> / <a href="<?php echo $base_link; ?>showurls=1">Alternative GWCs</a> / <a href="<?php echo $base_link; ?>stats=1">Statistics</a></div>
+				<div id="page-list"><a href="<?php echo $base_link; ?>showinfo=1">Home</a> / <a href="<?php echo $base_link; ?>showhosts=1">Hosts</a> / <a href="<?php echo $base_link; ?>showurls=1">Alternative GWCs</a> / <a href="<?php echo $base_link; ?>showblocklists=1">BlockLists</a> / <a href="<?php echo $base_link; ?>stats=1">Statistics</a></div>
 			</div>
 			<div id="content">
 <?php

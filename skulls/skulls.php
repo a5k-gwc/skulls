@@ -68,8 +68,8 @@ function IsWebInterface()
 {
 	if(isset($_GET['client']))
 		return false;
-	if(empty($_SERVER['QUERY_STRING']) || isset($_GET['showinfo']) || isset($_GET['showhosts'])
-	   || isset($_GET['showurls']) || isset($_GET['stats']))
+	if(empty($_SERVER['QUERY_STRING']) || isset($_GET['showinfo']) || isset($_GET['showhosts']) || isset($_GET['showurls'])
+	  || isset($_GET['showblocklists']) || isset($_GET['stats']))
 		return true;
 
 	$param_count = count($_GET);
@@ -1457,6 +1457,7 @@ $NO_IP_HEADER = empty($_GET['noipheader']) ? 0 : $_GET['noipheader'];
 $SHOWINFO = !empty($_GET['showinfo']) ? $_GET['showinfo'] : 0;
 $SHOWHOSTS = !empty($_GET['showhosts']) ? $_GET['showhosts'] : 0;
 $SHOWCACHES = !empty($_GET['showurls']) ? $_GET['showurls'] : 0;
+$SHOWBLOCKLISTS = empty($_GET['showblocklists'])? 0 : $_GET['showblocklists'];
 $SHOWSTATS = !empty($_GET['stats']) ? $_GET['stats'] : 0;
 $SHOWDATA = !empty($_GET['data']) ? $_GET['data'] : 0;
 
@@ -1500,7 +1501,7 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 
 if(IsWebInterface())
 {
-	$page_number = ($SHOWINFO? 1 : ($SHOWHOSTS? 2 : ($SHOWCACHES? 3 : ($SHOWSTATS? 4 : ($SHOWDATA? 4 : 1)))));
+	$page_number = ($SHOWINFO? 1 : ($SHOWHOSTS? 2 : ($SHOWCACHES? 3 : ($SHOWBLOCKLISTS? 4 : ($SHOWSTATS? 5 : ($SHOWDATA? 5 : 1))))));
 	if($page_number === 1)
 		header('Cache-Control: max-age=43200');  /* 12 hours */
 	else
