@@ -1455,13 +1455,6 @@ $GETMAXLEAVES = empty($_GET['getmaxleaves']) ? 0 : $_GET['getmaxleaves'];
 $NO_IP_HEADER = empty($_GET['noipheader']) ? 0 : $_GET['noipheader'];
 
 
-$SHOWINFO = !empty($_GET['showinfo']) ? $_GET['showinfo'] : 0;
-$SHOWHOSTS = !empty($_GET['showhosts']) ? $_GET['showhosts'] : 0;
-$SHOWCACHES = !empty($_GET['showurls']) ? $_GET['showurls'] : 0;
-$SHOWBLOCKLISTS = empty($_GET['showblocklists'])? 0 : $_GET['showblocklists'];
-$SHOWSTATS = !empty($_GET['stats']) ? $_GET['stats'] : 0;
-$SHOWDATA = !empty($_GET['data']) ? $_GET['data'] : 0;
-
 $KICK_START = !empty($_GET['kickstart']) ? $_GET['kickstart'] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter (it is used the first time to populate the cache, it MUST be disabled after that).
 
 if( isset($noload) ) die();
@@ -1502,15 +1495,9 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 
 if(IsWebInterface())
 {
-	$page_number = ($SHOWINFO? 1 : ($SHOWHOSTS? 2 : ($SHOWCACHES? 3 : ($SHOWBLOCKLISTS? 4 : ($SHOWSTATS? 5 : ($SHOWDATA? 5 : 1))))));
-	if($page_number === 1)
-		header('Cache-Control: max-age=43200');  /* 12 hours */
-	else
-		header('Cache-Control: max-age=60');     /* 1 minute */
-
 	include './web_interface.php';
 	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL, true);
-	ShowHtmlPage($page_number, $PHP_SELF, $COMPRESSION, $header, $footer);
+	ShowHtmlPage($PHP_SELF, $COMPRESSION, $header, $footer);
 	if($compressed) ob_end_flush();
 }
 elseif( $KICK_START )

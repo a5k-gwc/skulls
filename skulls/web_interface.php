@@ -19,23 +19,32 @@
 
 include "web_functions.php";
 
-function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
+function ShowHtmlPage($php_self, $compression, $header, $footer)
 {
 	global $NET, $SUPPORTED_NETWORKS;
+
+	$page_number = 1; $suffix = null;
 	if($NET === null) $NET = 'all';
+
+	if(!empty($_GET['showinfo']));
+	elseif(!empty($_GET['showhosts'])) { $page_number = 2; $suffix = ' - Hosts'; }
+	elseif(!empty($_GET['showurls'])) { $page_number = 3; $suffix = ' - GWCs'; }
+	elseif(!empty($_GET['showblocklists'])) { $page_number = 4; if($_GET['showblocklists'] > 1) $page_number = 5; $suffix = ' - BlockLists'; }
+	elseif(!empty($_GET['stats']) || !empty($_GET['data'])) { $page_number = 6; $suffix = ' - Stats'; }
+
+	if($page_number === 1 || $page_number === 5)
+		header('Cache-Control: max-age=43200');  /* 12 hours */
+	else
+		header('Cache-Control: max-age=60');     /* 1 minute */
+
+	$maintainer = htmlentities(MAINTAINER_NICK, ENT_QUOTES, 'UTF-8');
+	$title = NAME.'! Multi-Network WebCache '.VER.$suffix.' (by '.$maintainer.')';
+	$base_link = basename($php_self).'?'; if($compression !== null) $base_link .= 'compression='.$compression.'&amp;';
 
 	if(!function_exists("Initialize"))
 		include "functions.php";
 
 	Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
-
-	$base_link = basename($php_self).'?';
-	if($compression !== null) $base_link .= 'compression='.$compression.'&amp;';
-
-	$maintainer = htmlentities(MAINTAINER_NICK, ENT_QUOTES, 'UTF-8');
-	$title = NAME.'! Multi-Network WebCache '.VER;
-	if($num === 1); elseif($num === 2) $title .= ' - Hosts'; elseif($num === 3) $title .= ' - GWCs'; elseif($num === 5) $title .= ' - Stats';
-	$title .= ' (by '.$maintainer.')';
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
@@ -47,8 +56,8 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 <!--[if lte IE 9]><link rel="stylesheet" type="text/css" href="includes/style-ie.css"><![endif]-->
-<?php if($num === 1 && !empty($_SERVER['QUERY_STRING'])) echo '<link rel="canonical" href="',$php_self,'">',"\n"; ?>
-<meta name="robots" content="<?php if($num === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
+<?php if($page_number === 1 && !empty($_SERVER['QUERY_STRING'])) echo '<link rel="canonical" href="',$php_self,'">',"\n"; ?>
+<meta name="robots" content="<?php if($page_number === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
 <meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from p2p clients to bootstrap.">
 <meta name="keywords" content="<?php echo strtolower(NAME); ?>, gwebcache, gwc, p2p, bootstrap, gnutella, gnutella2">
 </head>
@@ -69,7 +78,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 			</div>
 			<div id="content">
 <?php
-			if($num == 1)	// Info
+			if($page_number == 1)	// Info
 			{
 				$idn_support = (function_exists('idn_to_ascii'));
 ?>
@@ -168,7 +177,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 				</div>
 <?php
 			}
-			elseif($num == 2)	// Hosts
+			elseif($page_number == 2)	// Hosts
 			{
 				$max_hosts = MAX_HOSTS;
 				$elements = 0;
@@ -248,7 +257,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 				</div>
 <?php
 			}
-			elseif($num == 3)	// GWCs
+			elseif($page_number == 3)	// GWCs
 			{
 				include './geoip/geoip.php'; $geoip = new GeoIPWrapper();
 
@@ -415,7 +424,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 <?php
 				if($geoip) $geoip->Destroy(); $geoip = null;
 			}
-			elseif($num == 4)	// Statistics
+			elseif($page_number == 6)	// Statistics
 			{
 				if(STATS_ENABLED)
 				{
@@ -479,7 +488,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 	</div>
 	<div class="spacer"></div>
 <?php
-	if($num == 1)	// Info
+	if($page_number == 1)	// Info
 	{
 ?>
 	<div class="center"><div class="container"><div class="padding">
@@ -515,7 +524,7 @@ function ShowHtmlPage($num, $php_self, $compression, $header, $footer)
 	</script>
 <?php
 
-	if($num == 3)	// WebCache
+	if($page_number == 3)	// WebCache
 	{
 ?>
 
