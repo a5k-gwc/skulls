@@ -61,20 +61,21 @@ function IsIPInBlockList($ip)
 {
 	$ip = ip2long($ip);
 	$fp = fopen('./ext/gwc-blocklist.dat', 'rb'); if($fp === false) return true;
-
-	while(true)
+	if(fgets($fp, 512) !== false)  /* Skip first line, it contains only informations */
 	{
-		$line = fgets($fp, 32); if($line === false) break;
-		$line = rtrim($line);
-		if($line === "") continue;
-
-		if(IsIPInBlockRange($ip, $line))
+		while(true)
 		{
-			fclose($fp); if(DEBUG) echo 'IP "',long2ip($ip),'" is blocked by: ',$line,"\r\n\r\n";
-			return true;
+			$line = fgets($fp, 32); if($line === false) break;
+			$line = rtrim($line);
+			if($line === "") continue;
+
+			if(IsIPInBlockRange($ip, $line))
+			{
+				fclose($fp); if(DEBUG) echo 'IP "',long2ip($ip),'" is blocked by: ',$line,"\r\n\r\n";
+				return true;
+			}
 		}
 	}
-
 	fclose($fp);
 	return false;
 }
