@@ -415,6 +415,57 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = -1)
 		return $client_name.' '.$version;
 }
 
+function CalculateSHA1($file_name)
+{
+	$hash = sha1_file($file_name, true);
+	if($hash === false) return false;
+	return strtoupper(bin2hex($hash));
+}
+
+function CheckHashAndFilesize($file_name)
+{
+	$file_size = filesize($file_name); if($file_size === false) return false;
+	$hash = CalculateSHA1($file_name); if($hash === false) return false;
+	$title = '"SHA1 = '.$hash.', Size='.$file_size.'"';
+
+	$BL_stored_info = file_get_contents(substr($file_name, 0, -3).'hash');
+	if($BL_stored_info === false) return '<span class="bad" title='.$title.'>Missing hash file</span>';
+	$BL_stored_info = explode('|', $BL_stored_info, 3);
+
+	if($hash === $BL_stored_info[0] && $file_size === (int)$BL_stored_info[1])
+		return '<span class="good" title='.$title.'>OK</span>';
+	else
+		return '<span class="bad" title='.$title.'>Corrupted</span>';
+}
+
+function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$BL_author, &$BL_rev)
+{
+	$BL_type = null; $BL_hash_check = null; $BL_author = null; $BL_rev = null;
+	if(!file_exists($file_name)) { $BL_type = '<span class="bad">Missing file</span>'; return false; }
+
+	$fp = fopen($file_name, 'rb'); if($fp === false) return false;
+	$line = fgets($fp, 512); if($line !== false) $BL_info = explode('|', $line, 5);
+	fclose($fp);
+	if(!isset($BL_info)) return false;
+
+	$BL_rev = $BL_info[1].' ('.$BL_info[2].')'; $BL_author = $BL_info[3];
+
+	if($BL_info[0] === '0')				/* Custom BlockList withOUT hash check */
+	{
+		$BL_type = '<span class="unknown">Custom - No hash check</span>';
+		$BL_hash_check = '<span class="unknown">Disabled</span>';
+	}
+	else
+	{
+		if($BL_info[0] === $unique_id)	/* Original BlockList with hash check */
+			$BL_type = '<span class="good">Original</span>';
+		else							/* Custom BlockList with hash check */
+			$BL_type = '<span class="unknown">Custom</span>';
+		$result = CheckHashAndFilesize($file_name); if($result !== false) $BL_hash_check = $result;
+	}
+	return true;
+}
+
 function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php", $came_from = NULL)
 {
 	global $MY_URL;

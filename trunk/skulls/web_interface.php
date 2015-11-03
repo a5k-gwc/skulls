@@ -424,6 +424,74 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 <?php
 				if($geoip) $geoip->Destroy(); $geoip = null;
 			}
+			elseif($page_number == 4)	// BlockList download
+			{
+?>
+				<div class="page-title"><strong>P2P BlockList</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
+				<div class="padding">
+					<div class="padding"><strong>Download</strong></div>
+					<table class="inner-table-infos" summary="BlockList download">
+						<tr>
+							<td><span class="padding">Under construction</span></td>
+						</tr>
+					</table>
+				</div>
+<?php
+			}
+			elseif($page_number == 5)	// BlockList informations
+			{
+				GetBlockListInfo('./ext/gwc-blocklist.dat', '161589560', $BL_type, $BL_hash_check, $BL_author, $BL_rev);
+?>
+				<div class="page-title"><strong>GWC BlockList</strong></div>
+				<div class="padding">
+					<div class="padding"><strong>Lite BlockList to be used by this GWC</strong></div>
+					<table class="inner-table-infos" summary="GWC BlockList">
+						<tr>
+							<th>- Type:</th>
+							<td><strong><?php echo $BL_type; ?></strong></td>
+						</tr>
+						<tr>
+							<th>- Hash check:</th>
+							<td><strong><?php echo $BL_hash_check; ?></strong></td>
+						</tr>
+						<tr>
+							<th>- Author:</th>
+							<td class="brown"><?php echo $BL_author; ?></td>
+						</tr>
+						<tr>
+							<th>- Revision:</th>
+							<td class="brown"><?php echo $BL_rev; ?></td>
+						</tr>
+					</table>
+				</div>
+				<div>&nbsp;</div>
+<?php
+				GetBlockListInfo('./ext/blocklist.dat', '296397923', $BL_type, $BL_hash_check, $BL_author, $BL_rev);
+?>
+				<div class="page-title"><strong>P2P BlockList</strong></div>
+				<div class="padding">
+					<div class="padding"><strong>Full BlockList to be used by P2P applications</strong></div>
+					<table class="inner-table-infos" summary="P2P BlockList">
+						<tr>
+							<th>- Type:</th>
+							<td><strong><?php echo $BL_type; ?></strong></td>
+						</tr>
+						<tr>
+							<th>- Hash check:</th>
+							<td><strong><?php echo $BL_hash_check; ?></strong></td>
+						</tr>
+						<tr>
+							<th>- Author:</th>
+							<td class="brown"><?php echo $BL_author; ?></td>
+						</tr>
+						<tr>
+							<th>- Revision:</th>
+							<td class="brown"><?php echo $BL_rev; ?></td>
+						</tr>
+					</table>
+				</div>
+<?php
+			}
 			elseif($page_number == 6)	// Statistics
 			{
 				if(STATS_ENABLED)
