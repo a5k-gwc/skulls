@@ -149,7 +149,7 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	return false;
 }
 
-function NormalizeIdentity(&$vendor, &$ver, $ua)
+function NormalizeIdentity(&$vendor, &$ver, &$ua)
 {
 	/* Check if vendor and version are mixed inside vendor */
 	if($ver === "" && strlen($vendor) > 4)
@@ -167,10 +167,18 @@ function NormalizeIdentity(&$vendor, &$ver, $ua)
 	}
 	elseif($vendor === 'LIME')
 	{
-		if(strpos($ua, 'Cabos') !== false)
+		if(strpos($ua, 'Cabos/') !== false)
 			$vendor = 'CABO';
 		elseif(strpos($ua, 'LimeWire') !== 0 || (float)$ver >= 5.7)
 			$vendor = 'LIMM';
+	}
+	elseif($vendor === 'TEST')
+	{
+		if(strpos($ua, 'Cabos/') !== false)  /* Some old Cabos, example: LimeWire/4.12.11 (Cabos/0.7.2) */
+		{
+			$vendor = 'CABO';
+			$ua .= ' - Vendor: TEST';
+		}
 	}
 }
 
