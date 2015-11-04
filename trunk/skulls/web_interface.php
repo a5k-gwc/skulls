@@ -99,7 +99,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						</tr>
 						<tr>
 							<th>- Version:</th>
-							<td class="green" title="<?php echo GetMainFileRev(); ?>"><span class="bold"><?php echo VER; ?></span></td>
+							<td><span class="green" title="<?php echo GetMainFileRev(); ?>"><span class="bold"><?php echo VER; ?></span></span></td>
 						</tr>
 						<tr>
 							<th>- Networks:</th>
@@ -118,7 +118,11 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						</tr>
 						<tr>
 							<th>- IDN support:</th>
-							<td class="<?php echo ($idn_support? 'good' : 'bad'); ?>"><span class="bold"><?php echo ($idn_support? 'Yes' : 'No'); ?></span></td>
+							<td>
+								<span class="<?php echo ($idn_support? 'good' : 'bad'); ?>">
+									<span class="bold"><?php echo ($idn_support? 'Yes' : 'No'); ?></span>
+								</span>
+							</td>
 						</tr>
 						<tr>
 							<td></td>
@@ -135,7 +139,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 ?>
 							<tr>
 								<th>- GeoIP DB version:</th>
-								<td class="green"><span class="bold"><?php echo $geoip->GetDBVersion(); ?></span></td>
+								<td><span class="green"><span class="bold"><?php echo $geoip->GetDBVersion(); ?></span></span></td>
 							</tr>
 							<tr>
 								<th>- GeoIP DB (c)opy:</th>
@@ -155,7 +159,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						</tr>
 						<tr>
 							<th>- Maintainer:</th>
-							<?php echo '<td class="blue"',$mail,'><span class="bold">',$maintainer,'</span></td>',"\n"; ?>
+							<td><span class="blue"<?php echo $mail; ?>><span class="bold"><?php echo $maintainer; ?></span></span></td>
 						</tr>
 <?php
 						if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
@@ -163,11 +167,13 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 ?>
 							<tr>
 								<th>- Maintainer site:</th>
-								<td class="blue">
+								<td>
+									<span class="blue">
 <?php
 									$website = htmlentities(MAINTAINER_WEBSITE, ENT_QUOTES, 'UTF-8');
 									echo '<a href="',$website,'" class="hover-underline" rel="external">',$website,'</a>',"\n";
 ?>
+									</span>
 								</td>
 							</tr>
 <?php
