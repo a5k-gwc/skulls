@@ -21,6 +21,7 @@ div.container { display: -moz-inline-stack; display: inline-block; }  /* IE comp
 .page-title { background: #ccff99; color: #0044ff; }
 .inner-table-infos { border-style: none; }
 .inner-table-infos th, .inner-table-infos td { padding: 0.1em; }  .inner-table-infos th { font-weight: normal; width: 37%; min-width: 10.8em; }
+.inner-table-infos td { color: brown; }
 .header-column { background: #c6e6e6; color: inherit; }
 .empty-list { height: 3em; text-align: center; }
 /* Odd lines */ .odd { background: white; color: inherit; }  /* Even lines */ .even { background: #f0f0f0; color: inherit; }
