@@ -87,7 +87,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 					<table class="inner-table-infos" summary="Informations about this GWC">
 						<tr>
 							<th>- Running since:</th>
-							<td class="brown">
+							<td>
 <?php
 								if(file_exists(DATA_DIR."/running_since.dat"))
 								{
@@ -103,7 +103,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						</tr>
 						<tr>
 							<th>- Networks:</th>
-							<td class="brown">
+							<td>
 <?php
 								global $SUPPORTED_NETWORKS;
 								for( $i = 0; $i < NETWORKS_COUNT; $i++ )
@@ -131,7 +131,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 <?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
 						<tr>
 							<th>- GeoIP type:</th>
-							<td class="brown"><span class="bold"><?php if($geoip) echo $geoip->GetType(); ?></span></td>
+							<td><span class="bold"><?php if($geoip) echo $geoip->GetType(); ?></span></td>
 						</tr>
 <?php
 						if($geoip && $geoip->IsEnabled())
@@ -143,7 +143,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							</tr>
 							<tr>
 								<th>- GeoIP DB (c)opy:</th>
-								<td class="brown"><?php echo $geoip->GetDBCopyright(); ?></td>
+								<td><?php echo $geoip->GetDBCopyright(); ?></td>
 							</tr>
 <?php
 						}
@@ -462,11 +462,11 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						</tr>
 						<tr>
 							<th>- Author:</th>
-							<td class="brown"><?php echo $BL_author; ?></td>
+							<td><?php echo $BL_author; ?></td>
 						</tr>
 						<tr>
 							<th>- Revision:</th>
-							<td class="brown"><?php echo $BL_rev; ?></td>
+							<td><?php echo $BL_rev; ?></td>
 						</tr>
 					</table>
 				</div>
@@ -488,11 +488,11 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						</tr>
 						<tr>
 							<th>- Author:</th>
-							<td class="brown"><?php echo $BL_author; ?></td>
+							<td><?php echo $BL_author; ?></td>
 						</tr>
 						<tr>
 							<th>- Revision:</th>
-							<td class="brown"><?php echo $BL_rev; ?></td>
+							<td><?php echo $BL_rev; ?></td>
 						</tr>
 					</table>
 				</div>
@@ -517,7 +517,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 					<table class="inner-table-infos" summary="Statistics about this GWC">
 						<tr>
 							<th>- Total requests:</th>
-							<td class="brown">
+							<td>
 <?php
 								if(STATS_ENABLED)
 									echo ReadStatsTotalReqs();
@@ -529,7 +529,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						</tr>
 						<tr>
 							<th>- Requests this hour:</th>
-							<td class="brown">
+							<td>
 <?php
 								if(STATS_ENABLED)
 									echo ($other_reqs + $upd_reqs + $blocked_reqs),' (',$blocked_reqs,' blocked)';
@@ -541,7 +541,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						</tr>
 						<tr>
 							<th>- Updates this hour:</th>
-							<td class="brown">
+							<td>
 <?php
 								if(STATS_ENABLED)
 									echo $upd_reqs,' (',$upd_bad_reqs,' bad)';
