@@ -428,7 +428,7 @@ function CheckHashAndFilesize($file_name)
 	$hash = CalculateSHA1($file_name); if($hash === false) return false;
 	$title = '"SHA1 = '.$hash.', Size='.$file_size.'"';
 
-	$BL_stored_info = file_get_contents(substr($file_name, 0, -3).'hash');
+	$BL_stored_info = @file_get_contents(substr($file_name, 0, -3).'hash');
 	if($BL_stored_info === false) return '<span class="bad" title='.$title.'>Missing hash file</span>';
 	$BL_stored_info = explode('|', $BL_stored_info, 3);
 
