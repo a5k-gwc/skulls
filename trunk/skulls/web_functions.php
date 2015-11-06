@@ -394,25 +394,24 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = -1)
 			$cache = 1;
 		default:
 			if($cache)
-			{
-				$client_name = 'Unknown GWC ('.$vendor.' '.$version.')';
-				$version = "";
-			}
-			elseif( $vendor !== "" )
-			{
-				$client_name = 'Unknown client ('.$vendor.' '.$version.')';
-				$version = "";
-			}
+				$full_name = 'Unknown GWC';
 			else
-				$client_name = 'Unknown client';
+				$full_name = 'Unknown client';
+
+			if($vendor !== "")
+				$full_name .= ' ('.$vendor.' '.$version.')';
+
+			return $full_name;
 	}
 
-	if($cache > 1) $version .= ' (GWC)';
+	$full_name = $client_name;
+	if($version !== "") $full_name .= ' '.$version;
+	if($cache > 1) $full_name .= ' (GWC)';
 
-	if( $url !== "" )
-		return '<a href="'.$url.'" rel="external nofollow">'.$client_name.' '.$version.'</a>';
-	else
-		return $client_name.' '.$version;
+	if($url !== "")
+		return '<a href="'.$url.'" rel="external nofollow">'.$full_name.'</a>';
+
+	return $full_name;
 }
 
 function CalculateSHA1($file_name)
