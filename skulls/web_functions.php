@@ -19,7 +19,7 @@
 
 function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = -1)
 {
-	$cache = 0; $cache_scan = 0; $url = "";
+	$cache = 0; $cache_scan = 0; $url = null;
 	if( $vendor === 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
 	{
 		if(strpos($version, '/') !== false)
@@ -408,7 +408,7 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = -1)
 	if($version !== "") $full_name .= ' '.$version;
 	if($cache > 1) $full_name .= ' (GWC)';
 
-	if($url !== "")
+	if($url !== null)
 		return '<a href="'.$url.'" rel="external nofollow">'.$full_name.'</a>';
 
 	return $full_name;
