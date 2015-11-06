@@ -778,6 +778,8 @@ function PingGWC($gwc_url, $query, $net_param = null)
 			$nets = "gnutella";
 		elseif(strpos($gwc_name, 'PHPGnuCacheII') === 0)   /* Workaround for compatibility with PHPGnuCacheII, it send its own url instead of the networks list */
 			$nets = "gnutella2-gnutella";
+		elseif($net_param !== null)
+			$nets = $net_param;
 		elseif(!empty($oldpong))
 			$nets = "gnutella2-gnutella";  /* Guessed */
 		else
@@ -795,13 +797,14 @@ function PingGWC($gwc_url, $query, $net_param = null)
 			if(strpos($query, 'update=1') === false)
 				return PingGWC($gwc_url, $query.'&update=1', $net_param);
 
-		// Workaround for compatibility
-		if( //substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
+		if(substr($oldpong, 0, 9) == "MWebCache")
+			$nets = "mute";
+		elseif($net_param !== null)
+			$nets = $net_param;
+		elseif( //substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
 			substr($oldpong, 0, 12) == "jumswebcache" ||
 			substr($oldpong, 0, 11) == "GWebCache 2" )
 			$nets = "gnutella2-gnutella";
-		elseif(substr($oldpong, 0, 9) == "MWebCache")
-			$nets = "mute";
 		else
 			$nets = "gnutella";  /* Guessed */
 
@@ -820,7 +823,6 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 {
 	global $SUPPORTED_NETWORKS;
 
-	$nets = null;
 	if(strpos($cache, '://') > -1)
 	{
 		$udp = FALSE;
@@ -846,7 +848,6 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 		)	// Workaround for compatibility with some GWCs using v2 spec
 		{	// FOR GWCs DEVELOPERS: If you want to avoid the necessity to make double ping, make your GWC pingable without the network parameter or with the wrong network parameter when there are ping=1 and multi=1
 			$result = PingGWC($cache, $query, 'gnutella2');
-			$nets = "gnutella2";
 		}
 		elseif( strpos($received_data[1], "access denied by acl") > -1 )
 		{
@@ -865,11 +866,10 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 		$cache_data[0] = 'FAIL';
 	else
 	{
-		if($nets === null) $nets = $received_data[2];
-		if(CheckNetworkString($SUPPORTED_NETWORKS, $nets))
+		if(CheckNetworkString($SUPPORTED_NETWORKS, $received_data[2]))
 		{
 			$cache_data[0] = $received_data[1];
-			$cache_data[1] = $nets;
+			$cache_data[1] = $received_data[2];
 			$cache_data[2] = $received_data[3];
 		}
 		else
