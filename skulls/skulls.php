@@ -1733,7 +1733,7 @@ else
 			else // Invalid IP
 				print "I|update|WARNING|Invalid host"."\r\n";
 
-			if($result >= 0 || $result <= 3)
+			if($result >= 0 && $result <= 3)
 				$is_good_update = true;
 			else
 				$is_good_update = false;
@@ -1785,7 +1785,7 @@ else
 
 			if($is_good_update === null)
 			{
-				if($result >= 0 || $result <= 3)
+				if(($result >= 0 && $result <= 3) || $result == 7)
 					$is_good_update = true;
 				else
 					$is_good_update = false;
@@ -1806,7 +1806,7 @@ else
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
 
-			if($result >= 0 || $result <= 3)
+			if($result >= 0 && $result <= 3)
 				$is_good_update = true;
 			else
 				$is_good_update = false;
@@ -1831,7 +1831,7 @@ else
 
 			if($is_good_update === null)
 			{
-				if($result >= 0 || $result <= 3)
+				if(($result >= 0 && $result <= 3) || $result == 7)
 					$is_good_update = true;
 				else
 					$is_good_update = false;
