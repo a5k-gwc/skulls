@@ -439,7 +439,7 @@ function CheckHashAndFilesize($file_name, &$BL_file_size)
 
 function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$BL_file_size, &$BL_author, &$BL_rev)
 {
-	$BL_type = null; $BL_hash_check = null; $BL_file_size = null; $BL_author = null; $BL_rev = null;
+	$BL_type = null; $BL_hash_check = null; $BL_file_size = 0; $BL_author = null; $BL_rev = null;
 	if(!file_exists($file_name)) { $BL_type = '<span class="bad">Missing file</span>'; return false; }
 
 	$fp = fopen($file_name, 'rb'); if($fp === false) return false;
