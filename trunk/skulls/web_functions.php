@@ -421,25 +421,25 @@ function CalculateSHA1($file_name)
 	return strtoupper(bin2hex($hash));
 }
 
-function CheckHashAndFilesize($file_name)
+function CheckHashAndFilesize($file_name, &$BL_file_size)
 {
-	$file_size = filesize($file_name); if($file_size === false) return false;
+	$BL_file_size = filesize($file_name); if($BL_file_size === false) return false;
 	$hash = CalculateSHA1($file_name); if($hash === false) return false;
-	$title = '"SHA1 = '.$hash.', Size='.$file_size.'"';
+	$title = '"SHA1 = '.$hash.'"';
 
 	$BL_stored_info = @file_get_contents(substr($file_name, 0, -3).'hash');
 	if($BL_stored_info === false) return '<span class="bad" title='.$title.'>Missing hash file</span>';
 	$BL_stored_info = explode('|', $BL_stored_info, 3);
 
-	if($hash === $BL_stored_info[0] && $file_size === (int)$BL_stored_info[1])
+	if($hash === $BL_stored_info[0] && $BL_file_size === (int)$BL_stored_info[1])
 		return '<span class="good" title='.$title.'>OK</span>';
 	else
 		return '<span class="bad" title='.$title.'>Corrupted</span>';
 }
 
-function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$BL_author, &$BL_rev)
+function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$BL_file_size, &$BL_author, &$BL_rev)
 {
-	$BL_type = null; $BL_hash_check = null; $BL_author = null; $BL_rev = null;
+	$BL_type = null; $BL_hash_check = null; $BL_file_size = null; $BL_author = null; $BL_rev = null;
 	if(!file_exists($file_name)) { $BL_type = '<span class="bad">Missing file</span>'; return false; }
 
 	$fp = fopen($file_name, 'rb'); if($fp === false) return false;
@@ -460,7 +460,7 @@ function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$
 			$BL_type = '<span class="good">Original</span>';
 		else							/* Custom BlockList with hash check */
 			$BL_type = '<span class="unknown">Custom</span>';
-		$result = CheckHashAndFilesize($file_name); if($result !== false) $BL_hash_check = $result;
+		$result = CheckHashAndFilesize($file_name, $BL_file_size); if($result !== false) $BL_hash_check = $result;
 	}
 	return true;
 }
