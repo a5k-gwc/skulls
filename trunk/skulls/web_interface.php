@@ -450,7 +450,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 ?>
 				<div class="page-title"><strong>GWC BlockList</strong></div>
 				<div class="padding">
-					<div class="padding"><strong>Lite BlockList to be used by this GWC</strong></div>
+					<div class="padding"><strong>Lite BlockList (to be used by this GWC)</strong></div>
 					<table class="inner-table-infos" summary="GWC BlockList">
 						<tr>
 							<th>- Type:</th>
@@ -480,7 +480,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 ?>
 				<div class="page-title"><strong>P2P BlockList</strong></div>
 				<div class="padding">
-					<div class="padding"><strong>Full BlockList to be used by P2P applications</strong></div>
+					<div class="padding"><strong>Full BlockList (to be used by P2P applications)</strong></div>
 					<table class="inner-table-infos" summary="P2P BlockList">
 						<tr>
 							<th>- Type:</th>
