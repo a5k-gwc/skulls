@@ -365,10 +365,13 @@ function Pong($detected_pv, $net_list_sent_elsewhere, $multi, $net, $client, $ve
 		echo 'I|pong|',NAME,' ',VER;
 		if(!$net_list_sent_elsewhere)
 		{
-			if($client === 'TEST' && !$multi && $net === 'gnutella2' && strpos($version, 'Bazooka') === 0)
-				echo '|gnutella2||COMPAT';	/* Workaround for compatibility with Bazooka (it expect only gnutella2 instead of a supported network list and chokes on the rest) */
-			elseif($client === 'GCII' && !$multi && $net === 'gnutella2')
-				echo '|||COMPAT';			/* Workaround for compatibility with PHPGnuCacheII (it expects our url instead of a supported network list, keep it empty is also fine) */
+			if($net === 'gnutella2' && !$multi)
+			{
+				if($client === 'TEST' && strpos($version, 'Bazooka') === 0)
+					echo '|gnutella2||COMPAT';	/* Workaround for compatibility with Bazooka (it expect only gnutella2 instead of a supported network list and chokes on the rest) */
+				elseif($client === 'GCII')
+					echo '|||COMPAT';			/* Workaround for compatibility with PHPGnuCacheII (it expects our url instead of a supported network list, keep it empty is also fine) */
+			}
 
 			echo '|',strtolower(NetsToString());
 		}
@@ -472,7 +475,7 @@ function CheckURLValidity($cache)
 	if(strlen($cache) > 10)
 		if(substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://")
 			if( !(strpos($cache, "?") > -1 || strpos($cache, "&") > -1 || strpos($cache, "#") > -1) )
-				return TRUE;
+				return true;
 
 	if(LOG_MINOR_ERRORS)
 	{
@@ -480,7 +483,7 @@ function CheckURLValidity($cache)
 		Logging("invalid-urls");
 	}
 
-	return FALSE;
+	return false;
 }
 
 function CheckUDPURLValidity($cache)
@@ -1711,7 +1714,7 @@ else
 	$is_good_update = null;
 	if($UPDATE)
 	{
-		if( $HOST != NULL && $supported_net )
+		if( $HOST !== NULL && $supported_net )
 		{
 			$result = -1;
 			include './update.php';
