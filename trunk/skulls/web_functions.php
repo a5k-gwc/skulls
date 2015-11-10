@@ -17,7 +17,7 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = -1)
+function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 {
 	$cache = 0; $cache_scan = 0; $url = null;
 	if( $vendor === 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
@@ -32,7 +32,7 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = -1)
 			{$vendor = $version; $version = "";}
 		$cache = 1;
 	}
-	elseif($is_a_gwc_param === 1) $cache = 1;
+	if($is_a_gwc_param === 1) $cache = 2;
 
 	/* http://rfc-gnutella.sourceforge.net/ */
 	switch($vendor)
@@ -390,8 +390,6 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = -1)
 			$cache = 2;
 			break;
 
-		case 'TEST':
-			$cache = 1;
 		default:
 			if($cache)
 				$full_name = 'Unknown GWC';
@@ -406,7 +404,7 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = -1)
 
 	$full_name = $client_name;
 	if($version !== "") $full_name .= ' '.$version;
-	if($cache > 1) $full_name .= ' (GWC)';
+	if($cache) $full_name .= ' (GWC)';
 
 	if($url !== null)
 		return '<a href="'.$url.'" rel="external nofollow">'.$full_name.'</a>';
