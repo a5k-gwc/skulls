@@ -79,4 +79,24 @@ function IsIPInBlockList($ip)
 	fclose($fp);
 	return false;
 }
+
+function IsCloudFlareIP($ip)
+{
+	$ip = ip2long($ip);
+	$fp = fopen('./ext/cloudflare-ips.dat', 'rb'); if($fp === false) return false;
+	while(true)
+	{
+		$line = fgets($fp, 32); if($line === false) break;
+		$line = rtrim($line);
+		if($line === "") continue;
+
+		if(IsIPInBlockRange($ip, $line))
+		{
+			fclose($fp); if(DEBUG) echo 'IP "',long2ip($ip),'" is CloudFlare IP by line : ',$line,"\r\n\r\n";
+			return true;
+		}
+	}
+	fclose($fp);
+	return false;
+}
 ?>

@@ -1543,13 +1543,32 @@ else
 	else
 		header('Content-Type: application/octet-stream');
 
+	$CF_IP = null; $FAKE_CF = false;
+	if(isset($_SERVER['HTTP_CF_CONNECTING_IP']))
+	{
+		include './update.php';
+		if(IsCloudFlareIP($REMOTE_IP))
+		{
+			$CF_IP = $REMOTE_IP;
+			$REMOTE_IP = $_SERVER['HTTP_CF_CONNECTING_IP'];
+		}
+		else
+			$FAKE_CF = true;
+	}
+
 	NormalizeIdentity($CLIENT, $VERSION, $UA_ORIGINAL);
-	if( !ValidateIdentity($CLIENT, $VERSION) )
+	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF)
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
-		if(LOG_MINOR_ERRORS) Logging('unidentified-clients');
+		if(LOG_MINOR_ERRORS)
+		{
+			if($FAKE_CF)
+				Logging('fake-cloudflare');
+			else
+				Logging('unidentified-clients');
+		}
 		die();
 	}
 
@@ -1717,7 +1736,7 @@ else
 		if( $HOST !== NULL && $supported_net )
 		{
 			$result = -1;
-			include './update.php';
+			include_once './update.php';
 			if( CheckIPValidity($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
 			{
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
@@ -1803,7 +1822,7 @@ else
 		if( $HOST != NULL && $supported_net )
 		{
 			$result = -1;
-			include './update.php';
+			include_once './update.php';
 			if( CheckIPValidity($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
