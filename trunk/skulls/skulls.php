@@ -523,6 +523,9 @@ function CheckBlockedGWC($gwc_url)
 
 function CleanFailedUrls()
 {
+	ignore_user_abort(true);
+	set_time_limit(120);
+
 	$failed_urls_file = file(DATA_DIR.'/failed_urls.dat');
 	$file_count = count($failed_urls_file);
 	$file = fopen(DATA_DIR.'/failed_urls.dat', 'wb');
@@ -1277,6 +1280,9 @@ function StartCompression($compression, $user_agent, $web_interface = false)
 
 function CleanStats($request)
 {
+	ignore_user_abort(true);
+	set_time_limit(120);
+
 	$now = time();
 	$offset = date("Z");
 	$file_count = 0;
@@ -1314,8 +1320,6 @@ function CleanStats($request)
 	}
 	fclose($file);
 
-
-	set_time_limit("20");
 	$file = fopen('stats/'.$request.'-reqs.dat', 'wb');
 	if($file === false) return;
 	flock($file, LOCK_EX);
@@ -2004,6 +2008,7 @@ else
 	}
 
 	if($compressed) ob_end_flush();
+	flush();
 
 	if($clean_file == "stats")
 		CleanStats($clean_type);
