@@ -1715,6 +1715,7 @@ else
 		else
 			header('X-Remote-IP: '.$REMOTE_IP);
 	}
+	if($PING && $MULTI) header('X-Vendor: '.VENDOR);
 
 	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL);
 
