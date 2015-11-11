@@ -1514,7 +1514,9 @@ if(IsWebInterface())
 }
 elseif( $KICK_START )
 {
-	if( !KICK_START_ENABLED )
+	header('Connection: close');
+
+	if(!KICK_START_ENABLED)
 		die("ERROR: KickStart is disabled\r\n");
 
 	if( $NET == NULL )
@@ -1530,6 +1532,8 @@ elseif( $KICK_START )
 }
 else
 {
+	header('Connection: close');
+
 	if(IsFakeClient($CLIENT, $VERSION, $UA_ORIGINAL))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
