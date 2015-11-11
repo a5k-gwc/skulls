@@ -434,7 +434,7 @@ function TimeSinceSubmissionInSeconds($now, $time_of_submission, $offset)
 	return $now - ( strtotime($time_of_submission) + $offset );	// GMT
 }
 
-function CheckIPValidity($remote_ip, $ip)
+function ValidateIP($remote_ip, $ip)
 {
 	$ip_port = explode(":", $ip);	// $ip_port[0] = IP	$ip_port[1] = Port
 
@@ -1746,7 +1746,7 @@ else
 		{
 			$result = -1;
 			include_once './update.php';
-			if( CheckIPValidity($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
+			if( ValidateIP($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
 			{
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 
@@ -1832,7 +1832,7 @@ else
 		{
 			$result = -1;
 			include_once './update.php';
-			if( CheckIPValidity($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
+			if( ValidateIP($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
