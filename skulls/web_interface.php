@@ -340,7 +340,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 								elseif(strpos($cache_name, 'Cachechu') === 0)
 									$output .= '<a class="gwc-home-link" href="http://github.com/kevogod/cachechu" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'GhostWhiteCrab') === 0)
-									$output .= '<a class="gwc-home-link" href="http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/" rel="external nofollow">'.$cache_name.'</a>';
+									$output .= '<a class="gwc-home-link" href="http://github.com/gtk-gnutella/gwc" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'PHPGnuCacheII') === 0)
 									$output .= '<a class="gwc-home-link" href="http://gwcii.sourceforge.net/" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'jumswebcache') === 0)
