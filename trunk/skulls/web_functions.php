@@ -353,7 +353,8 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			break;
 		case 'Crab':
 			$client_name = 'GhostWhiteCrab';
-			$url = 'http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/';
+			$url = 'http://github.com/gtk-gnutella/gwc';
+			/* http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/ */
 			$cache = 2;
 			break;
 		case 'GCII':  /* Example query => ?client=GCII&version=2.1.1&ping=1&net=gnutella2 */
