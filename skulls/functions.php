@@ -217,7 +217,7 @@ function KickStart($net, $cache){
 				unset($host);
 				$host = explode("|", $line);
 				$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
-				if(ValidateIP($ip_port[0], $host[1]))
+				if(ValidateHost($host[1], $ip_port[0]))
 					$is_host = TRUE;
 			}
 			elseif(strtolower(substr($line, 0, 2)) == "u|")	// Cache
@@ -234,7 +234,7 @@ function KickStart($net, $cache){
 				unset($host);
 				$host[1] = $line;
 				$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
-				if(ValidateIP($ip_port[0], $host[1]))
+				if(ValidateHost($host[1], $ip_port[0]))
 					$is_host = TRUE;
 			}
 

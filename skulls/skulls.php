@@ -231,15 +231,6 @@ function VerifyVersion($client, $version)
 	return true;
 }
 
-function ValidatePort($port)
-{
-	$int_port = (int)$port;
-	if($int_port === 7001 || $int_port === 27016)
-		return false;
-
-	return true;
-}
-
 function CanonicalizeURL(&$full_url)
 {
 	/* $_GET parameters are already "urldecoded" by PHP, so do NOT urldecode again */
@@ -434,40 +425,39 @@ function TimeSinceSubmissionInSeconds($now, $time_of_submission, $offset)
 	return $now - ( strtotime($time_of_submission) + $offset );	// GMT
 }
 
-function ValidateIP($remote_ip, $ip)
+function ValidateIP($ip, $reject_lan_IPs = true)
 {
-	$ip_port = explode(":", $ip);	// $ip_port[0] = IP	$ip_port[1] = Port
+	$long_ip = ip2long($ip); if($long_ip === false) return false;
 
-	$ip_array = explode(".", $ip_port[0]);
 	// http://www.rfc-editor.org/rfc/rfc3330.txt
+	$ip_array = explode('.', $ip, 4);
+	if($ip_array[0] === '0' || $ip_array[0] === '127') return false;			/* "This" network and Loopback */
 
-	if(
-		!(	// Check if it isn't a reserved address
-			$ip_array[0] == 0		// "This" Network
-			|| $ip_array[0] == 10	// Private Network
-			|| $ip_array[0] == 127	// Loopback
-			|| $ip_array[0] == 172 && ( $ip_array[1] >= 16 && $ip_array[1] <= 31 )	// Private Network
-			|| $ip_array[0] == 192 && $ip_array[1] == 168	// Private Network
+	if($reject_lan_IPs)
+		if( $ip_array[0] === '10'												/* Private addresses */
+		 || $ip_array[0] === '100' && $ip_array[1] >= 64 && $ip_array[1] <= 127	/* Carrier Grade NAT addresses */
+		 || $ip_array[0] === '169' && $ip_array[1] === '254'					/* Link-local addresses */
+		 || $ip_array[0] === '172' && $ip_array[1] >= 16 && $ip_array[1] <= 31	/* Private addresses */
+		 || $ip_array[0] === '192' && $ip_array[1] === '168'					/* Private addresses */
 		)
-	)
-	{
-		if( count($ip_port) == 2 &&
-			ctype_digit($ip_port[1]) &&
-			$ip_port[1] > 0 &&
-			$ip_port[1] < 65536 &&
-			$ip_port[0] == $remote_ip &&
-			ip2long($ip_port[0]) == ip2long($remote_ip)
-		)
-			return TRUE;
-	}
+			return false;
 
-	if(LOG_MINOR_ERRORS)
-	{
-		global $CLIENT, $VERSION, $NET;
-		Logging("invalid-hosts");
-	}
+	return $ip === long2ip((float)$long_ip);  /* The float cast will prevent getting wrong IPs on some systems */
+}
 
-	return FALSE;
+function ValidatePort($port, $full_block = false)
+{
+	if(!ctype_digit($port) || $port < 1 || $port > 65535) return false;
+	if($full_block && ($port === '7001' || $port === '27016')) return false;
+	return true;
+}
+
+function ValidateHost($host, $remote_ip)
+{
+	list($ip, $port) = explode(':', $host, 2);
+	if($ip !== $remote_ip || !ValidateIP($ip)) { if(LOG_MINOR_ERRORS) Logging('invalid-hosts'); return false; }
+	if(!ValidatePort($port, true)) { if(LOG_MINOR_ERRORS) Logging('invalid-host-ports'); return false; }
+	return true;
 }
 
 function CheckURLValidity($cache)
@@ -1430,7 +1420,7 @@ $USER_AGENT = str_replace('/', ' ', $UA_ORIGINAL);
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none
 
 $HOST = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
-$IP = null; $PORT = null; $GOOD_PORT = true;
+$IP = null; $PORT = null;
 $CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : null );
 $UDP_CACHE = (!empty($_GET["udpurl"]))? $_GET["udpurl"] : null;
 $LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
@@ -1587,7 +1577,6 @@ else
 			{$IP = $HOST; $PORT = 0;}
 		else
 			list($IP, $PORT) = explode(':', $HOST, 2);
-		$GOOD_PORT = ValidatePort($PORT);
 	}
 
 	if($CLIENT === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
@@ -1602,8 +1591,7 @@ else
 
 	if($NET === null) $NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
-	/* Block also missing remote IP, although it is unlikely, apparently it could happen in some configurations */
-	if(!VerifyUserAgent($UA_ORIGINAL) || !$GOOD_PORT || empty($REMOTE_IP) || $REMOTE_IP === 'unknown')
+	if(!VerifyUserAgent($UA_ORIGINAL))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
@@ -1746,7 +1734,7 @@ else
 		{
 			$result = -1;
 			include_once './update.php';
-			if( ValidateIP($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
+			if(ValidateHost($HOST, $REMOTE_IP) && !IsIPInBlockList($REMOTE_IP))
 			{
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 
@@ -1832,7 +1820,7 @@ else
 		{
 			$result = -1;
 			include_once './update.php';
-			if( ValidateIP($REMOTE_IP, $HOST) && !IsIPInBlockList($REMOTE_IP) )
+			if(ValidateHost($HOST, $REMOTE_IP) && !IsIPInBlockList($REMOTE_IP))
 				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
