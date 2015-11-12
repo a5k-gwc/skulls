@@ -220,16 +220,11 @@ function KickStart($net, $cache){
 				if(ValidateHost($host[1], $ip_port[0]))
 					$is_host = TRUE;
 			}
-			elseif(strtolower(substr($line, 0, 2)) == "u|")	// Cache
-			{
-			}
-			elseif(strtolower(substr($line, 0, 2)) == "i|")	// Info
-			{
-			}
-			elseif(strtolower(substr($line, 0, 2)) == "d|")	// Debug
-			{
-			}
-			elseif(strpos($line, ":") > -1)					// Host (old method)
+			elseif(strtolower(substr($line, 0, 2)) == "u|");	// GWC
+			elseif(strtolower(substr($line, 0, 2)) == "i|");	// Info
+			elseif(strtolower(substr($line, 0, 2)) == "d|");	// Debug
+			elseif(strpos($line, '://') !== false);				// GWC (old method)
+			elseif(strpos($line, ':') !== false)				// Host (old method)
 			{
 				unset($host);
 				$host[1] = $line;
