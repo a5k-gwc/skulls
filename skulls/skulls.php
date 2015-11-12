@@ -413,10 +413,7 @@ function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 	}
 
 	if(LOG_MINOR_ERRORS)
-	{
-		global $CLIENT, $VERSION, $NET;
 		Logging("unsupported-nets");
-	}
 
 	return FALSE;
 }
@@ -470,10 +467,7 @@ function CheckURLValidity($cache)
 				return true;
 
 	if(LOG_MINOR_ERRORS)
-	{
-		global $CLIENT, $VERSION, $NET;
 		Logging("invalid-urls");
-	}
 
 	return false;
 }
@@ -484,10 +478,7 @@ function CheckUDPURLValidity($cache)
 		return true;
 
 	if(LOG_MINOR_ERRORS)
-	{
-		global $CLIENT, $VERSION, $NET;
 		Logging("invalid-udp-urls");
-	}
 
 	return false;
 }
@@ -879,8 +870,6 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 
 function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = 0)
 {
-	global $SUPPORTED_NETWORKS;
-
 	// return 4; Unused
 	$file_path = DATA_DIR.'/hosts_'.$net.'.dat';
 	$host_file = file($file_path);
@@ -1416,8 +1405,7 @@ $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;			// It is added to every 
 
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;				// This tell to the cache to show info like the name, the version, the vendor code, the home page of the cache, the nick and the website of the maintainer (the one that has put the cache on a webserver)
 
-$UA_ORIGINAL = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
-$USER_AGENT = str_replace('/', ' ', $UA_ORIGINAL);
+$UA = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
 
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none
 
@@ -1504,7 +1492,7 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 if(IsWebInterface())
 {
 	include './web_interface.php';
-	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL, true);
+	$compressed = StartCompression($COMPRESSION, $UA, true);
 	ShowHtmlPage($PHP_SELF, $COMPRESSION, $header, $footer);
 	if($compressed) ob_end_flush();
 }
@@ -1530,7 +1518,7 @@ else
 {
 	header('Connection: close');
 
-	if(IsFakeClient($CLIENT, $VERSION, $UA_ORIGINAL))
+	if(IsFakeClient($CLIENT, $VERSION, $UA))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		if(STATS_FOR_BAD_CLIENTS) { UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs(); }
@@ -1556,7 +1544,7 @@ else
 			$FAKE_CF = true;
 	}
 
-	NormalizeIdentity($CLIENT, $VERSION, $UA_ORIGINAL);
+	NormalizeIdentity($CLIENT, $VERSION, $UA);
 	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF)
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
@@ -1583,7 +1571,7 @@ else
 
 	if($CLIENT === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
 	{
-		if(strpos($UA_ORIGINAL, 'Mutella') === 0)
+		if(strpos($UA, 'Mutella') === 0)
 			$CLIENT = 'MTLL';
 		else
 			$NET = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on G1/G2 */
@@ -1593,7 +1581,7 @@ else
 
 	if($NET === null) $NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
-	if(!VerifyUserAgent($UA_ORIGINAL))
+	if(!VerifyUserAgent($UA))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
@@ -1707,7 +1695,7 @@ else
 	}
 	if($PING && $MULTI) header('X-Vendor: '.VENDOR);
 
-	$compressed = StartCompression($COMPRESSION, $UA_ORIGINAL);
+	$compressed = StartCompression($COMPRESSION, $UA);
 
 	//$CACHE_IS_VALID = true;
 	if($CACHE !== null)
@@ -1738,7 +1726,7 @@ else
 			include_once './update.php';
 			if(ValidateHost($HOST, $REMOTE_IP) && !IsIPInBlockList($REMOTE_IP))
 			{
-				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
+				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|Host already updated\r\n";
@@ -1774,10 +1762,10 @@ else
 				if($UDP_CACHE !== null && $NET === 'gnutella')
 				{
 					$is_udp = true;
-					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $CLIENT, $VERSION, $IS_A_CACHE, $UA_ORIGINAL);
+					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $CLIENT, $VERSION, $IS_A_CACHE, $UA);
 				}
 				elseif($CACHE !== null)
-					$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $IS_A_CACHE, $UA_ORIGINAL);
+					$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $IS_A_CACHE, $UA);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|URL already updated\r\n";
@@ -1823,7 +1811,7 @@ else
 			$result = -1;
 			include_once './update.php';
 			if(ValidateHost($HOST, $REMOTE_IP) && !IsIPInBlockList($REMOTE_IP))
-				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA_ORIGINAL);
+				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
 
@@ -1840,7 +1828,7 @@ else
 				print "WARNING: URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
-				$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $IS_A_CACHE, $UA_ORIGINAL);
+				$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $IS_A_CACHE, $UA);
 
 				if( $result == 5 ) // Ping failed
 					print "WARNING: Ping of ".$CACHE." failed\r\n";

@@ -24,13 +24,13 @@ if( !file_exists("log/") )
 
 function Logging($filename, $detected_pv = null)
 {
-	global $CLIENT, $VERSION, $NET, $UA_ORIGINAL;
+	global $CLIENT, $VERSION, $NET, $UA;
 	$REMOTE_IP = empty($_SERVER['REMOTE_ADDR'])? null : $_SERVER['REMOTE_ADDR'];
 	$ACCEPT_ENCODING = empty($_SERVER['HTTP_ACCEPT_ENCODING'])? null : $_SERVER['HTTP_ACCEPT_ENCODING'];
-	$X_FORWARDED_FOR = empty($_SERVER['HTTP_X_FORWARDED_FOR'])? null : $_SERVER['HTTP_X_FORWARDED_FOR'];
+	$FORWARDED_FOR = empty($_SERVER['HTTP_X_FORWARDED_FOR'])? null : $_SERVER['HTTP_X_FORWARDED_FOR'];
 	$CLIENT_IP = empty($_SERVER['HTTP_CLIENT_IP'])? null : $_SERVER['HTTP_CLIENT_IP'];
 
-	$line = gmdate('Y/m/d H:i:s').'|'.$detected_pv.'|'.$NET.'|'.$CLIENT.' '.$VERSION.'|'.$ACCEPT_ENCODING.'|'.$UA_ORIGINAL.'|?'.$_SERVER['QUERY_STRING'].'|'.$REMOTE_IP.'|'.$X_FORWARDED_FOR.'|'.$CLIENT_IP."\r\n";
+	$line = gmdate('Y/m/d H:i:s').'|'.$detected_pv.'|'.$NET.'|'.$CLIENT.' '.$VERSION.'|'.$ACCEPT_ENCODING.'|'.$UA.'|?'.$_SERVER['QUERY_STRING'].'|'.$REMOTE_IP.'|'.$FORWARDED_FOR.'|'.$CLIENT_IP."\r\n";
 
 	$file = fopen('log/'.$filename.'.log', 'ab');
 	if($file === false) return;
