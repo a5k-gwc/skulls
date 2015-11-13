@@ -1388,6 +1388,23 @@ function WriteStatsTotalReqs()
 	fclose($file);
 }
 
+function DetectRemoteIP($remote_ip)
+{
+	/* Shared internet/ISP IP */
+	if(!empty($_SERVER['HTTP_CLIENT_IP']) && ValidateIP($_SERVER['HTTP_CLIENT_IP'])) return $_SERVER['HTTP_CLIENT_IP'];
+	/* IPs passing through proxies */
+	if(!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+	{
+		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		if(strpos($ip, ',') === false) { if(ValidateIP($ip)) return $ip; }
+		else { $ip_array = explode(',', $ip, 10); foreach($ip_array as $val) { $ip = trim($val); if(ValidateIP($ip)) return $ip; } }
+	}
+	/* Cloud Sites */
+	if(!empty($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']) && ValidateIP($_SERVER['HTTP_X_CLUSTER_CLIENT_IP'])) return $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
+
+	return $remote_ip;
+}
+
 
 /* Set default charset to UTF-8 */
 ini_set('default_charset', 'UTF-8');
@@ -1684,15 +1701,7 @@ else
 		}
 	}
 
-	if(!$NO_IP_HEADER)
-	{
-		if(!empty($_SERVER['HTTP_CLIENT_IP']) && $_SERVER['HTTP_CLIENT_IP'] !== 'unknown')
-			header('X-Remote-IP: '.$_SERVER['HTTP_CLIENT_IP']);  /* Check for shared internet/ISP IP */
-		elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR']) && $_SERVER['HTTP_X_FORWARDED_FOR'] !== 'unknown')
-			header('X-Remote-IP: '.$_SERVER['HTTP_X_FORWARDED_FOR']);  /* Check for IPs passing through proxies */
-		else
-			header('X-Remote-IP: '.$REMOTE_IP);
-	}
+	if(!$NO_IP_HEADER) header('X-Remote-IP: '.DetectRemoteIP($REMOTE_IP));
 	if($PING && $MULTI) header('X-Vendor: '.VENDOR);
 
 	$compressed = StartCompression($COMPRESSION, $UA);
