@@ -1562,7 +1562,7 @@ else
 	}
 
 	NormalizeIdentity($CLIENT, $VERSION, $UA);
-	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF)
+	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF || !ValidateIP($REMOTE_IP))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
