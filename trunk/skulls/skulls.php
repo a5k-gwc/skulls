@@ -1553,8 +1553,14 @@ else
 	else
 		header('Content-Type: application/octet-stream');
 
-	$DETECTED_REMOTE_IP = null;
-	$CLOUDFLARE_IP = null; $FAKE_CF = false;
+	$DETECTED_REMOTE_IP = null; $CLOUDFLARE_IP = null; $FAKE_CF = false;
+
+	if(TRUST_X_REMOTE_ADDR_FROM_LOCALHOST && $REMOTE_IP === '127.0.0.1' && isset($_SERVER['HTTP_X_REMOTE_ADDR']))
+	{
+		$REMOTE_IP = $_SERVER['HTTP_X_REMOTE_ADDR'];
+		if(!ValidateIP($REMOTE_IP)) die();
+	}
+
 	if(isset($_SERVER['HTTP_CF_CONNECTING_IP']))
 	{
 		include './update.php';
