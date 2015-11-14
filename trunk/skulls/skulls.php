@@ -1554,7 +1554,7 @@ else
 	if(isset($_SERVER['HTTP_CF_CONNECTING_IP']))
 	{
 		include './update.php';
-		if(IsCloudFlareIP($REMOTE_IP))
+		if(ValidateIP($REMOTE_IP) && IsCloudFlareIP($REMOTE_IP))
 		{
 			$CLOUDFLARE_IP = $REMOTE_IP;
 			$REMOTE_IP = $_SERVER['HTTP_CF_CONNECTING_IP'];
