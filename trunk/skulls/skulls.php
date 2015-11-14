@@ -1400,9 +1400,11 @@ function DetectRemoteIP($remote_ip)
 		if(strpos($ip, ',') === false) { if(ValidateIP($ip)) return $ip; }
 		else { $ip_array = explode(',', $ip, 10); foreach($ip_array as $val) { $ip = trim($val); if(ValidateIP($ip)) return $ip; } }
 	}
+	/* Varnish Cache on SourceForge and maybe others */
+	if(!empty($_SERVER['HTTP_X_REMOTE_ADDR']) && ValidateIP($_SERVER['HTTP_X_REMOTE_ADDR'])) return $_SERVER['HTTP_X_REMOTE_ADDR'];
 	/* Cloud Sites */
 	if(!empty($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']) && ValidateIP($_SERVER['HTTP_X_CLUSTER_CLIENT_IP'])) return $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
-	/* X-Real-IP header */
+	/* X-Real-IP header set by some CDN */
 	if(!empty($_SERVER['HTTP_X_REAL_IP']) && ValidateIP($_SERVER['HTTP_X_REAL_IP'])) return $_SERVER['HTTP_X_REAL_IP'];
 
 	return $remote_ip;
