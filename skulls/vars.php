@@ -34,7 +34,11 @@ define( 'RECHECK_CACHES',			24 );	// Hours to recheck a good cache
 define( 'CONNECT_TIMEOUT',			10 );	// Socket connection timeout
 define( 'TIMEOUT',					15 );	// Socket timeout
 
-define( 'DATA_DIR', 'data' );				// Directory where data files are stored (you should use relative path, you can leave it as is by default)
+/* Do NOT enable this option if it isn't strictly needed to avoid opening security holes. This may be needed on some servers that use Varnish Cache like SourceForge */
+define( 'TRUST_X_REMOTE_ADDR_FROM_LOCALHOST', false );
+
+/* The directory where data files are stored (you should use a relative path, you can leave it as is by default) */
+define( 'DATA_DIR', 'data' );
 
 $header = '';
 $footer = '';
