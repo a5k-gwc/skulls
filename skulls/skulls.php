@@ -1388,6 +1388,7 @@ function WriteStatsTotalReqs()
 	fclose($file);
 }
 
+/* It use headers that can be easily spoofed. This function is used only for helping clients to detect their IP address; it mustn't be used for security checks. */
 function DetectRemoteIP($remote_ip)
 {
 	/* Shared internet/ISP IP */
@@ -1548,21 +1549,23 @@ else
 	else
 		header('Content-Type: application/octet-stream');
 
-	$CF_IP = null; $FAKE_CF = false;
+	$DETECTED_REMOTE_IP = null;
+	$CLOUDFLARE_IP = null; $FAKE_CF = false;
 	if(isset($_SERVER['HTTP_CF_CONNECTING_IP']))
 	{
 		include './update.php';
 		if(IsCloudFlareIP($REMOTE_IP))
 		{
-			$CF_IP = $REMOTE_IP;
+			$CLOUDFLARE_IP = $REMOTE_IP;
 			$REMOTE_IP = $_SERVER['HTTP_CF_CONNECTING_IP'];
 		}
 		else
 			$FAKE_CF = true;
 	}
 
+	if(!ValidateIP($REMOTE_IP)) $REMOTE_IP = 'unknown';
 	NormalizeIdentity($CLIENT, $VERSION, $UA);
-	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF || !ValidateIP($REMOTE_IP))
+	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
@@ -1701,7 +1704,7 @@ else
 		}
 	}
 
-	if(!$NO_IP_HEADER) header('X-Remote-IP: '.DetectRemoteIP($REMOTE_IP));
+	if(!$NO_IP_HEADER) { $DETECTED_REMOTE_IP = DetectRemoteIP($REMOTE_IP); header('X-Remote-IP: '.$DETECTED_REMOTE_IP); }
 	if($PING && $MULTI) header('X-Vendor: '.VENDOR);
 
 	$compressed = StartCompression($COMPRESSION, $UA);
