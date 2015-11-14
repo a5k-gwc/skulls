@@ -1402,6 +1402,8 @@ function DetectRemoteIP($remote_ip)
 	}
 	/* Cloud Sites */
 	if(!empty($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']) && ValidateIP($_SERVER['HTTP_X_CLUSTER_CLIENT_IP'])) return $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
+	/* X-Real-IP header */
+	if(!empty($_SERVER['HTTP_X_REAL_IP']) && ValidateIP($_SERVER['HTTP_X_REAL_IP'])) return $_SERVER['HTTP_X_REAL_IP'];
 
 	return $remote_ip;
 }
