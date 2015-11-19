@@ -925,14 +925,14 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	}
 }
 
-function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $is_a_gwc_param, $user_agent)
+function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_gwc_param, $user_agent)
 {
 	global $MY_URL;
-	$cache = RemoveGarbage($cache);
+	$gwc_url = RemoveGarbage($gwc_url);
 
-	if($cache === $MY_URL)  /* It doesn't allow to insert itself in the GWC list */
+	if($gwc_url === $MY_URL)  /* It doesn't allow to insert itself in the GWC list */
 		return 0; // Exists
-	if(CheckFailedUrl($cache))
+	if(CheckFailedUrl($gwc_url))
 		return 4; // Failed URL
 
 	$client = RemoveGarbage($client);
@@ -945,7 +945,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $is_a_gw
 	{
 		list($time, /* New specs only */, $gwc_ip, $read, /* Networks */, $net_param,) = explode('|', $cache_file[$i], 7);
 
-		if(strtolower($cache) == strtolower($read))
+		if(strtolower($gwc_url) == strtolower($read))
 		{
 			$cache_exists = TRUE;
 			if($net_param === "") $net_param = null;
@@ -954,7 +954,7 @@ function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $is_a_gw
 	}
 	$this_alt_gwc = null;
 	$new_specs_only = '0';
-	$temp = $cache; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
+	$temp = $gwc_url; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
 	list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2);
 
 	if($cache_exists)
@@ -967,17 +967,17 @@ function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $is_a_gw
 			return 0; // Exists
 		else
 		{
-			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$cache, $net_param, true);
+			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$gwc_url, $net_param, true);
 
 			if($cache_data[0] === 'FAIL')
 			{
-				AddFailedUrl($cache);
+				AddFailedUrl($gwc_url);
 				ReplaceCache($file_path, $i, $cache_file, null);
 				return 5; // Ping failed
 			}
 			elseif($cache_data[0] === 'UNSUPPORTED')
 			{
-				AddFailedUrl($cache);
+				AddFailedUrl($gwc_url);
 				ReplaceCache($file_path, $i, $cache_file, null);
 				return 6; // Unsupported network
 			}
@@ -988,8 +988,8 @@ function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $is_a_gw
 			else
 			{
 				$gwc_ip = gethostbyname($temp.'.');
-				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($cache, 'https') === 0) $new_specs_only = '1';
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
+				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($gwc_url, 'https') === 0) $new_specs_only = '1';
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
 
 				ReplaceCache($file_path, $i, $cache_file, $this_alt_gwc);
 				return 1; // Updated timestamp
@@ -998,27 +998,27 @@ function WriteCacheFile($file_path, $is_udp, $cache, $client, $version, $is_a_gw
 	}
 	else
 	{
-		if(CheckBlockedGWC($cache))
+		if(CheckBlockedGWC($gwc_url))
 			return 4; // Blocked URL
 		else
 		{
-			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$cache);
+			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$gwc_url);
 
 			if($cache_data[0] === 'FAIL')
 			{
-				AddFailedUrl($cache);
+				AddFailedUrl($gwc_url);
 				return 5; // Ping failed
 			}
 			elseif($cache_data[0] === 'UNSUPPORTED')
 			{
-				AddFailedUrl($cache);
+				AddFailedUrl($gwc_url);
 				return 6; // Unsupported network
 			}
 			else
 			{
 				$gwc_ip = gethostbyname($temp.'.');
-				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($cache, 'https') === 0) $new_specs_only = '1';
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$cache.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
+				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($gwc_url, 'https') === 0) $new_specs_only = '1';
+				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
 
 				if($file_count >= MAX_CACHES || $file_count > 100)
 				{
