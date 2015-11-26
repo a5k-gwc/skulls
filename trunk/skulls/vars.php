@@ -26,7 +26,7 @@ define( 'LOG_MINOR_ERRORS',			0 );	// Enable logging of minor errors (NOTE: This
 define( 'MAX_HOSTS',				100 );	// Maximum number of host stored for EACH network (If there are 3 networks enabled and this value is 100 then 100 x 3 = 300 - By setting this value too high you DECREASE the SPEED of the gwc)
 define( 'MAX_HOSTS_OUT',			50 );	// Maximum number of host sent in each request (By setting this value too high you WASTE MORE BANDWIDTH, by setting it too low you could increase the number of requests needed)
 
-define( 'MAX_CACHES',				30 );	// Maximum number of cache stored for ALL networks (This value is used mainly for normal GWCs but also for UDP ones, so if the value is 30 then 30 x 2 = 60 - By setting this value too high you DECREASE the SPEED of the gwc)
+define( 'MAX_CACHES',				50 );	// Maximum number of cache stored for ALL networks (This value is used mainly for normal GWCs but also for UDP ones, so if the value is 50 then 50 x 2 = 100 - By setting this value too high you DECREASE the SPEED of the gwc)
 define( 'MAX_CACHES_OUT',			15 );	// Maximum number of cache sent in each request (By setting this value too high you WASTE MORE BANDWIDTH, by setting it too low you could increase the number of requests needed)
 define( 'MAX_UDP_CACHES_OUT',		5 );
 
