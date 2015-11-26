@@ -1622,7 +1622,7 @@ else
 	WriteStatsTotalReqs();
 
 	$FORCE_PV2 = false; $MARK_AS_GWC = false;
-	if($CLIENT === 'TEST') { $MARK_AS_GWC = true; if($NET === 'gnutella2' && strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true; }
+	if($CLIENT === 'TEST') { $MARK_AS_GWC = true; if(strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true; }
 	elseif($CLIENT === 'GCII') { $MARK_AS_GWC = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
 
 	/*
