@@ -1525,7 +1525,7 @@ elseif( $KICK_START )
 	if(!KICK_START_ENABLED)
 		die("ERROR: KickStart is disabled\r\n");
 
-	if( $NET == NULL )
+	if( $NET === NULL )
 		die("ERROR: Network not specified\r\n");
 	elseif( !CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
 		die("ERROR: Network not supported\r\n");
@@ -1599,17 +1599,27 @@ else
 			list($IP, $PORT) = explode(':', $HOST, 2);
 	}
 
-	if($CLIENT === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
+	$DETECTED_NET = $NET;
 	{
-		if(strpos($UA, 'Mutella') === 0)
-			$CLIENT = 'MTLL';
-		else
-			$NET = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on G1/G2 */
-	}
-	elseif($CLIENT === 'FOXY')
-		$NET = 'foxy';      /* Enforced network parameter for Foxy clients to prevent leakage on G1/G2 */
+		if($NET === null) $DETECTED_NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
+		if($CLIENT === 'MUTE')      /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
+		{
+			if(strpos($UA, 'Mutella') === 0)
+				$CLIENT = 'MTLL';
+			elseif($NET === null)
+				$DETECTED_NET = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on G1/G2 */
+		}
+		elseif($CLIENT === 'FOXY')  /* Enforced network parameter for Foxy clients to prevent leakage on G1/G2 */
+			$DETECTED_NET = 'foxy';
 
-	if($NET === null) $NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
+		/* Network names are gnutella and gnutella2, not gnutella1 and shareaza */
+		if($NET === 'gnutella1' || $NET === 'shareaza')
+		{
+			UpdateStats(STATS_BLOCKED);
+			if(LOG_MAJOR_ERRORS) Logging('invalid-network-names', $DETECTED_PV);
+			die("ERROR: Invalid network name\r\n");
+		}
+	}
 
 	if(!VerifyUserAgent($UA))
 	{
@@ -1678,14 +1688,6 @@ else
 		die("ERROR: Update your client\r\n");
 	}
 
-	/* There are some bad link examples over the internet, block invalid network names before anyone start using them */
-	if($NET === 'gnutella1' || $NET === 'shareaza' || $NET === 'foksy')
-	{
-		UpdateStats(STATS_BLOCKED);
-		if(LOG_MAJOR_ERRORS) Logging('invalid-network-names', $DETECTED_PV);
-		die("ERROR: Invalid network name\r\n");
-	}
-
 	if(!$GET && !$GETUDP && !$PING && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE === null && $UDP_CACHE === null && $HOST === null && !$INFO)
 	{
 		echo "ERROR: Invalid query\r\n";
@@ -1724,7 +1726,7 @@ else
 		if(!CanonicalizeURL($CACHE))
 			$CACHE = 'BLOCKED';
 
-	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
+	if( CheckNetworkString($SUPPORTED_NETWORKS, $DETECTED_NET, FALSE) )
 		$supported_net = TRUE;
 	else
 	{
@@ -1748,7 +1750,7 @@ else
 			include_once './update.php';
 			if(ValidateHost($HOST, $REMOTE_IP) && !IsIPInBlockList($REMOTE_IP))
 			{
-				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA);
+				$result = WriteHostFile($DETECTED_NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|Host already updated\r\n";
@@ -1775,13 +1777,13 @@ else
 			$result = -1; $is_udp = false;
 			if(!FSOCKOPEN && !extension_loaded('curl')) // Cache adding disabled
 				print "I|update|WARNING|URL adding is disabled\r\n";
-			elseif( ($UDP_CACHE !== null && $NET === 'gnutella' && !CheckUDPURLValidity($UDP_CACHE)))  // Invalid URL
+			elseif( ($UDP_CACHE !== null && $DETECTED_NET === 'gnutella' && !CheckUDPURLValidity($UDP_CACHE)))  // Invalid URL
 				print("I|update|WARNING|Invalid UDP URL"."\r\n");
 			elseif( ($CACHE !== null && !CheckURLValidity($CACHE)))  // Invalid URL
 				print("I|update|WARNING|Invalid URL"."\r\n");
 			else
 			{
-				if($UDP_CACHE !== null && $NET === 'gnutella')
+				if($UDP_CACHE !== null && $DETECTED_NET === 'gnutella')
 				{
 					$is_udp = true;
 					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $CLIENT, $VERSION, $IS_A_CACHE, $UA);
@@ -1833,7 +1835,7 @@ else
 			$result = -1;
 			include_once './update.php';
 			if(ValidateHost($HOST, $REMOTE_IP) && !IsIPInBlockList($REMOTE_IP))
-				$result = WriteHostFile($NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA);
+				$result = WriteHostFile($DETECTED_NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
 
@@ -1876,15 +1878,15 @@ else
 	{
 		$dummy_host_needed = CheckIfDummyHostIsNeeded($CLIENT, $VERSION);
 
-		Get($DETECTED_PV, $NET, $GET, $GETLEAVES, $GETVENDORS, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed);
+		Get($DETECTED_PV, $DETECTED_NET, $GET, $GETLEAVES, $GETVENDORS, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed);
 	}
 	elseif($supported_net)
 	{
 		if($HOSTFILE)
-			HostFile($NET, $AGE);
+			HostFile($DETECTED_NET, $AGE);
 
 		if($URLFILE && (FSOCKOPEN || extension_loaded('curl')))
-			UrlFile($DETECTED_PV, $NET, $AGE, $CLIENT);
+			UrlFile($DETECTED_PV, $DETECTED_NET, $AGE, $CLIENT);
 
 		if($DETECTED_PV === 3 && ($HOSTFILE || $URLFILE))
 			echo "nets: ".strtolower(NetsToString())."\r\n";
