@@ -1621,9 +1621,9 @@ else
 
 	WriteStatsTotalReqs();
 
-	$FORCE_PV2 = false; $MARK_AS_GWC = false;
-	if($CLIENT === 'TEST') { $MARK_AS_GWC = true; if(strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true; }
-	elseif($CLIENT === 'GCII') { $MARK_AS_GWC = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
+	$FORCE_PV2 = false; $MARKED_AS_GWC = false;
+	if($CLIENT === 'TEST') { $MARKED_AS_GWC = true; if(strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true; }
+	elseif($CLIENT === 'GCII') { $MARKED_AS_GWC = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
 
 	/*
 		Existing GWC specs: v1, v1.1, v2, v2.1, v3, v4  ( GWC v3 is an extension of GWC v1  /  GWC v4 is an extension of GWC v2.1 )
@@ -1635,7 +1635,7 @@ else
 	*/
 
 	/*** Smart spec detection - START ***/
-	$PV = empty($_GET['pv'])? 0 : ((float)$_GET['pv']);
+	$PV = (empty($_GET['pv'])? 0 : (float)$_GET['pv']);
 	$DETECTED_PV = 0;
 
 	if($PV >= 4 || $MULTI)
@@ -1664,7 +1664,7 @@ else
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
 	if($GETNETWORKS) $SUPPORT = 2;
 
-	if($IS_A_CACHE || $MARK_AS_GWC)
+	if($IS_A_CACHE || $MARKED_AS_GWC)
 	{
 		$HOST = null;       /* Block host submission by GWCs, they don't do it */
 		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header to GWCs, they don't need it */
