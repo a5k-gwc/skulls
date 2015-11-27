@@ -151,7 +151,7 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	return false;
 }
 
-function NormalizeIdentity(&$vendor, &$ver, &$ua)
+function NormalizeIdentity(&$vendor, &$ver, &$ua, &$net)
 {
 	/* Check if vendor and version are mixed inside vendor */
 	if($ver === "" && strlen($vendor) > 4)
@@ -173,6 +173,29 @@ function NormalizeIdentity(&$vendor, &$ver, &$ua)
 			$vendor = 'CABO';
 		elseif(strpos($ua, 'LimeWire') !== 0 || (float)$ver >= 5.7)
 			$vendor = 'LIMM';
+	}
+	elseif($vendor === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
+	{
+		if(strpos($ua, 'Mutella') === 0)
+			$vendor = 'MTLL';
+		else
+		{
+			$net = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on other networks */
+			if(strpos($ver, 'komm_') === 0)
+			{
+				$vendor = 'KOMM';
+				$ver = substr($ver, 5);
+			}
+			elseif(strpos($ver, 'MFC_') === 0)
+			{
+				$vendor = 'MMFC';
+				$ver = substr($ver, 4);
+			}
+		}
+	}
+	elseif($vendor === 'FOXY')
+	{
+		$net = 'foxy';  /* Enforced network parameter for Foxy clients to prevent leakage on other networks */
 	}
 	elseif($vendor === 'TEST')
 	{
@@ -1553,7 +1576,8 @@ else
 	else
 		header('Content-Type: application/octet-stream');
 
-	$DETECTED_REMOTE_IP = null; $CLOUDFLARE_IP = null; $FAKE_CF = false;
+	$DETECTED_NET = $NET; $DETECTED_REMOTE_IP = null; $CLOUDFLARE_IP = null; $FAKE_CF = false;
+	if($NET === null) $DETECTED_NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
 	if(TRUST_X_REMOTE_ADDR_FROM_LOCALHOST && $REMOTE_IP === '127.0.0.1' && isset($_SERVER['HTTP_X_REMOTE_ADDR']))
 	{
@@ -1574,7 +1598,7 @@ else
 	}
 
 	if(!ValidateIP($REMOTE_IP)) $REMOTE_IP = 'unknown';
-	NormalizeIdentity($CLIENT, $VERSION, $UA);
+	NormalizeIdentity($CLIENT, $VERSION, $UA, $DETECTED_NET);
 	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
@@ -1599,26 +1623,12 @@ else
 			list($IP, $PORT) = explode(':', $HOST, 2);
 	}
 
-	$DETECTED_NET = $NET;
+	/* Network names are gnutella and gnutella2, not gnutella1 and shareaza */
+	if($NET === 'gnutella1' || $NET === 'shareaza')
 	{
-		if($NET === null) $DETECTED_NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
-		if($CLIENT === 'MUTE')      /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
-		{
-			if(strpos($UA, 'Mutella') === 0)
-				$CLIENT = 'MTLL';
-			elseif($NET === null)
-				$DETECTED_NET = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on G1/G2 */
-		}
-		elseif($CLIENT === 'FOXY')  /* Enforced network parameter for Foxy clients to prevent leakage on G1/G2 */
-			$DETECTED_NET = 'foxy';
-
-		/* Network names are gnutella and gnutella2, not gnutella1 and shareaza */
-		if($NET === 'gnutella1' || $NET === 'shareaza')
-		{
-			UpdateStats(STATS_BLOCKED);
-			if(LOG_MAJOR_ERRORS) Logging('invalid-network-names', $DETECTED_PV);
-			die("ERROR: Invalid network name\r\n");
-		}
+		UpdateStats(STATS_BLOCKED);
+		if(LOG_MAJOR_ERRORS) Logging('invalid-network-names', $DETECTED_PV);
+		die("ERROR: Invalid network name\r\n");
 	}
 
 	if(!VerifyUserAgent($UA))

@@ -282,15 +282,23 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			$url = 'http://sourceforge.net/projects/ziga/';
 			break;
 
-		/* Custom vendor codes (they are set inside the php code to differentiate multiple clients with the same vendor code) */
-		case 'CABO':  /* Cabos - the vendor code of Cabos is LIME but it is changed to CABO in the code to distinguish it from the normal LimeWire */
+		/* Custom vendor codes (they are set inside the code to differentiate multiple clients with the same vendor code) */
+		case 'CABO':  /* Cabos - the original vendor code of Cabos is LIME but it is changed to CABO in the code to distinguish it from the normal LimeWire */
 			$client_name = 'Cabos/LimeWire';
 			$url = 'http://cabos.sourceforge.jp/';
+			break;
+		case 'KOMM':  /* Kommute (client of MUTE network) - the original vendor code is MUTE */
+			$client_name = 'Kommute';
+			$url = 'http://calypso.sourceforge.net/';
 			break;
 		case 'LIMM':  /* Generic vendor */
 			$client_name = 'LimeWire mod';
 			break;
-		case 'MTLL':  /* Mutella - the vendor code of Mutella is MUTE but it is changed to MTLL in the code to avoid confusion with MUTE - client of MUTE network */
+		case 'MMFC':  /* MUTE MFC (client of MUTE network) - the original vendor code is MUTE */
+			$client_name = 'MUTE MFC';
+			$url = 'http://sourceforge.net/projects/mfc-mute-net/';
+			break;
+		case 'MTLL':  /* Mutella (client of gnutella network) - the original vendor code of Mutella is MUTE but it is changed to MTLL in the code to avoid confusion with MUTE (client of MUTE network) */
 			$client_name = 'Mutella';
 			$url = 'http://mutella.sourceforge.net/';
 			break;
