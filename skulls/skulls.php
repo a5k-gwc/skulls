@@ -161,18 +161,17 @@ function NormalizeIdentity(&$vendor, &$ver, &$ua, &$net)
 	}
 	$vendor = strtoupper($vendor);
 
-	/* Change vendor code of mod versions */
 	if($vendor === 'RAZA')
 	{
 		if(strpos($ua, 'Shareaza') !== 0)
-			$vendor = 'RAZM';
+			$vendor = 'RAZM';  /* Change vendor code of mod versions */
 	}
 	elseif($vendor === 'LIME')
 	{
 		if(strpos($ua, 'Cabos/') !== false)
 			$vendor = 'CABO';
 		elseif(strpos($ua, 'LimeWire') !== 0 || (float)$ver >= 5.7)
-			$vendor = 'LIMM';
+			$vendor = 'LIMM';  /* Change vendor code of mod versions */
 	}
 	elseif($vendor === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
 	{
