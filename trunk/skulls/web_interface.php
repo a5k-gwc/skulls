@@ -346,7 +346,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 								elseif(strpos($cache_name, 'jumswebcache') === 0)
 									$output .= '<a class="gwc-home-link" href="http://www1.mager.org/GWebCache/" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'MWebCache') === 0)
-									$output .= '<a class="gwc-home-link" href="http://mute-net.sourceforge.net/mWebCache.shtml" rel="external nofollow">'.$cache_name.'</a>';
+									$output .= '<a class="gwc-home-link" href="http://sourceforge.net/p/mute-net/support-requests/7/" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'node.gwc') === 0)
 									$output .= '<a class="gwc-home-link" href="http://andrewgilmore.co.uk/project/nodegwc" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'GWebCache') === 0)
