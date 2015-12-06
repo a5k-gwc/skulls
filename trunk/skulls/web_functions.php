@@ -365,6 +365,11 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			/* http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/ */
 			$cache = 2;
 			break;
+		case 'DKAC';
+			$client_name = 'DKAC/Enticing-Enumon';
+			$url = 'http://dkac.trillinux.org/dkac/dkac.php';
+			$cache = 2;
+			break;
 		case 'GCII':  /* Example query => ?client=GCII&version=2.1.1&ping=1&net=gnutella2 */
 			$client_name = 'PHPGnuCacheII';
 			$url = 'http://gwcii.sourceforge.net/';
@@ -375,6 +380,11 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			$url = 'http://github.com/leite/guarana';
 			$cache = 2;
 			break;
+		case 'GWebCache':  /* Original GWebCache */
+			$client_name = 'GWebCache';
+			$url = 'http://gnucleus.sourceforge.net/gwebcache/';
+			$cache = 2;
+			break;
 		case 'JGWC':
 			$client_name = 'jumswebcache';
 			$url = 'http://www1.mager.org/GWebCache/';
@@ -383,8 +393,8 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			break;
 		case 'MWebCache':
 			$client_name = 'MWebCache';
-			$url = 'http://mute-net.sourceforge.net/mWebCache.shtml';
-			/* http://sourceforge.net/p/mute-net/support-requests/7/ */
+			$url = 'http://sourceforge.net/p/mute-net/support-requests/7/';
+			/* http://mute-net.sourceforge.net/mWebCache.shtml */
 			$cache = 2;
 			break;
 		case 'NGWC':  /* Example query => ?ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
