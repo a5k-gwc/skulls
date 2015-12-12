@@ -133,7 +133,7 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	if($vendor === 'RAZA')
 	{
 		if($ua === "" || $ua === 'Shareaza' || strpos($ua, 'Shareaza PRO') === 0 || strpos($ua, 'dianlei') === 0
-		  || strpos($ua, 'Python-urllib') === 0 || $ver === '1.0.0.0' || $ver === '3.0.0.0')
+		  || $ver === '1.0.0.0' || $ver === '3.0.0.0')
 		{
 			$vendor = 'RAZM';
 			return true;
@@ -221,8 +221,9 @@ function ValidateIdentity($vendor, $ver)
 
 function VerifyUserAgent($ua)
 {
-	/* Block Google and MSIE from making queries */
-	if(strpos($ua, 'Googlebot') !== false || strpos($ua, ' MSIE ') !== false)
+	/* Block Google, IE and Python from performing queries */
+	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false
+	  || strpos($ua, 'Python-urllib/') === 0)
 		return false;
 
 	return true;
