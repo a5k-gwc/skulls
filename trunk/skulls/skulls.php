@@ -214,7 +214,7 @@ function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 function ValidateIdentity($vendor, $ver)
 {
 	/* Version missing; vendor missing or too short */
-	if($ver === "" || strlen($vendor) < 4)
+	if($ver === "" || strlen($vendor) !== 4)
 		return false;  
 
 	return true;
