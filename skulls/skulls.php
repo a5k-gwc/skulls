@@ -151,7 +151,7 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	return false;
 }
 
-function NormalizeIdentity(&$vendor, &$ver, &$ua, &$net)
+function NormalizeIdentity(&$vendor, &$ver, &$ua, $net, &$detected_net)
 {
 	/* Check if vendor and version are mixed inside vendor */
 	if($ver === "" && strlen($vendor) > 4)
@@ -183,7 +183,7 @@ function NormalizeIdentity(&$vendor, &$ver, &$ua, &$net)
 			$vendor = 'MTLL';
 		else
 		{
-			$net = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on other networks */
+			if($net === null) $detected_net = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on other networks */
 			if(strpos($ver, 'komm_') === 0)
 			{
 				$vendor = 'KOMM';
@@ -198,7 +198,7 @@ function NormalizeIdentity(&$vendor, &$ver, &$ua, &$net)
 	}
 	elseif($vendor === 'FOXY')
 	{
-		$net = 'foxy';  /* Enforced network parameter for Foxy clients to prevent leakage on other networks */
+		$detected_net = 'foxy';  /* Enforced network parameter for Foxy clients to prevent leakage on other networks */
 	}
 	elseif($vendor === 'TEST')
 	{
@@ -1600,7 +1600,7 @@ else
 	}
 
 	if(!ValidateIP($REMOTE_IP)) $REMOTE_IP = 'unknown';
-	NormalizeIdentity($CLIENT, $VERSION, $UA, $DETECTED_NET);
+	NormalizeIdentity($CLIENT, $VERSION, $UA, $NET, $DETECTED_NET);
 	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
