@@ -162,7 +162,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							<td><span class="blue"<?php echo $mail; ?>><span class="bold"><?php echo $maintainer; ?></span></span></td>
 						</tr>
 <?php
-						if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
+						if(MAINTAINER_WEBSITE !== 'http://' && MAINTAINER_WEBSITE !== "")
 						{
 ?>
 							<tr>
