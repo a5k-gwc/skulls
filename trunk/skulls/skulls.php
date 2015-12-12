@@ -148,10 +148,19 @@ function IsFakeClient(&$vendor, $ver, $ua)
 			return true;
 		}
 	}
+	elseif($vendor === 'TEST')
+	{
+		/* Block fake Cabos */
+		if(strpos($ua, 'Cabos/') !== false)  /* Cabos usually use LIME vendor code, this seems fake.  UA: LimeWire/4.12.11 (Cabos/0.7.2) */
+		{
+			$vendor = 'CABO';
+			return true;
+		}
+	}
 	return false;
 }
 
-function NormalizeIdentity(&$vendor, &$ver, &$ua, $net, &$detected_net)
+function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 {
 	/* Check if vendor and version are mixed inside vendor */
 	if($ver === "" && strlen($vendor) > 4)
@@ -199,14 +208,6 @@ function NormalizeIdentity(&$vendor, &$ver, &$ua, $net, &$detected_net)
 	elseif($vendor === 'FOXY')
 	{
 		$detected_net = 'foxy';  /* Enforced network parameter for Foxy clients to prevent leakage on other networks */
-	}
-	elseif($vendor === 'TEST')
-	{
-		if(strpos($ua, 'Cabos/') !== false)  /* Some old Cabos, example: LimeWire/4.12.11 (Cabos/0.7.2) */
-		{
-			$vendor = 'CABO';
-			$ua .= ' - Vendor: TEST';
-		}
 	}
 }
 
