@@ -283,7 +283,7 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			break;
 
 		/* Custom vendor codes (they are set inside the code to differentiate multiple clients with the same vendor code) */
-		case 'CABO':  /* Cabos - the original vendor code of Cabos is LIME but it is changed to CABO in the code to distinguish it from the normal LimeWire */
+		case 'CABO':  /* Cabos - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
 			$client_name = 'Cabos/LimeWire';
 			$url = 'http://cabos.sourceforge.jp/';
 			break;
@@ -293,6 +293,10 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			break;
 		case 'LIMM':  /* Generic vendor */
 			$client_name = 'LimeWire mod';
+			break;
+		case 'LMZI':  /* LimeZilla - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
+			$client_name = 'LimeZilla';
+			$url = 'http://www.sharezillas.com/products/limezilla.html';
 			break;
 		case 'MMFC':  /* MUTE MFC (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'MUTE MFC';
@@ -304,6 +308,10 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			break;
 		case 'RAZM':  /* Generic vendor */
 			$client_name = 'Shareaza mod';
+			break;
+		case 'SHZI':  /* ShareZilla - the original vendor code is RAZA but it is changed in the code to distinguish it from the normal Shareaza */
+			$client_name = 'ShareZilla';
+			$url = 'http://www.sharezillas.com/products/sharezilla.html';
 			break;
 
 		/* GWC Scanners */
