@@ -58,6 +58,6 @@ $footer = '';
 $SUPPORTED_NETWORKS[] = 'Gnutella2';
 //$SUPPORTED_NETWORKS[] = 'Gnutella';
 $SUPPORTED_NETWORKS[] = 'MUTE';
-$SUPPORTED_NETWORKS[] = 'Kad';
+//$SUPPORTED_NETWORKS[] = 'Kad';
 //$SUPPORTED_NETWORKS[] = 'Foxy';
 ?>
