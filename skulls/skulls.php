@@ -205,6 +205,10 @@ function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 			}
 		}
 	}
+	elseif($vendor === 'ANTSP2P')
+	{
+		$vendor = 'ANTS';  /* Fixed the not-standard vendor length */
+	}
 	elseif($vendor === 'FOXY')
 	{
 		$detected_net = 'foxy';  /* Enforced network parameter for Foxy clients to prevent leakage on other networks */
