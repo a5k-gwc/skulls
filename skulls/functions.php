@@ -17,6 +17,17 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+function DetectServer()
+{
+	if(function_exists('apache_get_version') && apache_get_version() !== false)
+		return 'Apache';
+
+	if(!empty($_SERVER['SERVER_SOFTWARE']) && stripos($_SERVER['SERVER_SOFTWARE'], 'apache') === 0)
+		return 'Apache';
+
+	return false;
+}
+
 function InitializeNetworkFile($net, $show_errors = FALSE)
 {
 	$net = strtolower($net);
@@ -149,7 +160,7 @@ function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE)
 		else $errors .= "<font color=\"red\">Error during writing of admin/revision.dat</font><br>";
 	}
 
-	if(!file_exists('./.htaccess'))
+	if(!file_exists('./.htaccess') && DetectServer() === 'Apache')
 	{
 		$fp1 = @fopen('./includes/base-htaccess.php', 'rb');
 		$fp2 = @fopen('./.htaccess', 'wb');
