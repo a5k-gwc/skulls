@@ -256,6 +256,11 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 		case 'SWFT':
 			$client_name = 'SwiftPeer';
 			break;
+		case 'TAMU':  /* Vendor code used for research from Texas A&M University */
+			$client_name = 'Texas A&M University';
+			$url = 'http://irl.cs.tamu.edu/';
+			/* http://irl.cs.tamu.edu/courses/2010-spring2/463-500/1-19-10.pdf */
+			break;
 		case 'TFLS':
 			$client_name = 'TrustyFiles';
 			$url = 'http://www.trustyfiles.com/';
