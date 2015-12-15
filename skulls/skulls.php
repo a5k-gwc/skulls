@@ -162,12 +162,6 @@ function IsFakeClient(&$vendor, $ver, $ua)
 
 function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 {
-	/* Check if vendor and version are mixed inside vendor */
-	if($ver === "" && strlen($vendor) > 4)
-	{
-		$ver = substr($vendor, 4);
-		$vendor = substr($vendor, 0, 4);
-	}
 	$vendor = strtoupper($vendor);
 
 	if($vendor === 'RAZA')
@@ -1587,6 +1581,13 @@ elseif( $KICK_START )
 else
 {
 	header('Connection: close');
+
+	/* Check if vendor and version are mixed inside vendor */
+	if($VERSION === "" && strlen($CLIENT) > 4)
+	{
+		$VERSION = substr($CLIENT, 4);
+		$CLIENT = substr($CLIENT, 0, 4);
+	}
 
 	if(IsFakeClient($CLIENT, $VERSION, $UA))
 	{
