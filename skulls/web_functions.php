@@ -293,7 +293,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://antsp2p.sourceforge.net/';
 			break;
 		case 'CABO':  /* Cabos - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
-			$client_name = 'Cabos/LimeWire';
+			$client_name = 'Cabos/LimeWire'; $ua .= ' - LimeWire mod';
 			$url = 'http://cabos.sourceforge.jp/';
 			break;
 		case 'KOMM':  /* Kommute (client of MUTE network) - the original vendor code is MUTE */
@@ -304,8 +304,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$client_name = 'LimeWire mod';
 			break;
 		case 'LMZI':  /* LimeZilla - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
-			$client_name = 'LimeZilla';
-			$url = 'http://www.sharezillas.com/products/limezilla.html';
+			$client_name = 'LimeZilla'; $ua .= ' - LimeWire mod';
 			break;
 		case 'MMFC':  /* MUTE MFC (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'MUTE MFC';
@@ -319,7 +318,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$client_name = 'Shareaza mod';
 			break;
 		case 'SHZI':  /* ShareZilla - the original vendor code is RAZA but it is changed in the code to distinguish it from the normal Shareaza */
-			$client_name = 'ShareZilla';
+			$client_name = 'ShareZilla'; $ua .= ' - Shareaza mod';
 			$url = 'http://www.sharezillas.com/products/sharezilla.html';
 			break;
 
