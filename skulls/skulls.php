@@ -515,6 +515,18 @@ function CheckUDPURLValidity($cache)
 	return false;
 }
 
+function CheckBlockedDomain($domain)
+{
+	if(
+		/* Block duplicate DNS of mcache.mccarragher.org */
+		$domain === 'mccarragher.org' || $domain === 'news.mccarragher.org' || $domain === 'gallaxial.com' || $domain === 'news.gallaxial.com'
+		|| $domain === 'spacesst.com' || $domain === 'news.spacesst.com' || $domain === 'piz.noip.me'
+	)
+		return true;
+
+	return false;
+}
+
 /* When bugs of GWCs are fixed, ask on http://sourceforge.net/p/skulls/discussion/ and the GWCs will be unlocked */
 function CheckBlockedGWC($gwc_url)
 {
@@ -523,7 +535,6 @@ function CheckBlockedGWC($gwc_url)
 		$gwc_url === 'http://cache.trillinux.org/g2/bazooka.php'	/* Bugged - Return hosts with negative age */
 		|| $gwc_url === 'http://fascination77.free.fr/cachechu/'	/* Bugged - Call to undefined function: stream_socket_client() */
 		|| $gwc_url === 'http://peerproject.org/webcache/'			/* Duplicate URL */
-		|| $gwc_url === 'http://mccarragher.org/cachechu/'			/* Duplicate URL */
 		|| $gwc_url === 'http://gofoxy.net/gwc/cgi-bin/fc'			/* No longer exist */
 		|| $gwc_url === 'http://gwc.gofoxy.net:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://gwc.iblinx.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
@@ -987,6 +998,9 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 	$new_specs_only = '0';
 	$temp = $gwc_url; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
 	list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2);
+
+	if(CheckBlockedDomain($temp))
+		return 4; // Blocked URL
 
 	if($cache_exists)
 	{
