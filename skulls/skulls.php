@@ -1597,10 +1597,9 @@ else
 		die();
 	}
 
-	if(!CONTENT_TYPE_WORKAROUND)
-		header('Content-Type: text/plain; charset=UTF-8');
-	else
-		header('Content-Type: application/octet-stream');
+	/* Content-Type */
+	if(CONTENT_TYPE_WORKAROUND) { header('Content-Type: application/octet-stream'); header('X-CT: text/plain|UTF-8'); }
+	else header('Content-Type: text/plain; charset=UTF-8');
 
 	$DETECTED_NET = $NET; $DETECTED_REMOTE_IP = null; $CLOUDFLARE_IP = null; $FAKE_CF = false;
 	if($NET === null) $DETECTED_NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
