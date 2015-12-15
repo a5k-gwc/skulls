@@ -17,7 +17,7 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
+function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 {
 	$cache = 0; $cache_scan = 0; $url = null;
 	if( $vendor === 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
@@ -432,20 +432,16 @@ function ReplaceVendorCode($vendor, $version, $is_a_gwc_param = 0)
 			else
 				$full_name = 'Unknown client';
 
-			if($vendor !== "")
-				$full_name .= ' ('.$vendor.' '.$version.')';
+			if($vendor !== "") $full_name .= ' ('.$vendor.' '.$version.')';
 
-			return $full_name;
+			return '<span title="'.$ua.'">'.$full_name.'</span>';
 	}
 
-	$full_name = $client_name;
-	if($version !== "") $full_name .= ' '.$version;
+	$full_name = $client_name; if($version !== "") $full_name .= ' '.$version;
 	if($cache) $full_name .= ' (GWC)';
 
-	if($url !== null)
-		return '<a href="'.$url.'" rel="external nofollow">'.$full_name.'</a>';
-
-	return $full_name;
+	if($url !== null) return '<a href="'.$url.'" rel="external nofollow" title="'.$ua.'">'.$full_name.'</a>';
+	return '<span title="'.$ua.'">'.$full_name.'</span>';
 }
 
 function CalculateSHA1($file_name)

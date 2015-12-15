@@ -251,7 +251,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 								if($h_leaves !== "")
 									echo ' (',$h_leaves,(empty($h_max_leaves)? null : '/'.$h_max_leaves),')';
 								echo ' &nbsp;</td>';
-								echo '<td><strong title="',$h_ua,'">',ReplaceVendorCode($h_vendor, $h_ver),'</strong> &nbsp;</td>';
+								echo '<td><strong>',ReplaceVendorCode($h_vendor, $h_ver, $h_ua),'</strong> &nbsp;</td>';
 								echo '<td><a href="',$base_link,'showhosts=1&amp;net=',strtolower($net),'">',$net,'</a> &nbsp;</td>';
 								echo '<td>',$h_age,'</td></tr>',"\n";
 							}
@@ -356,7 +356,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 								else
 									$output .= $cache_name;
 								$output .= '</span> &nbsp;</td><td>'.ucfirst($net).' &nbsp;</td>';
-								$output .= '<td><span class="bold" title="'.$user_agent.'">'.ReplaceVendorCode($client, $version, (int)$is_a_gwc_param).'</span> &nbsp;</td>';
+								$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version, $user_agent, (int)$is_a_gwc_param).'</span> &nbsp;</td>';
 								$output .= '<td>'.rtrim($time).'</td></tr>'."\n";
 
 								echo $output;
@@ -418,7 +418,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 
 								$output .= '</a></span> &nbsp;</td><td><span title="'.$gwc_server.'">'.$cache_name;
 								$output .= '</span> &nbsp;</td><td>'.ucfirst($net).' &nbsp;</td>';
-								$output .= '<td><span class="bold" title="'.$user_agent.'">'.ReplaceVendorCode($client, $version, (int)$is_a_gwc_param).'</span> &nbsp;</td>';
+								$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version, $user_agent, (int)$is_a_gwc_param).'</span> &nbsp;</td>';
 								$output .= '<td>'.rtrim($time).'</td></tr>'."\n";
 
 								echo $output;
