@@ -1141,12 +1141,13 @@ function UrlFile($detected_pv, $net, $age, $client)
 	}
 }
 
-function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getmaxleaves, $getudp, $client, $add_dummy_host)
+function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $getmaxleaves, $getudp, $client, $add_dummy_host)
 {
 	$output = "";
 	$now = time(); $offset = date('Z');
 	$separators = 0;
 	if($getmaxleaves) $separators = 5;
+	elseif($getuptime) $separators = 4;
 	elseif($getvendors) $separators = 3;
 	elseif($getleaves) $separators = 2;
 
@@ -1163,7 +1164,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getmaxleaves, $
 
 		for($i=0; $i<$max_hosts; $i++)
 		{
-			list($h_age, $h_ip, $h_port, $h_leaves, $h_max_leaves, , $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */,) = explode('|', $host_file[$count_host - 1 - $i], 13);
+			list($h_age, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */,) = explode('|', $host_file[$count_host - 1 - $i], 13);
 			$h_age = TimeSinceSubmissionInSeconds($now, $h_age, $offset);
 			if($h_age > MAX_HOST_AGE) break;
 			$host = 'H|'.$h_ip.':'.$h_port.'|'.$h_age;
@@ -1172,6 +1173,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getmaxleaves, $
 			if($separators > 2) $host .= '|';
 			if($getvendors) $host .= $h_vendor;
 			if($separators > 3) $host .= '|';
+			if($getuptime) $host .= $h_uptime;
 			if($separators > 4) $host .= '|';
 			if($getmaxleaves) $host .= $h_max_leaves;
 			$output .= $host."\r\n";
@@ -1499,6 +1501,7 @@ $GETNETWORKS = empty($_GET['getnetworks']) ? 0 : $_GET['getnetworks'];
 
 $GETLEAVES = empty($_GET['getleaves']) ? 0 : $_GET['getleaves'];
 $GETVENDORS = empty($_GET['getvendors']) ? 0 : $_GET['getvendors'];
+$GETUPTIME = empty($_GET['getuptime']) ? 0 : $_GET['getuptime'];
 $GETMAXLEAVES = empty($_GET['getmaxleaves']) ? 0 : $_GET['getmaxleaves'];
 
 $NO_IP_HEADER = empty($_GET['noipheader']) ? 0 : $_GET['noipheader'];
@@ -1670,7 +1673,7 @@ else
 		$DETECTED_PV = 4;
 	elseif($PV < 3)
 	{
-		if($PV >= 2.1 || $GETNETWORKS || $GETLEAVES || $GETVENDORS || $GETMAXLEAVES || $GETUDP || $INFO || $UDP_CACHE !== null)
+		if($PV >= 2.1 || $GETNETWORKS || $GETLEAVES || $GETVENDORS || $GETUPTIME || $GETMAXLEAVES || $GETUDP || $INFO || $UDP_CACHE !== null)
 			$DETECTED_PV = 2.1;
 		elseif($PV >= 2 || $GET || $UPDATE || $SUPPORT || $FORCE_PV2)
 			$DETECTED_PV = 2;
@@ -1896,7 +1899,7 @@ else
 	{
 		$dummy_host_needed = CheckIfDummyHostIsNeeded($CLIENT, $VERSION);
 
-		Get($DETECTED_PV, $DETECTED_NET, $GET, $GETLEAVES, $GETVENDORS, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed);
+		Get($DETECTED_PV, $DETECTED_NET, $GET, $GETLEAVES, $GETVENDORS, $GETUPTIME, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed);
 	}
 	elseif($supported_net)
 	{
