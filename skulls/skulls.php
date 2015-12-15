@@ -162,8 +162,6 @@ function IsFakeClient(&$vendor, $ver, $ua)
 
 function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 {
-	$vendor = strtoupper($vendor);
-
 	if($vendor === 'RAZA')
 	{
 		if(strpos($ua, 'ShareZilla') === 0)
@@ -1588,6 +1586,7 @@ else
 		$VERSION = substr($CLIENT, 4);
 		$CLIENT = substr($CLIENT, 0, 4);
 	}
+	$CLIENT = strtoupper($CLIENT);
 
 	if(IsFakeClient($CLIENT, $VERSION, $UA))
 	{
