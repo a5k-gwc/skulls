@@ -175,7 +175,7 @@ function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 			$vendor = 'CABO';
 		elseif(strpos($ua, 'LimeZilla/') === 0)
 			$vendor = 'LMZI';
-		elseif(strpos($ua, 'LimeWire') !== 0 || (float)$ver >= 5.7)
+		elseif(strpos($ua, 'LimeWire/') !== 0 || (float)$ver >= 5.7)
 			$vendor = 'LIMM';  /* Change vendor code of mod versions */
 	}
 	elseif($vendor === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
