@@ -196,7 +196,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://peerproject.org/';
 			break;
 		case 'PHEX':
-			$client_name = 'Phex';
+			$client_name = 'Phex';  /* Phex 3.4.2.116 => User-Agent: Jakarta Commons-HttpClient/3.0.1 */
 			$url = 'http://www.phex.org/mambo/';
 			break;
 		case 'QAZA':
