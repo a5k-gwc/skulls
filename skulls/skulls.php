@@ -216,12 +216,21 @@ function ValidateIdentity($vendor, $ver)
 	return true;
 }
 
-function VerifyUserAgent($ua)
+function VerifyUserAgent($ua, $net)
 {
 	/* Block Google, IE and Python from performing queries */
 	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false
 	  || strpos($ua, 'Python-urllib/') === 0)
 		return false;
+
+	if(strpos($ua, 'Mozilla') !== false)
+	{
+		if($net === 'foxy' && $ua === 'Mozilla/4.0') return true;
+
+		/* Block black hat bots */
+		$pos_par1 = strpos($ua, '('); $pos_par2 = strpos($ua, ')');
+		if($pos_par1 === false || $pos_par2 === false || strpos($ua, 'Mozilla/') !== 0 || $pos_par2 < $pos_par1) return false;
+	}
 
 	return true;
 }
@@ -1655,7 +1664,7 @@ else
 		die("ERROR: Invalid network name\r\n");
 	}
 
-	if(!VerifyUserAgent($UA))
+	if(!VerifyUserAgent($UA, $DETECTED_NET))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
