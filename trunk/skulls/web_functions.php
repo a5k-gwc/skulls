@@ -238,6 +238,9 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 		case 'SALM':
 			$client_name = 'Salmonella';
 			break;
+		case 'SEER':
+			$client_name = 'Client by Jim Lee (unknown name)';
+			break;
 		case 'SHLN':
 			$client_name = 'Sharelin';
 			$url = 'http://sharelin.sourceforge.net/';
@@ -360,6 +363,11 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 		case 'BCON':
 			$client_name = 'Beacon Cache';
 			$url = 'http://sourceforge.net/projects/beaconcache/';
+			$cache = 2;
+			break;
+		case 'Boa':
+			$client_name = 'Boa';
+			$url = 'http://github.com/kevogod/Boa';
 			$cache = 2;
 			break;
 		case 'Cachechu':
