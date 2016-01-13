@@ -318,6 +318,8 @@ function CanonicalizeURL(&$full_url)
 			}
 			elseif($ext === '.htm' || substr($path, -5) === '.html')
 				return false;  /* Block static pages */
+			elseif(strpos($path, '.php/') !== false)
+				return false;  /* Block some erroneous url rewrites that make it available from infinite urls like this: http://www.domain.com/gwc.php/everything_is_allowed_here */
 		}
 		if($end_slash)  /* Add slash only if there was before */
 			$path .= '/';
