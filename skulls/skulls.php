@@ -536,7 +536,10 @@ function CheckBlockedGWC($gwc_url)
 	$gwc_url = strtolower($gwc_url);
 	if(
 		$gwc_url === 'http://cache.trillinux.org/g2/bazooka.php'	/* Bugged - Return hosts with negative age */
-		|| $gwc_url === 'http://fascination77.free.fr/cachechu/'	/* Bugged - Call to undefined function: stream_socket_client() */
+		|| $gwc_url === 'http://fascination77.free.fr/cachechu/'	/* Bugged - Fatal error, call to undefined function: stream_socket_client() */
+		|| $gwc_url === 'http://p2p.findclan.org/'					/* Bugged/bad - Completely empty */
+		|| $gwc_url === 'http://cache-doxu.rhcloud.com/'			/* Bugged/bad - No hosts */
+		|| $gwc_url === 'http://59.175.238.8:9030/beacon2/gwc.php'	/* Bugged/bad - Partially broken */
 		|| $gwc_url === 'http://peerproject.org/webcache/'			/* Duplicate URL */
 		|| $gwc_url === 'http://gofoxy.net/gwc/cgi-bin/fc'			/* No longer exist */
 		|| $gwc_url === 'http://gwc.gofoxy.net:2108/gwc/cgi-bin/fc'	/* No longer exist */
