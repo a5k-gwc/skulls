@@ -1,9 +1,10 @@
 <?php
-/****  SETTINGS  ****/
-/*
-	Copyright © by ale5000
-	You must read readme.txt in the admin directory to configure this properly.
-*/
+//
+//  vars.php - Skulls configuration
+//
+//  Copyright © 2005-2008, 2015-2016 by ale5000
+//  You must read readme.txt in the admin directory to configure this properly.
+//
 
 define( 'ENABLED',					1 );
 
