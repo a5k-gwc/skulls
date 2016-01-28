@@ -11,12 +11,12 @@ FileETag None
 </IfModule>
 
 ### Block bad clients ###
-<Files "skulls.php">
-  # Block Shareaza without version (they abuse server resources)
-  BrowserMatch "^Shareaza$" GoAway=1
-  Order Deny,Allow
-  Deny from Env=GoAway
-</Files>
+#<Files "skulls.php">
+#  # Block Shareaza without version (it abuse server resources)
+#  BrowserMatch "^Shareaza$" GoAway=1
+#  Order Deny,Allow
+#  Deny from Env=GoAway
+#</Files>
 
 ### Redirection  ###
 <IfModule mod_rewrite.c>
