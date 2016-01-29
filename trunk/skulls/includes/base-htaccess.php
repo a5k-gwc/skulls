@@ -4,7 +4,7 @@ ServerSignature Off
 DirectorySlash On
 DirectoryIndex index.html
 Options -Indexes
-FileETag None
+FileETag All -INode
 
 <IfModule mod_headers.c>
   Header unset X-Powered-By
@@ -78,11 +78,12 @@ AddType image/x-icon           .ico
 </Files>
 
 <IfModule mod_deflate.c>
-  <IfModule mod_headers.c>
-    <FilesMatch "\.(html?|css|js)$">
+  <FilesMatch "\.(html?|css|js)$">
+    FileETag None
+    <IfModule mod_headers.c>
       Header set Vary Accept-Encoding
-    </FilesMatch>
-  </IfModule>
+    </IfModule>
+  </FilesMatch>
 
   # Apache 2.0.33 and later
   <IfModule mod_filter.c>
