@@ -218,9 +218,9 @@ function ValidateIdentity($vendor, $ver)
 
 function VerifyUserAgent($ua, $net)
 {
-	/* Block Google, IE and Python from performing queries */
-	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false
-	  || strpos($ua, 'Python-urllib/') === 0)
+	/* Block Google, IE and some scripting languages from performing queries */
+	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false || strpos($ua, 'Ruby') === 0
+	  || strpos($ua, 'libwww-perl') === 0 || strpos($ua, 'Python-urllib/') === 0 || strpos($ua, 'python-requests/') === 0)
 		return false;
 
 	if(strpos($ua, 'Mozilla') !== false)
@@ -1567,6 +1567,15 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 
 if(IsWebInterface())
 {
+	/* Block empty User-Agent and some scripting languages */
+	if($UA === "" || strpos($UA, 'Ruby') === 0
+	  || strpos($UA, 'libwww-perl') === 0 || strpos($UA, 'Python-urllib/') === 0 || strpos($UA, 'python-requests/') === 0)
+	{
+		header('Connection: close');
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		exit;
+	}
+
 	include './web_interface.php';
 	$compressed = StartCompression($COMPRESSION, $UA, true);
 	ShowHtmlPage($PHP_SELF, $COMPRESSION, $header, $footer);
