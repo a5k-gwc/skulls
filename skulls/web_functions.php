@@ -629,8 +629,8 @@ function CheckUpdates()
 		list($status, $msg, $latest_check, $msg_info, $msg_error) = explode("|", $file[0]);
 
 		/* Use only cached update check for not-human requests */
-		if(strpos($USER_AGENT, 'Googlebot') !== false || strpos($USER_AGENT, 'libwww-perl') === 0 || strpos($USER_AGENT, 'Python-urllib') === 0
-		   || $USER_AGENT === 'Ruby' || strpos($USER_AGENT, 'W3C-mobileOK') === 0 || strpos($USER_AGENT, 'GTmetrix') !== false)
+		if(strpos($USER_AGENT, 'RED/') === 0 || strpos($USER_AGENT, 'Googlebot/') !== false
+		  || strpos($USER_AGENT, 'Google Page Speed') !== false || strpos($USER_AGENT, 'GTmetrix') !== false)
 			$cached = true;
 		else
 		{
