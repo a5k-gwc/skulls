@@ -219,7 +219,7 @@ function ValidateIdentity($vendor, $ver)
 function VerifyUserAgent($ua, $net)
 {
 	/* Block Google, IE and some scripting languages from performing queries */
-	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false || strpos($ua, 'Ruby') === 0
+	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false
 	  || strpos($ua, 'libwww-perl') === 0 || strpos($ua, 'Python-urllib/') === 0 || strpos($ua, 'python-requests/') === 0)
 		return false;
 
@@ -243,22 +243,6 @@ function VerifyVersion($client, $version)
 	{
 		case 'RAZA':
 			if($float_ver < 2.3)
-				return false;
-			break;
-		case 'RAZM':
-			if($float_ver < 2)
-				return false;
-			break;
-		case 'LIME':
-			if($float_ver < 3)
-				return false;
-			break;
-		case 'LIMM':
-			if($float_ver < 2)
-				return false;
-			break;
-		case 'BEAR':
-			if($float_ver < 5)
 				return false;
 			break;
 	}
@@ -1568,8 +1552,7 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 if(IsWebInterface())
 {
 	/* Block empty User-Agent and some scripting languages */
-	if($UA === "" || strpos($UA, 'Ruby') === 0
-	  || strpos($UA, 'libwww-perl') === 0 || strpos($UA, 'Python-urllib/') === 0 || strpos($UA, 'python-requests/') === 0)
+	if($UA === "" || strpos($UA, 'libwww-perl') === 0 || strpos($UA, 'Python-urllib/') === 0 || strpos($UA, 'python-requests/') === 0)
 	{
 		header('Connection: close');
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
