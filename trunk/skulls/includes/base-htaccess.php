@@ -10,6 +10,18 @@ FileETag All -INode
   Header unset X-Powered-By
 </IfModule>
 
+### Set charsets ###
+AddDefaultCharset UTF-8
+AddCharset        UTF-8 .css .js
+
+### Set MIME types ###
+AddType text/html              .html .htm
+AddType text/css               .css
+AddType application/javascript .js
+AddType image/gif              .gif
+AddType image/png              .png
+AddType image/x-icon           .ico
+
 ### Redirection  ###
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -33,18 +45,6 @@ FileETag All -INode
   RewriteRule "" "https://%1%{REQUEST_URI}" [L,R=permanent]
 </IfModule>
 
-### Set charsets ###
-AddDefaultCharset UTF-8
-AddCharset        UTF-8 .css .js
-
-### Set MIME types ###
-AddType text/html              .html .htm
-AddType text/css               .css
-AddType application/javascript .js
-AddType image/gif              .gif
-AddType image/png              .png
-AddType image/x-icon           .ico
-
 ### Enable caching ###
 <IfModule mod_expires.c>
   ExpiresActive On
@@ -65,10 +65,6 @@ AddType image/x-icon           .ico
 </IfModule>
 
 ### Enable compression (excluding php files) ###
-<Files "*.php">
-  SetEnv no-gzip 1
-</Files>
-
 <IfModule mod_deflate.c>
   <FilesMatch "\.(html?|css|js)$">
     FileETag None
@@ -95,8 +91,5 @@ AddType image/x-icon           .ico
 
 ### Deny access to .htaccess ###
 <Files ".htaccess">
-  Order Allow,Deny
-</Files>
-<Files "base-htaccess.php">
   Order Allow,Deny
 </Files>
