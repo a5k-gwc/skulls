@@ -10,14 +10,6 @@ FileETag All -INode
   Header unset X-Powered-By
 </IfModule>
 
-### Block bad clients ###
-#<Files "skulls.php">
-#  # Block Shareaza without version (it abuse server resources)
-#  BrowserMatch "^Shareaza$" GoAway=1
-#  Order Deny,Allow
-#  Deny from Env=GoAway
-#</Files>
-
 ### Redirection  ###
 <IfModule mod_rewrite.c>
   RewriteEngine On
