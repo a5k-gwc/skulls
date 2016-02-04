@@ -202,7 +202,7 @@ function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 	}
 	elseif($vendor === 'ANTSP2P')
 	{
-		$vendor = 'ANTS';  /* Fixed the not-standard vendor length */
+		$vendor = 'ANTS';  /* Fix the not-standard vendor length */
 		if(strpos($ver, 'beta') === 0) $ver = substr($ver, 4).' beta';
 	}
 	elseif($vendor === 'FOXY')
