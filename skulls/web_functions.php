@@ -326,10 +326,11 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 
 		/* Crawlers */
-		case 'DOXU':  /* Example query => ?client=DOXU1.2&get=1&ping=1&net=gnutella2 */
+		case 'DOXU':
 			$client_name = 'G2 Crawler';
 			$url = 'http://crawler.doxu.org/';
 			$IS_crawler = true;
+			/* Example query => ?client=DOXU1.2&get=1&ping=1&net=gnutella2 */
 			break;
 		case 'GWCSCANNER':
 			$client_name = 'Multi-Network GWC Scan';
@@ -393,15 +394,17 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://dkac.trillinux.org/dkac/dkac.php';
 			$IS_GWC = 2;
 			break;
-		case 'GCII':  /* Example query => ?client=GCII&version=2.1.1&ping=1&net=gnutella2 */
+		case 'GCII':
 			$client_name = 'PHPGnuCacheII';
 			$url = 'http://gwcii.sourceforge.net/';
 			$IS_GWC = 2;
+			/* Example query => ?client=GCII&version=2.1.1&ping=1&net=gnutella2 */
 			break;
-		case 'GUAR':  /* ?client=GUAR&version=GUAR+0.3&getnetworks=1&cache=1&net=...&ping=1&get=1&hostfile=1&urlfile=1 */
+		case 'GUAR':
 			$client_name = 'Guarana';
 			$url = 'http://github.com/leite/guarana';
 			$IS_GWC = 2;
+			/* Example query => ?client=GUAR&version=GUAR+0.3&getnetworks=1&cache=1&net=gnutella2&ping=1&get=1&hostfile=1&urlfile=1 */
 			break;
 		case 'GWebCache':  /* Original GWebCache */
 			$client_name = 'GWebCache';
@@ -420,11 +423,12 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			/* http://mute-net.sourceforge.net/mWebCache.shtml */
 			$IS_GWC = 2;
 			break;
-		case 'NGWC':  /* Example query => ?ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
+		case 'NGWC':
 			$client_name = 'node.gwc';
 			$url = 'http://andrewgilmore.co.uk/project/nodegwc';
 			/* http://github.com/agilmore/node.gwc */
 			$IS_GWC = 2;
+			/* Example query => ?ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
 			break;
 		case 'SKLL':
 			$client_name = 'Skulls';
