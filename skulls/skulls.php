@@ -1459,6 +1459,7 @@ $REMOTE_IP = $_SERVER['REMOTE_ADDR'];
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
 
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
+$IS_CRAWLER = empty($_GET["crawler"])? false : true;	// This must be added to every request made by a crawler, to clarify that the request is made from a crawler
 $IS_A_CACHE = empty($_GET["cache"])? 0 : 1;				// This must be added to every request made by a GWC, to clarify that the request is made from a GWC
 $MULTI = empty($_GET["multi"])? 0 : $_GET["multi"];		// It is added to every ping request (it has no effect on other things), it tell to the pinged cache to ignore the "net" parameter and outputting the pong using this format, if possible, "I|pong|[cache name] [cache version]|[supported networks list]" - example: I|pong|Skulls 0.3.0|gnutella-gnutella2
 
