@@ -326,6 +326,11 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 
 		/* Crawlers */
+		case 'DOXU':  /* Example query => ?client=DOXU1.2&get=1&ping=1&net=gnutella2 */
+			$client_name = 'G2 Crawler';
+			$url = 'http://crawler.doxu.org/';
+			$IS_crawler = true;
+			break;
 		case 'GWCSCANNER':
 			$client_name = 'Multi-Network GWC Scan';
 			$url = 'http://gcachescan.grantgalitz.com/';
