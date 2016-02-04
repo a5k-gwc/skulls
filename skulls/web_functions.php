@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright © 2005-2008, 2015 by ale5000
+//  Copyright © 2005-2008, 2015-2016 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -296,7 +296,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://antsp2p.sourceforge.net/';
 			break;
 		case 'CABO':  /* Cabos - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
-			$client_name = 'Cabos/LimeWire'; $ua .= ' - LimeWire MOD';
+			$client_name = 'Cabos'; $ua .= ' - LimeWire MOD';
 			$url = 'http://cabos.sourceforge.jp/';
 			break;
 		case 'KOMM':  /* Kommute (client of MUTE network) - the original vendor code is MUTE */
