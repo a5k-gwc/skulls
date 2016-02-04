@@ -172,7 +172,10 @@ function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 	elseif($vendor === 'LIME')
 	{
 		if(strpos($ua, 'Cabos/') !== false)
+		{
 			$vendor = 'CABO';
+			$ver = substr($ua, strpos($ua, 'Cabos/')+6, -1);
+		}
 		elseif(strpos($ua, 'LimeZilla/') === 0)
 			$vendor = 'LMZI';
 		elseif(strpos($ua, 'LimeWire/') !== 0 || (float)$ver >= 5.7)
