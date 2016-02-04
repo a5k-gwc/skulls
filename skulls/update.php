@@ -29,7 +29,7 @@ function CIDRCalculateStartOfRange($ip, $cidr)
 	return ($ip >> $bits_to_zero_fill << $bits_to_zero_fill);
 }
 
-function IsIPInBlockRange($ip, $cidr_range)
+function IsIPInRange($ip, $cidr_range)
 {
 	if(strpos($cidr_range, '/') === false) { if(DEBUG > 2) echo 'CIDR Range: ',$cidr_range,"\r\n\r\n"; return $ip === ip2long($cidr_range); }
 
@@ -69,7 +69,7 @@ function IsIPInBlockList($ip)
 			$line = rtrim($line);
 			if($line === "") continue;
 
-			if(IsIPInBlockRange($ip, $line))
+			if(IsIPInRange($ip, $line))
 			{
 				fclose($fp); if(DEBUG) echo 'IP "',long2ip($ip),'" is blocked by: ',$line,"\r\n\r\n";
 				return true;
@@ -90,7 +90,7 @@ function IsCloudFlareIP($ip)
 		$line = rtrim($line);
 		if($line === "") continue;
 
-		if(IsIPInBlockRange($ip, $line))
+		if(IsIPInRange($ip, $line))
 		{
 			fclose($fp); if(DEBUG) echo 'IP "',long2ip($ip),'" is CloudFlare IP by line : ',$line,"\r\n\r\n";
 			return true;
