@@ -19,7 +19,7 @@
 
 function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 {
-	$cache = 0; $cache_scan = 0; $url = null;
+	$IS_GWC = 0; $IS_crawler = false; $url = null;
 	if( $vendor === 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
 	{
 		if(strpos($version, '/') !== false)
@@ -30,9 +30,9 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			list( $vendor, $version ) = explode('-', $version, 2);
 		else
 			{$vendor = $version; $version = "";}
-		$cache = 1;
+		$IS_GWC = 1;
 	}
-	if($is_a_gwc_param === 1) $cache = 2;
+	if($is_a_gwc_param === 1) $IS_GWC = 2;
 
 	/* http://rfc-gnutella.sourceforge.net/ */
 	switch($vendor)
@@ -77,7 +77,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 		case 'FISH':
 			$client_name = 'PEERanha';
 			break;
-		case 'FOXY':  /* Foxy - client of Foxy network (Network parameter enforced in the code to prevent leakage on G1/G2) */
+		case 'FOXY':  /* Foxy - client of Foxy network */
 			$client_name = 'Foxy';
 			$url = 'http://en.wikipedia.org/wiki/Foxy_%28P2P%29';
 			break;
@@ -169,7 +169,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$client_name = 'Morpheus (old)';
 			$url = 'http://en.wikipedia.org/wiki/Morpheus_%28software%29';
 			break;
-		case 'MUTE':  /* MUTE - client of MUTE network (Network parameter enforced in the code to prevent leakage on G1/G2) */
+		case 'MUTE':  /* MUTE - client of MUTE network (Network parameter enforced in the code to prevent leakage on Gnutella) */
 			$client_name = 'MUTE';
 			$url = 'http://mute-net.sourceforge.net/';
 			break;
@@ -296,7 +296,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://antsp2p.sourceforge.net/';
 			break;
 		case 'CABO':  /* Cabos - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
-			$client_name = 'Cabos/LimeWire'; $ua .= ' - LimeWire mod';
+			$client_name = 'Cabos/LimeWire'; $ua .= ' - LimeWire MOD';
 			$url = 'http://cabos.sourceforge.jp/';
 			break;
 		case 'KOMM':  /* Kommute (client of MUTE network) - the original vendor code is MUTE */
@@ -304,10 +304,10 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://calypso.sourceforge.net/';
 			break;
 		case 'LIMM':  /* Generic vendor */
-			$client_name = 'LimeWire mod';
+			$client_name = 'LimeWire MOD';
 			break;
 		case 'LMZI':  /* LimeZilla - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
-			$client_name = 'LimeZilla'; $ua .= ' - LimeWire mod';
+			$client_name = 'LimeZilla'; $ua .= ' - LimeWire MOD';
 			break;
 		case 'MMFC':  /* MUTE MFC (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'MUTE MFC';
@@ -318,34 +318,28 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://mutella.sourceforge.net/';
 			break;
 		case 'RAZM':  /* Generic vendor */
-			$client_name = 'Shareaza mod';
+			$client_name = 'Shareaza MOD';
 			break;
 		case 'SHZI':  /* ShareZilla - the original vendor code is RAZA but it is changed in the code to distinguish it from the normal Shareaza */
-			$client_name = 'ShareZilla'; $ua .= ' - Shareaza mod';
+			$client_name = 'ShareZilla'; $ua .= ' - Shareaza MOD';
 			$url = 'http://www.sharezillas.com/products/sharezilla.html';
 			break;
 
-		/* GWC Scanners */
+		/* Crawlers */
 		case 'GWCSCANNER':
 			$client_name = 'Multi-Network GWC Scan';
 			$url = 'http://gcachescan.grantgalitz.com/';
-			$cache_scan = 2;
+			$IS_crawler = true;
 			break;
 		case 'PGDBScan':
 			$client_name = 'Jon Atkins GWC scan';
 			$url = 'http://gcachescan.jonatkins.com/';
-			$cache_scan = 2;
+			$IS_crawler = true;
 			break;
 		case 'WURM':
 			$client_name = 'Wurm Scanner';
 			$url = 'http://kevogod.trillinux.org/';
-			$cache_scan = 2;
-			break;
-
-		/* Special cases */
-		case 'Submit':
-			$client_name = 'Manual submission';
-			$cache = 0;
+			$IS_crawler = true;
 			break;
 
 		/* GWCs */
@@ -353,88 +347,96 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 		case 'Bazooka':
 			$client_name = 'Bazooka';
 			//$url = 'http://www.bazookanetworks.com/';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'BCII':
 			$client_name = 'Beacon Cache II';
 			$url = 'http://sourceforge.net/projects/beaconcache/';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'BCON':
 			$client_name = 'Beacon Cache';
 			$url = 'http://sourceforge.net/projects/beaconcache/';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'Boa':
 			$client_name = 'Boa';
 			$url = 'http://github.com/kevogod/Boa';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'Cachechu':
 			$client_name = 'Cachechu';
 			$url = 'http://github.com/kevogod/cachechu';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'CANN':
 			$client_name = 'Cannon';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'CHTC':
 			$client_name = 'CheaterCache';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'Crab':
 			$client_name = 'GhostWhiteCrab';
 			$url = 'http://github.com/gtk-gnutella/gwc';
 			/* http://sourceforge.net/projects/frostwire/files/GhostWhiteCrab/ */
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'DKAC';
 			$client_name = 'DKAC/Enticing-Enumon';
 			$url = 'http://dkac.trillinux.org/dkac/dkac.php';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'GCII':  /* Example query => ?client=GCII&version=2.1.1&ping=1&net=gnutella2 */
 			$client_name = 'PHPGnuCacheII';
 			$url = 'http://gwcii.sourceforge.net/';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'GUAR':  /* ?client=GUAR&version=GUAR+0.3&getnetworks=1&cache=1&net=...&ping=1&get=1&hostfile=1&urlfile=1 */
 			$client_name = 'Guarana';
 			$url = 'http://github.com/leite/guarana';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'GWebCache':  /* Original GWebCache */
 			$client_name = 'GWebCache';
 			$url = 'http://gnucleus.sourceforge.net/gwebcache/';
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'JGWC':
 			$client_name = 'jumswebcache';
 			$url = 'http://www1.mager.org/GWebCache/';
 			/* http://github.com/jum/GWebCache */
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'MWebCache':
 			$client_name = 'MWebCache';
 			$url = 'http://sourceforge.net/p/mute-net/support-requests/7/';
 			/* http://mute-net.sourceforge.net/mWebCache.shtml */
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'NGWC':  /* Example query => ?ping=1&multi=1&client=NGWC&version=0.1&cache=1&net=gnutella2 */
 			$client_name = 'node.gwc';
 			$url = 'http://andrewgilmore.co.uk/project/nodegwc';
 			/* http://github.com/agilmore/node.gwc */
-			$cache = 2;
+			$IS_GWC = 2;
 			break;
 		case 'SKLL':
 			$client_name = 'Skulls';
 			$url = 'http://sourceforge.net/projects/skulls/';
-			$cache = 2;
+			$IS_GWC = 2;
+			break;
+
+		/* Special cases */
+		case 'Submit':
+			if($IS_GWC > 1 || $IS_crawler) $client_name = 'Unknown submission';
+			else{ $client_name = 'Manual submission'; $IS_GWC = 0; }
 			break;
 
 		default:
-			if($cache)
+			if($IS_crawler)
+				$full_name = 'Unknown crawler';
+			elseif($IS_GWC)
 				$full_name = 'Unknown GWC';
 			else
 				$full_name = 'Unknown client';
@@ -445,7 +447,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 	}
 
 	$full_name = $client_name; if($version !== "") $full_name .= ' '.$version;
-	if($cache) $full_name .= ' (GWC)';
+	if($IS_GWC) $full_name .= ' (GWC)';
 
 	if($url !== null) return '<a href="'.$url.'" rel="external nofollow" title="'.$ua.'">'.$full_name.'</a>';
 	return '<span title="'.$ua.'">'.$full_name.'</span>';
