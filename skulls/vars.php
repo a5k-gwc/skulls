@@ -12,9 +12,6 @@ define( 'ENABLED',					1 );
 // IMPORTANT: Check carefully that it is the correct url
 define( 'CACHE_URL',				'' );	// Optional but recommended - The full url of your GWC, example: http://gwc.your-site.com/skulls.php
 
-define( 'FSOCKOPEN',				1 );	// Disable ONLY if the server have FSOCKOPEN disabled, use admin/test.php to check
-define( 'CONTENT_TYPE_WORKAROUND',	0 );	// Use admin/test.php to know the right value
-
 define( 'MAINTAINER_NICK', 'your nickname here' );			// Your nickname
 define( 'MAINTAINER_EMAIL', 'name AT server DOT com' );		// Optional - Your e-mail in the format "name AT server DOT com" to avoid spam. Example: pippo@excite.it => pippo AT excite DOT it
 define( 'MAINTAINER_WEBSITE', 'http://' );					// Optional - The url of your website (it isn't the url of your GWC), example: http://www.your-site.com/
@@ -38,14 +35,18 @@ define( 'RECHECK_CACHES',			24 );	// Hours to recheck a good cache
 define( 'CONNECT_TIMEOUT',			10 );	// Socket connection timeout
 define( 'TIMEOUT',					15 );	// Socket timeout
 
-/* Do NOT enable this option if it isn't strictly needed to avoid opening security holes. This may be needed on some servers that use Varnish Cache like SourceForge */
-define( 'TRUST_X_REMOTE_ADDR_FROM_LOCALHOST', false );
-
 /* The directory where data files are stored (you should use a relative path, you can leave it as is by default) */
 define( 'DATA_DIR', 'data' );
 
 $header = '';
 $footer = '';
+
+
+/***  SERVER RELATED SETTINGS  ***/
+define('FSOCKOPEN',					1);  // Disable ONLY if the server have FSOCKOPEN disabled, use admin/test.php to check
+define('CONTENT_TYPE_WORKAROUND',	0);  // Use admin/test.php to know the right value
+
+define('TRUST_X_REMOTE_ADDR_FROM_LOCALHOST', false);  // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers that use Varnish Cache like SourceForge
 
 
 /***  NETWORKS LIST  ***/
