@@ -42,6 +42,10 @@ $header = '';
 $footer = '';
 
 
+/***  SECURITY  ***/
+define('USE_GWC_BLOCKLIST', true);
+
+
 /***  SERVER RELATED SETTINGS  ***/
 define('FSOCKOPEN',					1);  // Disable ONLY if the server have FSOCKOPEN disabled, use admin/test.php to check
 define('CONTENT_TYPE_WORKAROUND',	0);  // Use admin/test.php to know the right value
