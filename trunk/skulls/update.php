@@ -59,8 +59,9 @@ function IsIPInRange($ip, $cidr_range)
 
 function IsIPInBlockList($ip)
 {
+	if(!USE_GWC_BLOCKLIST) return false;
 	$ip = ip2long($ip);
-	$fp = fopen('./ext/gwc-blocklist.dat', 'rb'); if($fp === false) return false;
+	$fp = fopen('./ext/gwc-blocklist.dat', 'rb'); if($fp === false) return true;
 	if(fgets($fp, 512) !== false)  /* Skip first line, it contains only informations */
 	{
 		while(true)
