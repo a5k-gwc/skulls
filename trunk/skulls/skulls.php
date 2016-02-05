@@ -1601,7 +1601,7 @@ else
 
 	if(IsFakeClient($CLIENT, $VERSION, $UA))
 	{
-		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); echo "ERROR\r\n";  /* Keep the ERROR text for fake/faulty clients that just ignore status code */
 		if(STATS_FOR_BAD_CLIENTS) { UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs(); }
 		if(LOG_MINOR_ERRORS) Logging('fake-clients');
 		die();
