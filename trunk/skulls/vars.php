@@ -50,6 +50,7 @@ define('USE_GWC_BLOCKLIST', true);
 define('FSOCKOPEN',					1);  // Disable ONLY if the server have FSOCKOPEN disabled, use admin/test.php to check
 define('CONTENT_TYPE_WORKAROUND',	0);  // Use admin/test.php to know the right value
 
+define('USING_CLOUDFLARE', false);  // Enable it only if CloudFlare is configured and enabled on your DNS
 define('TRUST_X_REMOTE_ADDR_FROM_LOCALHOST', false);  // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers that use Varnish Cache like SourceForge
 
 
