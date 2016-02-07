@@ -1477,9 +1477,9 @@ $UA = !empty($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : "";
 
 $COMPRESSION = !empty($_GET["compression"]) ? strtolower($_GET["compression"]) : NULL;	// It tell to the cache what compression to use (it override HTTP_ACCEPT_ENCODING), currently values are: deflate, none
 
-$HOST = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
 $IP = null; $PORT = null;
-$CACHE = !empty($_GET["url"]) ? $_GET["url"] : ( !empty($_GET["url1"]) ? $_GET["url1"] : null );
+$HOST = !empty($_POST['ip'])? $_POST['ip'] : (!empty($_GET['ip'])? $_GET['ip'] : null);
+$CACHE = !empty($_POST['url'])? $_POST['url'] : (!empty($_GET['url'])? $_GET['url'] : null);
 $UDP_CACHE = (!empty($_GET["udpurl"]))? $_GET["udpurl"] : null;
 $LEAVES = isset($_GET['x_leaves']) ? $_GET['x_leaves'] : null;
 $MAX_LEAVES = isset($_GET['x_max']) ? $_GET['x_max'] : null;
@@ -1504,7 +1504,7 @@ $BFILE = !empty($_GET["bfile"]) ? $_GET["bfile"] : 0;
 
 $GET = !empty($_GET["get"]) ? $_GET["get"] : 0;
 $GETUDP = (!empty($_GET["getudp"]))? $_GET["getudp"] : 0; /* Currently it is tied to the normal 'get' but in the future will be able to get queried alone */
-$UPDATE = !empty($_GET["update"]) ? $_GET["update"] : 0;
+$UPDATE = (empty($_POST['update']) && empty($_GET['update']))? 0 : 1;
 
 $CLIENT = !empty($_GET['client']) ? $_GET['client'] : "";
 $VERSION = !empty($_GET['version']) ? $_GET['version'] : "";
