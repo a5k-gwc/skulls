@@ -666,6 +666,8 @@ function cURL_OnError($ch, $function_name, $initialized = true)
 
 function ConnectionTest()
 {
+	if(!FSOCKOPEN) return true;
+
 	$fp = @fsockopen('google.com', 80, $errno, $errstr, 5);
 	if($fp === false) return false;
 	fclose($fp);
