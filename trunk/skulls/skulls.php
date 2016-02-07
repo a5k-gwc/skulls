@@ -675,6 +675,7 @@ function ConnectionTest()
 
 function PingGWC($gwc_url, $query, $net_param = null)
 {
+	if(!ENABLE_URL_SUBMIT) return 'ERR|DISABLED';
 	$our_url = null; $gwc_idn_hostname = false;
 
 	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
@@ -1198,7 +1199,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 
 	$gwcs_sent = 0;
 	$udps_sent = 0;
-	if(FSOCKOPEN || extension_loaded('curl'))
+	if(ENABLE_URL_SUBMIT)
 	{
 		$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
 		$count_cache = count($cache_file);
@@ -1817,7 +1818,7 @@ else
 		if( ($CACHE !== null || $UDP_CACHE !== null) && $supported_net )
 		{
 			$result = -1; $is_udp = false;
-			if(!FSOCKOPEN && !extension_loaded('curl')) // Cache adding disabled
+			if(!ENABLE_URL_SUBMIT) // Cache adding disabled
 				print "I|update|WARNING|URL adding is disabled\r\n";
 			elseif( ($UDP_CACHE !== null && $DETECTED_NET === 'gnutella' && !CheckUDPURLValidity($UDP_CACHE)))  // Invalid URL
 				print("I|update|WARNING|Invalid UDP URL"."\r\n");
@@ -1890,7 +1891,7 @@ else
 		if( $CACHE != NULL && $supported_net )
 		{
 			$result = -1;
-			if(!FSOCKOPEN && !extension_loaded('curl')) // Cache adding disabled
+			if(!ENABLE_URL_SUBMIT) // Cache adding disabled
 				print "WARNING: URL adding is disabled\r\n";
 			elseif( CheckURLValidity($CACHE) )
 			{
@@ -1927,7 +1928,7 @@ else
 		if($HOSTFILE)
 			HostFile($DETECTED_NET, $AGE);
 
-		if($URLFILE && (FSOCKOPEN || extension_loaded('curl')))
+		if($URLFILE && ENABLE_URL_SUBMIT)
 			UrlFile($DETECTED_PV, $DETECTED_NET, $AGE, $CLIENT);
 
 		if($DETECTED_PV === 3 && ($HOSTFILE || $URLFILE))
