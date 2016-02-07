@@ -49,8 +49,8 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title><?php echo $title; ?></title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -59,7 +59,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 <?php if($page_number === 1 && !empty($_SERVER['QUERY_STRING'])) echo '<link rel="canonical" href="',$php_self,'">',"\n"; ?>
 <meta name="robots" content="<?php if($page_number === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
 <meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from p2p clients to bootstrap.">
-<meta name="keywords" content="<?php echo strtolower(NAME); ?>, gwebcache, gwc, p2p, bootstrap, gnutella, gnutella2">
+<meta name="keywords" content="<?php echo strtolower(NAME); ?>, gwebcache, gwc, p2p, bootstrap">
 </head>
 
 <body>
