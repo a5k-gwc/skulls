@@ -222,18 +222,19 @@ function ValidateIdentity($vendor, $ver)
 
 function VerifyUserAgent($ua, $net)
 {
-	/* Block Google, IE and some scripting languages from performing queries */
-	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false
-	  || strpos($ua, 'libwww-perl') === 0 || strpos($ua, 'Python-urllib/') === 0 || strpos($ua, 'python-requests/') === 0)
-		return false;
+	/* Block Googlebot and perl from performing queries */
+	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, 'libwww-perl') === 0) return false;
 
 	if(strpos($ua, 'Mozilla') !== false)
 	{
-		if($net === 'foxy' && $ua === 'Mozilla/4.0') return true;
+		/* Foxy clients and some very old gnutella/gnutella2 clients use this User-Agent */
+		if($ua === 'Mozilla/4.0') return true;
 
+		/* Block Bingbot and IE from performing queries */
+		if(strpos($ua, 'bingbot/') !== false || strpos($ua, 'Trident/') !== false || strpos($ua, ' MSIE ') !== false) return false;
 		/* Block black hat bots */
-		$pos_par1 = strpos($ua, '('); $pos_par2 = strpos($ua, ')');
-		if($pos_par1 === false || $pos_par2 === false || strpos($ua, 'Mozilla/') !== 0 || $pos_par2 < $pos_par1) return false;
+		if(strpos($ua, 'Mozilla/') !== 0) return false; $pos_par1 = strpos($ua, '('); $pos_par2 = strpos($ua, ')');
+		if($pos_par1 === false || $pos_par2 === false || $pos_par2 < $pos_par1) return false;
 	}
 
 	return true;
@@ -1556,13 +1557,8 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 
 if(IsWebInterface())
 {
-	/* Block empty User-Agent and some scripting languages */
-	if($UA === "" || strpos($UA, 'libwww-perl') === 0 || strpos($UA, 'Python-urllib/') === 0 || strpos($UA, 'python-requests/') === 0)
-	{
-		header('Connection: close');
-		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-		exit;
-	}
+	/* Block empty User-Agent and perl */
+	if($UA === "" || strpos($UA, 'libwww-perl') === 0) { header('Connection: close'); header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); die; }
 
 	include './web_interface.php';
 	$compressed = StartCompression($COMPRESSION, $UA, true);
