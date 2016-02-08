@@ -1732,7 +1732,7 @@ else
 
 	if($LEAVES !== null && (!ctype_digit($LEAVES) || $LEAVES > 2047))
 	{
-		$LEAVES = null; if(LOG_MAJOR_ERRORS) Logging('invalid-leaves', $DETECTED_PV);
+		$LEAVES = null; $HOST = null; if(LOG_MAJOR_ERRORS) Logging('invalid-leaves', $DETECTED_PV);
 	}
 	if($MAX_LEAVES !== null && (!ctype_digit($MAX_LEAVES) || $MAX_LEAVES < 1 || $MAX_LEAVES > 2047))
 	{
