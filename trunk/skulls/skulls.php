@@ -132,30 +132,20 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	/* Block empty User-Agent, User-Agent without version and other rip-offs */
 	if($vendor === 'RAZA')
 	{
-		if($ua === "" || $ua === 'Shareaza' || strpos($ua, 'Shareaza PRO') === 0 || strpos($ua, 'dianlei') === 0
-		  || $ver === '1.0.0.0' || $ver === '3.0.0.0')
-		{
-			$vendor = 'RAZM';
+		if($ua === "" || $ua === 'Shareaza' || strpos($ua, 'Shareaza PRO') === 0 || strpos($ua, 'dianlei') === 0 || strpos($ua, 'Python-urllib/') === 0 || $ver === '1.0.0.0' || $ver === '3.0.0.0')
 			return true;
-		}
 	}
 	/* Block empty User-Agent and other rip-offs */
 	elseif($vendor === 'LIME')
 	{
-		if($ua === "" || $ua === 'Mozilla/4.0' || $ver === '1.1.1.6' || (int)$ver >= 9)
-		{
-			$vendor = 'LIMM';
+		if($ua === "" || $ver === '1.1.1.6')
 			return true;
-		}
 	}
 	elseif($vendor === 'TEST')
 	{
 		/* Block fake Cabos */
 		if(strpos($ua, 'Cabos/') !== false)  /* Cabos usually use LIME vendor code, this seems fake.  UA: LimeWire/4.12.11 (Cabos/0.7.2) */
-		{
-			$vendor = 'CABO';
 			return true;
-		}
 	}
 	return false;
 }
@@ -230,8 +220,8 @@ function VerifyUserAgent($ua, $net)
 		/* Foxy clients and some very old gnutella/gnutella2 clients use this User-Agent */
 		if($ua === 'Mozilla/4.0') return true;
 
-		/* Block Bingbot and IE from performing queries */
-		if(strpos($ua, 'bingbot/') !== false || strpos($ua, 'Trident/') !== false || strpos($ua, ' MSIE ') !== false) return false;
+		/* Block Bingbot and browsers from performing queries */
+		if(strpos($ua, 'bingbot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false || strpos($ua, 'Firefox/') !== false) return false;
 		/* Block black hat bots */
 		if(strpos($ua, 'Mozilla/') !== 0) return false; $pos_par1 = strpos($ua, '('); $pos_par2 = strpos($ua, ')');
 		if($pos_par1 === false || $pos_par2 === false || $pos_par2 < $pos_par1) return false;
@@ -1560,8 +1550,8 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 
 if(IsWebInterface())
 {
-	/* Block empty User-Agent and perl */
-	if($UA === "" || strpos($UA, 'libwww-perl') === 0) { header('Connection: close'); header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); die; }
+	/* Block empty User-Agent, port scanner and perl */
+	if($UA === "" || strpos($UA, 'masscan/') === 0 || strpos($UA, 'libwww-perl') === 0) { header('Connection: close'); header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); die; }
 
 	include './web_interface.php';
 	$compressed = StartCompression($COMPRESSION, $UA, true);
