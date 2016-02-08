@@ -923,7 +923,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 		$time_diff = time() - (strtotime($time) + date('Z'));	// GMT
 		$time_diff = floor($time_diff / 3600);	// Hours
 
-		if($time_diff < 24)
+		if($time_diff < 6)
 			return 0; // Exists
 		else
 		{
