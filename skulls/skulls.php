@@ -915,7 +915,6 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 			break;
 		}
 	}
-	if($h_ver === '5.3.6' && $net === 'gnutella') $h_suspect = $h_suspect + 1;
 	$this_host = gmdate('Y/m/d h:i:s A').'|'.$h_ip.'|'.$h_port.'|'.$h_leaves.'|'.$h_max_leaves.'|'.$h_uptime.'|'.RemoveGarbage($h_vendor).'|'.RemoveGarbage($h_ver).'|'.RemoveGarbage($h_ua).'|'.$h_suspect."|||\n";
 
 	if($host_exists)
