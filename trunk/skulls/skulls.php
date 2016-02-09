@@ -920,7 +920,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	if($host_exists)
 	{
 		$time_diff = time() - (strtotime($time) + date('Z'));	// GMT
-		$time_diff = floor($time_diff / 3600);	// Hours
+		$time_diff = round($time_diff / 3600, 1);	// Hours
 
 		if($time_diff < 6)
 			return 0; // Exists
