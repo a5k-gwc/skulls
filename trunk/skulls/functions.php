@@ -250,7 +250,7 @@ function KickStart($net, $cache){
 				if(!IsIPInBlockList($ip_port[0]))
 				{
 					if(!empty($host[5])) $h_vendor = RemoveGarbage($host[5]);
-					$result = WriteHostFile($net, $ip_port[0], rtrim($ip_port[1]), "", "", "", $h_vendor, "", 'KickStart');
+					$result = WriteHostFile($net, $ip_port[0], rtrim($ip_port[1]), "", "", "", $h_vendor, "", 'KickStart', 0, false);
 				}
 				else
 					$result = 9;
@@ -264,6 +264,11 @@ function KickStart($net, $cache){
 				elseif( $result == 3 ) // OK, pushed old data
 				{
 					echo "<b>I|update|OK|Host added successfully (pushed old data)</b><br>\r\n";
+					break;
+				}
+				elseif( $result == 4 ) // Error, failed verification (do NOT happens here)
+				{
+					echo "<b>Invalid return code</b><br>\r\n";
 					break;
 				}
 				elseif( $result == 9 ) // Blocked host

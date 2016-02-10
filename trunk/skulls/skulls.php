@@ -665,6 +665,16 @@ function ConnectionTest()
 	return true;
 }
 
+function PingPort($ip, $port)
+{
+	if(!FSOCKOPEN) return true;  //ToDO: Add cURL support
+
+	$fp = @fsockopen($ip, $port, $errno, $errstr, 10); if($fp === false) { if(LOG_MINOR_ERRORS) Logging('broken-hosts'); return false; }
+	fclose($fp);
+
+	return true;
+}
+
 function PingGWC($gwc_url, $query, $net_param = null)
 {
 	if(!ENABLE_URL_SUBMIT) return 'ERR|DISABLED';
@@ -898,9 +908,8 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 	return $cache_data;
 }
 
-function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = 0)
+function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = 0, $verify_host = true)
 {
-	// return 4; Unused
 	$file_path = DATA_DIR.'/hosts_'.$net.'.dat';
 	$host_file = file($file_path);
 	$file_count = count($host_file);
@@ -932,7 +941,9 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	}
 	else
 	{
-		if($file_count > MAX_HOSTS || $file_count > 200)
+		if(VERIFY_HOSTS && $verify_host && !PingPort($h_ip, $h_port))
+			return 4; // Error, failed verification
+		elseif($file_count > MAX_HOSTS || $file_count > 200)
 		{
 			ReplaceHost($file_path, 0, $this_host, $host_file, true);
 			return 3; // OK, pushed old data
@@ -1794,6 +1805,8 @@ else
 					print "I|update|OK|Host added\r\n";
 				elseif( $result == 3 ) // OK, pushed old data
 					print "I|update|OK|Host added (pushed old data)\r\n";
+				elseif( $result == 4 ) // Error, failed verification
+					print "I|update|WARNING|Unreachable host\r\n";
 				else
 					print "I|update|ERROR|Unknown error 1, return value = ".$result."\r\n";
 			}
