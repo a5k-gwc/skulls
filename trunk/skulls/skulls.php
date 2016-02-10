@@ -1786,6 +1786,8 @@ else
 	if($SUPPORT)
 		Support($SUPPORT, $SUPPORTED_NETWORKS);
 
+	if($HOST !== null && $CLIENT === 'MUTE' && VERIFY_HOSTS) { $IP = $REMOTE_IP; $HOST = $IP.':'.$PORT; }  // Workaround for MUTE specific bug in own IP detection
+
 	$is_good_update = null;
 	if($DETECTED_PV >= 2 && $DETECTED_PV !== 3)
 	{
