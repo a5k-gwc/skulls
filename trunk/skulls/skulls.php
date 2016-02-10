@@ -188,6 +188,8 @@ function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 				$vendor = 'MMFC';
 				$ver = substr($ver, 4);
 			}
+			elseif(strpos($ver, '_') !== false)
+				$vendor = 'MUTG';
 		}
 	}
 	elseif($vendor === 'ANTSP2P')
