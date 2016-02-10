@@ -82,6 +82,7 @@ function IsWebInterface()
 	return false;
 }
 
+if(DEBUG) error_reporting(-1);
 DisableAutomaticCompression();
 if(function_exists('header_remove')) header_remove('X-Powered-By');
 $PHP_SELF = $_SERVER['PHP_SELF'];
