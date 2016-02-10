@@ -1787,7 +1787,7 @@ else
 		Support($SUPPORT, $SUPPORTED_NETWORKS);
 
 	$is_good_update = null;
-	if($UPDATE)
+	if($DETECTED_PV >= 2 && $DETECTED_PV !== 3)
 	{
 		if( $HOST !== NULL && $supported_net )
 		{
