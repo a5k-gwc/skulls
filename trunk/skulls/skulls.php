@@ -658,8 +658,7 @@ function ConnectionTest()
 {
 	if(!FSOCKOPEN) return true;
 
-	$fp = @fsockopen('google.com', 80, $errno, $errstr, 5);
-	if($fp === false) return false;
+	$fp = @fsockopen('google.com', 80, $errno, $errstr, 5); if($fp === false) return false;
 	fclose($fp);
 
 	return true;
