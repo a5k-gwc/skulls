@@ -295,7 +295,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$client_name = 'ANts P2P';
 			$url = 'http://antsp2p.sourceforge.net/';
 			break;
-		case 'CABO':  /* Cabos - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
+		case 'CABO':  /* Cabos (client of gnutella network) - the original vendor code is LIME */
 			$client_name = 'Cabos'; $ua .= ' - LimeWire MOD';
 			$url = 'http://cabos.sourceforge.jp/';
 			break;
@@ -303,27 +303,27 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$client_name = 'Kommute';
 			$url = 'http://calypso.sourceforge.net/';
 			break;
-		case 'LIMM':  /* Generic vendor */
+		case 'LIMM':  /* Generic vendor (client of gnutella network) - the original vendor code is LIME */
 			$client_name = 'LimeWire MOD';
 			break;
-		case 'LMZI':  /* LimeZilla - the original vendor code is LIME but it is changed in the code to distinguish it from the normal LimeWire */
+		case 'LMZI':  /* LimeZilla (client of gnutella network) - the original vendor code is LIME */
 			$client_name = 'LimeZilla'; $ua .= ' - LimeWire MOD';
 			break;
 		case 'MMFC':  /* MUTE MFC (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'MUTE MFC';
 			$url = 'http://sourceforge.net/projects/mfc-mute-net/';
 			break;
-		case 'MTLL':  /* Mutella (client of gnutella network) - the original vendor code of Mutella is MUTE but it is changed to MTLL in the code to avoid confusion with MUTE (client of MUTE network) */
+		case 'MTLL':  /* Mutella (client of gnutella network) - the original vendor code is MUTE but it is changed to MTLL in the code to avoid confusion with MUTE (client of MUTE network) */
 			$client_name = 'Mutella';
 			$url = 'http://mutella.sourceforge.net/';
 			break;
 		case 'MUTG':  /* Generic vendor (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'Generic MUTE client';
 			break;
-		case 'RAZM':  /* Generic vendor */
+		case 'RAZM':  /* Generic vendor (client of gnutella/gnutella2 network) - the original vendor code is RAZA */
 			$client_name = 'Shareaza MOD';
 			break;
-		case 'SHZI':  /* ShareZilla - the original vendor code is RAZA but it is changed in the code to distinguish it from the normal Shareaza */
+		case 'SHZI':  /* ShareZilla (client of gnutella/gnutella2 network) - the original vendor code is RAZA */
 			$client_name = 'ShareZilla'; $ua .= ' - Shareaza MOD';
 			$url = 'http://www.sharezillas.com/products/sharezilla.html';
 			break;
