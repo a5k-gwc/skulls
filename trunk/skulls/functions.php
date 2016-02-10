@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright © 2005-2008, 2015 by ale5000
+//  Copyright © 2005-2008, 2015-2016 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -246,11 +246,11 @@ function KickStart($net, $cache){
 
 			if($is_host)
 			{
-				$gwc_vendor = null;
+				$h_vendor = null;
 				if(!IsIPInBlockList($ip_port[0]))
 				{
-					if(!empty($host[5])) $gwc_vendor = RemoveGarbage($host[5]);
-					$result = WriteHostFile($net, $ip_port[0], rtrim($ip_port[1]), "", "", "", $gwc_vendor, "", 'KickStart');
+					if(!empty($host[5])) $h_vendor = RemoveGarbage($host[5]);
+					$result = WriteHostFile($net, $ip_port[0], rtrim($ip_port[1]), "", "", "", $h_vendor, "", 'KickStart');
 				}
 				else
 					$result = 9;
