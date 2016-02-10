@@ -317,6 +317,9 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$client_name = 'Mutella';
 			$url = 'http://mutella.sourceforge.net/';
 			break;
+		case 'MUTG':  /* Generic vendor (client of MUTE network) - the original vendor code is MUTE */
+			$client_name = 'Generic MUTE client';
+			break;
 		case 'RAZM':  /* Generic vendor */
 			$client_name = 'Shareaza MOD';
 			break;
