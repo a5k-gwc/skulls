@@ -128,6 +128,11 @@ function GetMicrotime()
 	return (float)$usec + (float)$sec;
 }
 
+function LoadLib($name, $file_name = null)
+{
+	return extension_loaded($name) || (function_exists('dl') && @dl(((PHP_SHLIB_SUFFIX === 'dll')? 'php_' : "").($file_name? $file_name : $name).'.'.PHP_SHLIB_SUFFIX));
+}
+
 function IsFakeClient(&$vendor, $ver, $ua)
 {
 	/* Block empty User-Agent, User-Agent without version and other rip-offs */
@@ -749,7 +754,7 @@ function PingGWC($gwc_url, $query, $net_param = null)
 			}
 		}
 	}
-	elseif(extension_loaded('curl'))  /* cURL */
+	elseif(LoadLib('curl'))  /* cURL */
 	{
 		$gwc_url = ($secure_http? 'https' : 'http').'://'.$gwc_idn_host.'/'.$gwc_path; /* Rewrite url with idn host */
 
