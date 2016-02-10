@@ -19,7 +19,7 @@
 
 function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 {
-	$IS_GWC = 0; $IS_crawler = false; $url = null;
+	$IS_GWC = 0; $IS_crawler = false; $url = null; $ua_prefix = null;
 	if( $vendor === 'TEST' && !ctype_digit(substr($version, 0, 1)) )  // If $vendor is TEST and $version does NOT start with a number then version contains both name and version
 	{
 		if(strpos($version, '/') !== false)
@@ -296,7 +296,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://antsp2p.sourceforge.net/';
 			break;
 		case 'CABO':  /* Cabos (client of gnutella network) - the original vendor code is LIME */
-			$client_name = 'Cabos'; $ua .= ' - LimeWire MOD';
+			$client_name = 'Cabos'; $ua_prefix = 'LimeWire MOD - ';
 			$url = 'http://cabos.sourceforge.jp/';
 			break;
 		case 'KOMM':  /* Kommute (client of MUTE network) - the original vendor code is MUTE */
@@ -304,10 +304,10 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://calypso.sourceforge.net/';
 			break;
 		case 'LIMM':  /* Generic vendor (client of gnutella network) - the original vendor code is LIME */
-			$client_name = 'LimeWire MOD';
+			$client_name = 'LimeWire MOD'; $ua_prefix = 'LimeWire MOD - ';
 			break;
 		case 'LMZI':  /* LimeZilla (client of gnutella network) - the original vendor code is LIME */
-			$client_name = 'LimeZilla'; $ua .= ' - LimeWire MOD';
+			$client_name = 'LimeZilla'; $ua_prefix = 'LimeWire MOD - ';
 			break;
 		case 'MMFC':  /* MUTE MFC (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'MUTE MFC';
@@ -321,10 +321,10 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$client_name = 'Generic MUTE client';
 			break;
 		case 'RAZM':  /* Generic vendor (client of gnutella/gnutella2 network) - the original vendor code is RAZA */
-			$client_name = 'Shareaza MOD';
+			$client_name = 'Shareaza MOD'; $ua_prefix = 'Shareaza MOD - ';
 			break;
 		case 'SHZI':  /* ShareZilla (client of gnutella/gnutella2 network) - the original vendor code is RAZA */
-			$client_name = 'ShareZilla'; $ua .= ' - Shareaza MOD';
+			$client_name = 'ShareZilla'; $ua_prefix = 'Shareaza MOD - ';
 			$url = 'http://www.sharezillas.com/products/sharezilla.html';
 			break;
 
@@ -460,6 +460,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 
 	$full_name = $client_name; if($version !== "") $full_name .= ' '.$version;
 	if($IS_GWC) $full_name .= ' (GWC)';
+	if($ua !== 'KickStart') $ua = $ua_prefix.'User-Agent: '.$ua;
 
 	if($url !== null) return '<a href="'.$url.'" rel="external nofollow" title="'.$ua.'">'.$full_name.'</a>';
 	return '<span title="'.$ua.'">'.$full_name.'</span>';
