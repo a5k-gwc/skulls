@@ -1668,8 +1668,8 @@ else
 			list($IP, $PORT) = explode(':', $HOST, 2);
 	}
 
-	/* Network names are gnutella and gnutella2, not gnutella1 and shareaza */
-	if($NET === 'gnutella1' || $NET === 'shareaza')
+	/* Disallow some network names to avoid confusion with already existing networks */
+	if($NET === 'gnutella1' || $NET === 'g2' || $NET === 'shareaza')
 	{
 		UpdateStats(STATS_BLOCKED);
 		if(LOG_MAJOR_ERRORS) Logging('invalid-network-names', $DETECTED_PV);
