@@ -33,7 +33,7 @@ define( 'MAX_UDP_CACHES_OUT',		5 );
 
 define( 'RECHECK_CACHES',			24 );	// Hours to recheck a good cache
 define( 'CONNECT_TIMEOUT',			10 );	// Socket connection timeout
-define( 'TIMEOUT',					15 );	// Socket timeout
+define( 'TIMEOUT',					8 );	// Socket timeout
 
 define('VERIFY_HOSTS', true);
 define('ENABLE_URL_SUBMIT', true);  // Enable the submission of alternative GWCs, if it is disabled in addition of rejecting url submissions it will not return any previous url in queries although they will be still visible in the web interface
