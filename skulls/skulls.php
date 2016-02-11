@@ -676,7 +676,7 @@ function PingPort($ip, $port)
 {
 	if(!FSOCKOPEN) return true;  //ToDO: Add cURL support
 
-	$fp = @fsockopen($ip, $port, $errno, $errstr, 10); if($fp === false) { if(LOG_MINOR_ERRORS) Logging('broken-hosts'); return false; }
+	$fp = @fsockopen($ip, $port, $errno, $errstr, 8); if($fp === false) { if(LOG_MINOR_ERRORS) Logging('broken-hosts'); return false; }
 	fclose($fp);
 
 	return true;
