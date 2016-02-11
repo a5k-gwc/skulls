@@ -924,7 +924,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list($time, $read_ip,) = explode('|', $host_file[$i], 3);
+		list($time, $read_ip, $h_curr_port) = explode('|', $host_file[$i], 4);
 		if($h_ip === $read_ip)
 		{
 			$host_exists = TRUE;
@@ -940,6 +940,8 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 
 		if($time_diff < 6)
 			return 0; // Exists
+		elseif($h_port !== $h_curr_port && VERIFY_HOSTS && $verify_host && !PingPort($h_ip, $h_port))  /* ToDO: Remove host in this case */
+			return 4; // Error, failed verification
 		else
 		{
 			ReplaceHost($file_path, $i, $this_host, $host_file);
