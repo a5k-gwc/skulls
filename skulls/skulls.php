@@ -730,6 +730,7 @@ function PingGWC($gwc_url, $query, $net_param = null)
 			}
 			else
 			{
+				stream_set_timeout($fp, TIMEOUT);
 				$i = 0;
 				while($i++ < RESPONSE_LINES_LIMIT)
 				{
