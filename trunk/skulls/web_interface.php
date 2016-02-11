@@ -235,7 +235,10 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 								if(isset($host_file['net'][$i])) $net = $host_file['net'][$i];
 								$color = (($elements - $i) % 2 === 0 ? 'even' : 'odd');
 								$host = $h_ip.':'.$h_port;
-								$url = strtolower($net).':host:';
+								if(strtolower($net) === 'gnutella2')
+									$url = 'g2:host:';
+								else
+									$url = strtolower($net).':host:';
 
 								echo '<tr class="',$color,'">';
 								echo '<td>';
