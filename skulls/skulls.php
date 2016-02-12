@@ -156,8 +156,12 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	return false;
 }
 
-function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
+function ValidateIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 {
+	/* Version missing; vendor missing or too short */
+	if($ver === "" || strlen($vendor) !== 4)
+		return false;  
+
 	if($vendor === 'RAZA')
 	{
 		if(strpos($ua, 'ShareZilla') === 0)
@@ -207,13 +211,6 @@ function NormalizeIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 	{
 		$detected_net = 'foxy';  /* Enforced network parameter for Foxy clients to prevent leakage on other networks */
 	}
-}
-
-function ValidateIdentity($vendor, $ver)
-{
-	/* Version missing; vendor missing or too short */
-	if($ver === "" || strlen($vendor) !== 4)
-		return false;  
 
 	return true;
 }
@@ -1643,8 +1640,7 @@ else
 	}
 
 	if(!ValidateIP($REMOTE_IP)) $REMOTE_IP = 'unknown';
-	NormalizeIdentity($CLIENT, $VERSION, $UA, $NET, $DETECTED_NET);
-	if(!ValidateIdentity($CLIENT, $VERSION) || $FAKE_CF || $REMOTE_IP === 'unknown')
+	if(!ValidateIdentity($CLIENT, $VERSION, $UA, $NET, $DETECTED_NET) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid client identification\r\n";
