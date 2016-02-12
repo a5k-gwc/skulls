@@ -156,6 +156,7 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	return false;
 }
 
+/* Normalize and validate identity */
 function ValidateIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 {
 	/* Version missing, vendor missing or wrong length */
@@ -163,27 +164,22 @@ function ValidateIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 
 	if($vendor === 'RAZA')
 	{
-		if(strpos($ua, 'ShareZilla') === 0)
-			$vendor = 'SHZI';
-		elseif(strpos($ua, 'Shareaza') !== 0)
-			$vendor = 'RAZM';  /* Change vendor code of mod versions */
+		if(strpos($ua, 'ShareZilla') === 0) $vendor = 'SHZI';
+		elseif(strpos($ua, 'Shareaza ') !== 0) $vendor = 'RAZM';  /* Change vendor code of mod versions */
 	}
 	elseif($vendor === 'LIME')
 	{
-		if(strpos($ua, 'Cabos/') !== false)
-		{
-			$vendor = 'CABO';
-			$ver = substr($ua, strpos($ua, 'Cabos/')+6, -1);
-		}
-		elseif(strpos($ua, 'LimeZilla/') === 0)
-			$vendor = 'LMZI';
-		elseif(strpos($ua, 'LimeWire/') !== 0 || (float)$ver >= 5.7)
-			$vendor = 'LIMM';  /* Change vendor code of mod versions */
+		if(strpos($ua, 'Cabos/') !== false) { $vendor = 'CABO'; $ver = substr($ua, strpos($ua, 'Cabos/')+6, -1); }
+		elseif(strpos($ua, 'LimeZilla/') === 0) $vendor = 'LMZI';
+		elseif(strpos($ua, 'LimeWire/') !== 0 || (float)$ver >= 5.7) $vendor = 'LIMM';  /* Change vendor code of mod versions */
 	}
 	elseif($vendor === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
 	{
 		if(strpos($ua, 'Mutella') === 0)
+		{
+			if($net === null) $detected_net = 'gnutella';
 			$vendor = 'MTLL';
+		}
 		else
 		{
 			if($net === null) $detected_net = 'mute';  /* Changed network parameter for MUTE clients to prevent leakage on other networks */
@@ -208,7 +204,7 @@ function ValidateIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 	}
 	elseif($vendor === 'FOXY')
 	{
-		$detected_net = 'foxy';  /* Enforced network parameter for Foxy clients to prevent leakage on other networks */
+		if($detected_net !== 'foxy') return false;  /* Foxy clients use Foxy network, block other networks here (it shouldn't be needed but just in case) */
 	}
 
 	return true;
@@ -1642,14 +1638,14 @@ else
 	if(!ValidateIdentity($CLIENT, $VERSION, $UA, $NET, $DETECTED_NET) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-		echo "ERROR: Invalid client identification\r\n";
+		echo "ERROR: Invalid identification\r\n";
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
 		if(LOG_MINOR_ERRORS)
 		{
 			if($FAKE_CF)
-				Logging('fake-cloudflare');
+				Logging('fake-cloudflare-headers');
 			else
-				Logging('unidentified-clients');
+				Logging('invalid-identifications');
 		}
 		die();
 	}
