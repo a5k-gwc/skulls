@@ -158,9 +158,8 @@ function IsFakeClient(&$vendor, $ver, $ua)
 
 function ValidateIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 {
-	/* Version missing; vendor missing or too short */
-	if($ver === "" || strlen($vendor) !== 4)
-		return false;  
+	/* Version missing, vendor missing or wrong length */
+	if($ver === "" || strlen($vendor) !== 4) return false;
 
 	if($vendor === 'RAZA')
 	{
