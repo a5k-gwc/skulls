@@ -443,6 +443,12 @@ function TimeSinceSubmissionInSeconds($now, $time_of_submission, $offset)
 	return $now - ( strtotime($time_of_submission) + $offset );	// GMT
 }
 
+function IsValidPrivateIP($ip)
+{
+	if(ip2long($ip) === false) return false; $ip_array = explode('.', $ip, 4);
+	return ($ip_array[0] === '10' || $ip_array[0] === '192' && $ip_array[1] === '168' || $ip_array[0] === '172' && $ip_array[1] >= 16 && $ip_array[1] <= 31);
+}
+
 function ValidateIP($ip, $reject_lan_IPs = true)
 {
 	$long_ip = ip2long($ip); if($long_ip === false) return false;
@@ -1792,7 +1798,8 @@ else
 	if($SUPPORT)
 		Support($SUPPORT, $SUPPORTED_NETWORKS);
 
-	if($HOST !== null && $CLIENT === 'MUTE' && VERIFY_HOSTS) { $IP = $REMOTE_IP; $HOST = $IP.':'.$PORT; }  // Workaround for MUTE specific bug in own IP detection
+	if($HOST !== null && VERIFY_HOSTS && ($CLIENT === 'MUTE' || $CLIENT === 'GPUX'))
+		if(IsValidPrivateIP($IP)) { $IP = $REMOTE_IP; $HOST = $IP.':'.$PORT; }  /* Workaround for a bug in own IP detection of some clients */
 
 	$is_good_update = null;
 	if($DETECTED_PV >= 2 && $DETECTED_PV !== 3)
