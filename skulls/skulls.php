@@ -162,7 +162,7 @@ function IsFakeClient(&$vendor, $ver, $ua)
 }
 
 /* Normalize and validate identity */
-function ValidateIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
+function ValidateIdentity(&$vendor, &$ver, &$ua, $net, &$detected_net)
 {
 	/* Version missing, vendor missing or wrong length */
 	if($ver === "" || strlen($vendor) !== 4) return false;
@@ -192,6 +192,8 @@ function ValidateIdentity(&$vendor, &$ver, $ua, $net, &$detected_net)
 			{
 				$vendor = 'KOMM';
 				$ver = substr($ver, 5);
+				if(empty($ua) && function_exists('getallheaders'))  /* Workaround for incorrectly named header */
+				{ $headers = getallheaders(); if($headers !== false && isset($headers['user_agent'])) $ua = $headers['user_agent']; }
 			}
 			elseif(strpos($ver, 'MFC_') === 0)
 			{
