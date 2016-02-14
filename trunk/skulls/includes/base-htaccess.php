@@ -11,8 +11,8 @@ FileETag All -INode
 </IfModule>
 
 ### Set charsets ###
-AddDefaultCharset UTF-8
-AddCharset        UTF-8 .css .js
+AddDefaultCharset utf-8
+AddCharset        utf-8 .css .js
 
 ### Set MIME types ###
 AddType text/html              .html .htm

@@ -1470,7 +1470,7 @@ function DetectRemoteIP($remote_ip)
 
 
 /* Set default charset to UTF-8 */
-ini_set('default_charset', 'UTF-8');
+ini_set('default_charset', 'utf-8');
 /* Suppress warnings if the timezone isn't set */
 if(function_exists('date_default_timezone_get'))
 	date_default_timezone_set(@date_default_timezone_get());
@@ -1620,8 +1620,8 @@ else
 	}
 
 	/* Content-Type */
-	if(CONTENT_TYPE_WORKAROUND) { header('Content-Type: application/octet-stream'); header('X-CT: text/plain|UTF-8'); }
-	else header('Content-Type: text/plain; charset=UTF-8');
+	if(CONTENT_TYPE_WORKAROUND) { header('Content-Type: application/octet-stream'); header('X-CT: text/plain; utf-8'); }
+	else header('Content-Type: text/plain; charset=utf-8');
 
 	$DETECTED_NET = $NET; $DETECTED_REMOTE_IP = null; $CLOUDFLARE_IP = null; $FAKE_CF = false;
 	if($DETECTED_NET === null) $DETECTED_NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
