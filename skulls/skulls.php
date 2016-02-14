@@ -164,9 +164,6 @@ function IsFakeClient(&$vendor, $ver, $ua)
 /* Normalize and validate identity */
 function ValidateIdentity(&$vendor, &$ver, &$ua, $net, &$detected_net)
 {
-	/* Version missing, vendor missing or wrong length */
-	if($ver === "" || strlen($vendor) !== 4) return false;
-
 	if($vendor === 'RAZA')
 	{
 		if(strpos($ua, 'ShareZilla') === 0) $vendor = 'SHZI';
@@ -213,6 +210,9 @@ function ValidateIdentity(&$vendor, &$ver, &$ua, $net, &$detected_net)
 	{
 		if($detected_net !== 'foxy') return false;  /* Foxy clients use Foxy network, block other networks here (it shouldn't be needed but just in case) */
 	}
+
+	/* Version missing, vendor missing or wrong length */
+	if($ver === "" || strlen($vendor) !== 4) return false;
 
 	return true;
 }
