@@ -471,18 +471,19 @@ function ValidateIP($ip, $reject_lan_IPs = true)
 	return $ip === long2ip((float)$long_ip);  /* The float cast will prevent getting wrong IPs on some systems */
 }
 
-function ValidatePort($port, $full_block = false)
+function ValidatePort($port, $net)
 {
 	if(!ctype_digit($port) || $port < 1 || $port > 65535) return false;
-	if($full_block && ($port === '7001' || $port === '27016')) return false;
+	if($net === 'gnutella') { if($port === '7001' || $port === '27016') return false; }
+	elseif($net === 'mute') { if($port === '6346') return false; }
 	return true;
 }
 
-function ValidateHost($host, $remote_ip)
+function ValidateHost($host, $remote_ip, $net)
 {
 	list($ip, $port) = explode(':', $host, 2);
 	if($ip !== $remote_ip || !ValidateIP($ip)) { if(LOG_MINOR_ERRORS) Logging('invalid-hosts'); return false; }
-	if(!ValidatePort($port, true)) { if(LOG_MINOR_ERRORS) Logging('invalid-host-ports'); return false; }
+	if(!ValidatePort($port, $net)) { if(LOG_MINOR_ERRORS) Logging('invalid-host-ports'); return false; }
 	return true;
 }
 
@@ -1810,7 +1811,7 @@ else
 		{
 			$result = -1;
 			include_once './update.php';
-			if(ValidateHost($HOST, $REMOTE_IP) && !IsIPInBlockList($REMOTE_IP))
+			if(ValidateHost($HOST, $REMOTE_IP, $DETECTED_NET) && !IsIPInBlockList($REMOTE_IP))
 			{
 				$result = WriteHostFile($DETECTED_NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA);
 
@@ -1898,7 +1899,7 @@ else
 		{
 			$result = -1;
 			include_once './update.php';
-			if(ValidateHost($HOST, $REMOTE_IP) && !IsIPInBlockList($REMOTE_IP))
+			if(ValidateHost($HOST, $REMOTE_IP, $DETECTED_NET) && !IsIPInBlockList($REMOTE_IP))
 				$result = WriteHostFile($DETECTED_NET, $IP, $PORT, $LEAVES, $MAX_LEAVES, $UPTIME, $CLIENT, $VERSION, $UA);
 			else // Invalid IP
 				print "WARNING: Invalid host"."\r\n";
