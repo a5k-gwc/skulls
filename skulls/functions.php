@@ -221,27 +221,30 @@ function KickStart($net, $cache){
 		{
 			$is_host = FALSE;
 			$line = rtrim(fgets($fp, 1024));
-			echo $line."<br>";
+			echo $line,"<br>";
 
-			if(strtolower(substr($line, 0, 2)) == "h|")		// Host
+			if(strpos($line, '|') !== false)
 			{
-				unset($host);
-				$host = explode("|", $line);
-				$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
-				if(ValidateHost($host[1], $ip_port[0], $net))
-					$is_host = TRUE;
+				if(strtolower(substr($line, 0, 2)) == "h|")		// Host
+				{
+					unset($host);
+					$host = explode("|", $line);
+					$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
+					if(ValidateHost($host[1], $ip_port[0], $net))
+						$is_host = true;
+				}
+				elseif(strtolower(substr($line, 0, 2)) == "u|");	// GWC
+				elseif(strtolower(substr($line, 0, 2)) == "i|");	// Info
+				elseif(strtolower(substr($line, 0, 2)) == "d|");	// Debug
 			}
-			elseif(strtolower(substr($line, 0, 2)) == "u|");	// GWC
-			elseif(strtolower(substr($line, 0, 2)) == "i|");	// Info
-			elseif(strtolower(substr($line, 0, 2)) == "d|");	// Debug
-			elseif(strpos($line, '://') !== false);				// GWC (old method)
-			elseif(strpos($line, ':') !== false)				// Host (old method)
+			elseif(strpos($line, '://') !== false);		// GWC (old specs)
+			elseif(strpos($line, ':') !== false)		// Host (old specs)
 			{
 				unset($host);
 				$host[1] = $line;
 				$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
 				if(ValidateHost($host[1], $ip_port[0], $net))
-					$is_host = TRUE;
+					$is_host = true;
 			}
 
 			if($is_host)
