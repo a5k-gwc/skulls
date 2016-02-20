@@ -15,12 +15,15 @@ AddDefaultCharset utf-8
 AddCharset        utf-8 .css .js
 
 ### Set MIME types ###
-AddType text/html              .html .htm
-AddType text/css               .css
-AddType application/javascript .js
-AddType image/gif              .gif
-AddType image/png              .png
-AddType image/x-icon           .ico
+<IfModule mime_module>
+  AddType text/html                .html .htm
+  AddType text/css                 .css
+  AddType application/javascript   .js
+  AddType image/gif                .gif
+  AddType image/png                .png
+  AddType image/x-icon             .ico
+  AddType application/octet-stream .dat
+</IfModule>
 
 ### Redirection  ###
 <IfModule mod_rewrite.c>
