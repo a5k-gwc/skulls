@@ -22,6 +22,8 @@ AddCharset        utf-8 .css .js
   AddType image/gif                .gif
   AddType image/png                .png
   AddType image/x-icon             .ico
+  AddType text/plain               .txt
+  AddType application/x-php        .inc
   AddType application/octet-stream .dat
 </IfModule>
 
@@ -65,6 +67,7 @@ AddCharset        utf-8 .css .js
   ExpiresByType image/gif              A604800
   ExpiresByType image/png              A604800
   ExpiresByType image/x-icon           A604800
+  ExpiresByType text/plain             A604800
 </IfModule>
 
 ### Enable compression (excluding php files) ###
