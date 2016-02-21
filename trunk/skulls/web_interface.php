@@ -292,14 +292,14 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							{
 								list($time, /* New specs only */, $gwc_ip, $cache_url, $net, /* Net parameter needed */, /*$gwc_vendor.*/, /* $gwc_version */, $cache_name, $gwc_server, $client, $version, $is_a_gwc_param, $user_agent,) = explode("|", $cache_file[$i], 15);
 								$cache_name = htmlentities($cache_name, ENT_QUOTES, 'UTF-8');
-								if( strpos($net, "-") > -1 )
+								if(strpos($net, '-') !== false)
 								{
-									$networks = explode( "-", $net );
+									$networks = explode('-', $net);
 									$cache_nets_count = count($networks);
 									$net = "";
 									for( $x=0; $x < $cache_nets_count; $x++ )
 									{
-										if($x) $net .= " - ";
+										if($x) $net .= ', ';
 										$net .= ucfirst($networks[$x]);
 									}
 								}
