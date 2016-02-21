@@ -401,7 +401,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 								elseif($net === 'gnutella2')
 									$prefix = 'ukhl:';
 								else
-									$prefix = $net.':'.'udpurl:';
+									$prefix = $net.':'.'udphc:';
 								$output .= '<a class="gwc" href="'.$prefix.$cache_url.'" rel="nofollow">+</a> ';
 
 								if($geoip)
