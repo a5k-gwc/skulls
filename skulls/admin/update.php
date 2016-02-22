@@ -25,23 +25,20 @@ if(file_exists("revision.dat"))
 if( !isset($file_content[0]) )
 	$file_content[0] = 0;
 
-$doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'."\r\n";
+echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'."\r\n";
 $html_header = "<html><head><title>Update</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
 $html_footer = "</body></html>\r\n";
 
 if(rtrim($file_content[0]) == REVISION)
 {
-	echo $doctype.$html_header;
+	echo $html_header;
 	echo "There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.<br>\r\n";
 	echo $html_footer;
-	die();
+	die;
 }
 
-ini_set("display_errors", 1);
-if(defined("E_STRICT"))
-	error_reporting(E_ALL | E_STRICT);
-else
-	error_reporting(E_ALL);
+ini_set('display_errors', 1);
+error_reporting(-1);
 
 $log = "";
 $errors = 0;
@@ -55,16 +52,8 @@ function Error($text)
 
 function check($result)
 {
-	global $updated, $errors;
-	$updated = TRUE;
-
-	if($result)
-		return "<font color=\"green\"><b>OK</b></font><br>\r\n";
-	else
-	{
-		$errors++;
-		return "<font color=\"red\"><b>ERROR</b></font><br>\r\n";
-	}
+	global $updated; $updated = true;
+	if($result) return '<strong style="color: green;">OK</strong><br>'; else return Error('ERROR').'<br>';
 }
 
 function remove_dir($dir)
@@ -291,7 +280,7 @@ $log .= ValidateSize('stats/upd-bad-reqs.dat');
 $log .= ValidateSize('stats/other-reqs.dat');
 $log .= ValidateSize('stats/blocked-reqs.dat');
 
-echo $doctype.$html_header.$log;
+echo $html_header.$log;
 
 if($errors)
 {
