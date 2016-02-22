@@ -53,7 +53,7 @@ function Error($text)
 function check($result)
 {
 	global $updated; $updated = true;
-	if($result) return '<strong style="color: green;">OK</strong><br>'; else return Error('ERROR').'<br>';
+	if($result) return '<strong style="color: green;">OK</strong>'; else return Error('ERROR').'<br>';
 }
 
 function remove_dir($dir)
@@ -84,11 +84,12 @@ function truncate($name)
 	return Error('ERROR');
 }
 
+clearstatcache();
+
 if( !file_exists("../".DATA_DIR."/") )
 {
 	$result = mkdir("../".DATA_DIR."/", 0777);
-	$log .= "Creating ".DATA_DIR."/: ";
-	$log .= check($result);
+	$log .= '<div>Creating '.DATA_DIR.'/: '.check($result).'</div>'."\r\n";
 }
 
 if( file_exists("../".DATA_DIR."/caches.dat") )
@@ -169,7 +170,7 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 function DeleteFile($name)
 {
 	$full_name = '../'.$name;
-	if(file_exists($full_name)) return 'Deleting <b>"'.$name.'"</b>: '.check(unlink($full_name))."\r\n";
+	if(file_exists($full_name)) return '<div>Deleting <b>"'.$name.'"</b>: '.check(unlink($full_name)).'</div>'."\r\n";
 }
 
 function ValidateSize($name)
@@ -182,7 +183,7 @@ function ValidateSize($name)
 	}
 }
 
-clearstatcache();
+
 
 if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
 $log .= DeleteFile('admin/index.htm');
