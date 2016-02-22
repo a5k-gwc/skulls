@@ -245,6 +245,6 @@ else
 		echo '<div style="color: red;">Error during writing of <b>admin/revision.dat</b> file.</div>';
 }
 
-if(isset($footer) && $footer !== "") echo '<div><br>'.$footer.'</div>';
+if(!empty($footer)) echo '<div><br>'.$footer.'</div>';
 echo $html_footer;
 ?>
