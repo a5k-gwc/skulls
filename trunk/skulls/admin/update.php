@@ -25,7 +25,7 @@ if(file_exists("revision.dat"))
 if( !isset($file_content[0]) )
 	$file_content[0] = 0;
 
-$doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\r\n";
+$doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'."\r\n";
 $html_header = "<html><head><title>Update</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
 $html_footer = "</body></html>\r\n";
 
@@ -47,6 +47,11 @@ $log = "";
 $errors = 0;
 $updated = FALSE;
 include "../vars.php";
+
+function Error($text)
+{
+	global $errors; $errors++; return '<strong style="color: red;">'.$text.'</strong>';
+}
 
 function check($result)
 {
@@ -82,20 +87,12 @@ function remove_dir($dir)
 	}
 }
 
-function truncate($file_name)
+function truncate($name)
 {
-	global $updated, $errors;
-	$updated = TRUE;
+	global $updated; $updated = true;
+	$file = fopen($name, 'wb'); if($file !== false) { fclose($file); return '<strong style="color: green;">OK</strong>'; }
 
-	$file = fopen($file_name, "wb");
-	if($file !== FALSE)
-	{
-		fclose($file);
-		return "<font color=\"green\"><b>OK</b></font><br>\r\n";
-	}
-
-	$errors++;
-	return "<font color=\"red\"><b>ERROR</b></font><br>\r\n";
+	return Error('ERROR');
 }
 
 if( file_exists("../webcachedata/") )
@@ -277,53 +274,34 @@ if( file_exists("../admin/index.htm") && file_exists("../admin/index.html") )
 	$log .= check($result);
 }
 
-if( file_exists("../data/failed_urls.dat") )
+function ValidateSize($name)
 {
-	if( filesize("../data/failed_urls.dat") > 1 * 1024 *1024 )
+	$full_name = '../'.$name;
+	if(file_exists($full_name))
 	{
-		$log .= "Truncating data/failed_urls.dat because it is too big: ";
-		$log .= truncate("../data/failed_urls.dat");
+		if(filesize($full_name) === false) return '<div>'.Error('Unable to check the size: ').'<b>'.$name.'</b></div>'."\r\n";
+		if(filesize($full_name) > 1024 * 1024) return '<div>Truncating <b>"'.$name.'"</b> because it is too big: '.truncate($full_name).'</div>'."\r\n";
 	}
 }
 
-if( file_exists("../stats/upd-reqs.dat") )
-{
-	if( filesize("../stats/upd-reqs.dat") > 1 * 1024 *1024 )
-	{
-		$log .= "Truncating stats/upd-reqs.dat because it is too big: ";
-		$log .= truncate("../stats/upd-reqs.dat");
-	}
-}
-
-if( file_exists("../stats/upd-bad-reqs.dat") )
-{
-	if( filesize("../stats/upd-bad-reqs.dat") > 1 * 1024 *1024 )
-	{
-		$log .= "Truncating stats/upd-bad-reqs.dat because it is too big: ";
-		$log .= truncate("../stats/upd-bad-reqs.dat");
-	}
-}
-
-if( file_exists("../stats/other-reqs.dat") )
-{
-	if( filesize("../stats/other-reqs.dat") > 1 * 1024 *1024 )
-	{
-		$log .= "Truncating stats/other-reqs.dat because it is too big: ";
-		$log .= truncate("../stats/other-reqs.dat");
-	}
-}
+clearstatcache();
+$log .= ValidateSize('data/failed_urls.dat');
+$log .= ValidateSize('stats/upd-reqs.dat');
+$log .= ValidateSize('stats/upd-bad-reqs.dat');
+$log .= ValidateSize('stats/other-reqs.dat');
+$log .= ValidateSize('stats/blocked-reqs.dat');
 
 echo $doctype.$html_header.$log;
 
 if($errors)
 {
-	echo "<br><font color=\"red\"><b>".$errors." ";
+	echo '<div><br><strong style="color: red;">'.$errors.' ';
 	if($errors == 1)
 		echo "ERROR";
 	else
 		echo "ERRORS";
-	echo ".</b></font><br>";
-	echo "<b>You must execute the failed actions manually.</b><br>";
+	echo '.</strong></div>',"\r\n";
+	echo '<div><strong>You must execute the failed actions manually.</strong></div>';
 }
 else
 {
