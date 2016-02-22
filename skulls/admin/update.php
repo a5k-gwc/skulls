@@ -29,24 +29,24 @@ if( !isset($file_content[0]) )
 	$file_content[0] = 0;
 
 echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'."\r\n";
-$html_header = "<html><head><title>Update</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
-$html_footer = "</body></html>\r\n";
+$html_header = '<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Data update</title><meta name="robots" content="noindex, follow, noarchive, noimageindex"></head><body>'."\r\n";
+$html_footer = '</body></html>'."\r\n";
 
 if(rtrim($file_content[0]) === REVISION)
 {
 	echo $html_header;
-	echo "<div>There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.</div>\r\n";
+	echo '<div>There is no need to update it.<br>This file checks only if data files are updated, it doesn\'t check if the GWC is updated.<br>To check if this GWC is updated you must go on the main page.</div>'."\r\n";
 	echo $html_footer;
 	die;
 }
 
-ini_set('display_errors', 1);
+ini_set('display_errors', '1');
 error_reporting(-1);
 
 $log = "";
 $errors = 0;
 $updated = FALSE;
-include "../vars.php";
+include '../vars.php';
 
 function Error($text)
 {
@@ -65,7 +65,7 @@ function remove_dir($dir)
 	{
 		while( $item = readdir($handle) )
 		{
-			if($item != "." && $item != "..")
+			if($item !== '.' && $item !== '..')
 			{
 				if( is_dir($dir.$item))
 					remove_dir($dir.$item);
@@ -89,10 +89,10 @@ function truncate($name)
 
 clearstatcache();
 
-if( !file_exists("../".DATA_DIR."/") )
+if( !file_exists('../'.DATA_DIR.'/') )
 {
-	$result = mkdir("../".DATA_DIR."/", 0777);
-	$log .= '<div>Creating '.DATA_DIR.'/: '.check($result).'</div>'."\r\n";
+	$result = mkdir('../'.DATA_DIR.'/', 0777);
+	$log .= '<div>Creating <b>'.DATA_DIR.'/</b> directory: '.check($result).'</div>'."\r\n";
 }
 
 $gwc_name = DATA_DIR.'/alt-gwcs.dat';
@@ -100,7 +100,7 @@ $gwc_full_name = '../'.$gwc_name;
 if( file_exists($gwc_full_name) )
 {
 	$MY_URL = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];  /* HTTP_HOST already contains port if needed */
-	$MY_URL = strtolower(str_replace("/admin/update.php", "/skulls.php", $MY_URL));
+	$MY_URL = strtolower(str_replace('/admin/update.php', '/skulls.php', $MY_URL));
 	$cache_file = file($gwc_full_name);
 	$count_cache = count($cache_file);
 
@@ -115,21 +115,19 @@ if( file_exists($gwc_full_name) )
 			$delete = TRUE;
 		else
 		{
-			$gwc_url = $line[3];
-			if( isset($urls_array[$line[3]]) && $urls_array[$line[3]] === 1 )
+			$gwc_url = $line[3]; $gwc_url_LC = strtolower($gwc_url);
+			if(isset($urls_array[$gwc_url_LC]) && $urls_array[$gwc_url_LC] === true)  /* Duplicate URL */
 				$delete = TRUE;
-			elseif(strpos($line[3], "?") !== false || strpos($line[3], "&") !== false || strpos($line[3], "#") !== false
-				  || strpos($line[3], "index.php") == strlen($line[3]) - 9
-			)
+			elseif(strpos($gwc_url, '?') !== false || strpos($gwc_url, '&') !== false || strpos($gwc_url, '#') !== false || strpos($gwc_url, '/index.php') === strlen($gwc_url) - 10)
 				$delete = TRUE;
 			else
 			{
-				if(strpos($line[3], '://') !== false)
+				if(strpos($gwc_url, '://') !== false)
 				{
-					list( , $cache ) = explode("://", $line[3]);
+					list(, $cache) = explode('://', $gwc_url, 2);
 
 					if(strpos($cache, '/') !== false)
-						list($host, $path) = explode("/", $cache, 2);
+						list($host, $path) = explode('/', $cache, 2);
 					else
 						$host = $cache;
 
@@ -139,20 +137,20 @@ if( file_exists($gwc_full_name) )
 				else
 				{
 					$delete = TRUE;
-					echo "<font color=\"red\"><b>".$gwc_name." -> strange url removed: ".$gwc_url."</b></font><br>\r\n";
+					$log .= '<div><strong style="color: red;">Strange url</strong> in <b>'.$gwc_name.'</b> file removed: '.$gwc_url.'</div>'."\r\n";
 				}
 			}
 		}
 
 		if($delete)
 		{
-			$changed = TRUE;
+			$changed = true;
 			$data[$i] = "";
 		}
 		else
 		{
-			$urls_array[$gwc_url] = 1;
-			$data[$i] = implode("|", $line);
+			$urls_array[$gwc_url_LC] = true;
+			$data[$i] = implode('|', $line);
 		}
 		unset($line);
 	}
@@ -164,7 +162,7 @@ if( file_exists($gwc_full_name) )
 		for($i = 0; $i < $count_cache; $i++)
 		{
 			$data[$i] = rtrim($data[$i]);
-			if($data[$i] != "")
+			if($data[$i] !== "")
 				fwrite($file, $data[$i]."\r\n");
 		}
 		flock($file, LOCK_UN);
@@ -174,7 +172,7 @@ if( file_exists($gwc_full_name) )
 
 	if($changed)
 	{
-		$log .= "Internal structure updated in <b>".$gwc_name."</b>.<br>\r\n";
+		$log .= '<div>Internal structure updated in <b>'.$gwc_name.'</b> file.</div>'."\r\n";
 		$updated = TRUE;
 	}
 }
@@ -182,7 +180,7 @@ if( file_exists($gwc_full_name) )
 function DeleteFile($name)
 {
 	$full_name = '../'.$name;
-	if(file_exists($full_name)) return '<div>Deleting <b>"'.$name.'"</b>: '.check(unlink($full_name)).'</div>'."\r\n";
+	if(file_exists($full_name)) return '<div>Deleting <b>'.$name.'</b> file: '.check(unlink($full_name)).'</div>'."\r\n";
 }
 
 function ValidateSize($name)
@@ -190,8 +188,8 @@ function ValidateSize($name)
 	$full_name = '../'.$name;
 	if(file_exists($full_name))
 	{
-		if(filesize($full_name) === false) return '<div>'.Error('Unable to check the size: ').'<b>'.$name.'</b></div>'."\r\n";
-		if(filesize($full_name) > 1024 * 1024) return '<div>Truncating <b>"'.$name.'"</b> because it is too big: '.truncate($full_name).'</div>'."\r\n";
+		if(filesize($full_name) === false) return '<div>'.Error('Unable to check the size').' of <b>'.$name.'</b> file.</div>'."\r\n";
+		if(filesize($full_name) > 1024 * 1024) return '<div>Truncating <b>'.$name.'</b> file because it is too big: '.truncate($full_name).'</div>'."\r\n";
 	}
 }
 
@@ -219,15 +217,15 @@ if($errors)
 {
 	echo '<div><br><strong style="color: red;">'.$errors.' ';
 	if($errors === 1)
-		echo "ERROR";
+		echo 'ERROR';
 	else
-		echo "ERRORS";
+		echo 'ERRORS';
 	echo '.</strong></div>',"\r\n";
 	echo '<div><strong>You must execute the failed actions manually.</strong></div>';
 }
 else
 {
-	$file = fopen('./revision.dat', "wb");
+	$file = fopen('./revision.dat', 'wb');
 	if($file !== FALSE)
 	{
 		flock($file, 2);
@@ -240,13 +238,13 @@ else
 		else
 		{
 			echo '<div><strong style="color: green;">Already updated.</strong></div>',"\r\n";
-			echo "<div><b>This file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.</b></div>\r\n";
+			echo '<div><b>This file checks only if data files are updated, it doesn\'t check if the GWC is updated.<br>To check if this GWC is updated you must go on the main page.</b></div>'."\r\n";
 		}
 	}
 	else
-		echo "<font color=\"red\">Error during writing of admin/revision.dat</font><br>";
+		echo '<div style="color: red;">Error during writing of <b>admin/revision.dat</b> file.</div>';
 }
 
-if(isset($footer) && $footer !== "") echo "<div><br>".$footer."</div>";
+if(isset($footer) && $footer !== "") echo '<div><br>'.$footer.'</div>';
 echo $html_footer;
 ?>
