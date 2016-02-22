@@ -108,33 +108,11 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 		if( !isset($line[5]) || ( isset($urls_array[$line[0]]) && $urls_array[$line[0]] == 1 ) )
 			$delete = TRUE;
 		elseif(strpos($line[0], "?") > -1 || strpos($line[0], "&") > -1 || strpos($line[0], "#") > -1
-			// Bad
-			|| $line[0] == "http://www.xolox.nl/gwebcache/"
-			|| $line[0] == "http://www.xolox.nl/gwebcache/default.asp"
-			|| $line[0] == "http://fischaleck.net/cache/mcache.php"
-			|| $line[0] == "http://mcache.naskel.cx/mcache.php"
-			|| $line[0] == "http://silence.forcedefrappe.com/mcache.php"
-			// It take an eternity to load, it can't help network
-			|| $line[0] == "http://reukiodo.dyndns.org/beacon/gwc.php"
-			|| $line[0] == "http://reukiodo.dyndns.org/gwebcache/gwcii.php"
-			// Double - They are accessible also from another url
-			|| $line[0] == "http://gwc.frodoslair.net/skulls/skulls"
-			|| $line[0] == "http://gwc.nickstallman.net/beta.php"
-			|| $line[0] == "http://gwebcache.spearforensics.com/"
-			// Other
-			|| $line[0] == "http://bbs.robertwoolley.co.uk/GWebCache/gcache.php"
-			|| strpos($line[0], ".nyud.net/") > -1
-			|| strpos($line[0], ".nyucd.net/") > -1
-			|| strpos($line[0], "index.php") == strlen($line[0]) - 9
+			  || strpos($line[0], "index.php") == strlen($line[0]) - 9
 		)
 			$delete = TRUE;
 		else
 		{
-			if($line[2] == "multi")
-			{
-				$line[2] = "gnutella-gnutella2";
-				$changed = TRUE;
-			}
 
 			if(strpos($line[0], "://") > -1)
 			{
@@ -186,13 +164,6 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 		$log .= "Internal structure updated in ".DATA_DIR."/caches.dat.<br>\r\n";
 		$updated = TRUE;
 	}
-}
-
-if( file_exists("../".DATA_DIR."/blocked_caches.dat") )
-{
-	$result = unlink("../".DATA_DIR."/blocked_caches.dat");
-	$log .= "Deleting ".DATA_DIR."/blocked_caches.dat: ";
-	$log .= check($result);
 }
 
 function DeleteFile($name)
