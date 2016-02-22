@@ -92,11 +92,13 @@ if( !file_exists("../".DATA_DIR."/") )
 	$log .= '<div>Creating '.DATA_DIR.'/: '.check($result).'</div>'."\r\n";
 }
 
-if( file_exists("../".DATA_DIR."/caches.dat") )
+$gwc_name = DATA_DIR.'/alt-gwcs.dat';
+$gwc_full_name = '../'.$gwc_name;
+if( file_exists($gwc_full_name) )
 {
 	$MY_URL = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];  /* HTTP_HOST already contains port if needed */
 	$MY_URL = strtolower(str_replace("/admin/update.php", "/skulls.php", $MY_URL));
-	$cache_file = file("../".DATA_DIR."/caches.dat");
+	$cache_file = file($gwc_full_name);
 	$count_cache = count($cache_file);
 
 	$changed = FALSE;
@@ -104,35 +106,38 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 	for($i = 0; $i < $count_cache; $i++)
 	{
 		$delete = FALSE;
-		$line = explode("|", rtrim($cache_file[$i]));
+		$line = explode('|', rtrim($cache_file[$i]));
 
-		if( !isset($line[5]) || ( isset($urls_array[$line[0]]) && $urls_array[$line[0]] == 1 ) )
-			$delete = TRUE;
-		elseif(strpos($line[0], "?") > -1 || strpos($line[0], "&") > -1 || strpos($line[0], "#") > -1
-			  || strpos($line[0], "index.php") == strlen($line[0]) - 9
-		)
+		if(!isset($line[14]))
 			$delete = TRUE;
 		else
 		{
-
-			if(strpos($line[0], "://") > -1)
-			{
-				list( , $cache ) = explode("://", $line[0]);
-
-				if( strpos($cache, "/") > -1 )
-					list( $host, ) = explode("/", $cache);
-				else
-					$host = $cache;
-
-				if(strtolower($host) != $host || strtolower($cache) == $MY_URL)
-					$delete = TRUE;
-			}
-			elseif(substr($line[0], 0, 4) == "uhc:" || substr($line[0], 0, 5) == "ukhl:")
-				;
+			$gwc_url = $line[3];
+			if( isset($urls_array[$line[3]]) && $urls_array[$line[3]] === 1 )
+				$delete = TRUE;
+			elseif(strpos($line[3], "?") !== false || strpos($line[3], "&") !== false || strpos($line[3], "#") !== false
+				  || strpos($line[3], "index.php") == strlen($line[3]) - 9
+			)
+				$delete = TRUE;
 			else
 			{
-				$delete = TRUE;
-				echo "<font color=\"red\"><b>caches.dat -> strange url removed: ".$line[0]."</b></font><br>\r\n";
+				if(strpos($line[3], '://') !== false)
+				{
+					list( , $cache ) = explode("://", $line[3]);
+
+					if(strpos($cache, '/') !== false)
+						list($host, $path) = explode("/", $cache, 2);
+					else
+						$host = $cache;
+
+					if(strtolower($host) !== $host || strtolower($cache) === $MY_URL || strpos($path, '.php/') !== false)
+						$delete = TRUE;
+				}
+				else
+				{
+					$delete = TRUE;
+					echo "<font color=\"red\"><b>".$gwc_name." -> strange url removed: ".$gwc_url."</b></font><br>\r\n";
+				}
 			}
 		}
 
@@ -143,26 +148,30 @@ if( file_exists("../".DATA_DIR."/caches.dat") )
 		}
 		else
 		{
-			$urls_array[$line[0]] = 1;
+			$urls_array[$gwc_url] = 1;
 			$data[$i] = implode("|", $line);
 		}
 		unset($line);
 	}
 
-	$file = fopen("../".DATA_DIR."/caches.dat", "wb");
-	flock($file, 2);
-	for($i = 0; $i < $count_cache; $i++)
+	$file = fopen($gwc_full_name, 'wb');
+	if($file !== false)
 	{
-		$data[$i] = rtrim($data[$i]);
-		if($data[$i] != "")
-			fwrite($file, $data[$i]."\r\n");
+		flock($file, LOCK_EX);
+		for($i = 0; $i < $count_cache; $i++)
+		{
+			$data[$i] = rtrim($data[$i]);
+			if($data[$i] != "")
+				fwrite($file, $data[$i]."\r\n");
+		}
+		flock($file, LOCK_UN);
+		fclose($file);
 	}
-	flock($file, 3);
-	fclose($file);
+	else Error('');
 
 	if($changed)
 	{
-		$log .= "Internal structure updated in ".DATA_DIR."/caches.dat.<br>\r\n";
+		$log .= "Internal structure updated in <b>".$gwc_name."</b>.<br>\r\n";
 		$updated = TRUE;
 	}
 }
@@ -183,11 +192,7 @@ function ValidateSize($name)
 	}
 }
 
-
-
-if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
-$log .= DeleteFile('admin/index.htm');
-$log .= DeleteFile('admin/index.html');
+$log .= DeleteFile(DATA_DIR.'/caches.dat');
 $log .= DeleteFile('log/unsupported_nets.log');
 $log .= DeleteFile('log/invalid_ips.log');
 $log .= DeleteFile('log/invalid_urls.log');
@@ -195,6 +200,9 @@ $log .= DeleteFile('log/unidentified_clients.log');
 $log .= DeleteFile('log/old_clients.log');
 $log .= DeleteFile('log/invalid_queries.log');
 $log .= DeleteFile('log/invalid_leaves.log');
+$log .= DeleteFile('admin/index.html');
+$log .= DeleteFile('admin/index.htm');
+if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
 
 $log .= ValidateSize('data/failed_urls.dat');
 $log .= ValidateSize('stats/upd-reqs.dat');
