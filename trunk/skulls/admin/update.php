@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright (C) 2005-2008, 2015 by ale5000
+//  Copyright (C) 2005-2008, 2015-2016 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -17,10 +17,13 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-header("Pragma: no-cache");
-define( "REVISION", 4.9 );
-if(file_exists("revision.dat"))
-	$file_content = file("revision.dat");
+define('REVISION', '4.9.1');
+
+header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
+if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
+
+if(file_exists('./revision.dat'))
+	$file_content = file('./revision.dat');
 
 if( !isset($file_content[0]) )
 	$file_content[0] = 0;
@@ -29,10 +32,10 @@ echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/ht
 $html_header = "<html><head><title>Update</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
 $html_footer = "</body></html>\r\n";
 
-if(rtrim($file_content[0]) == REVISION)
+if(rtrim($file_content[0]) === REVISION)
 {
 	echo $html_header;
-	echo "There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.<br>\r\n";
+	echo "<div>There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.</div>\r\n";
 	echo $html_footer;
 	die;
 }
@@ -215,7 +218,7 @@ echo $html_header.$log;
 if($errors)
 {
 	echo '<div><br><strong style="color: red;">'.$errors.' ';
-	if($errors == 1)
+	if($errors === 1)
 		echo "ERROR";
 	else
 		echo "ERRORS";
@@ -224,7 +227,7 @@ if($errors)
 }
 else
 {
-	$file = @fopen("revision.dat", "wb");
+	$file = fopen('./revision.dat', "wb");
 	if($file !== FALSE)
 	{
 		flock($file, 2);
@@ -233,17 +236,17 @@ else
 		fclose($file);
 
 		if($updated)
-			echo "<br><font color=\"green\"><b>Updated correctly.</b></font><br>";
+			echo '<div><br><strong style="color: green;">Updated correctly.</strong></div>',"\r\n";
 		else
 		{
-			echo "<font color=\"green\"><b>Already updated.</b></font><br>";
-			echo "<b>This file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.</b><br>\r\n";
+			echo '<div><strong style="color: green;">Already updated.</strong></div>',"\r\n";
+			echo "<div><b>This file checks only if data files are updated, it doesn't check if the GWC is updated.<br>\r\nTo check if this GWC is updated you must go on the main page.</b></div>\r\n";
 		}
 	}
 	else
 		echo "<font color=\"red\">Error during writing of admin/revision.dat</font><br>";
 }
 
-if( isset($footer) && $footer != "" ) echo "<br><div>".$footer."</div>";
+if(isset($footer) && $footer !== "") echo "<div><br>".$footer."</div>";
 echo $html_footer;
 ?>
