@@ -84,44 +84,11 @@ function truncate($name)
 	return Error('ERROR');
 }
 
-if( file_exists("../webcachedata/") )
-{
-	if( !file_exists("../".DATA_DIR."/") )
-	{
-		$result = rename("../webcachedata/", "../".DATA_DIR."/");
-		$log .= "Renaming webcachedata folder to ".DATA_DIR.": ";
-		$log .= check($result);
-	}
-	else
-	{
-		remove_dir("../webcachedata/");
-		$result = !file_exists("../webcachedata/");
-		$log .= "Deleting webcachedata folder: ";
-		$log .= check($result);
-	}
-}
-
 if( !file_exists("../".DATA_DIR."/") )
 {
 	$result = mkdir("../".DATA_DIR."/", 0777);
 	$log .= "Creating ".DATA_DIR."/: ";
 	$log .= check($result);
-}
-
-if( file_exists("../".DATA_DIR."/hosts_gnutella1.dat") )
-{
-	if( !file_exists("../".DATA_DIR."/hosts_gnutella.dat") )
-	{
-		$result = rename("../".DATA_DIR."/hosts_gnutella1.dat", "../".DATA_DIR."/hosts_gnutella.dat");
-		$log .= "Renaming ".DATA_DIR."/hosts_gnutella1.dat to ".DATA_DIR."/hosts_gnutella.dat: ";
-		$log .= check($result);
-	}
-	else
-	{
-		$result = unlink("../".DATA_DIR."/hosts_gnutella1.dat");
-		$log .= "Deleting ".DATA_DIR."/hosts_gnutella1.dat: ";
-		$log .= check($result);
-	}
 }
 
 if( file_exists("../".DATA_DIR."/caches.dat") )
@@ -228,39 +195,10 @@ if( file_exists("../".DATA_DIR."/blocked_caches.dat") )
 	$log .= check($result);
 }
 
-if( file_exists("../vendor_code.php") )
+function DeleteFile($name)
 {
-	$result = unlink("../vendor_code.php");
-	$log .= "Deleting vendor_code.php: ";
-	$log .= check($result);
-}
-
-if( file_exists("../log/skulls.log") )
-{
-	$result = unlink("../log/skulls.log");
-	$log .= "Deleting log/skulls.log: ";
-	$log .= check($result);
-}
-
-if( file_exists("../log/old_clients.log") )
-{
-	$result = unlink("../log/old_clients.log");
-	$log .= "Deleting log/old_clients.log: ";
-	$log .= check($result);
-}
-
-if( file_exists("../index.htm") && file_exists("../index.html") )
-{
-	$result = unlink("../index.htm");
-	$log .= "Deleting index.htm (there is already index.html): ";
-	$log .= check($result);
-}
-
-if( file_exists("../admin/index.htm") && file_exists("../admin/index.html") )
-{
-	$result = unlink("../admin/index.htm");
-	$log .= "Deleting admin/index.htm (there is already admin/index.html): ";
-	$log .= check($result);
+	$full_name = '../'.$name;
+	if(file_exists($full_name)) return 'Deleting <b>"'.$name.'"</b>: '.check(unlink($full_name))."\r\n";
 }
 
 function ValidateSize($name)
@@ -274,6 +212,18 @@ function ValidateSize($name)
 }
 
 clearstatcache();
+
+if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
+$log .= DeleteFile('admin/index.htm');
+$log .= DeleteFile('admin/index.html');
+$log .= DeleteFile('log/unsupported_nets.log');
+$log .= DeleteFile('log/invalid_ips.log');
+$log .= DeleteFile('log/invalid_urls.log');
+$log .= DeleteFile('log/unidentified_clients.log');
+$log .= DeleteFile('log/old_clients.log');
+$log .= DeleteFile('log/invalid_queries.log');
+$log .= DeleteFile('log/invalid_leaves.log');
+
 $log .= ValidateSize('data/failed_urls.dat');
 $log .= ValidateSize('stats/upd-reqs.dat');
 $log .= ValidateSize('stats/upd-bad-reqs.dat');
