@@ -55,19 +55,20 @@ AddCharset        utf-8 .css .js
   ExpiresActive On
 
   # 1 day - Check also the extension to avoid setting it also on other files (like .php)
-  <FilesMatch "\.(html|htm)$">
-    ExpiresByType text/html             A86400
+  <FilesMatch "\.(html?)$">
+    ExpiresByType text/html            A86400
   </FilesMatch>
   # 1 day
   ExpiresByType application/javascript A86400
   ExpiresByType text/javascript        A86400
   # 7 days
   ExpiresByType text/css               A604800
-  # 7 days
   ExpiresByType image/gif              A604800
   ExpiresByType image/png              A604800
   ExpiresByType image/x-icon           A604800
-  ExpiresByType text/plain             A604800
+  <Files "*.txt">
+    ExpiresByType text/plain           A604800
+  </Files>
 </IfModule>
 
 ### Enable compression (excluding php files) ###
