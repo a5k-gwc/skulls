@@ -420,6 +420,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			/* http://github.com/jum/GWebCache */
 			$IS_GWC = 2;
 			break;
+		case 'MWCP':
 		case 'MWebCache':
 			$client_name = 'MWebCache';
 			$url = 'http://sourceforge.net/p/mute-net/support-requests/7/';
