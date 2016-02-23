@@ -291,25 +291,26 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							for($i = $elements - 1; $i >= 0; $i--)
 							{
 								list($time, /* New specs only */, $gwc_ip, $cache_url, $net, /* Net parameter needed */, /*$gwc_vendor.*/, /* $gwc_version */, $cache_name, $gwc_server, $client, $version, $is_a_gwc_param, $user_agent,) = explode("|", $cache_file[$i], 15);
-								$cache_name = htmlentities($cache_name, ENT_QUOTES, 'UTF-8');
+								$cache_name = htmlentities($cache_name, ENT_QUOTES, 'UTF-8'); $net_readable = null;
 								if(strpos($net, '-') !== false)
 								{
 									$networks = explode('-', $net);
 									$cache_nets_count = count($networks);
-									$net = "";
 									for( $x=0; $x < $cache_nets_count; $x++ )
 									{
-										if($x) $net .= ', ';
-										$net .= ucfirst($networks[$x]);
+										if($x) $net_readable .= ', ';
+										$net_readable .= ucfirst($networks[$x]);
 									}
 								}
+								else
+									$net_readable = ucfirst($net);
 								$color = (($elements - $i) % 2 === 0 ? 'even' : 'odd');
 
 								$output = '<tr class="'.$color.'">';
 								$output .= '<td>';
 
 								$prefix = 'gwc:';
-								$output .= '<a class="gwc" href="'.$prefix.$cache_url.'?nets='.str_replace(' ', "", strtolower($net)).'" rel="nofollow">+</a> ';
+								$output .= '<a class="gwc" href="'.$prefix.$cache_url.'?nets='.$net.'" rel="nofollow">+</a> ';
 
 								if($geoip)
 								{
@@ -358,7 +359,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 									$output .= '<a class="gwc-home-link" href="http://dkac.trillinux.org/dkac/dkac.php" rel="external nofollow">'.$cache_name.'</a>';
 								else
 									$output .= $cache_name;
-								$output .= '</span> &nbsp;</td><td>'.ucfirst($net).' &nbsp;</td>';
+								$output .= '</span> &nbsp;</td><td>'.$net_readable.' &nbsp;</td>';
 								$output .= '<td><span class="bold">'.ReplaceVendorCode($client, $version, $user_agent, (int)$is_a_gwc_param).'</span> &nbsp;</td>';
 								$output .= '<td>'.rtrim($time).'</td></tr>'."\n";
 
