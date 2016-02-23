@@ -18,7 +18,7 @@
 //
 
 $SUPPORTED_NETWORKS = null;
-include 'vars.php';
+include './vars.php';
 
 define('NAME', 'Skulls');
 define('VENDOR', 'SKLL');										/* Vendor code (four uppercase letters) */
@@ -361,7 +361,7 @@ function RemoveGarbage($value)
 
 function Pong($detected_pv, $net_list_sent_elsewhere, $multi, $net, $client, $version, $remote_ip)
 {
-	if($remote_ip === '127.0.0.1')  /* Prevent caches that point to 127.0.0.1 to being added to cache list, in this case we actually ping ourselves so the cache may look working while it isn't */
+	if($remote_ip === '127.0.0.1')  /* Prevent GWCs that point to 127.0.0.1 to being added to the alternative GWCs list, in this case we actually ping ourselves so the GWC may look like it is working while it isn't */
 		return;
 	$send_old_pong = false; $send_pong = false;
 
@@ -1536,7 +1536,7 @@ $GETMAXLEAVES = empty($_GET['getmaxleaves']) ? 0 : $_GET['getmaxleaves'];
 $NO_IP_HEADER = empty($_GET['noipheader']) ? 0 : $_GET['noipheader'];
 
 
-$KICK_START = !empty($_GET['kickstart']) ? $_GET['kickstart'] : 0;	// It request hosts from a caches specified in the "url" parameter for a network specified in "net" parameter (it is used the first time to populate the cache, it MUST be disabled after that).
+$KICK_START = !empty($_GET['kickstart']) ? $_GET['kickstart'] : 0;  // It request hosts from the GWC specified in the "url" parameter for the network specified in "net" parameter (it is used the first time to populate the hosts list, it MUST be disabled after that).
 
 if( isset($noload) ) die();
 

@@ -1,6 +1,6 @@
 <?php
 //
-//  Copyright (C) 2005-2008, 2015 by ale5000
+//  Copyright © 2005-2008, 2015-2016 by ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
