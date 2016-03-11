@@ -38,22 +38,6 @@ function InitializeNetworkFile($net, $show_errors = FALSE)
 		elseif($show_errors)
 			echo "<font color=\"red\">Error during writing of ".DATA_DIR."/hosts_".$net.".dat</font><br>";
 	}
-	else
-	{
-		$fp = @fopen(DATA_DIR."/hosts_".$net.".dat", "r+b"); if($fp === false) return;
-		flock($fp, LOCK_EX);
-		$line = fgets($fp, 200);
-		if($line !== false && strpos($line, '|') !== false)
-		{
-			list($field1, $field2, ) = explode('|', $line, 3);
-			/* Old format => ip:port|leaves|... */
-			/* New format => date|ip|port|... */
-			if(strpos($field1, '.') !== false && strpos($field2, '.') === false)
-				ftruncate($fp, 0);  /* If the file is in the old format truncate it */
-		}
-		flock($fp, LOCK_UN);
-		fclose($fp);
-	}
 }
 
 function Initialize($supported_networks, $show_errors = FALSE, $forced = FALSE)
