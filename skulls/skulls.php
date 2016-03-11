@@ -1795,7 +1795,7 @@ else
 	if($SUPPORT)
 		Support($SUPPORT, $SUPPORTED_NETWORKS);
 
-	if($HOST !== null && VERIFY_HOSTS && ($CLIENT === 'MUTE' || $CLIENT === 'GPUX'))
+	if($HOST !== null && VERIFY_HOSTS && ($CLIENT === 'MUTE' || $CLIENT === 'ANTS' || $CLIENT === 'GPUX'))
 		if(IsValidPrivateIP($IP)) { $IP = $REMOTE_IP; $HOST = $IP.':'.$PORT; }  /* Workaround for a bug in own IP detection of some clients */
 
 	$is_good_update = null;
