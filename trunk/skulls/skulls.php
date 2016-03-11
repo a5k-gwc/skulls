@@ -50,9 +50,9 @@ function IsSecureConnection()
 {
 	if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 		return true;
-	if(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
-		return true;
 	if(USING_CLOUDFLARE && isset($_SERVER['HTTP_CF_VISITOR']) && strpos($_SERVER['HTTP_CF_VISITOR'], '"https"') !== false)
+		return true;
+	if(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
 		return true;
 	return false;
 }
