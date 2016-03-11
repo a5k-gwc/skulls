@@ -8,6 +8,9 @@ FileETag All -INode
 
 <IfModule mod_headers.c>
   Header unset X-Powered-By
+  <Files "*.dat">
+    Header set X-Robots-Tag "noindex, noarchive"
+  </Files>
 </IfModule>
 
 ### Set charsets ###
