@@ -479,11 +479,11 @@ function ValidatePort($port, $net)
 	return true;
 }
 
-function ValidateHost($host, $remote_ip, $net)
+function ValidateHost($host, $remote_ip, $net, $suppress_log = false)
 {
 	list($ip, $port) = explode(':', $host, 2);
-	if($ip !== $remote_ip || !ValidateIP($ip)) { if(LOG_MINOR_ERRORS) Logging('invalid-hosts'); return false; }
-	if(!ValidatePort($port, $net)) { if(LOG_MINOR_ERRORS) Logging('invalid-host-ports'); return false; }
+	if($ip !== $remote_ip || !ValidateIP($ip)) { if(LOG_MINOR_ERRORS && !$suppress_log) Logging('invalid-hosts'); return false; }
+	if(!ValidatePort($port, $net)) { if(LOG_MINOR_ERRORS && !$suppress_log) Logging('invalid-host-ports'); return false; }
 	return true;
 }
 
