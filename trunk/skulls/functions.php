@@ -31,12 +31,12 @@ function DetectServer()
 function InitializeNetworkFile($net, $show_errors = FALSE)
 {
 	$net = strtolower($net);
-	if(!file_exists(DATA_DIR."/hosts_".$net.".dat"))
+	if(!file_exists(DATA_DIR.'/hosts-'.$net.'.dat'))
 	{
-		$file = @fopen(DATA_DIR."/hosts_".$net.".dat", "wb");
-		if($file !== FALSE) fclose($file);
+		$file = @fopen(DATA_DIR.'/hosts-'.$net.'.dat', 'wb');
+		if($file !== false) fclose($file);
 		elseif($show_errors)
-			echo "<font color=\"red\">Error during writing of ".DATA_DIR."/hosts_".$net.".dat</font><br>";
+			echo "<font color=\"red\">Error during writing of ".DATA_DIR."/hosts-".$net.".dat</font><br>";
 	}
 }
 
