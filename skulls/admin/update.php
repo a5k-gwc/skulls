@@ -17,7 +17,7 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-define('REVISION', '4.9.1.1');
+define('REVISION', '5.0.0.1');
 
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
@@ -177,9 +177,9 @@ if( file_exists($gwc_full_name) )
 	}
 }
 
-function DeleteFile($name)
+function DeleteFile($name, $sub_call = false)
 {
-	$full_name = '../'.$name;
+	$full_name = ($sub_call? '' : '../').$name;
 	if(file_exists($full_name)) return '<div>Deleting <b>'.$name.'</b> file: '.check(unlink($full_name)).'</div>'."\r\n";
 }
 
@@ -193,6 +193,19 @@ function ValidateSize($name)
 	}
 }
 
+function RemoveFilesStartingWith($filename_prefix, $dir)
+{
+	$dir = '../'.$dir.'/';
+	$dh = opendir($dir); if($dh === false) return; global $log;
+
+	while(($name = readdir($dh)) !== false)
+		if(is_file($dir.$name) && strpos($name, $filename_prefix) === 0)
+			$log .= DeleteFile($dir.$name, true);
+
+	closedir($dh);
+}
+
+RemoveFilesStartingWith('hosts_', DATA_DIR);
 $log .= DeleteFile(DATA_DIR.'/caches.dat');
 $log .= DeleteFile('log/unsupported_nets.log');
 $log .= DeleteFile('log/invalid_ips.log');
