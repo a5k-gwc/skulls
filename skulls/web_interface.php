@@ -195,7 +195,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 
 					for($x = NETWORKS_COUNT - 1; $x >= 0; $x--)
 					{
-						$temp = file(DATA_DIR."/hosts_".strtolower($SUPPORTED_NETWORKS[$x]).".dat");
+						$temp = file(DATA_DIR."/hosts-".strtolower($SUPPORTED_NETWORKS[$x]).".dat");
 						$n_temp = count($temp);
 						for($y = 0; $y < $n_temp; $y++)
 						{
@@ -206,9 +206,9 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						$temp = null;
 					}
 				}
-				elseif( file_exists(DATA_DIR."/hosts_".$NET.".dat") )
+				elseif( file_exists(DATA_DIR."/hosts-".$NET.".dat") )
 				{
-					$host_file["host"] = file(DATA_DIR."/hosts_".$NET.".dat");
+					$host_file["host"] = file(DATA_DIR."/hosts-".$NET.".dat");
 					$net = ucfirst($NET);
 					$elements = count($host_file["host"]);
 				}

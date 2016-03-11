@@ -924,7 +924,7 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 
 function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = 0, $verify_host = true)
 {
-	$file_path = DATA_DIR.'/hosts_'.$net.'.dat';
+	$file_path = DATA_DIR.'/hosts-'.$net.'.dat';
 	$host_file = file($file_path);
 	$file_count = count($host_file);
 	$host_exists = FALSE;
@@ -1110,7 +1110,7 @@ function CheckIfDummyHostIsNeeded($vendor, $ver)
 function HostFile($net, $age)
 {
 	$now = time(); $offset = date('Z');
-	$host_file = file(DATA_DIR.'/hosts_'.$net.'.dat');
+	$host_file = file(DATA_DIR.'/hosts-'.$net.'.dat');
 	$count_host = count($host_file);
 
 	if($count_host <= MAX_HOSTS_OUT)
@@ -1176,7 +1176,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 	$hosts_sent = 0;
 	if($get)
 	{
-		$host_file = file(DATA_DIR.'/hosts_'.$net.'.dat');
+		$host_file = file(DATA_DIR.'/hosts-'.$net.'.dat');
 		$count_host = count($host_file);
 
 		if($count_host <= MAX_HOSTS_OUT)
