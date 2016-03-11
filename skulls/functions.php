@@ -230,7 +230,7 @@ function KickStart($net, $cache){
 					unset($host);
 					$host = explode("|", $line);
 					$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
-					if(ValidateHost($host[1], $ip_port[0], $net))
+					if(ValidateHost($host[1], $ip_port[0], $net, true))
 						$is_host = true;
 				}
 				elseif(strtolower(substr($line, 0, 2)) == "u|");	// GWC
@@ -243,7 +243,7 @@ function KickStart($net, $cache){
 				unset($host);
 				$host[1] = $line;
 				$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
-				if(ValidateHost($host[1], $ip_port[0], $net))
+				if(ValidateHost($host[1], $ip_port[0], $net, true))
 					$is_host = true;
 			}
 
