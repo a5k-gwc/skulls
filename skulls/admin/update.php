@@ -17,7 +17,7 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-define('REVISION', '4.9.1');
+define('REVISION', '4.9.1.1');
 
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
@@ -163,7 +163,7 @@ if( file_exists($gwc_full_name) )
 		{
 			$data[$i] = rtrim($data[$i]);
 			if($data[$i] !== "")
-				fwrite($file, $data[$i]."\r\n");
+				fwrite($file, $data[$i]."\n");
 		}
 		flock($file, LOCK_UN);
 		fclose($file);
