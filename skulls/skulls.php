@@ -922,6 +922,13 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 	return $cache_data;
 }
 
+function ResolveDNS($host_name)
+{
+	$ip = gethostbyname($host_name.'.');
+	if($ip === $host_name || $ip === $host_name.'.') return false;  /* When the function fails on some servers the dot is kept but in others it is removed so check both */
+	return $ip;
+}
+
 function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = 0, $verify_host = true)
 {
 	$file_path = DATA_DIR.'/hosts-'.$net.'.dat';
@@ -1045,8 +1052,9 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 			}
 			else
 			{
-				$gwc_ip = gethostbyname($temp.'.');
-				if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($gwc_url, 'https') === 0) $new_specs_only = '1';
+				$gwc_ip = ResolveDNS($temp);
+				/* If the DNS resolution fails we assume it is already an IP address, if it is invalid then it will fail later in the code */
+				if($gwc_ip === false) { $gwc_ip = $temp; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https') === 0) $new_specs_only = '1';
 				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
 
 				ReplaceCache($file_path, $i, $cache_file, $this_alt_gwc);
@@ -1070,8 +1078,9 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 		}
 		else
 		{
-			$gwc_ip = gethostbyname($temp.'.');
-			if($gwc_ip === $temp) $new_specs_only = '1'; elseif(strpos($gwc_url, 'https') === 0) $new_specs_only = '1';
+			$gwc_ip = ResolveDNS($temp);
+			/* If the DNS resolution fails we assume it is already an IP address, if it is invalid then it will fail later in the code */
+			if($gwc_ip === false) { $gwc_ip = $temp; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https') === 0) $new_specs_only = '1';
 			$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
 
 			if($file_count >= MAX_CACHES || $file_count > 100)
