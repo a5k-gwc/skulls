@@ -1,0 +1,107 @@
+Skulls! Multi-Network WebCache - Changelog
+------------------------------------------
+
+0.3.2
+- Store the last net parameter used so when it re-query an existing GWC less queries are needed.
+- Store and display also the User-Agent of hosts that submit GWCs.
+- Added GeoLite ASN database and added code to use it (only under GeoIP PECL for now).
+- Display IPs of GWCs in the web interface.
+- Return special GWC urls only for new specs.
+- Moved GeoIP.dat to ext folder.
+- Mark some hosts as suspect.
+- Fully restructured and fixed the support for alternative UDP host caches (now it use "getudp=1" for retrieval and "udpurl=udp:..." for submission).
+- Fixed KickStart.
+- Store vendor codes from KickStart.
+- Check IP blocklist also from KickStart.
+- Fixed a serious error in the stats code.
+- Fixed country flag for GWCs with a not-default port.
+- Fully restructured the format of the file that store alternative GWCs, incompatible with the previous version.
+- Display country flags of GWCs in the web interface.
+- Updated IP blocklist.
+- Added IP blocking.
+- Added Kad to network list.
+- Block invalid network names.
+- Updated GeoIP database.
+- Fixed handling of missing port.
+- Validate and store uptime.
+- Better validation of max leaves.
+- Display max leaves in the web interface.
+- Improved pong parsing.
+- Added getspec to return the used spec (very useful for debugging).
+- Added "gwcs=1" parameter from GWC v3 spec.
+- Added "age=1" parameter from GWC v1.1 spec.
+- Fully restructured ping response to use smart spec detection.
+- Added smart spec detection to automatically detect spec based on the query, it also use the PV parameter if present.
+- Added "getmaxleaves=1".
+- Added TIMEOUT constant in addition to CONNECT_TIMEOUT.
+- Added full cURL support (useful when fsockopen on the server is disabled or limited, fsockopen is still preferred).
+- Added limit of 64 lines and 256 bytes per line when parsing the pong response (normal GWCs never reach that limit).
+- Added support for "Internationalized domain name" (if there is the PHP Intl extension on the server).
+- Added full support for https (fully tested).
+- Automatically pass the compression parameter between pages.
+- Small fixes for very old browsers.
+- Allow requests without the host header but just for the web interface (fix for very old browsers).
+- Improved link highlighting on focus in the web interface.
+- Improved accessibility in the web interface.
+- Fixed hosts/GWCs count.
+- No longer return hosts older than 3 days in Get and HostFile requests.
+- Moved css of the web interface to an external file for easier editing.
+- Make the web interface validating against HTML 4.01 Strict.
+- Switch from table to auto-sizing div in the web interface (my version works also in old browsers).
+- The replies of missing hosts/GWCs are now always separate.
+- Changed some server settings through .htaccess to enable compression and caching of static resources and to block common bad hosts before they reach php.
+- Made the web interface more standard compliant.
+- Added a variable to set an header in the web interface.
+- Added count of bad update requests (displayed in the web interface).
+- Added workaround to avoid removing a possible good GWC on network congestion.
+- Displayed GeoIP DB version and copyright info in the web interface.
+- Improved version and User-Agent blocking.
+- Minor changes.
+- Minor fixes.
+- Minor optimizations.
+
+0.3.1
+- Workaround for a Shareaza bug.
+- Added noipheader query for hosts that do NOT need X-Remote-IP header.
+- Blocked Googlebot from making queries.
+- Fixed url checking when external port is different from internal port on the server.
+- Fixed leaves 0 also in the web interface.
+- Rewritten URL canonicalization (now it should work safely in all cases).
+- Improved ping/pong compatibility.
+- Added almost all existing vendor codes (now it recognize all know hosts).
+- Updated links to GWCs.
+- Used $_SERVER['SERVER_PROTOCOL'] for all headers instead of HTTP/1.0.
+- Attempt to support https (it may NOT work).
+- Changed the format of data files for hosts, incompatible with the previous version.
+- Now it show the User-Agent of hosts in the web interface.
+- Block requests with missing Host header (on most servers these requests will never reach the script but just in case...).
+- Disabled deflate compression on Internet Explorer, their implementation doesn't respect the standard and the page isn't displayed.
+- Added detection of Cabos.
+- Added GeoIP, GeoIP database and country flags.
+- Fixed a very subtle bug, when Skulls was pinging a GWC with an un-standard port it was setting a wrong Host header.
+- Minor changes and optimizations.
+
+0.3.0
+- Changed license to GPLv3.
+- Added support for getnetworks, getleaves and getvendors queries.
+- Fixed compression.
+- Stricter host validation.
+- Improved spam blocking.
+- Blocked some bad ports.
+- Enforced network parameter for Foxy and MUTE.
+- Dropped support for cluster since noone is using it.
+- Added support=2 parameter.
+- Optimized support query.
+- Added identification of WireShare.
+- Added support for x_leaves=0 and blocked values higher than 2047.
+- Improved X-Remote-IP header.
+- Improved ReplaceVendorCode.
+- Improved CheckGWC.
+- Removed a useless header.
+
+0.2.9
+- Blocked some bad hosts.
+- Now users can add GWCs to p2p applications directly from the web interface.
+- More hosts and GWCs vendor codes recognized.
+- Cleaned pong.
+- Other changes that I don't remember.
