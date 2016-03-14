@@ -75,27 +75,6 @@ function Initialize($supported_networks, $show_errors = FALSE){
 				if($show_errors) echo "<font color=\"red\">Error during writing of stats/requests.dat</font><br>";
 			}
 		}
-		else
-		{
-			$file = @fopen("stats/requests.dat", "r+b");
-			if($file)
-			{
-				flock($file, 2);
-				$line = fgets($file);
-				if(rtrim($line) == "")
-				{
-					rewind($file);
-					fwrite($file, "1");
-				}
-				flock($file, 3);
-				fclose($file);
-			}
-			else
-			{
-				$initialized = FALSE;
-				if($show_errors) echo "<font color=\"red\">Error during reading of stats/requests.dat</font><br>";
-			}
-		}
 		if(!file_exists("stats/update_requests_hour.dat"))
 		{
 			$file = @fopen("stats/update_requests_hour.dat", "xb");

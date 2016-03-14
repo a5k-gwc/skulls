@@ -1,10 +1,17 @@
 <?php
 					/* You must read readme.txt in the admin directory to configure properly */
 
-$ENABLED =							1;
+define( "ENABLED",					1 );
+// It may happen that the cache is reachable from more then one address (this uselessly increase the cache usage), to avoid this you must put the address that you want use for the cache below.
+// IMPORTANT: Check carefully that it is the correct url
+define( "CACHE_URL",				"" );	// Optional but recommended - The full url of the cache, example: http://gwc.your-site.com/skulls.php
 
 define( "FSOCKOPEN",				1 );	// Disable ONLY if the server have FSOCKOPEN disabled, use admin/test.php to check
 define( "CONTENT_TYPE_WORKAROUND",	0 );	// Use admin/test.php to know the right value
+
+define( "MAINTAINER_NICK", "your nickname here" );				// Your nick
+define( "MAINTAINER_EMAIL", "name AT server DOT com" );			// Optional - Your e-mail in that format "name AT server DOT com". Example: pippo@excite.it => pippo AT excite DOT it
+define( "MAINTAINER_WEBSITE", "http://www.your-site.com/" );	// Optional - The address of your website (It isn't the url of the cache)
 
 define( "STATS_ENABLED",			1 );	// Enable collecting statistics
 define( "KICK_START_ENABLED",		0 );	// KickStart should be DISABLED after populating the webcache
@@ -23,9 +30,7 @@ define( "TIMEOUT",					20 );	// Socket time out for fsockopen
 
 define( "DATA_DIR", "data" );				// Directory where data files are stored (you should use relative path, you can leave it as is by default)
 
-define( "MAINTAINER_NICK", "your nickname here" );				// Your nick
-define( "MAINTAINER_EMAIL", "name AT server DOT com" );			// Optional - Your e-mail in that format "name AT server DOT com". Example: pippo@excite.it => pippo AT excite DOT it
-define( "MAINTAINER_WEBSITE", "http://www.your-site.com/" );	// Optional - The address of your website
+$footer = "";
 
 // You can add or remove any network, but after you changed them you must delete last_action.dat in data directory to initialize the changes.
 // By default gnutella is disabled and gnutella2 is enabled.

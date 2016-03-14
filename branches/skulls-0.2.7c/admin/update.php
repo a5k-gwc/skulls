@@ -1,7 +1,7 @@
 <?php
 header("Pragma: no-cache");
 
-define( "REVISION", 4.2 );
+define( "REVISION", 4.4 );
 if( !file_exists("revision.dat") )
 {
 	$file = fopen("revision.dat", "xb");
@@ -11,12 +11,21 @@ if( !file_exists("revision.dat") )
 	fclose($file);
 }
 $file_content = file("revision.dat");
+
+$doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\r\n";
+$header = "<html><head><title>Update</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
+$html_footer = "</body></html>\r\n";
+
 if(rtrim($file_content[0]) >= REVISION)
 {
-	header("Content-Type: text/plain");
-	die("There is no need to update it.\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.\r\nTo check if Skulls is updated you must go on skulls.php\r\n");
+	echo $doctype.$header;
+	echo "There is no need to update it.<br>\r\nThis file checks only if data files are updated, it doesn't check if Skulls is updated.<br>\r\nTo check if Skulls is updated you must go on skulls.php<br>\r\n";
+	echo $html_footer;
+	die();
 }
 
+ini_set(display_errors, 1);
+error_reporting(E_ALL);
 
 $log = "";
 $errors = 0;
@@ -29,11 +38,11 @@ function check($result)
 	$updated = TRUE;
 
 	if($result)
-		return "<font color=\"green\"><b>OK</b></font><br/>\r\n";
+		return "<font color=\"green\"><b>OK</b></font><br>\r\n";
 	else
 	{
 		$errors++;
-		return "<font color=\"red\"><b>ERROR</b></font><br/>\r\n";
+		return "<font color=\"red\"><b>ERROR</b></font><br>\r\n";
 	}
 }
 
@@ -99,31 +108,76 @@ if( file_exists("../".DATA_DIR."/hosts_gnutella1.dat") )
 
 if( file_exists("../".DATA_DIR."/caches.dat") )
 {
+	$PHP_SELF = $_SERVER["PHP_SELF"];
+	$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
+	$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
+	$MY_URL = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
+	$MY_URL = strtolower(str_replace("/admin/update.php", "/skulls.php", $MY_URL));
 	$cache_file = file("../".DATA_DIR."/caches.dat");
 	$count_cache = count($cache_file);
 
 	$changed = FALSE;
+	$urls_array = array();
 	for($i = 0; $i < $count_cache; $i++)
 	{
-		$line = explode("|", trim($cache_file[$i]));
+		$delete = FALSE;
+		$line = explode("|", rtrim($cache_file[$i]));
 		if($line[2] == "multi")
 		{
 			$line[2] = "gnutella-gnutella2";
 			$changed = TRUE;
 		}
-		$data[$i] = implode("|", $line);
+		if(strpos($line[0], "?") > -1 || strpos($line[0], "&") > -1 || strpos($line[0], "#") > -1 || $line[0] == "http://gwc.nickstallman.net/gcache" || $line[0] == "http://gwc.nickstallman.net/gcache2.asp")
+			$delete = TRUE;
+
+		if(strpos($line[0], "://") > -1)
+		{
+			list( , $cache ) = explode("://", $line[0]);
+
+			if( strpos($cache, "/") > -1 )
+				list( $host, ) = explode("/", $cache);
+			else
+				$host = $cache;
+
+			if(strtolower($host) != $host || strtolower($cache) == $MY_URL)
+				$delete = TRUE;
+		}
+		else
+		{
+			$errors++;
+			echo "<font color=\"red\"><b>ERROR: Strange url</b></font><br>\r\n";
+		}
+
+		if( isset($urls_array[$line[0]]) && $urls_array[$line[0]] == 1 )
+			$delete = TRUE;
+
+		if($delete)
+		{
+			$changed = TRUE;
+			$data[$i] = "";
+		}
+		else
+		{
+			$urls_array[$line[0]] = 1;
+			$data[$i] = implode("|", $line);
+		}
+		unset($line);
 	}
 
 	$file = fopen("../".DATA_DIR."/caches.dat", "wb");
 	flock($file, 2);
 	for($i = 0; $i < $count_cache; $i++)
-		fwrite($file, $data[$i]."\r\n");
+	{
+		$data[$i] = rtrim($data[$i]);
+		if($data[$i] != "")
+			fwrite($file, $data[$i]."\r\n");
+	}
 	flock($file, 3);
 	fclose($file);
 
 	if($changed)
 	{
-		$log .= "Internal structure updated in ".DATA_DIR."/caches.dat.<br/>\r\n";
+		$log .= "Internal structure updated in ".DATA_DIR."/caches.dat.<br>\r\n";
 		$updated = TRUE;
 	}
 }
@@ -165,19 +219,16 @@ if( file_exists("../log/skulls.log") )
 	$log .= check($result);
 }
 
-echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\r\n";
-echo "<html><head><title>Update</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
-
-echo $log;
+echo $doctype.$header.$log;
 
 if($errors)
 {
-	echo "<br/><font color=\"red\"><b>".$errors." ";
+	echo "<br><font color=\"red\"><b>".$errors." ";
 	if($errors == 1)
 		echo "ERROR";
 	else
 		echo "ERRORS";
-	echo ".</b></font><br/>";
+	echo ".</b></font><br>";
 	echo "<b>You must execute the failed actions manually.</b><br>";
 }
 else
@@ -189,7 +240,7 @@ else
 	fclose($file);
 
 	if($updated)
-		echo "<br/><font color=\"green\"><b>Updated correctly.</b></font><br>";
+		echo "<br><font color=\"green\"><b>Updated correctly.</b></font><br>";
 	else
 	{
 		echo "<font color=\"green\"><b>Already updated.</b></font><br>";
@@ -197,5 +248,6 @@ else
 	}
 }
 
-echo "</body></html>";
+if( isset($footer) && $footer != "" ) echo "<br><div>".$footer."</div>";
+echo $html_footer;
 ?>

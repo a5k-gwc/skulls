@@ -2,7 +2,7 @@
 //
 //   Skulls! Multi-Network WebCache (PHP)
 //
-//   Copyright (C) 2005-2006 by ale5000
+//   Copyright (C) 2005-2007 by ale5000
 //   Sources of this script can be downloaded here: http://sourceforge.net/projects/skulls/
 //
 //   This program is free software; you can redistribute it and/or
@@ -35,22 +35,32 @@ if( !isset($_GET) )
 $PHP_SELF = $_SERVER["PHP_SELF"];
 $REMOTE_IP = $_SERVER["REMOTE_ADDR"];
 
-if(!$ENABLED || basename($PHP_SELF) == "index.php")
+if(!ENABLED || basename($PHP_SELF) == "index.php")
 {
 	header("HTTP/1.0 404 Not Found");
 	die("ERROR: Service disabled\r\n");
 }
 
-/*if($REMOTE_IP == "...")
+/*if($REMOTE_IP == "...") { header("HTTP/1.0 404 Not Found"); die(); }*/
+
+$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
+$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
+$MY_URL = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
+if(CACHE_URL != "")
 {
-	header("HTTP/1.0 404 Not Found");
-	die();
-}*/
+	list( , $CACHE_URL ) = explode("://", CACHE_URL);
+	if($MY_URL != $CACHE_URL)
+	{
+		header("HTTP/1.0 301 Moved Permanently");
+		header("Location: ".CACHE_URL);
+		die();
+	}
+}
 
 define( "NAME", "Skulls" );
 define( "VENDOR", "SKLL" );
 define( "SHORT_VER", "0.2.7" );
-define( "VER", SHORT_VER."" );
+define( "VER", SHORT_VER."c" );
 
 if($SUPPORTED_NETWORKS == NULL)
 	die("ERROR: No network is supported.");
@@ -114,7 +124,6 @@ function Support($supported_networks)
 		echo "I|support|".strtolower($supported_networks[$i])."\r\n";
 	echo "I|url|".FSOCKOPEN."\r\n";
 	echo "I|compression|deflate\r\n";
-	echo "I|compression|zlib\r\n";
 }
 
 function CheckNetwork($supported_networks, $net){
@@ -193,8 +202,9 @@ function CheckIPValidity($remote_ip, $ip){
 
 function CheckURLValidity($cache){
 	if(strlen($cache) > 10)
-		if( substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://" )
-			return TRUE;
+		if(substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://")
+			if( !(strpos($cache, "?") > -1 || strpos($cache, "&") > -1 || strpos($cache, "#") > -1) )
+				return TRUE;
 
 	if(LOG_MINOR_ERRORS)
 	{
@@ -209,13 +219,16 @@ function CheckURLValidity($cache){
 function CheckBlockedCache($cache){
 	$cache = strtolower($cache);
 	if(
-		// They doesn't work
+		// Bad
 		$cache == "http://www.xolox.nl/gwebcache/"
 		|| $cache == "http://www.xolox.nl/gwebcache/default.asp"
-		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/index.asp"
-		|| $cache == "http://www.deepnetexplorer.co.uk/webcache/"
-		// It is the same of http://gwebcache.alpha64.info/
+		|| $cache == "http://gwebcache.alpha64.info/"
 		|| $cache == "http://gwebcache.alpha64.info/index.php"
+		// Don't work
+		|| $cache == "http://nonsense.ma.cx:9050/skulls.php"
+		// They are the same of http://gwc.nickstallman.net/gcache.asp
+		|| $cache == "http://gwc.nickstallman.net/gcache"
+		|| $cache == "http://gwc.nickstallman.net/gcache2.asp"
 	)
 		return TRUE;
 
@@ -272,7 +285,7 @@ function CheckFailedUrl($url){
 	for($i = 0, $now = time(), $offset = @date("Z"); $i < $file_count; $i++)
 	{
 		$read = explode("|", $file[$i]);
-		if( strtolower($url) == strtolower($read[0]) )
+		if($url == $read[0])
 		{
 			$read[1] = trim($read[1]);
 			$time_diff = $now - ( @strtotime( $read[1] ) + $offset );	// GMT
@@ -293,8 +306,8 @@ function AddFailedUrl($url){
 	fclose($file);
 }
 
-function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version){
-	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ($line + 1) ) ) );
+function ReplaceHost($host_file, $line, $ip, $leaves, $net, $cluster, $client, $version, $recover_limit = FALSE){
+	$new_host_file = implode("", array_merge( array_slice($host_file, 0, $line), array_slice( $host_file, ( $recover_limit ? $line + 2 : $line + 1 ) ) ) );
 
 	$file = fopen(DATA_DIR."/hosts_".$net.".dat", "wb");
 	flock($file, 2);
@@ -384,7 +397,7 @@ function PingGWC($cache, $query){
 
 			if( substr($oldpong, 0, 13) == "PHPGnuCacheII" ||	// Workaround for compatibility
 				substr($oldpong, 0, 10) == "perlgcache" ||
-				substr($oldpong, 0, 9) == "GWebCache" ||
+				substr($oldpong, 0,  9) == "GWebCache" ||
 				substr($oldpong, 0, 12) == "jumswebcache" )
 				$nets = "gnutella-gnutella2";
 			elseif(substr($oldpong, 0, 9) == "MWebCache")
@@ -405,7 +418,7 @@ function PingGWC($cache, $query){
 	return $cache_data;
 }
 
-function CheckGWC($cache, $cache_network, $cache_exists = FALSE){
+function CheckGWC($cache, $cache_network){
 	global $SUPPORTED_NETWORKS;
 
 	$nets = NULL;
@@ -415,7 +428,7 @@ function CheckGWC($cache, $cache_network, $cache_exists = FALSE){
 
 	if($received_data[0] == "ERR")
 	{
-		if( ($cache_network == "gnutella2" || $cache_exists) && strpos($received_data[1], "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
+		if( strpos($received_data[1], "network not supported") > -1 )	// Workaround for compatibility with GWCv2 specs
 		{																// FOR WEBCACHES DEVELOPERS: If you want avoid necessity to make double ping, make your cache pingable without network parameter when there are ping=1 and multi=1
 			$query .= "&net=gnutella2";
 			$result = PingGWC($cache, $query);
@@ -475,7 +488,12 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 	}
 	else
 	{
-		if($file_count >= MAX_HOSTS || $file_count >= 60)
+		if($file_count > MAX_HOSTS || $file_count >= 60)
+		{
+			ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version, TRUE);
+			return 3; // OK, pushed old data
+		}
+		elseif($file_count == MAX_HOSTS)
 		{
 			ReplaceHost($host_file, 0, $ip, $leaves, $net, $cluster, $client, $version);
 			return 3; // OK, pushed old data
@@ -493,11 +511,10 @@ function WriteHostFile($ip, $leaves, $net, $cluster, $client, $version){
 }
 
 function WriteCacheFile($cache, $net, $client, $version){
-	global $SERVER_NAME, $SERVER_PORT, $PHP_SELF;
+	global $MY_URL;
 
 	list( , $url ) = explode("://", $cache);
-	$my_url = $SERVER_PORT != 80 ? $SERVER_NAME.":".$SERVER_PORT.$PHP_SELF : $SERVER_NAME.$PHP_SELF;
-	if($url == $my_url)	// It doesn't allow to insert itself in cache list
+	if($url == $MY_URL)	// It doesn't allow to insert itself in cache list
 		return 0; // Exists
 
 	$cache = RemoveGarbage($cache);
@@ -532,7 +549,7 @@ function WriteCacheFile($cache, $net, $client, $version){
 			return 0; // Exists
 		else
 		{
-			$cache_data = CheckGWC($cache, $net, TRUE);
+			$cache_data = CheckGWC($cache, $net);
 
 			if($cache_data[0] == "FAIL")
 			{
@@ -773,8 +790,6 @@ $MULTI = !empty($_GET["multi"]) ? $_GET["multi"] : 0;
 $COMPRESSION = !empty($_GET["compression"]) && (float)PHP_VERSION >= 4.1 ? strtolower($_GET["compression"]) : NULL;
 $INFO = !empty($_GET["info"]) ? $_GET["info"] : 0;
 
-$SERVER_NAME = !empty($_SERVER["SERVER_NAME"]) ? $_SERVER["SERVER_NAME"] : $_SERVER["HTTP_HOST"];
-$SERVER_PORT = !empty($_SERVER["SERVER_PORT"]) ? $_SERVER["SERVER_PORT"] : 80;
 $USER_AGENT = !empty($_SERVER["HTTP_USER_AGENT"]) ? str_replace("/", " ", $_SERVER["HTTP_USER_AGENT"]) : NULL;
 
 $IP = !empty($_GET["ip"]) ? $_GET["ip"] : ( !empty($_GET["ip1"]) ? $_GET["ip1"] : NULL );
@@ -819,6 +834,8 @@ $KICK_START = !empty($_GET["kickstart"]) ? $_GET["kickstart"] : 0;	// It request
 if( empty($_SERVER["QUERY_STRING"]) )
 	$SHOWINFO = 1;
 
+if( isset($noload) ) die();
+
 if(MAINTAINER_NICK == "your nickname here")
 {
 	echo "You must read readme.txt in the admin directory first.\r\n";
@@ -833,7 +850,7 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 	if($file)
 	{
 		flock($file, 2);
-		fwrite($file, SHORT_VER."|".STATS_ENABLED."|0|".gmdate("Y/m/d H:i"));
+		fwrite($file, VER."|".STATS_ENABLED."|0|".gmdate("Y/m/d H:i"));
 		flock($file, 3);
 		fclose($file);
 	}
@@ -954,9 +971,6 @@ else
 		die();
 	}
 
-	if((int)PHP_VERSION >= 4 && ini_get("zlib.output_compression") == 1)
-		ini_set("zlib.output_compression", "Off");
-
 	if(!$PING && !$GET && !$SUPPORT && !$HOSTFILE && !$URLFILE && !$STATFILE && $CACHE == NULL && $IP == NULL && !$INFO)
 	{
 		print "ERROR: Invalid command - Request rejected\r\n";
@@ -964,6 +978,9 @@ else
 		UpdateStats("other");
 		die();
 	}
+
+	if($CLIENT == "TEST")
+		$IP = NULL;
 
 	if($LEAVES != NULL && !is_numeric($LEAVES))
 	{
@@ -985,6 +1002,11 @@ else
 
 		if( strpos($url, "/") > -1 )
 			list( $host, $path ) = explode("/", $url, 2);
+		elseif( strpos($url, "?") > -1 )
+		{
+			list( $host, $path ) = explode("?", $url);
+			$path = "?".$path;
+		}
 		else
 		{
 			$host = $url;
@@ -1026,11 +1048,11 @@ else
 		else
 			$host_port = ":".$host_port;
 
-		// Problem with wildcard dns on .xolox.nl is fixed
+		// The problem with wildcard dns on .xolox.nl is fixed
 		/*if( substr($host_name, -9) == ".xolox.nl" )
 			$CACHE = "http://www.xolox.nl/gwebcache/";
 		else*/
-			$CACHE = $protocol."://".$host_name.$host_port."/".$path;
+			$CACHE = $protocol."://".strtolower($host_name).$host_port."/".$path;
 	}
 
 	if($COMPRESSION == "deflate")
@@ -1038,16 +1060,14 @@ else
 		$compressed = TRUE;
 		ob_start("gzdeflate");
 	}
-	elseif($COMPRESSION == "zlib")
-	{
-		$compressed = TRUE;
-		ob_start("gzcompress");
-	}
 	else
 		$compressed = FALSE;
 
 	if($compressed) header("Content-Encoding: deflate");
-	header("X-Remote-IP: ".$REMOTE_IP);
+	if( !empty($_SERVER["HTTP_X_FORWARDED_FOR"]) )
+		header("X-Remote-IP: ".$_SERVER["HTTP_X_FORWARDED_FOR"]);
+	else
+		header("X-Remote-IP: ".$REMOTE_IP);
 	if($NET == NULL) $NET = "gnutella";
 
 	if( CheckNetworkString($SUPPORTED_NETWORKS, $NET, FALSE) )
@@ -1202,12 +1222,13 @@ else
 	list($last_ver, $last_stats_status, $last_action, $last_action_date) = explode("|", $last_action_string);
 	$time_diff = time() - ( @strtotime( $last_action_date ) + @date("Z") );	// GMT
 	$time_diff = floor($time_diff / 3600);	// Hours
-	if($time_diff >= 1)
+	if($time_diff >= 1 && $CACHE == NULL)
 	{
 		$last_action_date = gmdate("Y/m/d H:i");
 		switch($last_action)
 		{
 			case 0:
+				//$clean_file
 				$clean_stats = 1;
 				$clean_type = "other";
 				break;
@@ -1225,7 +1246,7 @@ else
 		if(!STATS_ENABLED) $clean_stats = 0;
 		$changed = 1;
 	}
-	if($last_ver != SHORT_VER || $last_stats_status != STATS_ENABLED)
+	if($last_ver != VER || $last_stats_status != STATS_ENABLED)
 	{
 		if( !function_exists("Initialize") )
 		{
@@ -1237,7 +1258,7 @@ else
 	if($changed)
 	{
 		rewind($file);
-		fwrite($file, SHORT_VER."|".STATS_ENABLED."|".($last_action + 1)."|".$last_action_date);
+		fwrite($file, VER."|".STATS_ENABLED."|".($last_action + 1)."|".$last_action_date);
 	}
 	flock($file, 3);
 	fclose($file);

@@ -22,8 +22,9 @@ INSTALLATION PROCEDURE
 4. In vars.php change also MAINTAINER_EMAIL (optional), MAINTAINER_WEBSITE (optional) and MAINTAINER_NICK
 5. Send updated vars.php to your web server
 6. Go on http://name_of_your_web_server/skulls.php in your browser, if you don't see any error you are OK
-Note: You must be sure that there aren't any problems before go to the step 7
-7. Submit the url of skulls.php here: http://skulls.sourceforge.net/submit.php
+7. Put the full url of the cache in CACHE_URL inside vars.php (with notepad), example: http://gwc.your-site.com/skulls.php (optional but recommended)
+Note: You must be sure that there aren't any problems before go to the step 8
+8. Submit the url of skulls.php here: http://skulls.sourceforge.net/submit.php
 
 If you need more help ask here: http://sourceforge.net/forum/forum.php?forum_id=522656
 
@@ -32,7 +33,7 @@ UPDATE PROCEDURE
 1. Delete old skulls.php in your web server
 2. Send updated files inside admin directory to your web server
 3. Go on http://name_of_your_web_server/admin/update.php in your browser
-4. Send all updated files to your web server
+4. Send all updated files to your web server (Copy the things that you have changed in the new vars.php)
 5. Go on http://name_of_your_web_server/skulls.php in your browser, if you don't see any error you are OK
 
 If you need more help ask here: http://sourceforge.net/forum/forum.php?forum_id=522656
