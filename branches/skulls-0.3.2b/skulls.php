@@ -32,7 +32,7 @@ define('DEBUG', 0);
 
 function GetMainFileRev()
 {
-	$main_rev = '$Rev$';
+	$main_rev = '$Rev: 515 $';
 	return trim(substr($main_rev, 1, -1));
 }
 
