@@ -534,6 +534,7 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 		$port = 80;
 	}
 
+	$errno = -1; $errstr = "";
 	$fp = @fsockopen($host_name, $port, $errno, $errstr, (FSOCKOPEN ? 10 : 5));
 	$status = NULL;
 	$msg = NULL;
@@ -541,16 +542,16 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 	$msg_info = NULL;
 	if(DEBUG) echo "---------------<br>";
 
-	if(!$fp)
+	if($fp === false)
 	{
 		$status = 'CONN-ERR';
-		$msg = 'Connection error '.$errno.' ('.rtrim($errstr).')';
+		$msg = 'Connection error '.$errno; if(!empty($errstr)) $msg .= ' ('.rtrim($errstr).')';
 	}
 	else
 	{
 		$query = 'update_check=1&url='.rawurlencode($MY_URL).'&client='.VENDOR.'&version='.SHORT_VER.'&cache=1';
 
-		if( !fwrite( $fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n") )
+		if( fwrite($fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n") === false )
 		{
 			$status = "REQUEST_ERROR";
 			$msg = "Request error";
