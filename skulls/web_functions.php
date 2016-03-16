@@ -551,7 +551,7 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 	{
 		$query = 'update_check=1&url='.rawurlencode($MY_URL).'&client='.VENDOR.'&version='.SHORT_VER.'&cache=1';
 
-		if( fwrite($fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n") === false )
+		if( fwrite($fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." ".$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n") === false )
 		{
 			$status = "REQUEST_ERROR";
 			$msg = "Request error";
