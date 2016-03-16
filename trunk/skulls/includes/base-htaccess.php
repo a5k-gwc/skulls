@@ -58,7 +58,7 @@ AddCharset        utf-8 .css .js
   ExpiresActive On
 
   # 1 day - Check also the extension to avoid setting it also on other files (like .php)
-  <FilesMatch "\.(html?)$">
+  <FilesMatch "\.html?$">
     ExpiresByType text/html            A86400
   </FilesMatch>
   # 1 day
