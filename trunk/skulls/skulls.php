@@ -143,7 +143,9 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	/* Block empty User-Agent, User-Agent without version and other rip-offs */
 	if($vendor === 'RAZA')
 	{
-		if($ua === "" || $ua === 'Shareaza' || strpos($ua, 'Shareaza PRO') === 0 || strpos($ua, 'dianlei') === 0 || strpos($ua, 'Python-urllib/') === 0 || $ver === '1.0.0.0' || $ver === '3.0.0.0')
+		if($ua === "" || $ua === 'Shareaza' || strpos($ua, 'ShareazaPRO') === 0 || strpos($ua, 'Shareaza PRO') === 0 || strpos($ua, 'dianlei') === 0 || strpos($ua, 'Python-urllib/') === 0)
+			return true;
+		if(($ver === '1.0.0.0' || $ver === '3.0.0.0') && strpos($ua, 'Shareaza ') === 0)
 			return true;
 	}
 	/* Block empty User-Agent and other rip-offs */
