@@ -22,17 +22,13 @@ define('REVISION', '5.0.0.1');
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
 
-if(file_exists('./revision.dat'))
-	$file_content = file('./revision.dat');
-
-if( !isset($file_content[0]) )
-	$file_content[0] = 0;
+if(file_exists('./revision.dat')) $rev_num = file_get_contents('./revision.dat'); if(empty($rev_num)) $rev_num = 1;
 
 echo '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'."\r\n";
 $html_header = '<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><title>Data update</title><meta name="robots" content="noindex, follow, noarchive, noimageindex"></head><body>'."\r\n";
 $html_footer = '</body></html>'."\r\n";
 
-if(rtrim($file_content[0]) === REVISION)
+if($rev_num === REVISION)
 {
 	echo $html_header;
 	echo '<div>There is no need to update it.<br>This file checks only if data files are updated, it doesn\'t check if the GWC is updated.<br>To check if this GWC is updated you must go on the main page.</div>'."\r\n";
@@ -165,6 +161,7 @@ if( file_exists($gwc_full_name) )
 			if($data[$i] !== "")
 				fwrite($file, $data[$i]."\n");
 		}
+		fflush($file);
 		flock($file, LOCK_UN);
 		fclose($file);
 	}
@@ -239,11 +236,12 @@ if($errors)
 else
 {
 	$file = fopen('./revision.dat', 'wb');
-	if($file !== FALSE)
+	if($file !== false)
 	{
-		flock($file, 2);
+		flock($file, LOCK_EX);
 		fwrite($file, REVISION);
-		flock($file, 3);
+		fflush($file);
+		flock($file, LOCK_UN);
 		fclose($file);
 
 		if($updated)
