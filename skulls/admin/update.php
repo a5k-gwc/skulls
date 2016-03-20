@@ -17,7 +17,7 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-define('REVISION', '5.0.0.1');
+define('REVISION', '5.0.0.2');
 
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
