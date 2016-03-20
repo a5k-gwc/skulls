@@ -190,6 +190,12 @@ function ValidateSize($name)
 	}
 }
 
+function RemoveSpecificFile($name, $size, $sha1)
+{
+	$name = '../'.$name;
+	if(file_exists($name) && filesize($name) === $size && sha1_file($name) === $sha1) { global $log; $log .= DeleteFile($name, true); }
+}
+
 function RemoveFilesStartingWith($filename_prefix, $dir)
 {
 	$dir = '../'.$dir.'/';
@@ -202,6 +208,18 @@ function RemoveFilesStartingWith($filename_prefix, $dir)
 	closedir($dh);
 }
 
+$old_htaccess = array(
+	array(0,    'da39a3ee5e6b4b0d3255bfef95601890afd80709'),  /* Empty file */
+	array(158,  'a32f8fef07cecefb9942d120bf4cc71bb11d7108'),  /* v0.2.9, v0.3.0, v0.3.1 */
+	array(3053, '5978373c6535cc7ec7735327767ede5bfc4a3391')   /* v0.3.2, v0.3.2b */
+);
+
+/* Changed files */
+foreach($old_htaccess as $val) RemoveSpecificFile('.htaccess', $val[0], $val[1]); unset($val);
+/* Moved files */
+$log .= DeleteFile('geoip/GeoIP.dat');  /* v0.3.1 */
+/* Renamed files */
+RemoveSpecificFile('ext/blocklist.dat', 18131, '0c3a14080b7817aa7601c599c8820198e5ab1167');  /* v0.3.2 */
 RemoveFilesStartingWith('hosts_', DATA_DIR);
 $log .= DeleteFile(DATA_DIR.'/caches.dat');
 $log .= DeleteFile('log/unsupported_nets.log');
@@ -211,10 +229,11 @@ $log .= DeleteFile('log/unidentified_clients.log');
 $log .= DeleteFile('log/old_clients.log');
 $log .= DeleteFile('log/invalid_queries.log');
 $log .= DeleteFile('log/invalid_leaves.log');
+if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
+/* Deleted files */
 $log .= DeleteFile('admin/index.html');
 $log .= DeleteFile('admin/index.htm');
-if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
-
+/* Size check */
 $log .= ValidateSize('data/failed_urls.dat');
 $log .= ValidateSize('stats/upd-reqs.dat');
 $log .= ValidateSize('stats/upd-bad-reqs.dat');
