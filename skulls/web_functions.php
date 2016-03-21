@@ -436,7 +436,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'SKLL':
 			$client_name = 'Skulls';
-			$url = 'http://sourceforge.net/projects/skulls/';
+			$url = 'http://skulls.sourceforge.net/';
 			$IS_GWC = 2;
 			break;
 
