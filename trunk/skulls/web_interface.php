@@ -125,6 +125,12 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							</td>
 						</tr>
 						<tr>
+							<th>- License:</th>
+							<td>
+								<span class="bold"><a href="<?php echo LICENSE_URL; ?>" rel="external"><?php echo LICENSE_NAME.' v'.LICENSE_VER; ?></a></span>
+							</td>
+						</tr>
+						<tr>
 							<td></td>
 							<td>&nbsp;</td>
 						</tr>

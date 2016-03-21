@@ -28,6 +28,11 @@ define('GWC_SITE', 'https://sourceforge.net/projects/skulls/');	/* Official site
 define('OPEN_SOURCE', '1');
 define('MAX_HOST_AGE', 259200);									/* 3 days */
 define('RESPONSE_LINES_LIMIT', 64);
+
+define('LICENSE_NAME', 'GPL');
+define('LICENSE_VER', '3+');
+define('LICENSE_URL', 'http://www.gnu.org/licenses/gpl-3.0.html');
+
 define('DEBUG', 0);
 
 function GetMainFileRev()
