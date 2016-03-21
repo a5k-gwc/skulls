@@ -26,13 +26,12 @@ define('SHORT_VER', '0.3.2');									/* Numeric version (without letters) */
 define('VER', SHORT_VER.'c');									/* Full version (it can contain letters) */
 define('GWC_SITE', 'https://sourceforge.net/projects/skulls/');	/* Official site of this GWC */
 
-define('MAX_HOST_AGE', 259200);									/* 3 days */
-define('RESPONSE_LINES_LIMIT', 64);
-
 define('LICENSE_NAME', 'GPL');
 define('LICENSE_VER', '3+');
 define('LICENSE_URL', 'http://www.gnu.org/licenses/gpl-3.0.html');
 
+define('MAX_HOST_AGE', 259200);									/* 3 days */
+define('RESPONSE_LINES_LIMIT', 64);
 define('DEBUG', 0);
 
 function GetMainFileRev()
@@ -1974,13 +1973,13 @@ else
 		echo "I|name|".NAME."\r\n";
 		echo "I|ver|".VER."\r\n";
 		echo "I|vendor|".VENDOR."\r\n";
-		echo "I|gwc-site|".GWC_SITE."\r\n";
+		echo "I|software-url|".GWC_SITE."\r\n";
 		echo "I|license|".LICENSE_NAME.' v'.LICENSE_VER."\r\n";
 		echo "I|license-url|".LICENSE_URL."\r\n";
 
 		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
 		if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
-			echo "I|maintainer-site|".MAINTAINER_WEBSITE."\r\n";
+			echo "I|maintainer-url|".MAINTAINER_WEBSITE."\r\n";
 	}
 
 	if($CACHE != NULL || $HOST != NULL)
