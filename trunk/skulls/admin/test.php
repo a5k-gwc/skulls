@@ -17,11 +17,17 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+function GetMicrotime()
+{
+	list($usec, $sec) = explode(' ', microtime(), 2);
+	return (float)$usec + (float)$sec;
+}
+
 function FsockTest1($hostname, $port)
 {
-	$fp = @fsockopen($hostname, $port, $errno, $errstr, 5); if($fp === false) return false;
+	$fp = @fsockopen('tcp://'.$hostname, $port, $errno, $errstr, 5); if($fp === false) return false;  /* Closed or unreachable port */
 	fclose($fp);
-	return true;
+	return true;  /* Opened port */
 }
 
 function FsockTest()
