@@ -518,7 +518,7 @@ function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$
 	return true;
 }
 
-function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php", $came_from = NULL)
+function QueryUpdateServer($url = 'http://skulls.sourceforge.net/latest_ver.php', $came_from = null)
 {
 	global $MY_URL;
 
@@ -527,15 +527,15 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 	$splitted_url = explode(":", $main_url[0], 2);	// $splitted_url[0] = www.test.com		$splitted_url[1] = 80
 
 	if( count($splitted_url) > 1 )
-		list($host_name, $port) = $splitted_url;
+		list($hostname, $port) = $splitted_url;
 	else
 	{
-		$host_name = $main_url[0];
+		$hostname = $main_url[0];
 		$port = 80;
 	}
 
 	$errno = -1; $errstr = "";
-	$fp = @fsockopen($host_name, $port, $errno, $errstr, (FSOCKOPEN ? 10 : 5));
+	$fp = @fsockopen($hostname, $port, $errno, $errstr, (FSOCKOPEN ? 10 : 5));
 	$status = NULL;
 	$msg = NULL;
 	$msg_error = NULL;
@@ -551,10 +551,10 @@ function QueryUpdateServer($url = "http://skulls.sourceforge.net/latest_ver.php"
 	{
 		$query = 'update_check=1&url='.rawurlencode($MY_URL).'&client='.VENDOR.'&version='.SHORT_VER.'&cache=1';
 
-		if( fwrite($fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." ".$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n") === false )
+		if(fwrite($fp, "GET ".substr( $url, strlen($main_url[0]), (strlen($url) - strlen($main_url[0]) ) )."?".$query." ".$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$hostname."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n") === false)
 		{
-			$status = "REQUEST_ERROR";
-			$msg = "Request error";
+			$status = 'REQUEST_ERROR';
+			$msg = 'Request failed';
 		}
 		else
 		{
