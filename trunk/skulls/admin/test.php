@@ -17,20 +17,23 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-function Ping($host_name)
+function FsockTest1($hostname, $port)
 {
-	if( !function_exists("fsockopen") )
-		return FALSE;
+	$fp = @fsockopen($hostname, $port, $errno, $errstr, 5); if($fp === false) return false;
+	fclose($fp);
+	return true;
+}
 
-	$port = 80;
-	$fp = @fsockopen($host_name, $port, $errno, $errstr, 20);
-	if($fp)
+function FsockTest()
+{
+	$ping = false;
+	if(function_exists('fsockopen'))
 	{
-		fclose ($fp);
-		return TRUE;
+		if(FsockTest1('google.com', 80))
+			$ping = true;
 	}
 
-	return FALSE;
+	return $ping;
 }
 
 function CheckFunction($function_name)
@@ -53,16 +56,11 @@ else
 
 echo "<br><br>\r\n";
 
-if( Ping("www.google.com") || Ping("www.libero.it") )
-	$ping = TRUE;
-else
-	$ping = FALSE;
-
 echo "<b><font color=\"blue\">Settings of vars.php</font></b>";
 echo "<blockquote>";
 
 echo "<b>FSOCKOPEN:</b> ";
-if($ping) echo "<b><font color=\"green\">1</font></b>";
+if(FsockTest()) echo "<b><font color=\"green\">1</font></b>";
 else echo "<b><font color=\"red\">0</font></b>";
 echo "<br>\r\n";
 echo "<b>CONTENT_TYPE_WORKAROUND:</b> If the box below is empty set the value to <b><font color=\"green\">0</font></b> otherwise you must set the value to <b><font color=\"red\">1</font></b><br>\r\n";
