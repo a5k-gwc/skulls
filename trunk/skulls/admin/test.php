@@ -30,16 +30,43 @@ function FsockTest1($hostname, $port)
 	return true;  /* Opened port */
 }
 
-function FsockTest()
+function FsockTest2($hostname, $port)
 {
-	$ping = false;
-	if(function_exists('fsockopen'))
+	//$start = GetMicrotime();
+
+	$fp = @fsockopen('tcp://'.$hostname, $port, $errno, $errstr, 5);
+	if($fp === false)
 	{
-		if(FsockTest1('google.com', 80))
-			$ping = true;
+		/* if(GetMicrotime()-$start > 4.9) */
+		if($errno === 111 || $errno === 10061) return true;  /* Closed port but reachable */
+		elseif($errno === 110 || $errno === 10060) return false;  /* Unreachable port (connection timed out) */
+		else return (int)$errno;
 	}
 
-	return $ping;
+	fclose ($fp);
+	return true;  /* Opened port */
+}
+
+function FsockTest()
+{
+	$fsock_base = false; $fsock_full = false; $warning = null;
+
+	if(function_exists('fsockopen') && FsockTest1('google.com', 80) && FsockTest1('google.com', 443))
+	{
+		$fsock_base = true;
+		$result = FsockTest2('sourceforge.net', 60000);
+
+		if($result === true) $fsock_full = true;
+		elseif($result === false);
+		else $warning = 'Unknown result from fsockopen, returned error: '.$result;
+	}
+
+	return array($fsock_base, $fsock_full, $warning);
+}
+
+function DisplayBool($bool)
+{
+	return $bool? '<span style="color: green">true</span>' : '<span style="color: red">false</span>';
 }
 
 function CheckFunction($function_name)
@@ -62,19 +89,24 @@ else
 
 echo "<br><br>\r\n";
 
-echo "<b><font color=\"blue\">Settings of vars.php</font></b>";
-echo "<blockquote>";
+echo "<div><b><big><font color=\"blue\">Detected settings</font></big></b></div>\r\n";
+echo '<div><i><small>Here you will see the settings that you should set in vars.php based on some tests on your server.</small></i></div>';
+echo '<div><i><small>The server must be connected to Internet otherwise the tests won\'t give the correct results.</small></i></div>';
 
-echo "<b>FSOCKOPEN:</b> ";
-if(FsockTest()) echo "<b><font color=\"green\">1</font></b>";
-else echo "<b><font color=\"red\">0</font></b>";
-echo "<br>\r\n";
-echo "<b>CONTENT_TYPE_WORKAROUND:</b> If the box below is empty set the value to <b><font color=\"green\">0</font></b> otherwise you must set the value to <b><font color=\"red\">1</font></b><br>\r\n";
-echo "<iframe src=\"inc.php\" height=\"50\" width=\"90\"></iframe><br>\r\n";
+echo "<blockquote>\r\n";
+
+$fsock_result = FsockTest(); if($fsock_result[2] !== null) $fsock_result[2] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[2].'">&sup1;</strong>';
+
+echo '<div><b>FSOCK_BASE: ',DisplayBool($fsock_result[0]),'</b></div>',"\r\n";
+echo '<div><b>FSOCK_FULL: ',DisplayBool($fsock_result[1]),'</b>',$fsock_result[2],'</div>',"\r\n";
+
+echo "<b>CONTENT_TYPE_WORKAROUND:</b> If the box below is empty then it is OK and you must set the value to <b><font color=\"green\">false</font></b> otherwise it means that your server interfere with the script and you must set the value to <b><font color=\"red\">true</font></b> to workaround the problem.<br>\r\n";
+echo "<iframe src=\"inc.php\" height=\"60\" width=\"300\"></iframe><br>\r\n";
 
 echo "</blockquote><br>\r\n";
 
-echo "<b><font color=\"blue\">Needed functions</font></b>";
+
+echo "<div><b><big><font color=\"blue\">Needed functions</font></big></b></div>\r\n";
 echo "<blockquote>";
 
 echo "<b>Function ctype_digit:</b> ";

@@ -676,7 +676,7 @@ function cURL_OnError($ch, $function_name, $initialized = true)
 
 function ConnectionTest()
 {
-	if(!FSOCKOPEN) return true;
+	if(!FSOCK_BASE) return true;
 
 	$fp = @fsockopen('google.com', 80, $errno, $errstr, 5); if($fp === false) return false;
 	fclose($fp);
@@ -686,7 +686,7 @@ function ConnectionTest()
 
 function PingPort($ip, $port)
 {
-	if(!FSOCKOPEN) return true;  //ToDO: Add cURL support
+	if(!FSOCK_FULL) return true;  //ToDO: Add cURL support
 
 	$fp = @fsockopen($ip, $port, $errno, $errstr, 8); if($fp === false) { if(LOG_MINOR_ERRORS) Logging('broken-hosts'); return false; }
 	fclose($fp);
@@ -718,7 +718,7 @@ function PingGWC($gwc_url, $query, $net_param = null)
 
 	$final_query = $query; if($net_param !== null) $final_query .= '&net='.$net_param;
 	$cache_data = null; $pong = ""; $oldpong = ""; $error = ""; $nets_list1 = null;
-	if(FSOCKOPEN)
+	if(FSOCK_FULL || (FSOCK_BASE && ($gwc_port === 80 || $gwc_port === 443)))
 	{
 		$errno = -1; $errstr = "";
 		$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_idn_hostname, $gwc_port, $errno, $errstr, (float)CONNECT_TIMEOUT);
