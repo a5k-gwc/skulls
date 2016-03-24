@@ -535,7 +535,7 @@ function QueryUpdateServer($url = 'http://skulls.sourceforge.net/latest_ver.php'
 	}
 
 	$errno = -1; $errstr = "";
-	$fp = @fsockopen($hostname, $port, $errno, $errstr, (FSOCKOPEN ? 10 : 5));
+	$fp = @fsockopen($hostname, $port, $errno, $errstr, (FSOCK_BASE? 10 : 5));
 	$status = NULL;
 	$msg = NULL;
 	$msg_error = NULL;
@@ -682,10 +682,10 @@ function CheckUpdates()
 	if($status === 'CONN-ERR' || $status === '403')
 	{
 		echo '<div class="bold">Update check process: ';
-		if(FSOCKOPEN)
+		if(FSOCK_BASE)
 			echo '<span class="bad"><strong>',$msg,'</strong></span>';
 		else
-			echo '<span class="unknown">Unable to check without fsockopen</span>';
+			echo '<span class="unknown">Unable to check</span>';
 		echo '</div>',"\n";
 	}
 	elseif($status === 'REQUEST_ERROR')
