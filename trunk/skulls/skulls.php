@@ -1864,7 +1864,7 @@ else
 		{
 			$result = -1; $is_udp = false;
 			if(!ENABLE_URL_SUBMIT) // Cache adding disabled
-				print "I|update|WARNING|URL adding is disabled\r\n";
+				print "I|update|OK|WARNING|URL adding is disabled\r\n";
 			elseif( ($UDP_CACHE !== null && $DETECTED_NET === 'gnutella' && !CheckUDPURLValidity($UDP_CACHE)))  // Invalid URL
 				print("I|update|WARNING|Invalid UDP URL"."\r\n");
 			elseif( ($CACHE !== null && !CheckURLValidity($CACHE)))  // Invalid URL
@@ -1888,13 +1888,13 @@ else
 				elseif( $result == 3 ) // OK, pushed old data
 					print "I|update|OK|URL added (pushed old data)\r\n";
 				elseif( $result == 4 ) // Blocked or failed URL
-					print "I|update|OK|Blocked URL\r\n";
+					print "I|update|OK|WARNING|Blocked URL\r\n";
 				elseif( $result == 5 ) // Ping failed
 				{
 					if($is_udp)
-						print "I|update|WARNING|Ping of ".$UDP_CACHE." failed\r\n";
+						print "I|update|OK|WARNING|Ping of ".$UDP_CACHE." failed\r\n";
 					else
-						print "I|update|WARNING|Ping of ".$CACHE." failed\r\n";
+						print "I|update|OK|WARNING|Ping of ".$CACHE." failed\r\n";
 				}
 				elseif( $result == 6 ) // Unsupported network
 					print "I|update|WARNING|Network of URL not supported\r\n";
