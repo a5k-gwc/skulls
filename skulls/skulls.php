@@ -1999,14 +1999,6 @@ else
 	else
 		UpdateStats(STATS_OTHER);
 
-	if(!empty($_GET['getspec']))
-	{
-		if($DETECTED_PV >=2 && $DETECTED_PV !== 3)
-			echo 'I|pv|',$DETECTED_PV,"\r\n";  /* v2.x, v4+ */
-		else
-			echo 'pv: ',$DETECTED_PV,"\r\n";   /* v0, v1.x, v3.x */
-	}
-
 	if($STATFILE)
 	{
 		if(STATS_ENABLED)
@@ -2032,6 +2024,14 @@ else
 			echo "I|general|WARNING|Accessed from localhost\r\n";
 		else
 			echo "WARNING: Accessed from localhost\r\n";
+	}
+
+	if(!empty($_GET['getspec']))
+	{
+		if($DETECTED_PV >=2 && $DETECTED_PV !== 3)
+			echo 'I|pv|',$DETECTED_PV,"\r\n";  /* v2.x, v4+ */
+		else
+			echo 'pv: ',$DETECTED_PV,"\r\n";   /* v0, v1.x, v3.x */
 	}
 
 
