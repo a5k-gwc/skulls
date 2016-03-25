@@ -1455,7 +1455,6 @@ function WriteStatsTotalReqs()
 	if($requests === "") $requests = 1; else $requests++;
 	rewind($file);
 	fwrite($file, $requests);
-	fflush($file);
 	flock($file, LOCK_UN);
 	fclose($file);
 }
