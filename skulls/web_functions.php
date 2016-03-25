@@ -455,6 +455,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 				$full_name = 'Unknown client';
 
 			if($vendor !== "") $full_name .= ' ('.$vendor.' '.$version.')';
+			if($ua !== 'KickStart') $ua = 'User-Agent: '.$ua;
 
 			return '<span title="'.$ua.'">'.$full_name.'</span>';
 	}
