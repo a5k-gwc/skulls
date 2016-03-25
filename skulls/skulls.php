@@ -457,6 +457,19 @@ function IsValidPrivateIP($ip)
 	return ($ip_array[0] === '10' || $ip_array[0] === '192' && $ip_array[1] === '168' || $ip_array[0] === '172' && $ip_array[1] >= 16 && $ip_array[1] <= 31);
 }
 
+function ValidateRemoteIP($ip, &$is_localhost)
+{
+	$is_localhost = false; if(ip2long($ip) === false) return false; $ip_array = explode('.', $ip, 4);
+
+	/* Private addresses */
+	if($ip_array[0] === '10' || $ip_array[0] === '172' && $ip_array[1] >= 16 && $ip_array[1] <= 31 || $ip_array[0] === '192' && $ip_array[1] === '168')
+		return false;
+	/* Loopback */
+	if($ip_array[0] === '127') $is_localhost = true;
+
+	return true;
+}
+
 function ValidateIP($ip, $reject_lan_IPs = true)
 {
 	$long_ip = ip2long($ip); if($long_ip === false) return false;
@@ -1658,7 +1671,7 @@ else
 			$FAKE_CF = true;
 	}
 
-	if(!ValidateIP($REMOTE_IP)) $REMOTE_IP = 'unknown';
+	if(!ValidateRemoteIP($REMOTE_IP, $IS_LOCALHOST)) $REMOTE_IP = 'unknown';
 	if(!ValidateIdentity($CLIENT, $VERSION, $UA, $NET, $DETECTED_NET) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
@@ -2011,6 +2024,14 @@ else
 		}
 		else
 			echo "WARNING: Statfile disabled\r\n";
+	}
+
+	if($IS_LOCALHOST)
+	{
+		if($DETECTED_PV >= 2 && $DETECTED_PV !== 3)
+			echo "I|general|WARNING|Accessed from localhost\r\n";
+		else
+			echo "WARNING: Accessed from localhost\r\n";
 	}
 
 
