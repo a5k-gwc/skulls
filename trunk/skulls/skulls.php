@@ -459,11 +459,13 @@ function IsValidPrivateIP($ip)
 
 function ValidateRemoteIP($ip, &$is_localhost)
 {
-	$is_localhost = false; if(ip2long($ip) === false) return false; $ip_array = explode('.', $ip, 4);
+	$is_localhost = false;
 
+	if(strpos($ip, ':') !== false) { if($ip === '::1') $is_localhost = true; return true; }  /* IPv6 */
+
+	$ip_array = explode('.', $ip, 4);
 	/* Private addresses */
-	if($ip_array[0] === '10' || $ip_array[0] === '172' && $ip_array[1] >= 16 && $ip_array[1] <= 31 || $ip_array[0] === '192' && $ip_array[1] === '168')
-		return false;
+	if($ip_array[0] === '10' || $ip_array[0] === '172' && $ip_array[1] >= 16 && $ip_array[1] <= 31 || $ip_array[0] === '192' && $ip_array[1] === '168') return false;
 	/* Loopback */
 	if($ip_array[0] === '127') $is_localhost = true;
 
@@ -1652,7 +1654,7 @@ else
 	$DETECTED_NET = $NET; $DETECTED_REMOTE_IP = null; $CLOUDFLARE_IP = null; $FAKE_CF = false;
 	if($DETECTED_NET === null) $DETECTED_NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
-	if(TRUST_X_REMOTE_ADDR_FROM_LOCALHOST && $REMOTE_IP === '127.0.0.1' && isset($_SERVER['HTTP_X_REMOTE_ADDR']))
+	if(TRUST_X_REMOTE_ADDR_FROM_LOCALHOST && isset($_SERVER['HTTP_X_REMOTE_ADDR']) && ($REMOTE_IP === '127.0.0.1' || $REMOTE_IP === '::1'))
 		$REMOTE_IP = $_SERVER['HTTP_X_REMOTE_ADDR'];
 
 	/* CloudFlare */
