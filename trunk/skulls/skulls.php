@@ -555,7 +555,7 @@ function CheckBlockedGWC($gwc_url)
 		|| $gwc_url === 'http://cache-doxu.rhcloud.com/'			/* Bugged/bad - No hosts */
 		|| $gwc_url === 'http://59.175.238.8:9030/beacon2/gwc.php'	/* Bugged/bad - Partially broken */
 		|| $gwc_url === 'http://peerproject.org/webcache/'			/* Duplicate URL */
-		|| $gwc_url === 'http://gofoxy.net/gwc/cgi-bin/fc'			/* No longer exist */
+		|| $gwc_url === 'http://cache.peernix.com/gwc.php'			/* No longer exist */
 		|| $gwc_url === 'http://gwc.gofoxy.net:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://gwc.iblinx.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://gamagic.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
