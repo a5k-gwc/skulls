@@ -61,7 +61,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'BEAR':
 			$client_name = 'BearShare';
-			$url = 'http://www.bearshare.com/';
+			$url = 'https://en.wikipedia.org/wiki/BearShare';
 			break;
 		case 'COCO':
 			$client_name = 'CocoGnut';
