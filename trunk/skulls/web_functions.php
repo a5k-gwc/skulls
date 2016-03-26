@@ -79,7 +79,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'FOXY':  /* Foxy - client of Foxy network */
 			$client_name = 'Foxy';
-			$url = 'http://en.wikipedia.org/wiki/Foxy_%28P2P%29';
+			$url = 'https://en.wikipedia.org/wiki/Foxy_%28P2P%29';
 			break;
 		case 'FSCP':
 			$client_name = 'Filescope';
@@ -125,7 +125,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'GPUX':
 			$client_name = 'GPU';
-			$url = 'http://sourceforge.net/projects/gpu/';
+			$url = 'https://sourceforge.net/projects/gpu/';
 			break;
 		/* ToDO: Check also vendor GNTD, maybe old version */
 		case 'GTKG':
@@ -142,7 +142,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'LIME':
 			$client_name = 'LimeWire';
-			$url = 'http://en.wikipedia.org/wiki/LimeWire';
+			$url = 'https://en.wikipedia.org/wiki/LimeWire';
 			break;
 		case 'MACT':
 			$client_name = 'Mactella';
@@ -276,7 +276,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'WSHR':
 			$client_name = 'WireShare';
-			$url = 'http://sourceforge.net/projects/wireshare/';
+			$url = 'https://sourceforge.net/projects/wireshare/';
 			break;
 		case 'XOLO':
 			$client_name = 'XoloX';
@@ -297,7 +297,8 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'CABO':  /* Cabos (client of gnutella network) - the original vendor code is LIME */
 			$client_name = 'Cabos'; $ua_prefix = 'LimeWire MOD - ';
-			$url = 'http://cabos.sourceforge.jp/';
+			$url = 'https://sourceforge.net/projects/cabos/';
+			/* http://cabos.osdn.jp/ */
 			break;
 		case 'KOMM':  /* Kommute (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'Kommute';
@@ -311,7 +312,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'MMFC':  /* MUTE MFC (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'MUTE MFC';
-			$url = 'http://sourceforge.net/projects/mfc-mute-net/';
+			$url = 'https://sourceforge.net/projects/mfc-mute-net/';
 			break;
 		case 'MTLL':  /* Mutella (client of gnutella network) - the original vendor code is MUTE but it is changed to MTLL in the code to avoid confusion with MUTE (client of MUTE network) */
 			$client_name = 'Mutella';
@@ -360,22 +361,22 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'BCII':
 			$client_name = 'Beacon Cache II';
-			$url = 'http://sourceforge.net/projects/beaconcache/';
+			$url = 'https://sourceforge.net/projects/beaconcache/';
 			$IS_GWC = 2;
 			break;
 		case 'BCON':
 			$client_name = 'Beacon Cache';
-			$url = 'http://sourceforge.net/projects/beaconcache/';
+			$url = 'https://sourceforge.net/projects/beaconcache/';
 			$IS_GWC = 2;
 			break;
 		case 'Boa':
 			$client_name = 'Boa';
-			$url = 'http://github.com/kevogod/Boa';
+			$url = 'https://github.com/kevogod/Boa';
 			$IS_GWC = 2;
 			break;
 		case 'Cachechu':
 			$client_name = 'Cachechu';
-			$url = 'http://github.com/kevogod/cachechu';
+			$url = 'https://github.com/kevogod/cachechu';
 			$IS_GWC = 2;
 			break;
 		case 'CANN':
