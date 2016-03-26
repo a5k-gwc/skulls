@@ -172,13 +172,11 @@ function ValidateIdentity(&$vendor, &$ver, &$ua, $net, &$detected_net)
 {
 	if($vendor === 'RAZA')
 	{
-		if(strpos($ua, 'ShareZilla') === 0) $vendor = 'SHZI';
-		elseif(strpos($ua, 'Shareaza ') !== 0) $vendor = 'RAZM';  /* Change vendor code of mod versions */
+		if(strpos($ua, 'Shareaza ') !== 0) $vendor = 'RAZM';  /* Change vendor code of mod versions */
 	}
 	elseif($vendor === 'LIME')
 	{
 		if(strpos($ua, 'Cabos/') !== false) { $vendor = 'CABO'; $ver = substr($ua, strpos($ua, 'Cabos/')+6, -1); }
-		elseif(strpos($ua, 'LimeZilla/') === 0) $vendor = 'LMZI';
 		elseif(strpos($ua, 'LimeWire/') !== 0 || (float)$ver >= 5.7) $vendor = 'LIMM';  /* Change vendor code of mod versions */
 	}
 	elseif($vendor === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */

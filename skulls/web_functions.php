@@ -307,9 +307,6 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 		case 'LIMM':  /* Generic vendor (client of gnutella network) - the original vendor code is LIME */
 			$client_name = 'LimeWire MOD'; $ua_prefix = 'LimeWire MOD - ';
 			break;
-		case 'LMZI':  /* LimeZilla (client of gnutella network) - the original vendor code is LIME */
-			$client_name = 'LimeZilla'; $ua_prefix = 'LimeWire MOD - ';
-			break;
 		case 'MMFC':  /* MUTE MFC (client of MUTE network) - the original vendor code is MUTE */
 			$client_name = 'MUTE MFC';
 			$url = 'https://sourceforge.net/projects/mfc-mute-net/';
@@ -323,10 +320,6 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'RAZM':  /* Generic vendor (client of gnutella/gnutella2 network) - the original vendor code is RAZA */
 			$client_name = 'Shareaza MOD'; $ua_prefix = 'Shareaza MOD - ';
-			break;
-		case 'SHZI':  /* ShareZilla (client of gnutella/gnutella2 network) - the original vendor code is RAZA */
-			$client_name = 'ShareZilla'; $ua_prefix = 'Shareaza MOD - ';
-			$url = 'http://www.sharezillas.com/products/sharezilla.html';
 			break;
 
 		/* Crawlers */
