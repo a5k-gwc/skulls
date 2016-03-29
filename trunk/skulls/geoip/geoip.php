@@ -19,7 +19,7 @@
 
 /*
 This product includes GeoLite data created by MaxMind, available at http://www.maxmind.com/
-Database download: http://dev.maxmind.com/geoip/legacy/geolite/ 
+Database download: http://dev.maxmind.com/geoip/legacy/geolite/
 Used GeoLite Country and GeoLite ASN.
 
 This product includes country flag icons created by Mark James, available at http://www.famfamfam.com/
