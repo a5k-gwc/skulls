@@ -1,5 +1,5 @@
 Skulls! Multi-Network WebCache
--------------------------------
+------------------------------
 
 skulls.php is the main file.
 
