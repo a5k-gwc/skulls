@@ -49,7 +49,19 @@ function FsockTest2($hostname, $port)
 
 function FsockTest()
 {
-	$fsock_base = false; $fsock_full = false; $warning = null;
+	$fsock_base = false; $fsock_full = false; $warning = null; $now = time();
+
+	$cache_file = './test_cached.dat';
+	if(file_exists($cache_file))
+	{
+		$file = file_get_contents($cache_file);
+		if(!empty($file))
+		{
+			$file_array = explode('|', $file, 5); unset($file);
+			if(ctype_digit($file_array[0]) && $file_array[0] > $now - 3 * 60 * 60)
+				return array((bool)$file_array[1], (bool)$file_array[2], $file_array[3], $file_array[0]);
+		}
+	}
 
 	if(function_exists('fsockopen') && FsockTest1('google.com', 80) && FsockTest1('google.com', 443))
 	{
@@ -61,7 +73,17 @@ function FsockTest()
 		else $warning = 'Unknown result from fsockopen, returned error: '.$result;
 	}
 
-	return array($fsock_base, $fsock_full, $warning);
+	$fp = fopen($cache_file, 'wb');
+	if($fp !== false)
+	{
+		flock($fp, LOCK_EX);
+		fwrite($fp, $now.'|'.(int)$fsock_base.'|'.(int)$fsock_full.'|'.$warning.'|');
+		fflush($fp);
+		flock($fp, LOCK_UN);
+		fclose($fp);
+	}
+
+	return array($fsock_base, $fsock_full, $warning, $now);
 }
 
 function DisplayBool($bool)
@@ -92,10 +114,10 @@ echo "<br><br>\r\n";
 echo "<div><b><big><font color=\"blue\">Detected settings</font></big></b></div>\r\n";
 echo '<div><i><small>Here you will see the settings that you should set in vars.php based on some tests on your server.</small></i></div>';
 echo '<div><i><small>The server must be connected to Internet otherwise the tests won\'t give the correct results.</small></i></div>';
+$fsock_result = FsockTest(); if(!empty($fsock_result[2])) $fsock_result[2] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[2].'">&sup1;</strong>';
+echo '<div><b><small>Last check: '.gmdate('Y/m/d H:i', $fsock_result[3]),' UTC</small></b></div>',"\r\n";
 
 echo "<blockquote>\r\n";
-
-$fsock_result = FsockTest(); if($fsock_result[2] !== null) $fsock_result[2] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[2].'">&sup1;</strong>';
 
 echo '<div><b>FSOCK_BASE: ',DisplayBool($fsock_result[0]),'</b></div>',"\r\n";
 echo '<div><b>FSOCK_FULL: ',DisplayBool($fsock_result[1]),'</b>',$fsock_result[2],'</div>',"\r\n";
