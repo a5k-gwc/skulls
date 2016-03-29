@@ -51,7 +51,7 @@ function FsockTest()
 {
 	$fsock_base = false; $fsock_full = false; $warning = null; $now = time();
 
-	$cache_file = './test_cached.dat';
+	$cache_file = './test-cached.dat';
 	if(file_exists($cache_file))
 	{
 		$file = file_get_contents($cache_file);
