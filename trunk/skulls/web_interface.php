@@ -339,24 +339,24 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 									$output .= $cache_url;
 
 								$output .= '</a></span> &nbsp;</td><td><span title="'.$gwc_server.'">';
-								if(strpos($cache_name, NAME) === 0)
+								if(strpos($cache_name, 'Sk'.'ulls') === 0)
+									$output .= '<a class="gwc-home-link" href="http://sk'.'ulls.sourceforge.net/" rel="external nofollow">'.$cache_name.'</a>';
+								elseif(strpos($cache_name, NAME) === 0)
 									$output .= '<a class="gwc-home-link" href="'.GWC_SITE.'" rel="external nofollow">'.$cache_name.'</a>';
-								elseif(NAME !== 'Sk'.'ulls' && strpos($cache_name, 'Sk'.'ulls') === 0)
-									$output .= '<a class="gwc-home-link" href="http://sourceforge.net/projects/sk'.'ulls/" rel="external nofollow">'.$cache_name.'</a>';
 								//elseif(strpos($cache_name, 'Bazooka') === 0)
-									//$output .= '<a class="gwc-home-link" href="http://www.bazookanetworks.com/" rel="external nofollow">'.$cache_name.'</a>';
+									//$output .= '<a class="gwc-home-link" href="" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'Beacon Cache') === 0)  /* Beacon Cache and Beacon Cache II */
-									$output .= '<a class="gwc-home-link" href="http://sourceforge.net/projects/beaconcache/" rel="external nofollow">'.$cache_name.'</a>';
+									$output .= '<a class="gwc-home-link" href="https://sourceforge.net/projects/beaconcache/" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'Cachechu') === 0)
-									$output .= '<a class="gwc-home-link" href="http://github.com/kevogod/cachechu" rel="external nofollow">'.$cache_name.'</a>';
+									$output .= '<a class="gwc-home-link" href="https://github.com/kevogod/cachechu" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'GhostWhiteCrab') === 0)
-									$output .= '<a class="gwc-home-link" href="http://github.com/gtk-gnutella/gwc" rel="external nofollow">'.$cache_name.'</a>';
+									$output .= '<a class="gwc-home-link" href="https://github.com/gtk-gnutella/gwc" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'PHPGnuCacheII') === 0)
 									$output .= '<a class="gwc-home-link" href="http://gwcii.sourceforge.net/" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'jumswebcache') === 0)
 									$output .= '<a class="gwc-home-link" href="http://www1.mager.org/GWebCache/" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'MWebCache') === 0)
-									$output .= '<a class="gwc-home-link" href="http://sourceforge.net/p/mute-net/support-requests/7/" rel="external nofollow">'.$cache_name.'</a>';
+									$output .= '<a class="gwc-home-link" href="https://sourceforge.net/p/mute-net/support-requests/7/" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'node.gwc') === 0)
 									$output .= '<a class="gwc-home-link" href="http://andrewgilmore.co.uk/project/nodegwc" rel="external nofollow">'.$cache_name.'</a>';
 								elseif(strpos($cache_name, 'GWebCache') === 0)
