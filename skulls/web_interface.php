@@ -157,7 +157,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 
 						$mail = null;
 						if(MAINTAINER_EMAIL !== 'name AT server DOT com' && MAINTAINER_EMAIL !== "")
-							$mail = ' title="'.htmlentities(str_replace('@', ' AT ', MAINTAINER_EMAIL), ENT_QUOTES, 'UTF-8').'"';
+							$mail = ' title="'.htmlentities(str_replace(array('@', '.'), array(' AT ', ' DOT '), MAINTAINER_EMAIL), ENT_QUOTES, 'UTF-8').'"';
 ?>
 						<tr>
 							<td></td>
