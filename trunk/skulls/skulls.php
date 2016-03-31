@@ -112,16 +112,17 @@ if(empty($_SERVER['HTTP_HOST']))
 	$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].NormalizePort($SECURE_HTTP, $server_port); unset($server_port);
 }
 
-function SanitizeHeader($val)
+function SanitizeHeaderValue($val)
 {
-	return str_replace(array('/', '\\', '"', "\r", "\n", "\0"), array('%2F'), $val);
+	if(strlen($val) > 1024) return null;
+	return str_replace(array(':', '/', '\\', '"', "\r", "\n", "\0"), array('%3A', '%2F'), $val);
 }
 
 $MY_URL = ($SECURE_HTTP? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
 if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$UNRELIABLE_HOST)
 {
 	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
-	header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeader($_SERVER['QUERY_STRING'])));
+	header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING'])));
 	die;
 }
 
