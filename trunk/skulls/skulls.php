@@ -1797,7 +1797,7 @@ else
 		}
 	}
 
-	if(!$NO_IP_HEADER) { $DETECTED_REMOTE_IP = DetectRemoteIP($REMOTE_IP); header('X-Remote-IP: '.$DETECTED_REMOTE_IP); }
+	if(!$NO_IP_HEADER) { $DETECTED_REMOTE_IP = DetectRemoteIP($REMOTE_IP); header('X-Remote-IP: '.SanitizeHeaderValue($DETECTED_REMOTE_IP)); }
 	if($PING && $MULTI) header('X-Vendor: '.VENDOR);
 
 	$compressed = StartCompression($COMPRESSION, $UA);
