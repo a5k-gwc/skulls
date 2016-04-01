@@ -65,11 +65,17 @@ function FsockTest()
 
 	if(function_exists('fsockopen') && FsockTest1('google.com', 80) && FsockTest1('google.com', 443))
 	{
-		$fsock_base = 1;
-		$result = FsockTest2('skulls.sourceforge.net', 60000);
+		$fsock_base = 1; $fsock_full = -1;
+		if(FsockTest1('skulls.sourceforge.net', 80))
+		{
+			$result = FsockTest2('skulls.sourceforge.net', 60000);
 
-		if($result === true) $fsock_full = 1;
-		elseif($result !== false) { $fsock_full = -1; $warning = 'Unknown result from fsockopen, returned error: '.$result; }
+			if($result === true) $fsock_full = 1;
+			elseif($result === false) $fsock_full = 0;
+			else $warning = 'Unknown result from fsockopen, returned error: '.$result;
+		}
+		else
+			$warning = 'There is a problem on the SourceForge server, retry later.';
 	}
 
 	$fp = fopen($cache_file, 'wb');
