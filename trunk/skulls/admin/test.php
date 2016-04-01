@@ -40,7 +40,7 @@ function FsockTest2($hostname, $port)
 		/* if(GetMicrotime()-$start > 4.9) */
 		if($errno === 111 || $errno === 10061) return true;  /* Closed port but reachable */
 		elseif($errno === 110 || $errno === 10060) return false;  /* Unreachable port (connection timed out) */
-		else return (int)$errno;
+		else return (string)$errno;
 	}
 
 	fclose ($fp);
@@ -49,7 +49,7 @@ function FsockTest2($hostname, $port)
 
 function FsockTest()
 {
-	$fsock_base = false; $fsock_full = false; $warning = null; $now = time();
+	$fsock_base = 0; $fsock_full = 0; $warning = ""; $now = time();
 
 	$cache_file = './test-cached.dat';
 	if(file_exists($cache_file))
@@ -59,25 +59,24 @@ function FsockTest()
 		{
 			$file_array = explode('|', $file, 5); unset($file);
 			if(ctype_digit($file_array[0]) && $file_array[0] > $now - 3 * 60 * 60)
-				return array((bool)$file_array[1], (bool)$file_array[2], $file_array[3], $file_array[0]);
+				return array((int)$file_array[1], (int)$file_array[2], $file_array[3], $file_array[0]);
 		}
 	}
 
 	if(function_exists('fsockopen') && FsockTest1('google.com', 80) && FsockTest1('google.com', 443))
 	{
-		$fsock_base = true;
+		$fsock_base = 1;
 		$result = FsockTest2('skulls.sourceforge.net', 60000);
 
-		if($result === true) $fsock_full = true;
-		elseif($result === false);
-		else $warning = 'Unknown result from fsockopen, returned error: '.$result;
+		if($result === true) $fsock_full = 1;
+		elseif($result !== false) { $fsock_full = -1; $warning = 'Unknown result from fsockopen, returned error: '.$result; }
 	}
 
 	$fp = fopen($cache_file, 'wb');
 	if($fp !== false)
 	{
 		flock($fp, LOCK_EX);
-		fwrite($fp, $now.'|'.(int)$fsock_base.'|'.(int)$fsock_full.'|'.$warning.'|');
+		fwrite($fp, $now.'|'.$fsock_base.'|'.$fsock_full.'|'.$warning.'|');
 		fflush($fp);
 		flock($fp, LOCK_UN);
 		fclose($fp);
@@ -86,9 +85,10 @@ function FsockTest()
 	return array($fsock_base, $fsock_full, $warning, $now);
 }
 
-function DisplayBool($bool)
+function DisplayTristate($val)
 {
-	return $bool? '<span style="color: green">true</span>' : '<span style="color: red">false</span>';
+	if($val === -1) return '<span style="color: yellow">Unknown</span>';
+	return ($val? '<span style="color: green">true</span>' : '<span style="color: red">false</span>');
 }
 
 function CheckFunction($function_name)
@@ -114,13 +114,13 @@ echo "<br><br>\r\n";
 echo "<div><b><big><font color=\"blue\">Detected settings</font></big></b></div>\r\n";
 echo '<div><i><small>Here you will see the settings that you should set in vars.php based on some tests on your server.</small></i></div>';
 echo '<div><i><small>The server must be connected to Internet otherwise the tests won\'t give the correct results.</small></i></div>';
-$fsock_result = FsockTest(); if(!empty($fsock_result[2])) $fsock_result[2] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[2].'">&sup1;</strong>';
+$fsock_result = FsockTest(); if($fsock_result[2] !== "") $fsock_result[2] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[2].'">&sup1;</strong>';
 echo '<div><b><small>Last check: '.gmdate('Y/m/d H:i:s', $fsock_result[3]),' UTC</small></b></div>',"\r\n";
 
 echo "<blockquote>\r\n";
 
-echo '<div><b>FSOCK_BASE: ',DisplayBool($fsock_result[0]),'</b></div>',"\r\n";
-echo '<div><b>FSOCK_FULL: ',DisplayBool($fsock_result[1]),'</b>',$fsock_result[2],'</div>',"\r\n";
+echo '<div><b>FSOCK_BASE: ',DisplayTristate($fsock_result[0]),'</b></div>',"\r\n";
+echo '<div><b>FSOCK_FULL: ',DisplayTristate($fsock_result[1]),'</b>',$fsock_result[2],'</div>',"\r\n";
 
 echo "<b>CONTENT_TYPE_WORKAROUND:</b> If the box below is empty then it is OK and you must set the value to <b><font color=\"green\">false</font></b> otherwise it means that your server interfere with the script and you must set the value to <b><font color=\"red\">true</font></b> to workaround the problem.<br>\r\n";
 echo "<iframe src=\"inc.php\" height=\"60\" width=\"300\"></iframe><br>\r\n";
