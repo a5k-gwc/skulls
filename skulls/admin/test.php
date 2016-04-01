@@ -66,7 +66,7 @@ function FsockTest()
 	if(function_exists('fsockopen') && FsockTest1('google.com', 80) && FsockTest1('google.com', 443))
 	{
 		$fsock_base = true;
-		$result = FsockTest2('sourceforge.net', 60000);
+		$result = FsockTest2('skulls.sourceforge.net', 60000);
 
 		if($result === true) $fsock_full = true;
 		elseif($result === false);
@@ -115,7 +115,7 @@ echo "<div><b><big><font color=\"blue\">Detected settings</font></big></b></div>
 echo '<div><i><small>Here you will see the settings that you should set in vars.php based on some tests on your server.</small></i></div>';
 echo '<div><i><small>The server must be connected to Internet otherwise the tests won\'t give the correct results.</small></i></div>';
 $fsock_result = FsockTest(); if(!empty($fsock_result[2])) $fsock_result[2] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[2].'">&sup1;</strong>';
-echo '<div><b><small>Last check: '.gmdate('Y/m/d H:i', $fsock_result[3]),' UTC</small></b></div>',"\r\n";
+echo '<div><b><small>Last check: '.gmdate('Y/m/d H:i:s', $fsock_result[3]),' UTC</small></b></div>',"\r\n";
 
 echo "<blockquote>\r\n";
 
