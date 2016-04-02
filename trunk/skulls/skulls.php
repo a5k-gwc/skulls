@@ -1604,6 +1604,7 @@ if(IsWebInterface())
 	if($UA === "" || strpos($UA, 'masscan/') === 0 || strpos($UA, 'libwww-perl') === 0) { header('Connection: close'); header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); die; }
 
 	include './web_interface.php';
+	header($_SERVER['SERVER_PROTOCOL'].' 200 OK');
 	$compressed = StartCompression($COMPRESSION, $UA, true);
 	ShowHtmlPage($PHP_SELF, $COMPRESSION, $header, $footer);
 	if($compressed) ob_end_flush();

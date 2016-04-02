@@ -22,6 +22,7 @@ include "web_functions.php";
 function ShowHtmlPage($php_self, $compression, $header, $footer)
 {
 	global $NET, $SUPPORTED_NETWORKS;
+	header('Content-Type: text/html; charset=utf-8');
 
 	$page_number = 1; $suffix = null;
 	if($NET === null) $NET = 'all';
