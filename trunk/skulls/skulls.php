@@ -169,8 +169,11 @@ function IsFakeClient(&$vendor, $ver, $ua)
 }
 
 /* Normalize and validate identity */
-function ValidateIdentity(&$vendor, &$ver, &$ua, $net, &$detected_net)
+function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net)
 {
+	if($method === 'OPTIONS') { header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
+	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Content-Length: 0'); die; }
+
 	if($vendor === 'RAZA')
 	{
 		if(strpos($ua, 'Shareaza ') !== 0) $vendor = 'RAZM';  /* Change vendor code of mod versions */
@@ -253,6 +256,17 @@ function VerifyVersion($client, $version)
 				return false;
 			break;
 	}
+
+	return true;
+}
+
+function ValidateIdentityWeb($method, $ua)
+{
+	/* Block port scanner and perl */
+	if(strpos($ua, 'masscan/') === 0 || strpos($ua, 'libwww-perl') === 0) return false;
+
+	if($method === 'OPTIONS') { header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
+	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Content-Length: 0'); die; }
 
 	return true;
 }
@@ -1600,8 +1614,7 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 
 if(IsWebInterface())
 {
-	/* Block empty User-Agent, port scanner and perl */
-	if($UA === "" || strpos($UA, 'masscan/') === 0 || strpos($UA, 'libwww-perl') === 0) { header('Connection: close'); header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); die; }
+	if(!ValidateIdentityWeb($_SERVER['REQUEST_METHOD'], $UA)) { header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); header('Content-Length: 0'); header('Connection: close'); die; }
 
 	include './web_interface.php';
 	header($_SERVER['SERVER_PROTOCOL'].' 200 OK');
@@ -1671,7 +1684,7 @@ else
 	}
 
 	if(!ValidateRemoteIP($REMOTE_IP, $IS_LOCALHOST)) $REMOTE_IP = 'unknown';
-	if(!ValidateIdentity($CLIENT, $VERSION, $UA, $NET, $DETECTED_NET) || $FAKE_CF || $REMOTE_IP === 'unknown')
+	if(!ValidateIdentity($_SERVER['REQUEST_METHOD'], $CLIENT, $VERSION, $UA, $NET, $DETECTED_NET) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid identification\r\n";
