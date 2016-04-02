@@ -17,7 +17,7 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-$SUPPORTED_NETWORKS = null;
+$SUPPORTED_NETWORKS = array();
 include './vars.php';
 
 define('NAME', 'Skulls');
