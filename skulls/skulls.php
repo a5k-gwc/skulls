@@ -90,8 +90,9 @@ if(DEBUG) error_reporting(-1);
 DisableAutomaticCompression();
 if(function_exists('header_remove')) header_remove('X-Powered-By');
 $PHP_SELF = $_SERVER['PHP_SELF'];
+define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
 
-if(!ENABLED || basename($PHP_SELF) === 'index.php' || $SUPPORTED_NETWORKS === null)
+if(!ENABLED || basename($PHP_SELF) === 'index.php' || NETWORKS_COUNT === 0)
 {
 	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 	die("ERROR: Service disabled\r\n");
@@ -126,7 +127,6 @@ if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$UNRELIABLE_HOST)
 	die;
 }
 
-define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
 define('STATS_OTHER',   0);
 define('STATS_UPD',     1);
 define('STATS_UPD_BAD', 2);
