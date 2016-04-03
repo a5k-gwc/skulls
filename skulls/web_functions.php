@@ -74,6 +74,10 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$client_name = 'Deepnet Explorer';
 			$url = 'http://www.deepnetexplorer.com/';
 			break;
+		case 'ENVY':
+			$client_name = 'Envy';
+			$url = 'https://sourceforge.net/projects/getenvy/';
+			break;
 		case 'FISH':
 			$client_name = 'PEERanha';
 			break;
