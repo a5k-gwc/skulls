@@ -172,7 +172,7 @@ function IsFakeClient(&$vendor, $ver, $ua)
 function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net)
 {
 	if($method === 'OPTIONS') { header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
-	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Content-Length: 0'); die; }
+	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
 
 	if($vendor === 'RAZA')
 	{
@@ -266,7 +266,7 @@ function ValidateIdentityWeb($method, $ua)
 	if(strpos($ua, 'masscan/') === 0 || strpos($ua, 'libwww-perl') === 0) return false;
 
 	if($method === 'OPTIONS') { header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
-	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Content-Length: 0'); die; }
+	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
 
 	return true;
 }
