@@ -547,10 +547,15 @@ function CheckUDPURLValidity($cache)
 
 function CheckBlockedDomain($domain)
 {
-	if(
-		/* Block duplicate DNS of mcache.mccarragher.org */
-		$domain === 'mccarragher.org' || $domain === 'news.mccarragher.org' || $domain === 'gallaxial.com' || $domain === 'news.gallaxial.com'
-		|| $domain === 'spacesst.com' || $domain === 'news.spacesst.com' || $domain === 'piz.noip.me'
+	/* Malicious */
+	if($domain === 'udp-ho'.'st-cache.com')
+		return true;
+
+	/* Duplicates */
+	if( /* Duplicates of mcache.mccarragher.org */
+		$domain === 'mccarragher.org' || $domain === 'news.mccarragher.org'
+		|| $domain === 'gallaxial.com' || $domain === 'www.gallaxial.com' || $domain === 'news.gallaxial.com'
+		|| $domain === 'spacesst.com' || $domain === 'www.spacesst.com' || $domain === 'news.spacesst.com'
 	)
 		return true;
 
