@@ -177,6 +177,7 @@ function RunHttpOptionsMethod()
 /* Normalize and validate identity */
 function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net)
 {
+	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
 	if($method === 'OPTIONS') RunHttpOptionsMethod();
 	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
 
@@ -271,6 +272,7 @@ function ValidateIdentityWeb($method, $ua)
 	/* Block port scanner and perl */
 	if(strpos($ua, 'masscan/') === 0 || strpos($ua, 'libwww-perl') === 0) return false;
 
+	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
 	if($method === 'OPTIONS') RunHttpOptionsMethod();
 	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
 
