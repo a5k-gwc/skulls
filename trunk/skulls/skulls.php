@@ -1729,16 +1729,6 @@ else
 		die("ERROR: Invalid network name\r\n");
 	}
 
-	if(!VerifyUserAgent($UA, $DETECTED_NET))
-	{
-		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
-		if(LOG_MINOR_ERRORS) Logging('blocked-clients');
-		die();
-	}
-
-	WriteStatsTotalReqs();
-
 	$IS_WEB_TOOL = false;  /* Is considered a web tool every thing that isn't a P2P servent, like GWebCaches, crawlers, manual submissions, etc. */
 	$MANUAL_SUBMIT = false; $FORCE_PV2 = false;
 	if($CLIENT === 'TEST')
@@ -1749,6 +1739,16 @@ else
 	}
 	elseif($CLIENT === 'GCII') { $IS_WEB_TOOL = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
 	elseif($IS_CRAWLER || $IS_A_CACHE) $IS_WEB_TOOL = true;
+
+	if(!$MANUAL_SUBMIT && !VerifyUserAgent($UA, $DETECTED_NET))
+	{
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
+		if(LOG_MINOR_ERRORS) Logging('blocked-clients');
+		die();
+	}
+
+	WriteStatsTotalReqs();
 
 	/*
 		Existing GWC specs: v1, v1.1, v2, v2.1, v3, v4  ( GWC v3 is an extension of GWC v1  /  GWC v4 is an extension of GWC v2.1 )
