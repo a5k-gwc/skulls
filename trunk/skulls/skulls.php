@@ -1740,8 +1740,13 @@ else
 	WriteStatsTotalReqs();
 
 	$IS_WEB_TOOL = false;  /* Is considered a web tool every thing that isn't a P2P servent, like GWebCaches, crawlers, manual submissions, etc. */
-	$FORCE_PV2 = false;
-	if($CLIENT === 'TEST') { $IS_WEB_TOOL = true; if(strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true; }
+	$MANUAL_SUBMIT = false; $FORCE_PV2 = false;
+	if($CLIENT === 'TEST')
+	{
+		$IS_WEB_TOOL = true;
+		if($VERSION === 'Submit') $MANUAL_SUBMIT = true;
+		elseif(strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true;
+	}
 	elseif($CLIENT === 'GCII') { $IS_WEB_TOOL = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
 	elseif($IS_CRAWLER || $IS_A_CACHE) $IS_WEB_TOOL = true;
 
@@ -1788,6 +1793,7 @@ else
 	{
 		$HOST = null;       /* Block host submissions, they aren't hosts */
 		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header, they don't need it */
+		if($MANUAL_SUBMIT) { $PING = 0; $GET = 0; $GETUDP = 0; $HOSTFILE = 0; $URLFILE = 0; $STATFILE = 0; $INFO = 0; }
 	}
 
 	if(!VerifyVersion($CLIENT, $VERSION))
