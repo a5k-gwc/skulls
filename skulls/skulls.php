@@ -1670,7 +1670,7 @@ else
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); echo "ERROR\r\n";  /* Keep the ERROR text for fake/faulty clients that just ignore status code */
 		if(STATS_FOR_BAD_CLIENTS) { UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs(); }
 		if(LOG_MINOR_ERRORS) Logging('fake-clients-'.$CLIENT);
-		die();
+		die;
 	}
 
 	/* Content-Type */
@@ -1709,7 +1709,7 @@ else
 			else
 				Logging('invalid-identifications');
 		}
-		die();
+		die;
 	}
 
 	/* Separate ip from port for the submitted host, it will be used later */
@@ -1724,8 +1724,8 @@ else
 	/* Disallow some network names to avoid confusion with already existing networks */
 	if($NET === 'gnutella1' || $NET === 'g2' || $NET === 'shareaza')
 	{
-		UpdateStats(STATS_BLOCKED);
-		if(LOG_MAJOR_ERRORS) Logging('invalid-network-names', $DETECTED_PV);
+		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
+		if(LOG_MAJOR_ERRORS) Logging('invalid-network-names');
 		die("ERROR: Invalid network name\r\n");
 	}
 
@@ -1745,7 +1745,7 @@ else
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
 		if(LOG_MINOR_ERRORS) Logging('blocked-clients');
-		die();
+		die;
 	}
 
 	WriteStatsTotalReqs();
@@ -1809,7 +1809,7 @@ else
 		echo "ERROR: Invalid query\r\n";
 		UpdateStats(STATS_BLOCKED);
 		if(LOG_MAJOR_ERRORS) Logging('invalid-queries', $DETECTED_PV);
-		die();
+		die;
 	}
 
 	if($LEAVES !== null && (!ctype_digit($LEAVES) || $LEAVES > 2047))
