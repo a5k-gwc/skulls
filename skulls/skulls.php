@@ -1665,6 +1665,8 @@ else
 	}
 	$CLIENT = strtoupper($CLIENT);
 
+	$ORIGIN = isset($_SERVER['HTTP_ORIGIN'])? $_SERVER['HTTP_ORIGIN'] : null;
+
 	if(IsFakeClient($CLIENT, $VERSION, $UA))
 	{
 		header('HTTP/1.0 404 Not Found'); echo "ERROR\r\n";  /* Keep the ERROR text for fake/faulty clients that just ignore status code */
@@ -1738,7 +1740,7 @@ else
 		elseif(strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true;
 	}
 	elseif($CLIENT === 'GCII') { $IS_WEB_TOOL = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
-	elseif($IS_CRAWLER || $IS_A_CACHE) $IS_WEB_TOOL = true;
+	elseif($IS_CRAWLER || $IS_A_CACHE || $ORIGIN !== null) $IS_WEB_TOOL = true;
 
 	if(!$MANUAL_SUBMIT && !VerifyUserAgent($UA, $DETECTED_NET))
 	{
