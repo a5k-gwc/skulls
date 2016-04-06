@@ -409,8 +409,6 @@ function RemoveGarbage($value)
 
 function Pong($detected_pv, $net_list_sent_elsewhere, $multi, $net, $client, $version, $remote_ip)
 {
-	if($remote_ip === '127.0.0.1')  /* Prevent GWCs that point to 127.0.0.1 to being added to the alternative GWCs list, in this case we actually ping ourselves so the GWC may look like it is working while it isn't */
-		return;
 	$send_old_pong = false; $send_pong = false;
 
 	/* v2.x, v4+ */
@@ -1101,6 +1099,11 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 			return 0; // Exists
 		else
 		{
+			/* If the DNS resolution fails we assume it is already an IP address */
+			$gwc_ip = ResolveDNS($temp); if($gwc_ip === false) { $gwc_ip = $temp; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https://') === 0) $new_specs_only = '1';
+			if(DEBUG) echo 'D|update|GWC|IP|'.RemoveGarbage($gwc_ip)."\r\n";
+			if(!ValidateIP($gwc_ip))  return 4;  // Blocked URL
+
 			$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$gwc_url, $net_param, true);
 
 			if($cache_data[0] === 'FAIL')
@@ -1121,11 +1124,7 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 			}
 			else
 			{
-				$gwc_ip = ResolveDNS($temp);
-				/* If the DNS resolution fails we assume it is already an IP address, if it is invalid then it will fail later in the code */
-				if($gwc_ip === false) { $gwc_ip = $temp; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https') === 0) $new_specs_only = '1';
 				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
-
 				ReplaceCache($file_path, $i, $cache_file, $this_alt_gwc);
 				return 1; // Updated timestamp
 			}
@@ -1133,6 +1132,11 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 	}
 	else
 	{
+		/* If the DNS resolution fails we assume it is already an IP address */
+		$gwc_ip = ResolveDNS($temp); if($gwc_ip === false) { $gwc_ip = $temp; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https://') === 0) $new_specs_only = '1';
+		if(DEBUG) echo 'D|update|GWC|IP|'.RemoveGarbage($gwc_ip)."\r\n";
+		if(!ValidateIP($gwc_ip))  return 4;  // Blocked URL
+
 		$cache_data = CheckGWC(($is_udp? 'uhc:' : "").$gwc_url);
 
 		if($cache_data[0] === 'FAIL')
@@ -1147,9 +1151,6 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 		}
 		else
 		{
-			$gwc_ip = ResolveDNS($temp);
-			/* If the DNS resolution fails we assume it is already an IP address, if it is invalid then it will fail later in the code */
-			if($gwc_ip === false) { $gwc_ip = $temp; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https') === 0) $new_specs_only = '1';
 			$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
 
 			if($file_count >= MAX_CACHES || $file_count >= 200)
