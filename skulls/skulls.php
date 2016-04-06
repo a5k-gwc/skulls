@@ -168,17 +168,23 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	return false;
 }
 
-function RunHttpOptionsMethod()
+function RunHttpOptionsMethod($CORS = false)
 {
-	header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); header('Allow: GET,HEAD,POST,OPTIONS');
-	header('Content-Length: 0'); die;
+	header($_SERVER['SERVER_PROTOCOL'].' 200 OK');
+	if($CORS)
+	{
+		header('Access-Control-Allow-Methods: GET,OPTIONS');
+		header('Access-Control-Max-Age: 43200');
+	}
+	header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die;
 }
 
 /* Normalize and validate identity */
-function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net)
+function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net, $CORS)
 {
 	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
-	if($method === 'OPTIONS') RunHttpOptionsMethod();
+	if($CORS) header('Access-Control-Allow-Origin: *');
+	if($method === 'OPTIONS') RunHttpOptionsMethod($CORS);
 	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
 
 	if($vendor === 'RAZA')
@@ -1714,7 +1720,7 @@ else
 	}
 
 	if(!ValidateRemoteIP($REMOTE_IP, $IS_LOCALHOST)) $REMOTE_IP = 'unknown';
-	if(!ValidateIdentity($_SERVER['REQUEST_METHOD'], $CLIENT, $VERSION, $UA, $NET, $DETECTED_NET) || $FAKE_CF || $REMOTE_IP === 'unknown')
+	if(!ValidateIdentity($_SERVER['REQUEST_METHOD'], $CLIENT, $VERSION, $UA, $NET, $DETECTED_NET, $ORIGIN !== null) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid identification\r\n";
@@ -1757,7 +1763,7 @@ else
 	elseif($CLIENT === 'GCII') { $IS_WEB_TOOL = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
 	elseif($IS_CRAWLER || $IS_A_CACHE || $ORIGIN !== null) $IS_WEB_TOOL = true;
 
-	if($MANUAL_SUBMIT? !VerifyUserAgentWeb($UA) : !VerifyUserAgent($UA))
+	if(($MANUAL_SUBMIT || $ORIGIN !== null)? !VerifyUserAgentWeb($UA) : !VerifyUserAgent($UA))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
