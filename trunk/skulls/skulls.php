@@ -1710,7 +1710,7 @@ else
 	/* CloudFlare */
 	if(isset($_SERVER['HTTP_CF_CONNECTING_IP']))
 	{
-		include './update.php';
+		include_once './update.php';
 		if(USING_CLOUDFLARE && ValidateIP($REMOTE_IP) && IsCloudFlareIP($REMOTE_IP))
 		{
 			$CLOUDFLARE_IP = $REMOTE_IP;
