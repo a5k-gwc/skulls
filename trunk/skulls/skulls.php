@@ -232,7 +232,7 @@ function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net)
 	return true;
 }
 
-function VerifyUserAgent($ua, $net)
+function VerifyUserAgent($ua)
 {
 	/* Block Googlebot and perl from performing queries */
 	if(strpos($ua, 'Googlebot/') !== false || strpos($ua, 'libwww-perl') === 0) return false;
@@ -244,6 +244,21 @@ function VerifyUserAgent($ua, $net)
 
 		/* Block Bingbot and browsers from performing queries */
 		if(strpos($ua, 'bingbot/') !== false || strpos($ua, ' MSIE ') !== false || strpos($ua, 'Trident/') !== false || strpos($ua, 'Firefox/') !== false) return false;
+		/* Block black hat bots */
+		if(strpos($ua, 'Mozilla/') !== 0) return false; $pos_par1 = strpos($ua, '('); $pos_par2 = strpos($ua, ')');
+		if($pos_par1 === false || $pos_par2 === false || $pos_par2 < $pos_par1) return false;
+	}
+
+	return true;
+}
+
+function VerifyUserAgentWeb($ua, $block_search_enine = true)
+{
+	if(strpos($ua, 'masscan/') === 0 || strpos($ua, 'libwww-perl') === 0) return false;
+	if($block_search_enine && (strpos($ua, 'Googlebot/') !== false || strpos($ua, 'bingbot/') !== false)) return false;
+
+	if(strpos($ua, 'Mozilla') !== false)
+	{
 		/* Block black hat bots */
 		if(strpos($ua, 'Mozilla/') !== 0) return false; $pos_par1 = strpos($ua, '('); $pos_par2 = strpos($ua, ')');
 		if($pos_par1 === false || $pos_par2 === false || $pos_par2 < $pos_par1) return false;
@@ -1742,7 +1757,7 @@ else
 	elseif($CLIENT === 'GCII') { $IS_WEB_TOOL = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
 	elseif($IS_CRAWLER || $IS_A_CACHE || $ORIGIN !== null) $IS_WEB_TOOL = true;
 
-	if(!$MANUAL_SUBMIT && !VerifyUserAgent($UA, $DETECTED_NET))
+	if($MANUAL_SUBMIT? !VerifyUserAgentWeb($UA) : !VerifyUserAgent($UA))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
