@@ -185,7 +185,7 @@ function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net, 
 	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
 	if($CORS) header('Access-Control-Allow-Origin: *');
 	if($method === 'OPTIONS') RunHttpOptionsMethod($CORS);
-	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
+	if($CORS? $method !== 'GET' : $method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
 
 	if($vendor === 'RAZA')
 	{
@@ -1734,6 +1734,16 @@ else
 				Logging('invalid-identifications');
 		}
 		die;
+	}
+
+	/* Validate CORS requests */
+	if($ORIGIN !== null)
+	{
+		include_once './update.php';
+		if(empty($ORIGIN) || $ORIGIN === 'null' || empty($_SERVER['HTTP_REFERER']) || empty($UA) || IsIPInBlockList($REMOTE_IP))
+		{
+			header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); die;
+		}
 	}
 
 	/* Separate ip from port for the submitted host, it will be used later */
