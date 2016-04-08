@@ -31,7 +31,7 @@ function Logging($filename, $detected_pv = null)
 	$CLIENT_IP = empty($_SERVER['HTTP_CLIENT_IP'])? null : $_SERVER['HTTP_CLIENT_IP'];
 	$REFERER = empty($_SERVER['HTTP_REFERER'])? null: $_SERVER['HTTP_REFERER'];
 
-	$line = gmdate("Y/m/d H:i:s").'|'.$detected_pv.'|'.$DETECTED_NET.'|'.$CLIENT.' '.$VERSION.'|'.$ACCEPT_ENCODING.'|'.$UA.'|?'.$_SERVER['QUERY_STRING'].'|'.$REMOTE_IP.'|'.$FORWARDED_FOR.'|'.$CLIENT_IP.'|'.$ORIGIN.'|'.$REFERER.'|'."\r\n";
+	$line = gmdate("Y/m/d H:i:s").'|'.$detected_pv.'|'.RemoveGarbage($DETECTED_NET).'|'.RemoveGarbage($CLIENT.' '.$VERSION).'|'.RemoveGarbage($ACCEPT_ENCODING).'|'.RemoveGarbage($UA).'|?'.RemoveGarbage($_SERVER['QUERY_STRING']).'|'.RemoveGarbage($REMOTE_IP).'|'.RemoveGarbage($FORWARDED_FOR).'|'.RemoveGarbage($CLIENT_IP).'|'.RemoveGarbage($ORIGIN).'|'.RemoveGarbage($REFERER).'|'."\r\n";
 
 	$file = fopen('log/'.$filename.'.log', 'ab');
 	if($file === false) return;
