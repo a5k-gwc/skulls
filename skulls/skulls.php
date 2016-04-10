@@ -1933,9 +1933,9 @@ else
 			if(!ENABLE_URL_SUBMIT) // Cache adding disabled
 				print "I|update|OK|WARNING|URL adding is disabled\r\n";
 			elseif( ($UDP_CACHE !== null && $DETECTED_NET === 'gnutella' && !CheckUDPURLValidity($UDP_CACHE)))  // Invalid URL
-				print("I|update|WARNING|Invalid UDP URL"."\r\n");
+				print("I|update|OK|WARNING|Invalid UDP URL"."\r\n");
 			elseif( ($CACHE !== null && !CheckURLValidity($CACHE)))  // Invalid URL
-				print("I|update|WARNING|Invalid URL"."\r\n");
+				print("I|update|OK|WARNING|Invalid URL"."\r\n");
 			else
 			{
 				if($UDP_CACHE !== null && $DETECTED_NET === 'gnutella')
