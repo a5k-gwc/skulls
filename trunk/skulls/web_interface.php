@@ -457,7 +457,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 			}
 			elseif($page_number == 5)	// BlockList informations
 			{
-				GetBlockListInfo('./ext/gwc-blocklist.dat', '161589560', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev);
+				GetBlockListInfo('./ext/gwc-blocklist.dat', '161589560', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev, $BL_license);
 ?>
 				<div class="page-title"><strong>GWC BlockList</strong></div>
 				<div class="padding">
@@ -483,11 +483,15 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							<th>- Revision:</th>
 							<td><?php echo $BL_rev; ?></td>
 						</tr>
+						<tr>
+							<th>- License:</th>
+							<td><?php echo $BL_license; ?></td>
+						</tr>
 					</table>
 				</div>
 				<div>&nbsp;</div>
 <?php
-				GetBlockListInfo('./ext/blocklist.dat', '296397923', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev);
+				GetBlockListInfo('./ext/blocklist.dat', '296397923', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev, $BL_license);
 ?>
 				<div class="page-title"><strong>P2P BlockList</strong></div>
 				<div class="padding">
@@ -512,6 +516,10 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						<tr>
 							<th>- Revision:</th>
 							<td><?php echo $BL_rev; ?></td>
+						</tr>
+						<tr>
+							<th>- License:</th>
+							<td><?php echo $BL_license; ?></td>
 						</tr>
 					</table>
 				</div>
