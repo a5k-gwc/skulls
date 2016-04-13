@@ -32,6 +32,7 @@ define('LICENSE_URL', 'http://www.gnu.org/licenses/gpl-3.0.html');
 
 define('MAX_HOST_AGE', 259200);									/* 3 days */
 define('RESPONSE_LINES_LIMIT', 64);
+define('ENABLE_CORS', true);
 define('DEBUG', 0);
 
 function GetMainFileRev()
@@ -1684,7 +1685,12 @@ else
 	}
 	$CLIENT = strtoupper($CLIENT);
 
-	$ORIGIN = isset($_SERVER['HTTP_ORIGIN'])? $_SERVER['HTTP_ORIGIN'] : null;
+	$IS_CORS = false; $ORIGIN = null;
+	if(isset($_SERVER['HTTP_ORIGIN']))
+	{
+		$IS_CORS = true;
+		$ORIGIN = $_SERVER['HTTP_ORIGIN'];
+	}
 
 	if(IsFakeClient($CLIENT, $VERSION, $UA))
 	{
@@ -1718,7 +1724,7 @@ else
 	}
 
 	if(!ValidateRemoteIP($REMOTE_IP, $IS_LOCALHOST)) $REMOTE_IP = 'unknown';
-	if(!ValidateIdentity($_SERVER['REQUEST_METHOD'], $CLIENT, $VERSION, $UA, $NET, $DETECTED_NET, $ORIGIN !== null) || $FAKE_CF || $REMOTE_IP === 'unknown')
+	if(!ValidateIdentity($_SERVER['REQUEST_METHOD'], $CLIENT, $VERSION, $UA, $NET, $DETECTED_NET, $IS_CORS) || $FAKE_CF || $REMOTE_IP === 'unknown')
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		echo "ERROR: Invalid identification\r\n";
@@ -1734,12 +1740,14 @@ else
 	}
 
 	/* Validate CORS requests */
-	if($ORIGIN !== null)
+	if($IS_CORS)
 	{
+		if(!ENABLE_CORS) { header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); die; }
+
 		include_once './update.php';
 		if(empty($ORIGIN) || $ORIGIN === 'null' || empty($_SERVER['HTTP_REFERER']) || empty($UA) || IsIPInBlockList($REMOTE_IP))
 		{
-			header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); die;
+			header($_SERVER['SERVER_PROTOCOL'].' 418 I\'m a teapot'); die;
 		}
 	}
 
@@ -1769,9 +1777,9 @@ else
 		elseif(strpos($VERSION, 'Bazooka') === 0) $FORCE_PV2 = true;
 	}
 	elseif($CLIENT === 'GCII') { $IS_WEB_TOOL = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
-	elseif($IS_CRAWLER || $IS_A_CACHE || $ORIGIN !== null) $IS_WEB_TOOL = true;
+	elseif($IS_CRAWLER || $IS_A_CACHE || $IS_CORS) $IS_WEB_TOOL = true;
 
-	if(($MANUAL_SUBMIT || $ORIGIN !== null)? !VerifyUserAgentWeb($UA) : !VerifyUserAgent($UA))
+	if(($MANUAL_SUBMIT || $IS_CORS)? !VerifyUserAgentWeb($UA) : !VerifyUserAgent($UA))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
