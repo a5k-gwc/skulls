@@ -981,10 +981,18 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 	return $cache_data;
 }
 
-function ResolveDNS($host_name)
+function IDN_Encode($hostname)
 {
-	$ip = gethostbyname($host_name.'.');
-	if($ip === $host_name || $ip === $host_name.'.') return false;  /* When the function fails on some servers the dot is kept but in others it is removed so check both */
+	/* It needs the PHP Intl extension (bundled version with --enable-intl or PECL) enabled on the server */
+	$idn_hostname = false;
+	if(function_exists('idn_to_ascii')) $idn_hostname = idn_to_ascii($hostname); if($idn_hostname === false) return $hostname;
+	return $idn_hostname;
+}
+
+function ResolveDNS($hostname)
+{
+	$hostname = IDN_Encode($hostname); $ip = gethostbyname($hostname.'.');
+	if($ip === $hostname || $ip === $hostname.'.') return false;  /* When the function fails on some servers the dot is kept but in others it is removed so check both */
 	return $ip;
 }
 
