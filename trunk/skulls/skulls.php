@@ -1687,10 +1687,10 @@ else
 
 	if(IsFakeClient($CLIENT, $VERSION, $UA))
 	{
-		header('HTTP/1.0 404 Not Found'); echo "ERROR\r\n";  /* Keep the ERROR text for fake/faulty clients that just ignore status code */
+		header('HTTP/1.0 404 Not Found'); header('Content-Length: 7');
 		if(STATS_FOR_BAD_CLIENTS) { UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs(); }
 		if(LOG_MINOR_ERRORS) Logging('fake-clients-'.$CLIENT);
-		die;
+		die("ERROR\r\n");  /* Keep the ERROR text for fake/faulty clients that just ignore status code */
 	}
 
 	/* Content-Type */
@@ -1735,12 +1735,12 @@ else
 	/* Validate CORS requests */
 	if($IS_CORS)
 	{
-		if(!ENABLE_CORS) { header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); die; }
+		if(!ENABLE_CORS) { header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); header('Content-Length: 0'); die; }
 
 		include_once './update.php';
 		if(empty($ORIGIN) || $ORIGIN === 'null' || empty($_SERVER['HTTP_REFERER']) || empty($UA) || IsIPInBlockList($REMOTE_IP))
 		{
-			header($_SERVER['SERVER_PROTOCOL'].' 418 I\'m a teapot'); die;
+			header($_SERVER['SERVER_PROTOCOL'].' 418 I\'m a teapot'); header('Content-Length: 0'); die;
 		}
 	}
 
