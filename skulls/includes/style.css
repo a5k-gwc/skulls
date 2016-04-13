@@ -38,6 +38,8 @@ a:focus img { -moz-outline-style: solid; outline-style: solid; }
 .hover-underline, .gwc-home-link, .gwc { text-decoration: none; }
 .hover-underline:hover, .gwc-home-link:hover { text-decoration: underline; }
 
+.magnet { text-decoration: none; }  .magnet img { vertical-align: middle; }  .magnet:focus img { -moz-outline-style: none; outline-style: none; }
+
 #accessible-links a { margin: 0; padding: 0; position: absolute; top: -1000px; left: 0.5em; overflow: hidden; width: 1px; height: 1px;
 					  speak: normal; voice-family: female; }
 #accessible-links a:focus { top: 0.5em; width: auto; height: auto; }
