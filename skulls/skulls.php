@@ -750,7 +750,7 @@ function PingPort($ip, $port)
 function PingGWC($gwc_url, $query, $net_param = null)
 {
 	if(!ENABLE_URL_SUBMIT) return 'ERR|DISABLED';
-	$our_url = null; $gwc_idn_hostname = false;
+	$our_url = null;
 
 	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
 	list($gwc_host, $gwc_path) = explode('/', $gwc_base_url, 2);
@@ -763,9 +763,7 @@ function PingGWC($gwc_url, $query, $net_param = null)
 		{ $gwc_hostname = $gwc_host; $gwc_port = ($secure_http? 443 : 80); }
 	unset($gwc_host);
 
-	/* It needs the PHP Intl extension (bundled version with --enable-intl or PECL) enabled on the server */
-	if(function_exists('idn_to_ascii')) $gwc_idn_hostname = idn_to_ascii($gwc_hostname);
-	if($gwc_idn_hostname === false) $gwc_idn_hostname = $gwc_hostname;
+	$gwc_idn_hostname = IDN_Encode($gwc_hostname);
 	$gwc_idn_host = $gwc_idn_hostname.NormalizePort($secure_http, $gwc_port);
 	if(DEBUG) echo "\r\nD|update|GWC|HOSTNAME|",$gwc_hostname,"\r\nD|update|GWC|IDN-HOSTNAME|",$gwc_idn_hostname,"\r\nD|update|GWC|SECURE-HTTP|",(int)$secure_http,"\r\n";
 
