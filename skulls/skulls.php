@@ -95,7 +95,7 @@ define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
 
 if(!ENABLED || basename($PHP_SELF) === 'index.php' || NETWORKS_COUNT === 0)
 {
-	header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+	header('HTTP/1.0 404 Not Found');
 	die("ERROR: Service disabled\r\n");
 }
 
@@ -107,8 +107,8 @@ if(empty($_SERVER['HTTP_HOST']))
 	$UNRELIABLE_HOST = true;
 	if(!IsWebInterface())
 	{
-		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
-		die("ERROR: Missing Host header\r\n");
+		header('HTTP/1.0 403 Forbidden');
+		die("ERROR: Missing host header\r\n");
 	}
 	$server_port = (isset($_SERVER['SERVER_PORT']) ? (int)$_SERVER['SERVER_PORT'] : null);
 	$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].NormalizePort($SECURE_HTTP, $server_port); unset($server_port);
@@ -184,6 +184,7 @@ function RunHttpOptionsMethod($CORS = false)
 function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net, $CORS)
 {
 	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
+
 	if($CORS) header('Access-Control-Allow-Origin: *');
 	if($method === 'OPTIONS') RunHttpOptionsMethod($CORS);
 	if($CORS? $method !== 'GET' : $method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
@@ -291,10 +292,11 @@ function VerifyVersion($client, $version)
 
 function ValidateIdentityWeb($method, $ua)
 {
+	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
+
 	/* Block port scanner and perl */
 	if(strpos($ua, 'masscan/') === 0 || strpos($ua, 'libwww-perl') === 0) return false;
 
-	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
 	if($method === 'OPTIONS') RunHttpOptionsMethod();
 	if($method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
 
@@ -1640,7 +1642,7 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 
 if(IsWebInterface())
 {
-	if(!ValidateIdentityWeb($_SERVER['REQUEST_METHOD'], $UA)) { header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); header('Content-Length: 0'); header('Connection: close'); die; }
+	if(!ValidateIdentityWeb($_SERVER['REQUEST_METHOD'], $UA)) { header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); header('Content-Length: 0'); header('Connection: close'); die; }
 
 	include './web_interface.php';
 	header($_SERVER['SERVER_PROTOCOL'].' 200 OK');
@@ -1774,7 +1776,7 @@ else
 
 	if(($MANUAL_SUBMIT || $IS_CORS)? !VerifyUserAgentWeb($UA) : !VerifyUserAgent($UA))
 	{
-		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); header('Content-Length: 0');
 		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
 		if(LOG_MINOR_ERRORS) Logging('blocked-clients');
 		die;
