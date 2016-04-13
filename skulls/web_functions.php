@@ -489,17 +489,17 @@ function CheckHashAndFilesize($file_name, &$BL_file_size)
 		return '<span class="bad" title='.$title.'>Corrupted</span>';
 }
 
-function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$BL_file_size, &$BL_author, &$BL_rev)
+function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$BL_file_size, &$BL_author, &$BL_rev, &$BL_license)
 {
-	$BL_type = null; $BL_hash_check = null; $BL_file_size = 0; $BL_author = null; $BL_rev = null;
+	$BL_type = null; $BL_hash_check = null; $BL_file_size = 0; $BL_author = null; $BL_rev = null; $BL_license = null;
 	if(!file_exists($file_name)) { $BL_type = '<span class="bad">Missing file</span>'; return false; }
 
 	$fp = fopen($file_name, 'rb'); if($fp === false) return false;
-	$line = fgets($fp, 512); if($line !== false) $BL_info = explode('|', $line, 5);
+	$line = fgets($fp, 512); if($line !== false) $BL_info = explode('|', $line, 6);
 	fclose($fp);
 	if(!isset($BL_info)) return false;
 
-	$BL_rev = $BL_info[1].' ('.$BL_info[2].')'; $BL_author = $BL_info[3];
+	$BL_rev = $BL_info[1].' ('.$BL_info[2].')'; $BL_author = $BL_info[3]; $BL_license = rtrim($BL_info[4]);
 
 	if($BL_info[0] === '0')				/* Custom BlockList withOUT hash check */
 	{
