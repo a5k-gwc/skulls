@@ -399,12 +399,9 @@ function NetsToString()
 	return $nets;
 }
 
-function RemoveGarbage($value)
+function RemoveGarbage($val)
 {
-	$value = str_replace("|", "", $value);
-	$value = str_replace("\r", "", $value);
-	$value = str_replace("\n", "", $value);
-	return str_replace("\0", "", $value);
+	return str_replace(array('|', "\r", "\n", "\0"), "", $val);
 }
 
 function Pong($detected_pv, $net_list_sent_elsewhere, $multi, $net, $client, $version, $remote_ip)
