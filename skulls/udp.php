@@ -42,9 +42,9 @@ function PingUDP($cache){
 	if(count($splitted_url) != 3)
 		return "ERR|No port in URL";						// ERR|Error name
 
-	list( , $host_name, $port) = $splitted_url;
+	list(, $hostname, $port) = $splitted_url;
 
-	$fp = @fsockopen("udp://".$host_name, $port, $errno, $errstr, (float)CONNECT_TIMEOUT);
+	$fp = @fsockopen('udp://'.$hostname, $port, $errno, $errstr, (float)CONNECT_TIMEOUT);
 	if(!$fp)
 	{
 		$cache_data = "ERR|".$errno;						// ERR|Error name
@@ -52,32 +52,30 @@ function PingUDP($cache){
 	}
 	else
 	{
-		if( !fwrite($fp, $ping) )
+		if(fwrite($fp, $ping) === false)
 		{
 			$cache_data = "ERR|Request error";				// ERR|Error name
 			fclose($fp);
 		}
 		else
 		{
-			stream_set_timeout($fp, (int)CONNECT_TIMEOUT - 2);
-			$line = fread($fp, 2048);
-			//if(DEBUG) echo $line."\r\n";
+			stream_set_timeout($fp, TIMEOUT);
+			$type = null;
+			$data = fread($fp, 8192);
+			if(DEBUG) echo 'D|',bin2hex($data),"\r\n";
+
+			if(strpos($data, 'UDPHC') !== false) $type = "uhc";
+			elseif(strpos($data, 'IPP') !== false) $type = "ukhl";
 
 			$info = stream_get_meta_data($fp);
-			if(strpos($line, "UDPHC") > -1)
-				$type = "uhc";
-			elseif(strpos($line, "IPP") > -1)
-				$type = "ukhl";
-			else
-				$type = NULL;
 			fclose($fp);
 
-			if($info["timed_out"])
+			if($info['timed_out'])
 				$cache_data = "ERR|Timeout exceeded";		// ERR|Error name
 			elseif($type == "uhc")
-				$cache_data = "P|".$host_name."|gnutella";	// P|Name of the GWC|Networks list
+				$cache_data = "P|".$hostname."|gnutella";	// P|Name of the GWC|Networks list
 			elseif($type == "ukhl")
-				$cache_data = "P|".$host_name."|gnutella2";	// P|Name of the GWC|Networks list
+				$cache_data = "P|".$hostname."|gnutella2";	// P|Name of the GWC|Networks list
 			else
 				$cache_data = "ERR|No UHC or UKHL";				// ERR|Error name
 		}
