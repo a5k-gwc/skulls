@@ -45,7 +45,7 @@ function PingUDP($cache){
 	list(, $hostname, $port) = $splitted_url;
 
 	$fp = @fsockopen('udp://'.IDN_Encode($hostname), $port, $errno, $errstr, (float)CONNECT_TIMEOUT);
-	if(!$fp)
+	if($fp === false)
 	{
 		$cache_data = "ERR|".$errno;						// ERR|Error name
 		if(DEBUG) echo "D|update|ERROR|".$errno." (".$errstr.")\r\n";
