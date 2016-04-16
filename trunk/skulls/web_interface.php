@@ -93,7 +93,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 								if(file_exists(DATA_DIR."/running_since.dat"))
 								{
 									$running_since = file(DATA_DIR."/running_since.dat");
-									echo $running_since[0],"\n";
+									echo $running_since[0]," UTC\n";
 								}
 ?>
 							</td>
