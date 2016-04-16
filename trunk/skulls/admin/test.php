@@ -173,6 +173,8 @@ echo "<b>Function strlen:</b> ";
 CheckFunction("strlen");
 echo "<br>";
 
+echo "<b>Function file_get_contents:</b> ";
+CheckFunction("file_get_contents");
 echo "<b>Function file:</b> ";
 CheckFunction("file");
 echo "<b>Function fopen:</b> ";
