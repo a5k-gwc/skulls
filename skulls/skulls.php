@@ -1748,7 +1748,7 @@ else
 		if(!ENABLE_CORS) { header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); header('Content-Length: 0'); die; }
 
 		include_once './update.php';
-		if(empty($ORIGIN) || $ORIGIN === 'null' || empty($_SERVER['HTTP_REFERER']) || empty($UA) || IsIPInBlockList($REMOTE_IP))
+		if(empty($ORIGIN) || $ORIGIN === 'null' || empty($UA) || IsIPInBlockList($REMOTE_IP))
 		{
 			header($_SERVER['SERVER_PROTOCOL'].' 418 I\'m a teapot'); header('Content-Length: 0'); die;
 		}
