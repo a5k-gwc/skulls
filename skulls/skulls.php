@@ -1039,7 +1039,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	{
 		if(VERIFY_HOSTS && $verify_host && !PingPort($h_ip, $h_port))
 			return 4; // Error, failed verification
-		elseif($file_count > MAX_HOSTS || $file_count > 300)
+		elseif($file_count > max(10, min(300, MAX_HOSTS)))
 		{
 			ReplaceHost($file_path, 0, $this_host, $host_file, true);
 			return 3; // OK, pushed old data
@@ -1159,7 +1159,7 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 		{
 			$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
 
-			if($file_count >= MAX_CACHES || $file_count >= 200)
+			if($file_count >= max(5, min(200, MAX_CACHES)))
 			{
 				ReplaceCache($file_path, 0, $cache_file, $this_alt_gwc);
 				return 3; // OK, pushed old data
