@@ -171,6 +171,10 @@ echo "<b>Function substr:</b> ";
 CheckFunction("substr");
 echo "<b>Function strlen:</b> ";
 CheckFunction("strlen");
+echo "<b>Function min:</b> ";
+CheckFunction("min");
+echo "<b>Function max:</b> ";
+CheckFunction("max");
 echo "<br>";
 
 echo "<b>Function file_get_contents:</b> ";
