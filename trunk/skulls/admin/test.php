@@ -23,6 +23,17 @@ function GetMicrotime()
 	return (float)$usec + (float)$sec;
 }
 
+if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());
+function FormatDate($timestamp)
+{
+	return gmdate('Y/m/d H:i:s', $timestamp);
+}
+
+function GetTimestamp($date)
+{
+	return strtotime($date.'UTC');
+}
+
 function FsockTest1($hostname, $port)
 {
 	$fp = @fsockopen('tcp://'.$hostname, $port, $errno, $errstr, 5); if($fp === false) return false;  /* Closed or unreachable port */
@@ -58,7 +69,7 @@ function FsockTest()
 		if(!empty($file))
 		{
 			$file_array = explode('|', $file, 5); unset($file);
-			if(ctype_digit($file_array[0]) && $file_array[0] > $now - 3 * 60 * 60)
+			if(GetTimestamp($file_array[0]) > $now - 3 * 60 * 60)
 				return array($file_array[0], (int)$file_array[1], (int)$file_array[2], $file_array[3]);
 		}
 	}
@@ -82,13 +93,13 @@ function FsockTest()
 	if($fp !== false)
 	{
 		flock($fp, LOCK_EX);
-		fwrite($fp, $now.'|'.$fsock_base.'|'.$fsock_full.'|'.$warning.'|');
+		fwrite($fp, FormatDate($now).'|'.$fsock_base.'|'.$fsock_full.'|'.$warning.'|');
 		fflush($fp);
 		flock($fp, LOCK_UN);
 		fclose($fp);
 	}
 
-	return array($now, $fsock_base, $fsock_full, $warning);
+	return array(FormatDate($now), $fsock_base, $fsock_full, $warning);
 }
 
 function DisplayTristate($val)
@@ -121,7 +132,7 @@ echo "<div><b><big><font color=\"blue\">Detected settings</font></big></b></div>
 echo '<div><i><small>Here you will see the settings that you should set in vars.php based on some tests on your server.</small></i></div>';
 echo '<div><i><small>The server must be connected to Internet otherwise the tests won\'t give the correct results.</small></i></div>';
 $fsock_result = FsockTest(); if($fsock_result[3] !== "") $fsock_result[3] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[2].'">&sup1;</strong>';
-echo '<div><b><small>Last check: '.gmdate('Y/m/d H:i:s', $fsock_result[0]),' UTC</small></b></div>',"\r\n";
+echo '<div><b><small>Last check: ',$fsock_result[0],' UTC</small></b></div>',"\r\n";
 
 echo "<blockquote>\r\n";
 
