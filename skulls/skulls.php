@@ -45,16 +45,6 @@ function GetMainFileRev()
 	return trim(substr($main_rev, 1, -1));
 }
 
-/* Compression will be enabled later only if needed, otherwise it is just a waste of server resources */
-function DisableAutomaticCompression()
-{
-	$auto_compr = ini_get('zlib.output_compression');
-	if(!empty($auto_compr))
-		ini_set('zlib.output_compression', '0');
-	if(function_exists('apache_setenv'))
-		apache_setenv('no-gzip', '1');
-}
-
 function IsSecureConnection()
 {
 	if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -65,6 +55,17 @@ function IsSecureConnection()
 		return true;
 	return false;
 }
+
+function ConfigureSettings()
+{
+	ini_set('default_charset', 'utf-8');  /* Set default charset to UTF-8 */
+	$zlib_compr = ini_get('zlib.output_compression'); if(!empty($zlib_compr)) ini_set('zlib.output_compression', '0');
+	if(function_exists('apache_setenv')) apache_setenv('no-gzip', '1');  /* Compression will be enabled later only if needed, otherwise it is just a waste of server resources */
+	if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());  /* Suppress warnings if the timezone isn't set */
+	if(function_exists('header_remove')) header_remove('X-Powered-By');
+}
+ConfigureSettings();
+$SECURE_HTTP = IsSecureConnection();
 
 function NormalizePort($secure_http, $port)
 {
@@ -91,16 +92,11 @@ function IsWebInterface()
 	return false;
 }
 
-DisableAutomaticCompression();
-if(function_exists('header_remove')) header_remove('X-Powered-By');
-
 if(!ENABLED || basename($PHP_SELF) === 'index.php' || NETWORKS_COUNT === 0)
 {
 	header('HTTP/1.0 404 Not Found');
 	die("ERROR: Service disabled\r\n");
 }
-
-$SECURE_HTTP = IsSecureConnection();
 
 if(empty($_SERVER['HTTP_HOST']))
 {
@@ -1552,12 +1548,6 @@ function DetectRemoteIP($remote_ip)
 	return $remote_ip;
 }
 
-
-/* Set default charset to UTF-8 */
-ini_set('default_charset', 'utf-8');
-/* Suppress warnings if the timezone isn't set */
-if(function_exists('date_default_timezone_get'))
-	date_default_timezone_set(@date_default_timezone_get());
 
 $REMOTE_IP = $_SERVER['REMOTE_ADDR'];
 
