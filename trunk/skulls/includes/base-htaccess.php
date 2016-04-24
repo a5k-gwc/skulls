@@ -3,7 +3,7 @@
 ServerSignature Off
 DirectorySlash On
 DirectoryIndex index.html
-Options -Indexes
+Options -Indexes -MultiViews
 FileETag All -INode
 
 <IfModule mod_headers.c>
