@@ -116,7 +116,7 @@ if(empty($_SERVER['HTTP_HOST']))
 
 function SanitizeHeaderValue($val)
 {
-	if(strlen($val) > 1024) return null;
+	if(strlen($val) > 512) return null;
 	return str_replace(array(':', '/', '\\', '"', "\r", "\n", "\0"), array('%3A', '%2F'), $val);
 }
 
