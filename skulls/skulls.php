@@ -1191,7 +1191,7 @@ function CheckIfDummyHostIsNeeded($vendor, $ver)
 	return false;
 }
 
-function HostFile($net, $age)
+function HostFile($net, $age, $is_web_tool)
 {
 	$now = time(); $offset = date('Z');
 	$host_file = file(DATA_DIR.'/hosts-'.$net.'.dat');
@@ -1202,11 +1202,12 @@ function HostFile($net, $age)
 	else
 		$max_hosts = MAX_HOSTS_OUT;
 
+	$hosts_sent = 0;  /* Send at least 5 hosts (emergency mode when there are few recent hosts, especially useful on small networks). */
 	for($i = 0; $i < $max_hosts; $i++)
 	{
 		list($h_age, $h_ip, $h_port,) = explode('|', $host_file[$count_host - 1 - $i], 4);
 		$h_age = TimeSinceSubmissionInSeconds($now, $h_age, $offset);
-		if($h_age > MAX_HOST_AGE) break;
+		if($h_age > MAX_HOST_AGE && ($hosts_sent > 4 || $is_web_tool)) break; $hosts_sent++;
 		echo $h_ip,':',$h_port; if($age) echo '|',$h_age; echo "\r\n";
 	}
 }
@@ -2050,7 +2051,7 @@ else
 	elseif($supported_net)
 	{
 		if($HOSTFILE)
-			HostFile($DETECTED_NET, $AGE);
+			HostFile($DETECTED_NET, $AGE, $IS_WEB_TOOL);
 
 		if($URLFILE && ENABLE_URL_SUBMIT)
 			UrlFile($DETECTED_PV, $DETECTED_NET, $AGE, $CLIENT);
