@@ -17,6 +17,8 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+include '../vars.php';
+
 function GetMicrotime()
 {
 	list($usec, $sec) = explode(' ', microtime(), 2);
@@ -62,14 +64,14 @@ function FsockTest()
 {
 	$fsock_base = 0; $fsock_full = 0; $warning = ""; $now = time();
 
-	$cache_file = './test-cached.dat';
+	$cache_file = '../'.DATA_DIR.'/detection-cache.dat';
 	if(file_exists($cache_file))
 	{
 		$file = file_get_contents($cache_file);
 		if(!empty($file))
 		{
 			$file_array = explode('|', $file, 5); unset($file);
-			if(GetTimestamp($file_array[0]) > $now - 3 * 60 * 60)
+			if(GetTimestamp($file_array[0]) > $now - 6 * 60 * 60)
 				return array($file_array[0], (int)$file_array[1], (int)$file_array[2], $file_array[3]);
 		}
 	}
