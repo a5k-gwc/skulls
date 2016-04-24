@@ -35,7 +35,7 @@ define('RESPONSE_LINES_LIMIT', 64);
 define('ENABLE_CORS', true);
 define('DEBUG', 0);
 
-if(DEBUG) error_reporting(-1);
+if(DEBUG) { ini_set('display_errors', '1'); error_reporting(~0); }
 define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
 $PHP_SELF = $_SERVER['PHP_SELF']; $UNRELIABLE_HOST = false;
 
