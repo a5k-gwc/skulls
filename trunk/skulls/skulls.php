@@ -1739,6 +1739,8 @@ else
 		die;
 	}
 
+	WriteStatsTotalReqs();
+
 	/* Validate CORS requests */
 	if($IS_CORS)
 	{
@@ -1749,23 +1751,6 @@ else
 		{
 			header($_SERVER['SERVER_PROTOCOL'].' 418 I\'m a teapot'); header('Content-Length: 0'); die;
 		}
-	}
-
-	/* Separate ip from port for the submitted host, it will be used later */
-	if($HOST !== null)
-	{
-		if(strpos($HOST, ':') === false)
-			{$IP = $HOST; $PORT = 0;}
-		else
-			list($IP, $PORT) = explode(':', $HOST, 2);
-	}
-
-	/* Disallow some network names to avoid confusion with already existing networks */
-	if($NET === 'gnutella1' || $NET === 'g2' || $NET === 'shareaza')
-	{
-		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
-		if(LOG_MAJOR_ERRORS) Logging('invalid-network-names');
-		die("ERROR: Invalid network name\r\n");
 	}
 
 	$IS_WEB_TOOL = false;  /* Is considered a web tool every thing that isn't a P2P servent, like GWebCaches, crawlers, manual submissions, etc. */
@@ -1779,15 +1764,29 @@ else
 	elseif($CLIENT === 'GCII') { $IS_WEB_TOOL = true; if($NET === 'gnutella2') $FORCE_PV2 = true; }
 	elseif($IS_CRAWLER || $IS_A_CACHE || $IS_CORS) $IS_WEB_TOOL = true;
 
+	if($IS_WEB_TOOL)
+	{
+		$HOST = null;       /* Block host submissions, they aren't hosts */
+		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header, they don't need it */
+		if($MANUAL_SUBMIT) { $PING = 0; $GET = 0; $GETUDP = 0; $HOSTFILE = 0; $URLFILE = 0; $STATFILE = 0; $INFO = 0; }
+	}
+
 	if(($MANUAL_SUBMIT || $IS_CORS)? !VerifyUserAgentWeb($UA) : !VerifyUserAgent($UA))
 	{
 		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found'); header('Content-Length: 0');
-		UpdateStats(STATS_BLOCKED); WriteStatsTotalReqs();
+		UpdateStats(STATS_BLOCKED);
 		if(LOG_MINOR_ERRORS) Logging('blocked-clients');
 		die;
 	}
 
-	WriteStatsTotalReqs();
+	/* Separate ip from port for the submitted host, it will be used later */
+	if($HOST !== null)
+	{
+		if(strpos($HOST, ':') === false)
+			{$IP = $HOST; $PORT = 0;}
+		else
+			list($IP, $PORT) = explode(':', $HOST, 2);
+	}
 
 	/*
 		Existing GWC specs: v1, v1.1, v2, v2.1, v3, v4  ( GWC v3 is an extension of GWC v1  /  GWC v4 is an extension of GWC v2.1 )
@@ -1828,11 +1827,13 @@ else
 	/* getnetworks=1 is the same of support=2, in case it is specified then the old support=1 is ignored */
 	if($GETNETWORKS) $SUPPORT = 2;
 
-	if($IS_WEB_TOOL)
+	/* Disallow some network names to avoid confusion with already existing networks */
+	if($NET === 'gnutella1' || $NET === 'g2' || $NET === 'shareaza')
 	{
-		$HOST = null;       /* Block host submissions, they aren't hosts */
-		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header, they don't need it */
-		if($MANUAL_SUBMIT) { $PING = 0; $GET = 0; $GETUDP = 0; $HOSTFILE = 0; $URLFILE = 0; $STATFILE = 0; $INFO = 0; }
+		header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		UpdateStats(STATS_BLOCKED);
+		if(LOG_MAJOR_ERRORS) Logging('invalid-network-names', $DETECTED_PV);
+		die("ERROR: Invalid network name\r\n");
 	}
 
 	if(!VerifyVersion($CLIENT, $VERSION))
