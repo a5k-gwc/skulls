@@ -1741,18 +1741,6 @@ else
 
 	WriteStatsTotalReqs();
 
-	/* Validate CORS requests */
-	if($IS_CORS)
-	{
-		if(!ENABLE_CORS) { header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); header('Content-Length: 0'); die; }
-
-		include_once './update.php';
-		if(empty($ORIGIN) || $ORIGIN === 'null' || empty($UA) || IsIPInBlockList($REMOTE_IP))
-		{
-			header($_SERVER['SERVER_PROTOCOL'].' 418 I\'m a teapot'); header('Content-Length: 0'); die;
-		}
-	}
-
 	$IS_WEB_TOOL = false;  /* Is considered a web tool every thing that isn't a P2P servent, like GWebCaches, crawlers, manual submissions, etc. */
 	$MANUAL_SUBMIT = false; $FORCE_PV2 = false;
 	if($CLIENT === 'TEST')
@@ -1769,6 +1757,19 @@ else
 		$HOST = null;       /* Block host submissions, they aren't hosts */
 		$NO_IP_HEADER = 1;  /* Do NOT send X-Remote-IP header, they don't need it */
 		if($MANUAL_SUBMIT) { $PING = 0; $GET = 0; $GETUDP = 0; $HOSTFILE = 0; $URLFILE = 0; $STATFILE = 0; $INFO = 0; }
+		include_once './update.php';
+		if(IsIPInBlockList($REMOTE_IP)) { header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); header('Content-Length: 0'); die; }
+	}
+
+	/* Validate CORS requests */
+	if($IS_CORS)
+	{
+		if(!ENABLE_CORS) { header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); header('Content-Length: 0'); die; }
+
+		if(empty($ORIGIN) || $ORIGIN === 'null' || empty($UA))
+		{
+			header($_SERVER['SERVER_PROTOCOL'].' 418 I\'m a teapot'); header('Content-Length: 0'); die;
+		}
 	}
 
 	if(($MANUAL_SUBMIT || $IS_CORS)? !VerifyUserAgentWeb($UA) : !VerifyUserAgent($UA))
