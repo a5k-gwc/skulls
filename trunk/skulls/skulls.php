@@ -1200,7 +1200,7 @@ function HostFile($net, $age, $is_web_tool)
 	else
 		$max_hosts = MAX_HOSTS_OUT;
 
-	$hosts_sent = 0;  /* Send at least 5 hosts (emergency mode when there are few recent hosts, especially useful on small networks). */
+	$hosts_sent = 0;  /* Send at least 5 hosts (emergency mode when there are few recent hosts, especially useful on small networks) */
 	for($i = 0; $i < $max_hosts; $i++)
 	{
 		list($h_age, $h_ip, $h_port,) = explode('|', $host_file[$count_host - 1 - $i], 4);
@@ -1246,7 +1246,7 @@ function UrlFile($detected_pv, $net, $age, $client)
 	}
 }
 
-function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $getmaxleaves, $getudp, $client, $add_dummy_host)
+function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $getmaxleaves, $getudp, $client, $add_dummy_host, $is_web_tool)
 {
 	$output = "";
 	$now = time(); $offset = date('Z');
@@ -1256,7 +1256,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 	elseif($getvendors) $separators = 3;
 	elseif($getleaves) $separators = 2;
 
-	$hosts_sent = 0;
+	$hosts_sent = 0;  /* Send at least 5 hosts (emergency mode when there are few recent hosts, especially useful on small networks) */
 	if($get)
 	{
 		$host_file = file(DATA_DIR.'/hosts-'.$net.'.dat');
@@ -1271,7 +1271,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 		{
 			list($h_age, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, /* $h_ver */, /* $h_ua */, /* $h_suspect */,) = explode('|', $host_file[$count_host - 1 - $i], 13);
 			$h_age = TimeSinceSubmissionInSeconds($now, $h_age, $offset);
-			if($h_age > MAX_HOST_AGE) break;
+			if($h_age > MAX_HOST_AGE && ($hosts_sent > 4 || $is_web_tool)) break;
 			$host = 'H|'.$h_ip.':'.$h_port.'|'.$h_age;
 			if($separators > 1) $host .= '||';
 			if($getleaves) $host .= $h_leaves;
@@ -2038,7 +2038,7 @@ else
 	{
 		$dummy_host_needed = CheckIfDummyHostIsNeeded($CLIENT, $VERSION);
 
-		Get($DETECTED_PV, $DETECTED_NET, $GET, $GETLEAVES, $GETVENDORS, $GETUPTIME, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed);
+		Get($DETECTED_PV, $DETECTED_NET, $GET, $GETLEAVES, $GETVENDORS, $GETUPTIME, $GETMAXLEAVES, $GETUDP, $CLIENT, $dummy_host_needed, $IS_WEB_TOOL);
 	}
 	elseif($supported_net)
 	{
