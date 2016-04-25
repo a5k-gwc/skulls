@@ -17,7 +17,7 @@
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-define('REVISION', '5.0.0.3');
+define('REVISION', '5.0.0.4');
 
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
@@ -210,7 +210,9 @@ function RemoveFilesStartingWith($filename_prefix, $dir)
 $old_htaccess = array(
 	array(0,    'da39a3ee5e6b4b0d3255bfef95601890afd80709'),  /* Empty file */
 	array(158,  'a32f8fef07cecefb9942d120bf4cc71bb11d7108'),  /* v0.2.9, v0.3.0, v0.3.1 */
-	array(3053, '5978373c6535cc7ec7735327767ede5bfc4a3391')   /* v0.3.2, v0.3.2b */
+	array(3053, '5978373c6535cc7ec7735327767ede5bfc4a3391'),  /* v0.3.2, v0.3.2b */
+	array(3093, 'd9a5185e38944dfa485192cc13dca78542858c3d'),  /* v0.3.2c */
+	array(3091, '94fa81f7cf89b6f9c552b79711ab1bc725bb0ea8')   /* v0.3.2d, v0.3.2e */
 );
 
 /* Changed files */
