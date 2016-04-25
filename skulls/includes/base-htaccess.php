@@ -35,10 +35,9 @@ AddCharset        utf-8 .css .js
   RewriteEngine On
 
   <Files "skulls">
-    # This should block, for the main php script, the extension strip that is enabled on some servers by re-adding the extension
-    RewriteCond "%{REQUEST_FILENAME}\.php" -f
-    RewriteCond "%{REQUEST_URI}" "^(.*)/skulls$"
-    RewriteRule "" "%1/skulls.php" [L,R=permanent]
+    # This should block, for the main php script, the extension strip that is enabled on some servers
+    RewriteCond %{REQUEST_FILENAME}\.php -f
+    RewriteRule . - [G,L]
   </Files>
 
   # Redirect from the www url to the not-www url (excluding the main php script that already auto-redirect itself)
