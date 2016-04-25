@@ -153,7 +153,7 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	/* Block empty User-Agent and other rip-offs */
 	elseif($vendor === 'LIME')
 	{
-		if($ua === "" || $ver === '1.1.1.6')
+		if($ua === "" || $ua === 'Mozilla/4.0' || $ver === '1.1.1.6')
 			return true;
 	}
 	elseif($vendor === 'TEST')
