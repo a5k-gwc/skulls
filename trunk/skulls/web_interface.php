@@ -135,7 +135,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							<td></td>
 							<td>&nbsp;</td>
 						</tr>
-<?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper(); ?>
+<?php include './geoip/geoip.php'; $geoip = new GeoIPWrapper; ?>
 						<tr>
 							<th>- GeoIP type:</th>
 							<td><span class="bold"><?php if($geoip) echo $geoip->GetType(); ?></span></td>
@@ -234,7 +234,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							echo '<tr><td class="empty-list" colspan="4">There are no <strong>hosts</strong> listed at this time.</td></tr>',"\n";
 						else
 						{
-							include './geoip/geoip.php'; $geoip = new GeoIPWrapper();
+							include './geoip/geoip.php'; $geoip = new GeoIPWrapper;
 
 							for( $i = $elements - 1; $i >= 0; $i-- )
 							{
@@ -275,7 +275,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 			}
 			elseif($page_number == 3)	// GWCs
 			{
-				include './geoip/geoip.php'; $geoip = new GeoIPWrapper();
+				include './geoip/geoip.php'; $geoip = new GeoIPWrapper;
 
 				$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
 				$elements = count($cache_file);
