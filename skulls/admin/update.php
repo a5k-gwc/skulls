@@ -36,7 +36,7 @@ if($rev_num === REVISION)
 	die;
 }
 
-ini_set('display_errors', '1'); error_reporting(~0);
+error_reporting(~0); ini_set('display_errors', '1');
 
 $log = "";
 $errors = 0;
