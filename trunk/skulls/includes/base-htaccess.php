@@ -1,4 +1,4 @@
-<?php header('Connection: close'); header($_SERVER['SERVER_PROTOCOL'].' 403 Forbidden'); die; ?>
+<?php header('Connection: close'); header('HTTP/1.0 403 Forbidden'); header('Content-Length: 0'); die; ?>
 ### Main settings ###
 ServerSignature Off
 DirectorySlash On
