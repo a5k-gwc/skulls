@@ -1,6 +1,7 @@
 <?php
+//  admin/update.php
 //
-//  Copyright © 2005-2008, 2015-2016 by ale5000
+//  Copyright © 2005-2008, 2015-2016  ale5000
 //  This file is part of Skulls! Multi-Network WebCache.
 //
 //  Skulls is free software: you can redistribute it and/or modify
@@ -15,7 +16,6 @@
 //
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
-//
 
 define('REVISION', '5.0.0.4');
 
