@@ -128,13 +128,14 @@ class GeoIPWrapper
 
 
 	/* Constructor */
-	function GeoIPWrapper()
+	function __construct()
 	{
 		$this->curr_dir = dirname(__FILE__);
 
 		if($this->_InitPECL() || $this->_InitAPI())
 			$this->enabled = true;
 	}
+	function GeoIPWrapper() { $this->__construct(); }
 
 	/* Destructor (manually executed) */
 	function Destroy()
