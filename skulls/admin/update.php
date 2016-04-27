@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-define('REVISION', '5.0.0.4');
+define('REVISION', '5.0.0.5');
 
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
@@ -219,6 +219,8 @@ $old_htaccess = array(
 foreach($old_htaccess as $val) RemoveSpecificFile('.htaccess', $val[0], $val[1]); unset($val);
 /* Moved files */
 $log .= DeleteFile('geoip/GeoIP.dat');  /* v0.3.1 */
+$log .= DeleteFile('admin/test-cached.dat');
+$log .= DeleteFile('license.txt');
 /* Renamed files */
 RemoveSpecificFile('ext/blocklist.dat', 18131, '0c3a14080b7817aa7601c599c8820198e5ab1167');  /* v0.3.2 */
 RemoveFilesStartingWith('hosts_', DATA_DIR);
@@ -234,7 +236,6 @@ if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
 /* Deleted files */
 $log .= DeleteFile('admin/index.html');
 $log .= DeleteFile('admin/index.htm');
-$log .= DeleteFile('admin/test-cached.dat');
 /* Size check */
 $log .= ValidateSize('data/failed_urls.dat');
 $log .= ValidateSize('stats/upd-reqs.dat');
