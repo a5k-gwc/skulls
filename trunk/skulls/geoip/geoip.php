@@ -32,7 +32,7 @@ in this case you have to manually configure the path inside php.ini or copy the 
 class GeoIPWrapper
 {
 	/* Private */
-	var $enabled = false;
+	var $status = 0;
 	var $is_pecl = false;
 	var $curr_dir = null;
 	var $api_handle = null;
@@ -129,17 +129,18 @@ class GeoIPWrapper
 	/* Constructor */
 	function __construct()
 	{
+		if($this->status !== 0) trigger_error('GeoIPWrapper - Invalid initialization call', E_USER_ERROR);
 		$this->curr_dir = dirname(__FILE__);
 
-		if($this->_InitPECL() || $this->_InitAPI())
-			$this->enabled = true;
+		if($this->_InitPECL() || $this->_InitAPI()) { $this->status = 1; return true; }
+		return false;
 	}
-	function GeoIPWrapper() { $this->__construct(); }
+	function GeoIPWrapper() { return $this->__construct(); }
 
 	/* Destructor (manually executed) */
 	function Destroy()
 	{
-		if($this->enabled)
+		if($this->status === 1)
 		{
 			if(!$this->is_pecl)
 			{
@@ -148,23 +149,24 @@ class GeoIPWrapper
 				elseif(!geoip_close($this->api_handle))
 					trigger_error('GeoIPWrapper - Destroy failed', E_USER_ERROR);
 			}
-			$this->enabled = false;
 			$this->is_pecl = false;
 			$this->api_handle = null;
 			$this->db_ver = null;
 			$this->db_cr = "";
 		}
+		$this->status = 2;
 	}
 
 	/* Public */
 	function IsEnabled()
 	{
-		return $this->enabled;
+		return $this->status === 1;
 	}
 
 	function GetType()
 	{
-		if($this->enabled)
+		if($this->status === 2) return 'Unknown';
+		if($this->status === 1)
 		{
 			if($this->is_pecl)
 				return 'PECL extension';
@@ -172,12 +174,12 @@ class GeoIPWrapper
 				return 'Legacy PHP API';
 		}
 
-		return 'Missing';
+		return 'None';
 	}
 
 	function GetDBVersion()
 	{
-		if(!$this->enabled) return "";
+		if($this->status !== 1) return "";
 
 		if($this->_GetDBVersionAndCopyright())
 			return $this->db_ver;
@@ -187,7 +189,7 @@ class GeoIPWrapper
 
 	function GetDBCopyright()
 	{
-		if($this->enabled && $this->_GetDBVersionAndCopyright())
+		if($this->status === 1 && $this->_GetDBVersionAndCopyright())
 			return $this->db_cr;
 
 		return "";
@@ -195,7 +197,7 @@ class GeoIPWrapper
 
 	function GetCountryNameByIP($ip)
 	{
-		if(!$this->enabled) return null;
+		if($this->status !== 1) return null;
 		if($this->is_pecl)
 			$name = @geoip_country_name_by_name($ip);
 		else
@@ -207,7 +209,7 @@ class GeoIPWrapper
 
 	function GetCountryCodeByIP($ip)
 	{
-		if(!$this->enabled) return null;
+		if($this->status !== 1) return null;
 		if($this->is_pecl)
 			$code = @geoip_country_code_by_name($ip);
 		else
@@ -219,7 +221,7 @@ class GeoIPWrapper
 
 	function GetCountryFlag($code)
 	{
-		if(!$this->enabled) return null;
+		if($this->status !== 1) return null;
 		if($code !== "")
 		{
 			$path = '/flags/'.strtolower($code).'.png';
@@ -233,7 +235,7 @@ class GeoIPWrapper
 	/* Only PECL for now */
 	function GetASNByIP($ip)
 	{
-		if(!$this->enabled) return null;
+		if($this->status !== 1) return null;
 		if($this->is_pecl)
 			if(function_exists('geoip_asnum_by_name'))
 				return htmlentities(@geoip_asnum_by_name($ip), ENT_QUOTES, 'ISO-8859-1');
