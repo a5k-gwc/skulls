@@ -59,7 +59,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 <!--[if lte IE 9]><link rel="stylesheet" type="text/css" href="includes/style-ie.css"><![endif]-->
 <?php if($page_number === 1 && !empty($_SERVER['QUERY_STRING'])) echo '<link rel="canonical" href="',$php_self,'">',"\n"; ?>
 <meta name="robots" content="<?php if($page_number === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
-<meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from p2p clients to bootstrap.">
+<meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from P2P clients to bootstrap. It support all versions of the GWC specification.">
 <meta name="keywords" content="<?php echo strtolower(NAME); ?>, gwebcache, gwc, p2p, bootstrap">
 </head>
 
