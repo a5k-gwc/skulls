@@ -27,11 +27,11 @@ function Logging($filename, $detected_pv = null)
 	global $CLIENT, $VERSION, $DETECTED_NET, $UA, $ORIGIN;
 	$REMOTE_IP = empty($_SERVER['REMOTE_ADDR'])? null : $_SERVER['REMOTE_ADDR'];
 	$ACCEPT_ENCODING = empty($_SERVER['HTTP_ACCEPT_ENCODING'])? null : $_SERVER['HTTP_ACCEPT_ENCODING'];
-	$FORWARDED_FOR = empty($_SERVER['HTTP_X_FORWARDED_FOR'])? null : $_SERVER['HTTP_X_FORWARDED_FOR'];
-	$CLIENT_IP = empty($_SERVER['HTTP_CLIENT_IP'])? null : $_SERVER['HTTP_CLIENT_IP'];
+	$X_FORWARDED_FOR = empty($_SERVER['HTTP_X_FORWARDED_FOR'])? null : $_SERVER['HTTP_X_FORWARDED_FOR'];
+	$X_CLIENT_IP = empty($_SERVER['HTTP_X_CLIENT_IP'])? null : $_SERVER['HTTP_X_CLIENT_IP'];
 	$REFERER = empty($_SERVER['HTTP_REFERER'])? null: $_SERVER['HTTP_REFERER'];
 
-	$line = gmdate("Y/m/d H:i:s").'|'.$detected_pv.'|'.RemoveGarbage($DETECTED_NET).'|'.RemoveGarbage($CLIENT.' '.$VERSION).'|'.RemoveGarbage($ACCEPT_ENCODING).'|'.RemoveGarbage($UA).'|?'.RemoveGarbage($_SERVER['QUERY_STRING']).'|'.RemoveGarbage($REMOTE_IP).'|'.RemoveGarbage($FORWARDED_FOR).'|'.RemoveGarbage($CLIENT_IP).'|'.RemoveGarbage($ORIGIN).'|'.RemoveGarbage($REFERER).'|'."\r\n";
+	$line = gmdate("Y/m/d H:i:s").'|'.$detected_pv.'|'.RemoveGarbage($DETECTED_NET).'|'.RemoveGarbage($CLIENT.' '.$VERSION).'|'.RemoveGarbage($ACCEPT_ENCODING).'|'.RemoveGarbage($UA).'|?'.RemoveGarbage($_SERVER['QUERY_STRING']).'|'.RemoveGarbage($REMOTE_IP).'|'.RemoveGarbage($X_FORWARDED_FOR).'|'.RemoveGarbage($X_CLIENT_IP).'|'.RemoveGarbage($ORIGIN).'|'.RemoveGarbage($REFERER).'|'."\r\n";
 
 	$file = fopen('log/'.$filename.'.log', 'ab');
 	if($file === false) return;

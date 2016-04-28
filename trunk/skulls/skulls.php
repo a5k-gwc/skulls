@@ -1548,8 +1548,6 @@ function WriteStatsTotalReqs()
 /* It use headers that can be easily spoofed. This function is used only for helping clients to detect their IP address; it mustn't be used for security checks. */
 function DetectRemoteIP($remote_ip)
 {
-	/* Shared internet/ISP IP */
-	if(!empty($_SERVER['HTTP_CLIENT_IP']) && ValidateIP($_SERVER['HTTP_CLIENT_IP'])) return $_SERVER['HTTP_CLIENT_IP'];
 	/* IPs passing through proxies */
 	if(!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
 	{
@@ -1557,12 +1555,10 @@ function DetectRemoteIP($remote_ip)
 		if(strpos($ip, ',') === false) { if(ValidateIP($ip)) return $ip; }
 		else { $ip_array = explode(',', $ip, 10); foreach($ip_array as $val) { $ip = trim($val); if(ValidateIP($ip)) return $ip; } }
 	}
-	/* Varnish Cache on SourceForge and maybe others */
-	if(!empty($_SERVER['HTTP_X_REMOTE_ADDR']) && ValidateIP($_SERVER['HTTP_X_REMOTE_ADDR'])) return $_SERVER['HTTP_X_REMOTE_ADDR'];
-	/* Cloud Sites */
+	if(!empty($_SERVER['HTTP_X_REMOTE_ADDR']) && ValidateIP($_SERVER['HTTP_X_REMOTE_ADDR'])) return $_SERVER['HTTP_X_REMOTE_ADDR'];  /* Varnish Cache on SourceForge and maybe others */
+	if(!empty($_SERVER['HTTP_X_CLIENT_IP']) && ValidateIP($_SERVER['HTTP_X_CLIENT_IP'])) return $_SERVER['HTTP_X_CLIENT_IP'];
 	if(!empty($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']) && ValidateIP($_SERVER['HTTP_X_CLUSTER_CLIENT_IP'])) return $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
-	/* X-Real-IP header set by some CDN */
-	if(!empty($_SERVER['HTTP_X_REAL_IP']) && ValidateIP($_SERVER['HTTP_X_REAL_IP'])) return $_SERVER['HTTP_X_REAL_IP'];
+	if(!empty($_SERVER['HTTP_X_REAL_IP']) && ValidateIP($_SERVER['HTTP_X_REAL_IP'])) return $_SERVER['HTTP_X_REAL_IP'];  /* X-Real-IP header set by some CDN */
 
 	return $remote_ip;
 }
