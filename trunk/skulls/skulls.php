@@ -1058,6 +1058,13 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	}
 }
 
+function ParseDomainFromUrl($url, $is_udp)
+{
+	if($is_udp) list(,$domain) = explode(':', $url, 2); else list(,$domain) = explode('://', $url, 2);
+	list($domain) = explode('/', $domain, 2); list($domain) = explode(':', $domain, 2);
+	return $domain;
+}
+
 function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_gwc_param, $user_agent)
 {
 	global $MY_URL;
@@ -1065,7 +1072,8 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 
 	if($gwc_url === $MY_URL)  /* It doesn't allow to insert itself in the GWC list */
 		return 0;  // Exists
-	if(CheckBlockedGWC($gwc_url) || CheckFailedUrl($gwc_url))
+	$domain = ParseDomainFromUrl(($is_udp? 'udp:' : "").$gwc_url, $is_udp);
+	if(CheckBlockedDomain($domain) || CheckBlockedGWC($gwc_url) || CheckFailedUrl($gwc_url))
 		return 4;  // Blocked URL
 
 	$client = RemoveGarbage($client);
@@ -1087,10 +1095,6 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 	}
 	$this_alt_gwc = null;
 	$new_specs_only = '0';
-	$temp = $gwc_url; if(!$is_udp) list(,$temp) = explode('://', $temp, 2);
-	list($temp,) = explode('/', $temp, 2); list($temp,) = explode(':', $temp, 2);
-
-	if(CheckBlockedDomain($temp)) return 4;  // Blocked URL
 
 	if($cache_exists)
 	{
@@ -1103,7 +1107,7 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 		else
 		{
 			/* If the DNS resolution fails we assume it is already an IP address */
-			$gwc_ip = ResolveDNS($temp); if($gwc_ip === false) { $gwc_ip = $temp; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https://') === 0) $new_specs_only = '1';
+			$gwc_ip = ResolveDNS($domain); if($gwc_ip === false) { $gwc_ip = $domain; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https://') === 0) $new_specs_only = '1';
 			if(DEBUG) echo 'D|update|GWC|IP|'.RemoveGarbage($gwc_ip)."\r\n";
 			if(!ValidateIP($gwc_ip)) { ReplaceCache($file_path, $i, $cache_file, null); return 4; }  // Blocked URL
 
@@ -1144,7 +1148,7 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 	else
 	{
 		/* If the DNS resolution fails we assume it is already an IP address */
-		$gwc_ip = ResolveDNS($temp); if($gwc_ip === false) { $gwc_ip = $temp; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https://') === 0) $new_specs_only = '1';
+		$gwc_ip = ResolveDNS($domain); if($gwc_ip === false) { $gwc_ip = $domain; $new_specs_only = '1'; } elseif(strpos($gwc_url, 'https://') === 0) $new_specs_only = '1';
 		if(DEBUG) echo 'D|update|GWC|IP|'.RemoveGarbage($gwc_ip)."\r\n";
 		if(!ValidateIP($gwc_ip)) { return 4; }  // Blocked URL
 
