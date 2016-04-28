@@ -1726,8 +1726,10 @@ else
 	$DETECTED_NET = $NET; $DETECTED_REMOTE_IP = null; $CLOUDFLARE_IP = null; $FAKE_CF = false;
 	if($DETECTED_NET === null) $DETECTED_NET = 'gnutella';  /* This should NOT absolutely be changed (also if your GWC doesn't support the gnutella network) otherwise you will mix hosts of different networks and it is bad */
 
-	if(TRUST_X_REMOTE_ADDR_FROM_LOCALHOST && isset($_SERVER['HTTP_X_REMOTE_ADDR']) && ($REMOTE_IP === '127.0.0.1' || $REMOTE_IP === '::1'))
+	if(TRUST_X_REMOTE_ADDR_FROM_LOCALHOST && isset($_SERVER['HTTP_X_REMOTE_ADDR']) && (strpos($REMOTE_IP, '127.') === 0 || $REMOTE_IP === '::1'))
 		$REMOTE_IP = $_SERVER['HTTP_X_REMOTE_ADDR'];
+	if(TRUST_X_CLIENT_IP_FROM_LOCALHOST && isset($_SERVER['HTTP_X_CLIENT_IP']) && (strpos($REMOTE_IP, '127.') === 0 || $REMOTE_IP === '::1'))
+		$REMOTE_IP = $_SERVER['HTTP_X_CLIENT_IP'];
 
 	/* CloudFlare */
 	if(isset($_SERVER['HTTP_CF_CONNECTING_IP']))
