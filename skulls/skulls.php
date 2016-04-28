@@ -2066,6 +2066,8 @@ else
 		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
 		if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
 			echo "I|maintainer-url|".MAINTAINER_WEBSITE."\r\n";
+
+		echo "I|host-verification|",(VERIFY_HOSTS && FSOCK_FULL);
 	}
 
 	if($CACHE != NULL || $HOST != NULL)
