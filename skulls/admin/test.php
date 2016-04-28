@@ -134,7 +134,7 @@ echo "<br><br>\r\n";
 echo "<div><b><big><font color=\"blue\">Detected settings</font></big></b></div>\r\n";
 echo '<div><i><small>Here you will see the settings that you should set in vars.php based on some tests on your server.</small></i></div>';
 echo '<div><i><small>The server must be connected to Internet otherwise the tests won\'t give the correct results.</small></i></div>';
-$fsock_result = FsockTest(); if($fsock_result[3] !== "") $fsock_result[3] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[2].'">&sup1;</strong>';
+$fsock_result = FsockTest(); if($fsock_result[3] !== "") $fsock_result[3] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[3].'">&sup1;</strong>';
 echo '<div><b><small>Last check: ',$fsock_result[0],' UTC</small></b></div>',"\r\n";
 
 echo "<blockquote>\r\n";
