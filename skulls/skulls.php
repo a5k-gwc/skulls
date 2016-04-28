@@ -593,6 +593,7 @@ function CheckBlockedGWC($gwc_url)
 		|| $gwc_url === 'http://webcache.peerproject.org/'			/* No longer exist */
 		|| $gwc_url === 'http://peerproject.org/webcache/'			/* No longer exist */
 		|| $gwc_url === 'http://cache.peernix.com/gwc.php'			/* No longer exist */
+		|| $gwc_url === 'http://gofoxy.net/gwc/cgi-bin/fc'			/* No longer exist */
 		|| $gwc_url === 'http://gwc.gofoxy.net:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://gwc.iblinx.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
 		|| $gwc_url === 'http://gamagic.com:2108/gwc/cgi-bin/fc'	/* No longer exist */
