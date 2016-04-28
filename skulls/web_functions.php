@@ -468,9 +468,8 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 
 function CalculateSHA1($file_name)
 {
-	$hash = sha1_file($file_name, true);
-	if($hash === false) return false;
-	return strtoupper(bin2hex($hash));
+	$hash = sha1_file($file_name); if($hash === false) return false;
+	return strtoupper($hash);
 }
 
 function CheckHashAndFilesize($file_name, &$BL_file_size)
