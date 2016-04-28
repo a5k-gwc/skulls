@@ -2056,18 +2056,17 @@ else
 
 	if($INFO)
 	{
-		echo "I|name|".NAME."\r\n";
-		echo "I|ver|".VER."\r\n";
-		echo "I|vendor|".VENDOR."\r\n";
-		echo "I|software-url|".GWC_SITE."\r\n";
-		echo "I|license|".LICENSE_NAME.' v'.LICENSE_VER."\r\n";
-		echo "I|license-url|".LICENSE_URL."\r\n";
+		echo 'I|info|name|',NAME,"\r\n";
+		echo 'I|info|ver|',VER,"\r\n";
+		echo 'I|info|vendor|',VENDOR,"\r\n";
 
-		echo "I|maintainer|".MAINTAINER_NICK."\r\n";
-		if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "")
-			echo "I|maintainer-url|".MAINTAINER_WEBSITE."\r\n";
+		echo 'I|info|hosts-verification|',(VERIFY_HOSTS && FSOCK_FULL),"\r\n";
 
-		echo "I|host-verification|",(VERIFY_HOSTS && FSOCK_FULL);
+		echo 'I|info|software-url|',GWC_SITE,"\r\n";
+		echo 'I|info|license|',LICENSE_NAME,' v',LICENSE_VER,"\r\n";
+		echo 'I|info|license-url|',LICENSE_URL,"\r\n";
+		echo 'I|info|maintainer|',MAINTAINER_NICK,"\r\n";
+		if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "") echo 'I|info|maintainer-url|',MAINTAINER_WEBSITE,"\r\n";
 	}
 
 	if($CACHE != NULL || $HOST != NULL)
