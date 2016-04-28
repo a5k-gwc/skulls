@@ -46,14 +46,14 @@ function FsockTest1($hostname, $port)
 
 function FsockTest2($hostname, $port)
 {
-	//$start = GetMicrotime();
+	$errno = -1; //$start = GetMicrotime();
 
 	$fp = @fsockopen('tcp://'.$hostname, $port, $errno, $errstr, 5);
 	if($fp === false)
 	{
 		/* if(GetMicrotime()-$start > 4.9) */
 		if($errno === 111 || $errno === 10061) return true;  /* Closed port but reachable */
-		elseif($errno === 110 || $errno === 10060) return false;  /* Unreachable port (connection timed out) */
+		elseif($errno === 110 || $errno === 10060 || $errno === 13) return false;  /* Unreachable port: errors 110/10060 (Connection timed out), error 13 (Permission denied) */
 		else return (string)$errno;
 	}
 
