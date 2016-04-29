@@ -155,6 +155,8 @@ echo "<b>Function ctype_digit:</b> ";
 CheckFunction("ctype_digit");
 echo "<b>Function ip2long:</b> ";
 CheckFunction("ip2long");
+echo "<b>Function long2ip:</b> ";
+CheckFunction("long2ip");
 echo "<br>";
 
 echo "<b>Function gzcompress:</b> ";
