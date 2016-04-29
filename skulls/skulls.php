@@ -510,7 +510,7 @@ function ValidateRemoteIP($ip, &$is_localhost)
 
 function ValidateIP($ip, $reject_lan_IPs = true)
 {
-	$long_ip = ip2long($ip); if($long_ip === false) return false;
+	$long = ip2long($ip); if($long === false) return false;
 
 	// http://www.rfc-editor.org/rfc/rfc3330.txt
 	$ip_array = explode('.', $ip, 4);
@@ -525,7 +525,7 @@ function ValidateIP($ip, $reject_lan_IPs = true)
 		)
 			return false;
 
-	return $ip === long2ip((float)$long_ip);  /* The float cast will prevent getting wrong IPs on some systems */
+	return $ip === long2ip($long);
 }
 
 function ValidatePort($port, $net)
