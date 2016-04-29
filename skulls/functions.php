@@ -191,7 +191,7 @@ function KickStart($net, $cache){
 
 	$fp = @fsockopen($host_name, $port, $errno, $errstr, (float)CONNECT_TIMEOUT);
 
-	if(!$fp)
+	if($fp === false)
 	{
 		echo "<font color=\"red\"><b>Error ".$errno.".</b></font><br>\r\n";
 		return;
@@ -200,8 +200,8 @@ function KickStart($net, $cache){
 	{
 		include './update.php';
 
-		fwrite( $fp, "GET ".substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) )."?get=1&hostfile=1&getvendors=1&client=".VENDOR."&version=".SHORT_VER."&cache=1&net=".$net." ".$_SERVER['SERVER_PROTOCOL']."\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n" );
-		while( !feof($fp) )
+		fwrite($fp, 'GET '.substr( $cache, strlen($main_url[0]), (strlen($cache) - strlen($main_url[0]) ) ).'?get=1&hostfile=1&getvendors=1&getnetworks=1&pv=2&net='.$net.'&client='.VENDOR.'&version='.SHORT_VER.'&cache=1'." HTTP/1.0\r\nHost: ".$host_name."\r\nUser-Agent: ".NAME." ".VER."\r\nConnection: close\r\n\r\n");
+		while(!feof($fp))
 		{
 			$is_host = FALSE;
 			$line = rtrim(fgets($fp, 1024));
@@ -211,11 +211,8 @@ function KickStart($net, $cache){
 			{
 				if(strtolower(substr($line, 0, 2)) == "h|")		// Host
 				{
-					unset($host);
-					$host = explode("|", $line);
-					$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
-					if(ValidateHost($host[1], $ip_port[0], $net, true))
-						$is_host = true;
+					$host = explode('|', $line, 7);
+					$is_host = true;
 				}
 				elseif(strtolower(substr($line, 0, 2)) == "u|");	// GWC
 				elseif(strtolower(substr($line, 0, 2)) == "i|");	// Info
@@ -224,24 +221,26 @@ function KickStart($net, $cache){
 			elseif(strpos($line, '://') !== false);		// GWC (old specs)
 			elseif(strpos($line, ':') !== false)		// Host (old specs)
 			{
-				unset($host);
-				$host[1] = $line;
-				$ip_port = explode(":", $host[1]);	// $ip_port[0] = IP	$ip_port[1] = Port
-				if(ValidateHost($host[1], $ip_port[0], $net, true))
+				list($ip) = explode(':', $line, 2);
+				if(ValidateIP($ip))
+				{
+					$host = array(); $host[1] = $line;
 					$is_host = true;
+				}
+				unset($ip);
 			}
 
 			if($is_host)
 			{
-				$h_vendor = null;
-				if(!IsIPInBlockList($ip_port[0]))
-				{
-					if(!empty($host[5])) $h_vendor = RemoveGarbage($host[5]);
-					if($h_vendor === 'LIME') $result = 10;  // Skip LimeWire from KickStart because most are fake (LimeWire can still submit itself)
-					else $result = WriteHostFile($net, $ip_port[0], rtrim($ip_port[1]), "", "", "", $h_vendor, "", 'KickStart', 0, false);
-				}
-				else
+				$h_vendor = null; if(!empty($host[5])) $h_vendor = strtoupper(RemoveGarbage($host[5]));
+				list($h_ip, $h_port) = explode(':', $host[1], 2);
+
+				if(!ValidateHostKickStart($host[1], $net) || IsIPInBlockList($h_ip))
 					$result = 9;
+				elseif($h_vendor !== null && (strlen($h_vendor) !== 4 || $h_vendor === 'LIME'))  /* Skip LimeWire (often fake) and invalid vendors from KickStart */
+					$result = 10;
+				else
+					$result = WriteHostFile($net, $h_ip, $h_port, "", "", "", $h_vendor, "", 'KickStart', 0, false);
 
 				if( $result == 0 ) // Exists
 					echo "<b>I|update|OK|Host already updated</b><br>\r\n";

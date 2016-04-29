@@ -544,6 +544,13 @@ function ValidateHost($host, $remote_ip, $net, $suppress_log = false)
 	return true;
 }
 
+function ValidateHostKickStart($host, $net)
+{
+	list($ip, $port) = explode(':', $host, 2);
+	if(!ValidateIP($ip) || !ValidatePort($port, $net)) return false;
+	return true;
+}
+
 function CheckURLValidity($cache)
 {
 	if(strlen($cache) > 10)
