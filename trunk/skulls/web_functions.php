@@ -594,12 +594,12 @@ function QueryUpdateServer($url = 'http://skulls.sourceforge.net/latest_ver.php'
 					$received_data = explode("|", $line);
 					$msg_error .= '<div>'.$received_data[2].'</div>';
 				}
-				elseif(strpos($line, "404 Not Found") > -1)
+				elseif(strpos($line, "404 Not Found") !== false)
 				{
 					$status = "404";
 					$msg = $line;
 				}
-				elseif(strpos($line, "403 Forbidden") > -1)
+				elseif(strpos($line, "403 Forbidden") !== false)
 				{
 					$status = "403";
 					$msg = $line;
