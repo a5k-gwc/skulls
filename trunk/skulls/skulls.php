@@ -755,9 +755,10 @@ function PingPort($ip, $port)
 	return true;
 }
 
-function PingGWC($gwc_url, $query, $net_param = null)
+function PingGWC($gwc_url, $query, $net_param = null, $identity = null)
 {
 	if(!ENABLE_URL_SUBMIT) return 'ERR|DISABLED';
+	if($identity === null) $identity = 'client='.VENDOR.'&version='.SHORT_VER.'&cache=1';
 	$our_url = null;
 
 	list($gwc_scheme, $gwc_base_url) = explode('://', $gwc_url, 2);
@@ -790,7 +791,7 @@ function PingGWC($gwc_url, $query, $net_param = null)
 		{
 			if(CACHE_URL !== "") $our_url = 'X-GWC-URL: '.CACHE_URL."\r\n";
 			$common_headers = "Connection: close\r\nUser-Agent: ".NAME.' '.VER."\r\n".$our_url;
-			$out = 'GET /'.$gwc_path.'?'.$final_query.' '.$_SERVER['SERVER_PROTOCOL']."\r\n";
+			$out = 'GET /'.$gwc_path.'?'.$final_query.'&'.$identity.' HTTP/1.0'."\r\n";
 			$out .= 'Host: '.$gwc_idn_host."\r\n".$common_headers."\r\n";
 			if(DEBUG) echo "\r\n",rtrim($out),"\r\n";
 
@@ -830,7 +831,7 @@ function PingGWC($gwc_url, $query, $net_param = null)
 	{
 		$gwc_url = ($secure_http? 'https' : 'http').'://'.$gwc_idn_host.'/'.$gwc_path; /* Rewrite url with idn host */
 
-		$ch = curl_init($gwc_url.'?'.$final_query);
+		$ch = curl_init($gwc_url.'?'.$final_query.'&'.$identity);
 		if($ch === false) return cURL_OnError(null, 'init', false);
 
 		if(!cURL_SetOptions($ch, $gwc_idn_host, $gwc_port)) return cURL_OnError($ch, 'setopt');
@@ -903,10 +904,10 @@ function PingGWC($gwc_url, $query, $net_param = null)
 		/* Needed to force v2 spec since they ignore the other ways */
 		if(strpos($oldpong, 'Cachechu') === 0 || strpos($oldpong, 'PHPGnuCacheII') === 0)
 			if(strpos($query, 'update=1') === false)
-				return PingGWC($gwc_url, $query.'&update=1', $net_param);
+				return PingGWC($gwc_url, $query.'&update=1', $net_param, 'client=TEST&version='.VENDOR.'%20'.SHORT_VER);
 
-		if(substr($oldpong, 0, 9) == "MWebCache")
-			$nets = "mute";
+		if(substr($oldpong, 0, 9) === 'MWebCache')
+			$nets = 'mute';
 		elseif($net_param !== null)
 			$nets = $net_param;
 		elseif( //substr($oldpong, 0, 10) == "perlgcache" ||		// ToDO: Re-verify
@@ -934,7 +935,7 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 	if(strpos($cache, '://') > -1)
 	{
 		$udp = FALSE;
-		$query = 'ping=1&multi=1&getnetworks=1&pv=2&client='.VENDOR.'&version='.SHORT_VER.'&cache=1';
+		$query = 'ping=1&multi=1&getnetworks=1&pv=2';
 		$result = PingGWC($cache, $query, $net_param);  /* $result => P|Name of the GWC|Networks list|Net parameter needed for query   or   ERR|Error name   or   CONN-ERR|Error number */
 	}
 	else
@@ -959,8 +960,7 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 		}
 		elseif( strpos($received_data[1], "access denied by acl") > -1 )
 		{
-			$query = 'ping=1&multi=1&getnetworks=1&pv=2&client=TEST&version='.VENDOR.'%20'.SHORT_VER.'&cache=1';
-			$result = PingGWC($cache, $query, $net_param);
+			$result = PingGWC($cache, $query, $net_param, 'client=TEST&version='.VENDOR.'%20'.SHORT_VER.'&cache=1');
 		}
 		unset($received_data);
 		$received_data = explode('|', $result, 4);
