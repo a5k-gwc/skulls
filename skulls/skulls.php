@@ -2101,7 +2101,7 @@ else
 		echo 'I|info|license|',LICENSE_NAME,' v',LICENSE_VER,"\r\n";
 		echo 'I|info|license-url|',LICENSE_URL,"\r\n";
 		echo 'I|info|maintainer|',MAINTAINER_NICK,"\r\n";
-		if(MAINTAINER_WEBSITE !== 'http://www.your-site.com/' && MAINTAINER_WEBSITE !== "") echo 'I|info|maintainer-url|',MAINTAINER_WEBSITE,"\r\n";
+		if(MAINTAINER_WEBSITE !== 'http://' && MAINTAINER_WEBSITE !== "") echo 'I|info|maintainer-url|',MAINTAINER_WEBSITE,"\r\n";
 	}
 
 	if($CACHE != NULL || $HOST != NULL)
