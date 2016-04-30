@@ -106,6 +106,16 @@ function FsockTest()
 	return array(FormatDate($now), $fsock_base, $fsock_full, $warning);
 }
 
+function VerifyXRemoteAddr()
+{
+	return isset($_SERVER['HTTP_X_REMOTE_ADDR']) && (strpos($_SERVER['REMOTE_ADDR'], '127.') === 0 || $_SERVER['REMOTE_ADDR'] === '::1');
+}
+
+function VerifyXClientIP()
+{
+	return isset($_SERVER['HTTP_X_CLIENT_IP']) && (strpos($_SERVER['REMOTE_ADDR'], '127.') === 0 || $_SERVER['REMOTE_ADDR'] === '::1');
+}
+
 function DisplayTristate($val)
 {
 	if($val === -1) return '<span style="color: yellow">Unknown</span>';
@@ -134,7 +144,7 @@ echo "<br><br>\r\n";
 
 echo "<div><b><big><font color=\"blue\">Detected settings</font></big></b></div>\r\n";
 echo '<div><i><small>Here you will see the settings that you should set in vars.php based on some tests on your server.</small></i></div>';
-echo '<div><i><small>The server must be connected to Internet otherwise the tests won\'t give the correct results.</small></i></div>';
+echo '<div><i><small>The server must be connected to Internet and you should access this page using the public address (not localhost) otherwise the tests won\'t give the correct results.</small></i></div>';
 $fsock_result = FsockTest(); if($fsock_result[3] !== "") $fsock_result[3] = ' <strong style="color: orange; font-weight: bolder; cursor: help;" title="'.$fsock_result[3].'">&sup1;</strong>';
 echo '<div><b><small>Last check: ',$fsock_result[0],' UTC</small></b></div>',"\r\n";
 
@@ -142,6 +152,8 @@ echo "<blockquote>\r\n";
 
 echo '<div><b>FSOCK_BASE: ',DisplayTristate($fsock_result[1]),'</b></div>',"\r\n";
 echo '<div><b>FSOCK_FULL: ',DisplayTristate($fsock_result[2]),'</b>',$fsock_result[3],'</div>',"\r\n";
+echo '<div><b>TRUST_X_REMOTE_ADDR_FROM_LOCALHOST: ',DisplayTristate(VerifyXRemoteAddr()),'</b></div>',"\r\n";
+echo '<div><b>TRUST_X_CLIENT_IP_FROM_LOCALHOST: ',DisplayTristate(VerifyXClientIP()),'</b></div><br>',"\r\n";
 
 echo "<b>CONTENT_TYPE_WORKAROUND:</b> If the box below is empty then it is OK and you must set the value to <b><font color=\"green\">false</font></b> otherwise it means that your server interfere with the script and you must set the value to <b><font color=\"red\">true</font></b> to workaround the problem.<br>\r\n";
 echo "<iframe src=\"inc.php\" height=\"60\" width=\"300\"></iframe><br>\r\n";
