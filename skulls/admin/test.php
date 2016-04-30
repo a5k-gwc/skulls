@@ -46,15 +46,18 @@ function FsockTest1($hostname, $port)
 
 function FsockTest2($hostname, $port)
 {
-	$errno = -1; //$start = GetMicrotime();
+	$errno = -1; $start = GetMicrotime();
 
 	$fp = @fsockopen('tcp://'.$hostname, $port, $errno, $errstr, 5);
 	if($fp === false)
 	{
-		/* if(GetMicrotime()-$start > 4.9) */
 		if($errno === 111 || $errno === 10061) return true;  /* Closed port but reachable */
-		elseif($errno === 110 || $errno === 10060 || $errno === 13) return false;  /* Unreachable port: errors 110/10060 (Connection timed out), error 13 (Permission denied) */
-		else return (string)$errno;
+		elseif($errno === 110 || $errno === 10060) return false;  /* Unreachable port: errors 110/10060 (Connection timed out) */
+		else
+		{
+			if(GetMicrotime()-$start > 4.9) $result = 'false'; else $result = 'true';
+			return 'Probably '.$result.', unknown result from fsockopen. Returned error: '.$errno;
+		}
 	}
 
 	fclose ($fp);
@@ -87,7 +90,7 @@ function FsockTest()
 
 			if($result === true) $fsock_full = 1;
 			elseif($result === false) $fsock_full = 0;
-			else $warning = 'Unknown result from fsockopen, returned error: '.$result;
+			else $warning = $result;
 		}
 		else
 			$warning = 'There is a problem on the SourceForge server, retry later.';
