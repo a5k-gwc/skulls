@@ -26,7 +26,7 @@ AddCharset        utf-8 .css .js
   AddType image/png                .png
   AddType image/x-icon             .ico
   AddType text/plain               .txt
-  AddType application/x-php        .inc
+  AddType application/x-httpd-php  .inc
   AddType application/octet-stream .dat
 </IfModule>
 
