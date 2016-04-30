@@ -39,6 +39,8 @@ if(DEBUG) { error_reporting(~0); ini_set('display_errors', '1'); }
 define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
 $PHP_SELF = $_SERVER['PHP_SELF']; $UNRELIABLE_HOST = false;
 
+if(!ENABLED || basename($PHP_SELF) === 'index.php' || NETWORKS_COUNT === 0) { header('HTTP/1.0 404 Not Found'); die("ERROR: Service disabled\r\n"); }
+
 function GetMainFileRev()
 {
 	$main_rev = '$Rev$';
@@ -67,15 +69,6 @@ function ConfigureSettings()
 ConfigureSettings();
 $SECURE_HTTP = IsSecureConnection();
 
-function NormalizePort($secure_http, $port)
-{
-	if(!$port) return null;
-	if($secure_http) { if($port === 443) return null; }
-	else { if($port === 80) return null; }
-
-	return ':'.$port;
-}
-
 function IsWebInterface()
 {
 	if(isset($_GET['client']))
@@ -92,23 +85,29 @@ function IsWebInterface()
 	return false;
 }
 
-if(!ENABLED || basename($PHP_SELF) === 'index.php' || NETWORKS_COUNT === 0)
+function NormalizePort($is_https, $port)
 {
-	header('HTTP/1.0 404 Not Found');
-	die("ERROR: Service disabled\r\n");
+	if(!$port) return null;
+	if($is_https) { if($port === 443) return null; }
+	else { if($port === 80) return null; }
+
+	return ':'.$port;
 }
 
-if(empty($_SERVER['HTTP_HOST']))
+function ValidateHostHeader($is_https)
 {
-	$UNRELIABLE_HOST = true;
-	if(!IsWebInterface())
+	if(empty($_SERVER['HTTP_HOST']))
 	{
-		header('HTTP/1.0 403 Forbidden');
-		die("ERROR: Missing host header\r\n");
+		global $UNRELIABLE_HOST; $UNRELIABLE_HOST = true;
+		if(!IsWebInterface()) { header('HTTP/1.0 403 Forbidden'); die("ERROR: Missing host header\r\n"); }
+
+		$server_port = !empty($_SERVER['SERVER_PORT'])? (int)$_SERVER['SERVER_PORT'] : null;
+		$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].NormalizePort($is_https, $server_port);
 	}
-	$server_port = (isset($_SERVER['SERVER_PORT']) ? (int)$_SERVER['SERVER_PORT'] : null);
-	$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].NormalizePort($SECURE_HTTP, $server_port); unset($server_port);
+
+	if(strpos($_SERVER['HTTP_HOST'], '/') !== false || strpos($_SERVER['HTTP_HOST'], '\\') !== false) { header('HTTP/1.0 400 Bad Request'); header('Content-Length: 0'); die; }
 }
+ValidateHostHeader($SECURE_HTTP);
 
 function SanitizeHeaderValue($val)
 {
