@@ -469,7 +469,7 @@ function CheckNetwork($supported_networks, $net)
 
 function CheckNetworkString($supported_networks, $nets, $multi = TRUE)
 {
-	if( $multi && strpos($nets, "-") > -1 )
+	if($multi && strpos($nets, '-') !== false)
 	{
 		$nets = explode("-", $nets);
 		$nets_count = count($nets);
@@ -565,7 +565,7 @@ function CheckURLValidity($cache)
 {
 	if(strlen($cache) > 10)
 		if(substr($cache, 0, 7) == "http://" || substr($cache, 0, 8) == "https://")
-			if( !(strpos($cache, "?") > -1 || strpos($cache, "&") > -1 || strpos($cache, "#") > -1) )
+			if( !(strpos($cache, '?') !== false || strpos($cache, '&') !== false || strpos($cache, '#') !== false) )
 				return true;
 
 	if(LOG_MINOR_ERRORS)
@@ -941,7 +941,7 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 {
 	global $SUPPORTED_NETWORKS;
 
-	if(strpos($cache, '://') > -1)
+	if(strpos($cache, '://') !== false)
 	{
 		$udp = FALSE;
 		$query = 'ping=1&multi=1&getnetworks=1&pv=2';
@@ -967,7 +967,7 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 		{	// FOR GWCs DEVELOPERS: If you want to avoid the necessity to make double ping, make your GWC pingable without the network parameter or with the wrong network parameter when there are ping=1 and multi=1
 			$result = PingGWC($cache, $query, 'gnutella2');
 		}
-		elseif( strpos($received_data[1], "access denied by acl") > -1 )
+		elseif(strpos($received_data[1], 'access denied by acl') !== false)
 		{
 			$result = PingGWC($cache, $query, $net_param, 'client=TEST&version='.VENDOR.'%20'.SHORT_VER.'&cache=1');
 		}
@@ -1258,7 +1258,7 @@ function UrlFile($detected_pv, $net, $age, $client)
 		list($gwc_age, $new_specs_only,, $cache, $cache_net,) = explode('|', $cache_file[$i], 6);
 
 		$show = FALSE;
-		if(strpos($cache_net, '-') > -1)
+		if(strpos($cache_net, '-') !== false)
 		{
 			$cache_networks = explode('-', $cache_net);
 			$cache_nets_count = count($cache_networks);
@@ -1274,7 +1274,7 @@ function UrlFile($detected_pv, $net, $age, $client)
 		elseif($cache_net === $net)
 			$show = TRUE;
 
-		if($show && strpos($cache, '://') > -1)
+		if($show && strpos($cache, '://') !== false)  // ToDO: Check this
 		{
 			if((bool)$new_specs_only && $detected_pv < 2.1) continue;
 			echo $cache; if($age) echo '|',TimeSinceSubmissionInSeconds($now, $gwc_age, $offset); echo "\r\n";
@@ -1343,7 +1343,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 				list($time, $new_specs_only,, $cache, $cache_net,) = explode('|', $cache_file[$i], 6);
 
 				$show = FALSE;
-				if(strpos($cache_net, '-') > -1)
+				if(strpos($cache_net, '-') !== false)
 				{
 					$cache_networks = explode('-', $cache_net);
 					$cache_nets_count = count($cache_networks);
@@ -1359,7 +1359,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 				elseif($cache_net === $net)
 					$show = TRUE;
 
-				if($show && strpos($cache, '://') > -1)
+				if($show && strpos($cache, '://') !== false)  // ToDO: Check this
 				{
 					if((bool)$new_specs_only && $detected_pv < 2.1) continue;
 					$cache = 'U|'.$cache.'|'.TimeSinceSubmissionInSeconds($now, rtrim($time), $offset);
