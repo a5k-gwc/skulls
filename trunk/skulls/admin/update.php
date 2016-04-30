@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-define('REVISION', '5.0.0.5');
+define('REVISION', '5.0.0.6');
 
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
@@ -236,6 +236,7 @@ if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
 /* Deleted files */
 $log .= DeleteFile('admin/index.html');
 $log .= DeleteFile('admin/index.htm');
+$log .= DeleteFile('log/invalid-host-ports.log');
 /* Size check */
 $log .= ValidateSize('data/failed_urls.dat');
 $log .= ValidateSize('stats/upd-reqs.dat');
