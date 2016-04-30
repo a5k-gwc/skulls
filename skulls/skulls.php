@@ -119,6 +119,7 @@ function SanitizeHeaderValue($val)
 $MY_URL = ($SECURE_HTTP? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
 if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$UNRELIABLE_HOST)
 {
+	ValidateProtocol();
 	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
 	header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING'])));
 	die;
@@ -165,6 +166,15 @@ function IsFakeClient(&$vendor, $ver, $ua)
 	return false;
 }
 
+function ValidateProtocol()
+{
+	if(!isset($_SERVER['SERVER_PROTOCOL'])) { $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.0'; return; }
+	if($_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.0' || $_SERVER['SERVER_PROTOCOL'] === 'HTTP/1.1') return;
+
+	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') === 0) header('HTTP/1.0 501 Not Implemented'); else header('HTTP/1.0 400 Bad Request');
+	header('Content-Length: 0'); die;
+}
+
 function RunHttpOptionsMethod($CORS = false)
 {
 	header($_SERVER['SERVER_PROTOCOL'].' 200 OK');
@@ -179,8 +189,7 @@ function RunHttpOptionsMethod($CORS = false)
 /* Normalize and validate identity */
 function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net, $CORS)
 {
-	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
-
+	ValidateProtocol();
 	if($CORS) header('Access-Control-Allow-Origin: *');
 	if($method === 'OPTIONS') RunHttpOptionsMethod($CORS);
 	if($CORS? $method !== 'GET' : $method !== 'GET' && $method !== 'POST' && $method !== 'HEAD') { header($_SERVER['SERVER_PROTOCOL'].' 405 Method Not Allowed'); header('Allow: GET,HEAD,POST,OPTIONS'); header('Content-Length: 0'); die; }
@@ -288,7 +297,7 @@ function VerifyVersion($client, $version)
 
 function ValidateIdentityWeb($method, $ua)
 {
-	if(strpos($_SERVER['SERVER_PROTOCOL'], 'HTTP/') !== 0) { header('HTTP/1.0 501 Not Implemented'); header('Content-Length: 0'); die; }
+	ValidateProtocol();
 
 	/* Block port scanner and perl */
 	if(strpos($ua, 'masscan/') === 0 || strpos($ua, 'libwww-perl') === 0) return false;
