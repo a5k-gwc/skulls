@@ -123,6 +123,7 @@ if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$UNRELIABLE_HOST)
 	header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING'])));
 	die;
 }
+if($SECURE_HTTP && CACHE_URL === "") { header('HTTP/1.0 404 Not Found'); die("ERROR: HTTPS is disabled\r\n"); }
 
 define('STATS_OTHER',   0);
 define('STATS_UPD',     1);
