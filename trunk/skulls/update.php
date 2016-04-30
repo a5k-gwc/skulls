@@ -56,7 +56,7 @@ function IsIPInRange($ip, $cidr_range)
 
 	if(DEBUG)
 	{
-		$valid = ($ip1 === ToUnsigned(IPToNumber($cidr[0])));
+		$valid = (long2ip($ip1) === $cidr[0]);
 		if(DEBUG > 2 || !$valid)
 		{
 			if(!$valid) echo 'Start IP do not match.',"\r\n";
