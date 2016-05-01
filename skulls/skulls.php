@@ -548,7 +548,7 @@ function ValidatePort($port, $net)
 
 function ValidateHost($host, $remote_ip, $net)
 {
-	list($ip, $port) = explode(':', $host, 2);
+	if(strpos($host, ':') === false) return false; list($ip, $port) = explode(':', $host, 2);
 	if($ip !== $remote_ip) { if(LOG_MINOR_ERRORS) Logging('invalid-hosts'); return false; }
 	if(!ValidateIP($ip)) { if(LOG_MAJOR_ERRORS) Logging('invalid-ip-hosts'); return false; }
 	if(!ValidatePort($port, $net)) return false;
@@ -557,7 +557,7 @@ function ValidateHost($host, $remote_ip, $net)
 
 function ValidateHostKickStart($host, $net)
 {
-	list($ip, $port) = explode(':', $host, 2);
+	if(strpos($host, ':') === false) return false; list($ip, $port) = explode(':', $host, 2);
 	if(!ValidateIP($ip) || !ValidatePort($port, $net)) return false;
 	return true;
 }
