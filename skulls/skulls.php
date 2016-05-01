@@ -1055,14 +1055,14 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	{
 		if(VERIFY_HOSTS && $verify_host && !PingPort($h_ip, $h_port))
 			return 4; // Error, failed verification
-		elseif($file_count > max(10, min(300, MAX_HOSTS)))
-		{
-			ReplaceHost($file_path, 0, $this_host, $host_file, true);
-			return 3; // OK, pushed old data
-		}
-		elseif($file_count === MAX_HOSTS)
+		elseif($file_count === max(10, min(200, MAX_HOSTS)))
 		{
 			ReplaceHost($file_path, 0, $this_host, $host_file);
+			return 3; // OK, pushed old data
+		}
+		elseif($file_count > max(10, min(200, MAX_HOSTS)))
+		{
+			ReplaceHost($file_path, 0, $this_host, $host_file, true);
 			return 3; // OK, pushed old data
 		}
 		else
