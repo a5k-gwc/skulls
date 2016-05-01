@@ -2096,7 +2096,7 @@ else
 		echo 'I|info|ver|',VER,"\r\n";
 		echo 'I|info|vendor|',VENDOR,"\r\n";
 
-		echo 'I|info|hosts-verification|',(VERIFY_HOSTS && FSOCK_FULL),"\r\n";
+		echo 'I|info|hosts-verification|',(int)(VERIFY_HOSTS && FSOCK_FULL),"\r\n";
 
 		echo 'I|info|software-url|',GWC_SITE,"\r\n";
 		echo 'I|info|license|',LICENSE_NAME,' v',LICENSE_VER,"\r\n";
