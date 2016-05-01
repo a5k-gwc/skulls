@@ -23,7 +23,7 @@ include './vars.php';
 define('NAME', 'Skulls');
 define('VENDOR', 'SKLL');										/* Vendor code (four uppercase letters) */
 define('SHORT_VER', '0.3.3');									/* Numeric version (without letters) */
-define('VER', SHORT_VER.'');									/* Full version (it can contain letters) */
+define('VER', SHORT_VER.'b');									/* Full version (it can contain letters) */
 define('GWC_SITE', 'https://sourceforge.net/projects/skulls/');	/* Official site of this GWC */
 
 define('LICENSE_NAME', 'GPL');
