@@ -56,7 +56,7 @@ function FsockTest2($hostname, $port)
 		else
 		{
 			if(GetMicrotime()-$start > 4.9) $result = 'false'; else $result = 'true';
-			return 'Probably '.$result.', unknown result from fsockopen. Returned error: '.$errno;
+			return 'Probably '.$result.'. Unknown result from fsockopen, returned error: '.$errno;
 		}
 	}
 
