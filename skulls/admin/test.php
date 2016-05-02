@@ -17,8 +17,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-include '../vars.php';
 error_reporting(~0); ini_set('display_errors', '1');
+$SUPPORTED_NETWORKS = array();
+include '../vars.php';
 
 function GetMicrotime()
 {
