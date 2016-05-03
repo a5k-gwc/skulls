@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-define('REVISION', '5.0.0.6');
+define('REVISION', '5.0.0.7');
 
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
@@ -213,7 +213,10 @@ function ConvertRunningSinceFile()
 					global $updated; $updated = true;
 				}
 				else
+				{
 					$log .= '<div>'.Error('Error during writing').' of <b>'.DATA_DIR.'/running-since.dat</b> file.</div>'."\r\n";
+					return;
+				}
 			}
 		}
 	}
