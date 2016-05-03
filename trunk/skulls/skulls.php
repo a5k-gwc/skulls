@@ -37,14 +37,21 @@ define('DEBUG', 0);
 
 if(DEBUG) { error_reporting(~0); ini_set('display_errors', '1'); }
 define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
-$PHP_SELF = $_SERVER['PHP_SELF']; $UNRELIABLE_HOST = false;
-
-if(!ENABLED || basename($PHP_SELF) === 'index.php' || NETWORKS_COUNT === 0) { header('HTTP/1.0 404 Not Found'); die("ERROR: Service disabled\r\n"); }
+$UNRELIABLE_HOST = false;
 
 function GetMainFileRev()
 {
 	$main_rev = '$Rev$';
 	return trim(substr($main_rev, 1, -1));
+}
+
+function ConfigureSettings()
+{
+	ini_set('default_charset', 'utf-8');  /* Set default charset to UTF-8 */
+	$zlib_compr = ini_get('zlib.output_compression'); if(!empty($zlib_compr)) ini_set('zlib.output_compression', '0');
+	if(function_exists('apache_setenv')) apache_setenv('no-gzip', '1');  /* Compression will be enabled later only if needed, otherwise it is just a waste of server resources */
+	if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());  /* Suppress warnings if the timezone isn't set */
+	if(function_exists('header_remove')) header_remove('X-Powered-By');
 }
 
 function IsSecureConnection()
@@ -58,16 +65,33 @@ function IsSecureConnection()
 	return false;
 }
 
-function ConfigureSettings()
+function ValidateHostHeader($is_https)
 {
-	ini_set('default_charset', 'utf-8');  /* Set default charset to UTF-8 */
-	$zlib_compr = ini_get('zlib.output_compression'); if(!empty($zlib_compr)) ini_set('zlib.output_compression', '0');
-	if(function_exists('apache_setenv')) apache_setenv('no-gzip', '1');  /* Compression will be enabled later only if needed, otherwise it is just a waste of server resources */
-	if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());  /* Suppress warnings if the timezone isn't set */
-	if(function_exists('header_remove')) header_remove('X-Powered-By');
+	if(!isset($_SERVER['HTTP_HOST']))
+	{
+		if(!IsWebInterface()) { header('HTTP/1.0 400 Bad Request'); die("ERROR: Missing host header\r\n"); }
+
+		$port = empty($_SERVER['SERVER_PORT'])? 0 : (int)$_SERVER['SERVER_PORT'];
+		if($port === 0 || ($is_https? $port === 443 : $port === 80)) $port = null; else $port = ':'.$port;
+
+		$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].$port; $GLOBALS['UNRELIABLE_HOST'] = true;
+	}
+
+	if(strpos($_SERVER['HTTP_HOST'], '/') !== false || strpos($_SERVER['HTTP_HOST'], '\\') !== false) { header('HTTP/1.0 400 Bad Request'); header('Content-Length: 0'); die; }
 }
-ConfigureSettings();
-$SECURE_HTTP = IsSecureConnection();
+
+function InitializeValidateVars()
+{
+	ConfigureSettings();
+	$IS_HTTPS = IsSecureConnection(); $PHP_SELF = $_SERVER['PHP_SELF'];
+	if(!ENABLED || NETWORKS_COUNT === 0 || basename($PHP_SELF) === 'index.php') { header('HTTP/1.0 404 Not Found'); die("ERROR: Service disabled\r\n"); }
+	if($IS_HTTPS && CACHE_URL === "") { header('HTTP/1.0 404 Not Found'); die("ERROR: HTTPS is disabled\r\n"); }
+
+	ValidateHostHeader($IS_HTTPS);
+	$GLOBALS['MY_URL'] = ($IS_HTTPS? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
+}
+InitializeValidateVars();
+
 
 function IsWebInterface()
 {
@@ -94,28 +118,12 @@ function NormalizePort($is_https, $port)
 	return ':'.$port;
 }
 
-function ValidateHostHeader($is_https)
-{
-	if(empty($_SERVER['HTTP_HOST']))
-	{
-		global $UNRELIABLE_HOST; $UNRELIABLE_HOST = true;
-		if(!IsWebInterface()) { header('HTTP/1.0 403 Forbidden'); die("ERROR: Missing host header\r\n"); }
-
-		$server_port = !empty($_SERVER['SERVER_PORT'])? (int)$_SERVER['SERVER_PORT'] : null;
-		$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].NormalizePort($is_https, $server_port);
-	}
-
-	if(strpos($_SERVER['HTTP_HOST'], '/') !== false || strpos($_SERVER['HTTP_HOST'], '\\') !== false) { header('HTTP/1.0 400 Bad Request'); header('Content-Length: 0'); die; }
-}
-ValidateHostHeader($SECURE_HTTP);
-
 function SanitizeHeaderValue($val)
 {
 	if(strlen($val) > 512) return null;
 	return str_replace(array(':', '/', '\\', '"', "\r", "\n", "\0"), array('%3A', '%2F'), $val);
 }
 
-$MY_URL = ($SECURE_HTTP? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
 if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$UNRELIABLE_HOST)
 {
 	ValidateProtocol();
@@ -123,7 +131,6 @@ if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$UNRELIABLE_HOST)
 	header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING'])));
 	die;
 }
-if($SECURE_HTTP && CACHE_URL === "") { header('HTTP/1.0 404 Not Found'); die("ERROR: HTTPS is disabled\r\n"); }
 
 define('STATS_OTHER',   0);
 define('STATS_UPD',     1);
@@ -1686,7 +1693,7 @@ if(IsWebInterface())
 	include './web_interface.php';
 	header($_SERVER['SERVER_PROTOCOL'].' 200 OK');
 	$compressed = StartCompression($COMPRESSION, $UA, true);
-	ShowHtmlPage($PHP_SELF, $COMPRESSION, $header, $footer);
+	ShowHtmlPage($_SERVER['PHP_SELF'], $COMPRESSION, $header, $footer);
 	if($compressed) ob_end_flush();
 }
 elseif( $KICK_START )
