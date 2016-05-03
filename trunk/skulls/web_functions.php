@@ -654,7 +654,7 @@ function CheckUpdates()
 
 			if($time_diff < 1)
 				$cached = TRUE;
-			elseif($status === 'OK' && $time_diff < 4)
+			elseif($status === 'OK' && $time_diff < 3)
 				$cached = TRUE;
 		}
 	}
