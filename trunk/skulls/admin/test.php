@@ -35,7 +35,7 @@ function FormatDate($timestamp)
 
 function GetTimestamp($date)
 {
-	return strtotime($date.'UTC');
+	return strtotime($date.' UTC');
 }
 
 function FsockTest1($hostname, $port)

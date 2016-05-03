@@ -90,10 +90,10 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							<th>- Running since:</th>
 							<td>
 <?php
-								if(file_exists(DATA_DIR."/running_since.dat"))
+								if(file_exists(DATA_DIR.'/running-since.dat'))
 								{
-									$running_since = file(DATA_DIR."/running_since.dat");
-									echo $running_since[0]," UTC\n";
+									$running_since = file(DATA_DIR.'/running-since.dat');
+									echo $running_since[0],' UTC',"\n";
 								}
 ?>
 							</td>

@@ -708,9 +708,9 @@ function CheckUpdates()
 		$file = @fopen(DATA_DIR."/update_check.dat", "wb");
 		if($file !== FALSE)
 		{
-			flock($file, 2);
+			flock($file, LOCK_EX);
 			fwrite($file, $status."|".$msg."|".gmdate("Y/m/d H:i")."|".$msg_info."|".$msg_error);
-			flock($file, 3);
+			flock($file, LOCK_UN);
 			fclose($file);
 		}
 		else
