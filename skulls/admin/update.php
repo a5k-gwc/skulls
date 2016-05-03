@@ -173,6 +173,55 @@ if( file_exists($gwc_full_name) )
 	}
 }
 
+if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());
+function FormatDate($timestamp)
+{
+	return gmdate('Y/m/d H:i:s', $timestamp);
+}
+
+function GetTimestamp($date)
+{
+	return strtotime($date.' UTC');
+}
+
+function ConvertRunningSinceFile()
+{
+	$running_since = false; $old_name_1 = '../'.DATA_DIR.'/runnig_since.dat'; $old_name_2 = '../'.DATA_DIR.'/running_since.dat';
+
+	if(file_exists($old_name_1))
+		$running_since = file_get_contents($old_name_1);
+	elseif(file_exists($old_name_2))
+		$running_since = file_get_contents($old_name_2);
+
+	if($running_since !== false)
+	{
+		$timestamp = GetTimestamp(rtrim($running_since));
+		if($timestamp !== false)
+		{
+			$running_since = FormatDate($timestamp);
+			if($running_since !== false)
+			{
+				$fp = fopen('../'.DATA_DIR.'/running-since.dat', 'wb'); global $log;
+				if($fp !== false)
+				{
+					flock($fp, LOCK_EX);
+					fwrite($fp, $running_since);
+					fflush($fp);
+					flock($fp, LOCK_UN);
+					fclose($fp);
+					$log .= '<div>Conversion of <b>'.DATA_DIR.'/running-since.dat</b> done.</div>'."\r\n";
+					global $updated; $updated = true;
+				}
+				else
+					$log .= '<div>'.Error('Error during writing').' of <b>'.DATA_DIR.'/running-since.dat</b> file.</div>'."\r\n";
+			}
+		}
+	}
+	DeleteFile($old_name_1, true);
+	DeleteFile($old_name_2, true);
+}
+ConvertRunningSinceFile();
+
 function DeleteFile($name, $sub_call = false)
 {
 	$full_name = ($sub_call? '' : '../').$name;
