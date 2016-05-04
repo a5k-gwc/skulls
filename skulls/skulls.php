@@ -89,6 +89,7 @@ function InitializeValidateVars()
 
 	ValidateHostHeader($IS_HTTPS);
 	$GLOBALS['MY_URL'] = ($IS_HTTPS? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
+	define('DATA_DIR', './'.DATA_FOLDER.'/');
 }
 InitializeValidateVars();
 
@@ -634,9 +635,9 @@ function CleanFailedUrls()
 	ignore_user_abort(true);
 	set_time_limit(120);
 
-	$failed_urls_file = file(DATA_DIR.'/failed_urls.dat');
+	$failed_urls_file = file(DATA_DIR.'failed_urls.dat');
 	$file_count = count($failed_urls_file);
-	$file = fopen(DATA_DIR.'/failed_urls.dat', 'wb');
+	$file = fopen(DATA_DIR.'failed_urls.dat', 'wb');
 	flock($file, LOCK_EX);
 
 	$now = time();
@@ -657,7 +658,7 @@ function CleanFailedUrls()
 
 function CheckFailedUrl($url)
 {
-	$file = file(DATA_DIR.'/failed_urls.dat');
+	$file = file(DATA_DIR.'failed_urls.dat');
 	$file_count = count($file);
 
 	for($i = 0, $now = time(), $offset = date('Z'); $i < $file_count; $i++)
@@ -678,7 +679,7 @@ function CheckFailedUrl($url)
 
 function AddFailedUrl($url)
 {
-	$file = fopen(DATA_DIR.'/failed_urls.dat', 'ab');
+	$file = fopen(DATA_DIR.'failed_urls.dat', 'ab');
 	flock($file, LOCK_EX);
 	fwrite($file, $url.'|'.gmdate('Y/m/d H:i')."\r\n");
 	flock($file, LOCK_UN);
@@ -1026,7 +1027,7 @@ function ResolveDNS($hostname)
 
 function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime, $h_vendor, $h_ver, $h_ua, $h_suspect = 0, $verify_host = true)
 {
-	$file_path = DATA_DIR.'/hosts-'.$net.'.dat';
+	$file_path = DATA_DIR.'hosts-'.$net.'.dat';
 	$host_file = file($file_path);
 	$file_count = count($host_file);
 	$host_exists = FALSE;
@@ -1237,7 +1238,7 @@ function CheckIfDummyHostIsNeeded($vendor, $ver)
 function HostFile($net, $age, $is_web_tool)
 {
 	$now = time(); $offset = date('Z');
-	$host_file = file(DATA_DIR.'/hosts-'.$net.'.dat');
+	$host_file = file(DATA_DIR.'hosts-'.$net.'.dat');
 	$count_host = count($host_file);
 
 	if($count_host <= MAX_HOSTS_OUT)
@@ -1258,7 +1259,7 @@ function HostFile($net, $age, $is_web_tool)
 function UrlFile($detected_pv, $net, $age, $client)
 {
 	$now = time(); $offset = date('Z');
-	$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
+	$cache_file = file(DATA_DIR.'alt-gwcs.dat');
 	$count_cache = count($cache_file);
 
 	for($n = 0, $i = $count_cache - 1; $n < MAX_CACHES_OUT && $i >= 0; $i--)
@@ -1304,7 +1305,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 	$hosts_sent = 0;  /* Send at least 5 hosts (emergency mode when there are few recent hosts, especially useful on small networks) */
 	if($get)
 	{
-		$host_file = file(DATA_DIR.'/hosts-'.$net.'.dat');
+		$host_file = file(DATA_DIR.'hosts-'.$net.'.dat');
 		$count_host = count($host_file);
 
 		if($count_host <= MAX_HOSTS_OUT)
@@ -1341,7 +1342,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 	$udps_sent = 0;
 	if(ENABLE_URL_SUBMIT)
 	{
-		$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
+		$cache_file = file(DATA_DIR.'alt-gwcs.dat');
 		$count_cache = count($cache_file);
 
 		if($get)
@@ -1380,7 +1381,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 
 		if($getudp && $net === 'gnutella')
 		{
-			$cache_file = file(DATA_DIR.'/alt-udps.dat');
+			$cache_file = file(DATA_DIR.'alt-udps.dat');
 			$count_cache = count($cache_file);
 
 			for($n=0, $i=$count_cache-1; $n<MAX_UDP_CACHES_OUT && $i>=0; $i--)
@@ -1663,11 +1664,11 @@ if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
 	include "log.php";
 }
 
-if( !file_exists(DATA_DIR."/last_action.dat") )
+if(!file_exists(DATA_DIR.'last_action.dat'))
 {
-	if( !file_exists(DATA_DIR."/") ) mkdir(DATA_DIR."/", 0777);
+	if(!file_exists(DATA_DIR)) mkdir(DATA_DIR, 0777);
 
-	$file = @fopen( DATA_DIR."/last_action.dat", "xb" );
+	$file = @fopen(DATA_DIR.'last_action.dat', 'xb');
 	if($file !== FALSE)
 	{
 		flock($file, LOCK_EX);
@@ -1677,7 +1678,7 @@ if( !file_exists(DATA_DIR."/last_action.dat") )
 	}
 	else
 	{
-		echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."/last_action.dat</b></font><br>";
+		echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."last_action.dat</b></font><br>";
 		echo "<b>You must create the file manually, and give to the file the correct permissions.</b><br><br>";
 	}
 
@@ -1991,10 +1992,10 @@ else
 				if($UDP_CACHE !== null && $DETECTED_NET === 'gnutella')
 				{
 					$is_udp = true;
-					$result = WriteCacheFile(DATA_DIR.'/alt-udps.dat', true, substr($UDP_CACHE, 4), $CLIENT, $VERSION, $IS_A_CACHE, $UA);
+					$result = WriteCacheFile(DATA_DIR.'alt-udps.dat', true, substr($UDP_CACHE, 4), $CLIENT, $VERSION, $IS_A_CACHE, $UA);
 				}
 				elseif($CACHE !== null)
-					$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $IS_A_CACHE, $UA);
+					$result = WriteCacheFile(DATA_DIR.'alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $IS_A_CACHE, $UA);
 
 				if( $result == 0 ) // Exists
 					print "I|update|OK|URL already updated\r\n";
@@ -2055,9 +2056,9 @@ else
 			$result = -1;
 			if(!ENABLE_URL_SUBMIT) // Cache adding disabled
 				print "WARNING: URL adding is disabled\r\n";
-			elseif( CheckURLValidity($CACHE) )
+			elseif(CheckURLValidity($CACHE))
 			{
-				$result = WriteCacheFile(DATA_DIR.'/alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $IS_A_CACHE, $UA);
+				$result = WriteCacheFile(DATA_DIR.'alt-gwcs.dat', false, $CACHE, $CLIENT, $VERSION, $IS_A_CACHE, $UA);
 
 				if( $result == 5 ) // Ping failed
 					print "WARNING: Ping of ".$CACHE." failed\r\n";
@@ -2155,7 +2156,7 @@ else
 
 	$clean_file = NULL;
 	$changed = FALSE;
-	$file = fopen( DATA_DIR."/last_action.dat", "r+b" );
+	$file = fopen(DATA_DIR.'last_action.dat', 'r+b');
 	if($file !== false)
 	{
 		flock($file, LOCK_EX);

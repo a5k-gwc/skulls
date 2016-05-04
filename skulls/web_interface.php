@@ -90,9 +90,9 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 							<th>- Running since:</th>
 							<td>
 <?php
-								if(file_exists(DATA_DIR.'/running-since.dat'))
+								if(file_exists(DATA_DIR.'running-since.dat'))
 								{
-									$running_since = file(DATA_DIR.'/running-since.dat');
+									$running_since = file(DATA_DIR.'running-since.dat');
 									echo $running_since[0],' UTC',"\n";
 								}
 ?>
@@ -202,7 +202,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 
 					for($x = NETWORKS_COUNT - 1; $x >= 0; $x--)
 					{
-						$temp = file(DATA_DIR."/hosts-".strtolower($SUPPORTED_NETWORKS[$x]).".dat");
+						$temp = file(DATA_DIR.'hosts-'.strtolower($SUPPORTED_NETWORKS[$x]).'.dat');
 						$n_temp = count($temp);
 						for($y = 0; $y < $n_temp; $y++)
 						{
@@ -213,9 +213,9 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 						$temp = null;
 					}
 				}
-				elseif( file_exists(DATA_DIR."/hosts-".$NET.".dat") )
+				elseif(file_exists(DATA_DIR.'hosts-'.$NET.'.dat'))
 				{
-					$host_file["host"] = file(DATA_DIR."/hosts-".$NET.".dat");
+					$host_file["host"] = file(DATA_DIR.'hosts-'.$NET.'.dat');
 					$net = ucfirst($NET);
 					$elements = count($host_file["host"]);
 				}
@@ -277,7 +277,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 			{
 				include './geoip/geoip.php'; $geoip = new GeoIPWrapper;
 
-				$cache_file = file(DATA_DIR.'/alt-gwcs.dat');
+				$cache_file = file(DATA_DIR.'alt-gwcs.dat');
 				$elements = count($cache_file);
 ?>
 				<div class="page-title"><strong>Alternative GWCs (<?php echo $elements." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 GWCs to your P2P application</a></div>
@@ -377,7 +377,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 					</table>
 				</div><div>&nbsp;</div>
 <?php
-				$cache_file = file(DATA_DIR.'/alt-udps.dat');
+				$cache_file = file(DATA_DIR.'alt-udps.dat');
 				$elements = count($cache_file);
 ?>
 				<div class="page-title"><strong>Alternative UDP host caches (<?php echo $elements." of ".MAX_CACHES; ?>)</strong></div>

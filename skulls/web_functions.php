@@ -617,22 +617,22 @@ function QueryUpdateServer($url = 'http://skulls.sourceforge.net/latest_ver.php'
 
 function CheckUpdates()
 {
-	if(!file_exists(DATA_DIR."/update_check.dat"))
+	if(!file_exists(DATA_DIR.'update_check.dat'))
 	{
-		$file = @fopen(DATA_DIR."/update_check.dat", "xb");
+		$file = @fopen(DATA_DIR.'update_check.dat', 'xb');
 		if($file !== FALSE) fclose($file);
 		else
 		{
-			echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."/update_check.dat</b></font><br>";
+			echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."update_check.dat</b></font><br>";
 			echo "<b>You must create the file manually, and give to the file the correct permissions.</b><br><br>";
 			die();
 		}
 	}
 
-	$file = @file(DATA_DIR."/update_check.dat");
+	$file = @file(DATA_DIR.'update_check.dat');
 	if($file === FALSE)
 	{
-		echo "<font color=\"red\"><b>Error during reading of ".DATA_DIR."/update_check.dat</b></font><br>";
+		echo "<font color=\"red\"><b>Error during reading of ".DATA_DIR."update_check.dat</b></font><br>";
 		echo "<b>You must give to the file the correct permissions.</b><br><br>";
 		die();
 	}
@@ -705,7 +705,7 @@ function CheckUpdates()
 
 	if(!$cached)
 	{
-		$file = @fopen(DATA_DIR."/update_check.dat", "wb");
+		$file = @fopen(DATA_DIR.'update_check.dat', 'wb');
 		if($file !== FALSE)
 		{
 			flock($file, LOCK_EX);
@@ -715,7 +715,7 @@ function CheckUpdates()
 		}
 		else
 		{
-			echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."/update_check.dat</b></font><br>";
+			echo "<font color=\"red\"><b>Error during writing of ".DATA_DIR."update_check.dat</b></font><br>";
 			echo "<b>You must create the file manually, and give to the file the correct permissions.</b><br><br>";
 		}
 	}

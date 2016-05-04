@@ -36,8 +36,8 @@ define( 'TIMEOUT',					8 );	// Socket timeout
 define('VERIFY_HOSTS', true);
 define('ENABLE_URL_SUBMIT', true);  // Enable the submission of alternative GWCs, if it is disabled in addition of rejecting url submissions it will not return any previous url in queries although they will be still visible in the web interface
 
-/* The directory where data files are stored (you should use a relative path, you can leave it as is by default) */
-define( 'DATA_DIR', 'data' );
+/* The directory where data files will be stored (it is a relative path, you can also leave it as is by default) */
+define('DATA_FOLDER', 'data');
 
 $header = '';
 $footer = '';
