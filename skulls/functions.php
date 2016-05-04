@@ -77,7 +77,7 @@ function Initialize($supported_networks, $show_errors = false, $forced = false)
 
 	if(STATS_ENABLED)
 	{
-		if(!file_exists('stats/')) mkdir('stats/', 0777);
+		if(!file_exists('stats/')) @mkdir('stats/', DIR_FLAGS);
 		if(!file_exists('stats/requests.dat'))
 		{
 			$file = @fopen('stats/requests.dat', 'wb');

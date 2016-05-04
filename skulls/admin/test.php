@@ -82,7 +82,7 @@ function FsockTest()
 				return array($file_array[0], (int)$file_array[1], (int)$file_array[2], $file_array[3]);
 		}
 	}
-	elseif(!file_exists(DATA_DIR)) mkdir(DATA_DIR, 0777);
+	elseif(!file_exists(DATA_DIR)) mkdir(DATA_DIR, DIR_FLAGS);
 
 	if(function_exists('fsockopen') && FsockTest1('google.com', 80) && FsockTest1('google.com', 443))
 	{

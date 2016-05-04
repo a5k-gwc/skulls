@@ -37,6 +37,7 @@ define('VERIFY_HOSTS', true);
 define('ENABLE_URL_SUBMIT', true);  // Enable the submission of alternative GWCs, if it is disabled in addition of rejecting url submissions it will not return any previous url in queries although they will be still visible in the web interface
 
 define('DATA_DIR_PATH', 'data');  // The directory where data files will be stored, it is a relative path. You can also leave it as is by default
+define('DIR_FLAGS', 0751);        // Permission flags to set when creating new folders. You can also leave it as is by default
 
 $header = '';
 $footer = '';
@@ -53,7 +54,7 @@ define('CONTENT_TYPE_WORKAROUND', false);  // Use admin/test.php to know the rig
 
 define('USING_CLOUDFLARE', false);  // Enable this option only if CloudFlare is configured and enabled on the DNS of your site
 define('TRUST_X_REMOTE_ADDR_FROM_LOCALHOST', false);  // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers like SourceForge
-define('TRUST_X_CLIENT_IP_FROM_LOCALHOST', false);  // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers like OpenShift
+define('TRUST_X_CLIENT_IP_FROM_LOCALHOST', false);    // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers like OpenShift
 
 
 /***  NETWORKS LIST  ***/

@@ -1666,7 +1666,7 @@ if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
 
 if(!file_exists(DATA_DIR.'last_action.dat'))
 {
-	if(!file_exists(DATA_DIR)) mkdir(DATA_DIR, 0777);
+	if(!file_exists(DATA_DIR)) @mkdir(DATA_DIR, DIR_FLAGS);
 
 	$file = @fopen(DATA_DIR.'last_action.dat', 'xb');
 	if($file !== FALSE)

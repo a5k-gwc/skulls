@@ -89,7 +89,7 @@ clearstatcache();
 
 if(!file_exists(DATA_DIR))
 {
-	$result = mkdir(DATA_DIR, 0777);
+	$result = mkdir(DATA_DIR, DIR_FLAGS);
 	$log .= '<div>Creating <b>'.DATA_DIR.'</b> directory: '.check($result).'</div>'."\r\n";
 }
 
