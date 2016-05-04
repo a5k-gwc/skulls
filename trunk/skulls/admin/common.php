@@ -17,6 +17,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
+function GetMicrotime()
+{
+	if((int)PHP_VERSION >= 5) return microtime(true);
+	list($usec, $sec) = explode(' ', microtime(), 2);
+	return (float)$usec + (float)$sec;
+}
+
 function Configure()
 {
 	error_reporting(~0); ini_set('display_errors', '1');
@@ -32,12 +39,6 @@ function InitializeVars()
 	$SUPPORTED_NETWORKS = array();
 	include '../vars.php';
 	define('DATA_DIR', '../'.DATA_DIR_PATH.'/');
-}
-
-function GetMicrotime()
-{
-	list($usec, $sec) = explode(' ', microtime(), 2);
-	return (float)$usec + (float)$sec;
 }
 
 function FormatDate($ts)
