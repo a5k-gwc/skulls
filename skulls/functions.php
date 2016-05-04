@@ -49,6 +49,9 @@ function InitializeNetworkFile($net, $show_errors = false)
 function Initialize($supported_networks, $show_errors = false, $forced = false)
 {
 	$errors = "";
+
+	if(!CreateFolder('./log/', DIR_FLAGS)) $errors .= '<div style="color: red;">Unable to create the folder ./log/</div>';
+
 	if(!file_exists(DATA_DIR.'running-since.dat'))
 	{
 		$running_since = gmdate('Y/m/d H:i:s');

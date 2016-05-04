@@ -420,6 +420,25 @@ function RemoveGarbage($val)
 	return str_replace(array('|', "\r", "\n", "\0"), "", $val);
 }
 
+function Logging($filename, $detected_pv = null)
+{
+	global $CLIENT, $VERSION, $DETECTED_NET, $UA, $ORIGIN;
+	$REMOTE_IP = empty($_SERVER['REMOTE_ADDR'])? null : $_SERVER['REMOTE_ADDR'];
+	$ACCEPT_ENCODING = empty($_SERVER['HTTP_ACCEPT_ENCODING'])? null : $_SERVER['HTTP_ACCEPT_ENCODING'];
+	$X_FORWARDED_FOR = empty($_SERVER['HTTP_X_FORWARDED_FOR'])? null : $_SERVER['HTTP_X_FORWARDED_FOR'];
+	$X_CLIENT_IP = empty($_SERVER['HTTP_X_CLIENT_IP'])? null : $_SERVER['HTTP_X_CLIENT_IP'];
+	$REFERER = empty($_SERVER['HTTP_REFERER'])? null: $_SERVER['HTTP_REFERER'];
+
+	$line = gmdate("Y/m/d H:i:s").'|'.$detected_pv.'|'.RemoveGarbage($DETECTED_NET).'|'.RemoveGarbage($CLIENT.' '.$VERSION).'|'.RemoveGarbage($ACCEPT_ENCODING).'|'.RemoveGarbage($UA).'|?'.RemoveGarbage($_SERVER['QUERY_STRING']).'|'.RemoveGarbage($REMOTE_IP).'|'.RemoveGarbage($X_FORWARDED_FOR).'|'.RemoveGarbage($X_CLIENT_IP).'|'.RemoveGarbage($ORIGIN).'|'.RemoveGarbage($REFERER).'|'."\r\n";
+
+	$file = fopen('log/'.$filename.'.log', 'ab');
+	if($file === false) return;
+	flock($file, LOCK_EX);
+	fwrite($file, $line);
+	flock($file, LOCK_UN);
+	fclose($file);
+}
+
 function Pong($detected_pv, $net_list_sent_elsewhere, $multi, $net, $client, $version, $remote_ip)
 {
 	$send_old_pong = false; $send_pong = false;
@@ -1657,11 +1676,6 @@ if(MAINTAINER_NICK === 'your nickname here' || MAINTAINER_NICK === "")
 {
 	echo "You must read readme.txt in the admin directory first.\r\n";
 	die();
-}
-
-if(LOG_MAJOR_ERRORS || LOG_MINOR_ERRORS)
-{
-	include "log.php";
 }
 
 if(!file_exists(DATA_DIR.'last_action.dat'))
