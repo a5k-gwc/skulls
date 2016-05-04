@@ -17,6 +17,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
+function CreateFolder($path, $flags)
+{
+	if(file_exists($path) || @mkdir($path, $flags)) return true;
+	return false;
+}
+
 function DetectServer()
 {
 	if(function_exists('apache_get_version') && apache_get_version() !== false)
@@ -77,7 +83,7 @@ function Initialize($supported_networks, $show_errors = false, $forced = false)
 
 	if(STATS_ENABLED)
 	{
-		if(!file_exists('stats/')) @mkdir('stats/', DIR_FLAGS);
+		if(!CreateFolder('./stats/', DIR_FLAGS & ~0007)) $errors .= '<div style="color: red;">Unable to create the folder ./stats/</div>';
 		if(!file_exists('stats/requests.dat'))
 		{
 			$file = @fopen('stats/requests.dat', 'wb');
