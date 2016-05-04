@@ -466,19 +466,19 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 	return '<span title="'.$ua.'">'.$full_name.'</span>';
 }
 
-function CalculateSHA1($file_name)
+function CalculateSHA1($filename)
 {
-	$hash = sha1_file($file_name); if($hash === false) return false;
+	$hash = sha1_file($filename); if($hash === false) return false;
 	return strtoupper($hash);
 }
 
-function CheckHashAndFilesize($file_name, &$BL_file_size)
+function CheckHashAndFilesize($filename, &$BL_file_size)
 {
-	$BL_file_size = filesize($file_name); if($BL_file_size === false) return false;
-	$hash = CalculateSHA1($file_name); if($hash === false) return false;
+	$BL_file_size = filesize($filename); if($BL_file_size === false) return false;
+	$hash = CalculateSHA1($filename); if($hash === false) return false;
 	$title = '"SHA1 = '.$hash.'"';
 
-	$BL_stored_info = @file_get_contents(substr($file_name, 0, -3).'hash');
+	$BL_stored_info = @file_get_contents(substr($filename, 0, -3).'hash');
 	if($BL_stored_info === false) return '<span class="bad" title='.$title.'>Missing hash file</span>';
 	$BL_stored_info = explode('|', $BL_stored_info, 3);
 
@@ -488,12 +488,12 @@ function CheckHashAndFilesize($file_name, &$BL_file_size)
 		return '<span class="bad" title='.$title.'>Corrupted</span>';
 }
 
-function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$BL_file_size, &$BL_author, &$BL_rev, &$BL_license)
+function GetBlockListInfo($filename, $unique_id, &$BL_type, &$BL_hash_check, &$BL_file_size, &$BL_author, &$BL_rev, &$BL_license)
 {
 	$BL_type = null; $BL_hash_check = null; $BL_file_size = 0; $BL_author = null; $BL_rev = null; $BL_license = null;
-	if(!file_exists($file_name)) { $BL_type = '<span class="bad">Missing file</span>'; return false; }
+	if(!file_exists($filename)) { $BL_type = '<span class="bad">Missing file</span>'; return false; }
 
-	$fp = fopen($file_name, 'rb'); if($fp === false) return false;
+	$fp = fopen($filename, 'rb'); if($fp === false) return false;
 	$line = fgets($fp, 512); if($line !== false) $BL_info = explode('|', $line, 6);
 	fclose($fp);
 	if(!isset($BL_info)) return false;
@@ -511,7 +511,7 @@ function GetBlockListInfo($file_name, $unique_id, &$BL_type, &$BL_hash_check, &$
 			$BL_type = '<span class="good">Original</span>';
 		else							/* Custom BlockList with hash check */
 			$BL_type = '<span class="unknown">Custom</span>';
-		$result = CheckHashAndFilesize($file_name, $BL_file_size); if($result !== false) $BL_hash_check = $result;
+		$result = CheckHashAndFilesize($filename, $BL_file_size); if($result !== false) $BL_hash_check = $result;
 	}
 	return true;
 }
