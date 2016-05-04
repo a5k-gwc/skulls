@@ -44,7 +44,7 @@ $updated = FALSE;
 
 $SUPPORTED_NETWORKS = array();
 include '../vars.php';
-define('DATA_DIR', '../'.DATA_FOLDER.'/');
+define('DATA_DIR', '../'.DATA_DIR_PATH.'/');
 
 function Error($text)
 {

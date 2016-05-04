@@ -20,7 +20,7 @@
 error_reporting(~0); ini_set('display_errors', '1');
 $SUPPORTED_NETWORKS = array();
 include '../vars.php';
-define('DATA_DIR', '../'.DATA_FOLDER.'/');
+define('DATA_DIR', '../'.DATA_DIR_PATH.'/');
 
 function GetMicrotime()
 {
