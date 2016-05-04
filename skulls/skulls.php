@@ -89,7 +89,7 @@ function InitializeValidateVars()
 
 	ValidateHostHeader($IS_HTTPS);
 	$GLOBALS['MY_URL'] = ($IS_HTTPS? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
-	define('DATA_DIR', './'.DATA_FOLDER.'/');
+	define('DATA_DIR', './'.DATA_DIR_PATH.'/');
 }
 InitializeValidateVars();
 
