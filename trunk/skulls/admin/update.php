@@ -19,6 +19,9 @@
 
 define('REVISION', '5.0.0.7');
 
+include './common.php';
+InitializeVars();
+
 header($_SERVER['SERVER_PROTOCOL'].' 200 OK'); list(,$prot_ver) = explode('/', $_SERVER['SERVER_PROTOCOL'], 2);
 if($prot_ver >= 1.1) header('Cache-Control: no-cache'); else header('Pragma: no-cache');
 
@@ -36,15 +39,9 @@ if($rev_num === REVISION)
 	die;
 }
 
-error_reporting(~0); ini_set('display_errors', '1');
-
 $log = "";
 $errors = 0;
 $updated = FALSE;
-
-$SUPPORTED_NETWORKS = array();
-include '../vars.php';
-define('DATA_DIR', '../'.DATA_DIR_PATH.'/');
 
 function Error($text)
 {
@@ -174,18 +171,6 @@ if(file_exists($gwc_full_name))
 		$log .= '<div>Internal structure updated in <b>'.$gwc_name.'</b> file.</div>'."\r\n";
 		$updated = TRUE;
 	}
-}
-
-if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());
-function FormatDate($timestamp)
-{
-	return gmdate('Y/m/d H:i:s', $timestamp);
-}
-
-function GetTimestamp($date)
-{
-	if($date === "") return false;
-	return strtotime($date.' UTC');
 }
 
 function ConvertRunningSinceFile()
@@ -333,6 +318,6 @@ else
 		echo '<div style="color: red;">Error during writing of <b>admin/revision.dat</b> file.</div>';
 }
 
-if(!empty($footer)) echo '<div><br>'.$footer.'</div>';
+//if(!empty($footer)) echo '<div><br>'.$footer.'</div>';
 echo $html_footer;
 ?>

@@ -17,28 +17,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-error_reporting(~0); ini_set('display_errors', '1');
-$SUPPORTED_NETWORKS = array();
-include '../vars.php';
-define('DATA_DIR', '../'.DATA_DIR_PATH.'/');
-
-function GetMicrotime()
-{
-	list($usec, $sec) = explode(' ', microtime(), 2);
-	return (float)$usec + (float)$sec;
-}
-
-if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());
-function FormatDate($timestamp)
-{
-	return gmdate('Y/m/d H:i:s', $timestamp);
-}
-
-function GetTimestamp($date)
-{
-	if($date === "") return false;
-	return strtotime($date.' UTC');
-}
+include './common.php';
+InitializeVars();
 
 function FsockTest1($hostname, $port)
 {
@@ -140,11 +120,10 @@ echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://
 echo "<html><head><title>Test</title><meta name=\"robots\" content=\"noindex,nofollow,noarchive\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>\r\n";
 echo "<br><br>";
 
-$php_version = PHP_VERSION;
-if((float)$php_version >= 4.3)
+if((float)PHP_VERSION >= 4.3)
 	echo "<b>PHP version: <font color=\"green\">OK</font></b>";
 else
-	echo "<b>PHP version: <font color=\"red\">".$php_version."</font> (This version of PHP is too old, the minimum version is 4.3)</b>";
+	echo "<b>PHP version: <font color=\"red\">".PHP_VERSION."</font> (This version of PHP is too old, the minimum version is 4.3)</b>";
 
 echo "<br><br>\r\n";
 
