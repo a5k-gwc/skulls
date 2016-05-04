@@ -17,9 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-if( !defined("DATA_DIR") )
-	die();
-if( !file_exists("log/") )
+if(!file_exists("log/"))
 	mkdir("log/", 0777);
 
 function Logging($filename, $detected_pv = null)

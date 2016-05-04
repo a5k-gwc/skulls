@@ -31,45 +31,45 @@ function DetectServer()
 function InitializeNetworkFile($net, $show_errors = false)
 {
 	$net = strtolower($net);
-	if(!file_exists(DATA_DIR.'/hosts-'.$net.'.dat'))
+	if(!file_exists(DATA_DIR.'hosts-'.$net.'.dat'))
 	{
-		$file = @fopen(DATA_DIR.'/hosts-'.$net.'.dat', 'wb');
+		$file = @fopen(DATA_DIR.'hosts-'.$net.'.dat', 'wb');
 		if($file !== false) fclose($file);
 		elseif($show_errors)
-			echo "<font color=\"red\">Error during writing of ".DATA_DIR."/hosts-".$net.".dat</font><br>";
+			echo "<font color=\"red\">Error during writing of ".DATA_DIR."hosts-".$net.".dat</font><br>";
 	}
 }
 
 function Initialize($supported_networks, $show_errors = false, $forced = false)
 {
 	$errors = "";
-	if(!file_exists(DATA_DIR.'/running-since.dat'))
+	if(!file_exists(DATA_DIR.'running-since.dat'))
 	{
 		$running_since = gmdate('Y/m/d H:i:s');
-		$fp = @fopen(DATA_DIR.'/running-since.dat', 'wb');
+		$fp = @fopen(DATA_DIR.'running-since.dat', 'wb');
 		if($fp !== false)
 		{
 			flock($fp, LOCK_EX); fwrite($fp, $running_since); fflush($fp); flock($fp, LOCK_UN); fclose($fp);
 		}
-		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/running-since.dat</font><br>";
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."running-since.dat</font><br>";
 	}
-	if(!file_exists(DATA_DIR."/alt-gwcs.dat"))
+	if(!file_exists(DATA_DIR.'alt-gwcs.dat'))
 	{
-		$file = @fopen(DATA_DIR."/alt-gwcs.dat", "wb");
+		$file = @fopen(DATA_DIR.'alt-gwcs.dat', 'wb');
 		if($file !== FALSE) fclose($file);
-		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/alt-gwcs.dat</font><br>";
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."alt-gwcs.dat</font><br>";
 	}
-	if(!file_exists(DATA_DIR."/alt-udps.dat"))
+	if(!file_exists(DATA_DIR.'alt-udps.dat'))
 	{
-		$file = @fopen(DATA_DIR."/alt-udps.dat", "wb");
+		$file = @fopen(DATA_DIR.'alt-udps.dat', 'wb');
 		if($file !== FALSE) fclose($file);
-		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/alt-udps.dat</font><br>";
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."alt-udps.dat</font><br>";
 	}
-	if(!file_exists(DATA_DIR."/failed_urls.dat"))
+	if(!file_exists(DATA_DIR.'failed_urls.dat'))
 	{
-		$file = @fopen(DATA_DIR."/failed_urls.dat", "wb");
+		$file = @fopen(DATA_DIR.'failed_urls.dat', 'wb');
 		if($file !== FALSE) fclose($file);
-		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."/failed_urls.dat</font><br>";
+		else $errors .= "<font color=\"red\">Error during writing of ".DATA_DIR."failed_urls.dat</font><br>";
 	}
 
 	for($i = 0; $i < NETWORKS_COUNT; $i++)
@@ -77,42 +77,42 @@ function Initialize($supported_networks, $show_errors = false, $forced = false)
 
 	if(STATS_ENABLED)
 	{
-		if(!file_exists("stats/")) mkdir("stats/", 0777);
-		if(!file_exists("stats/requests.dat"))
+		if(!file_exists('stats/')) mkdir('stats/', 0777);
+		if(!file_exists('stats/requests.dat'))
 		{
-			$file = @fopen("stats/requests.dat", "wb");
+			$file = @fopen('stats/requests.dat', 'wb');
 			if($file !== FALSE) { flock($file, LOCK_EX); fwrite($file, "0"); flock($file, LOCK_UN); fclose($file); }
 			else $errors .= "<font color=\"red\">Error during writing of stats/requests.dat</font><br>";
 		}
-		if(!file_exists("stats/upd-reqs.dat"))
+		if(!file_exists('stats/upd-reqs.dat'))
 		{
-			$file = @fopen("stats/upd-reqs.dat", "wb");
+			$file = @fopen('stats/upd-reqs.dat', 'wb');
 			if($file !== FALSE) fclose($file);
 			else $errors .= "<font color=\"red\">Error during writing of stats/upd-reqs.dat</font><br>";
 		}
-		if(!file_exists("stats/upd-bad-reqs.dat"))
+		if(!file_exists('stats/upd-bad-reqs.dat'))
 		{
-			$file = @fopen("stats/upd-bad-reqs.dat", "wb");
+			$file = @fopen('stats/upd-bad-reqs.dat', 'wb');
 			if($file !== FALSE) fclose($file);
 			else $errors .= "<font color=\"red\">Error during writing of stats/upd-bad-reqs.dat</font><br>";
 		}
-		if(!file_exists("stats/blocked-reqs.dat"))
+		if(!file_exists('stats/blocked-reqs.dat'))
 		{
-			$file = @fopen("stats/blocked-reqs.dat", "wb");
+			$file = @fopen('stats/blocked-reqs.dat', 'wb');
 			if($file !== FALSE) fclose($file);
 			else $errors .= "<font color=\"red\">Error during writing of stats/blocked-reqs.dat</font><br>";
 		}
-		if(!file_exists("stats/other-reqs.dat"))
+		if(!file_exists('stats/other-reqs.dat'))
 		{
-			$file = @fopen("stats/other-reqs.dat", "wb");
+			$file = @fopen('stats/other-reqs.dat', 'wb');
 			if($file !== FALSE) fclose($file);
 			else $errors .= "<font color=\"red\">Error during writing of stats/other-reqs.dat</font><br>";
 		}
 	}
 
-	if(!file_exists("admin/revision.dat"))
+	if(!file_exists('admin/revision.dat'))
 	{
-		$file = @fopen("admin/revision.dat", "wb");
+		$file = @fopen('admin/revision.dat', 'wb');
 		if($file !== FALSE)
 		{
 			flock($file, LOCK_EX);

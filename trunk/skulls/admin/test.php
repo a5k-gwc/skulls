@@ -20,6 +20,7 @@
 error_reporting(~0); ini_set('display_errors', '1');
 $SUPPORTED_NETWORKS = array();
 include '../vars.php';
+define('DATA_DIR', '../'.DATA_FOLDER.'/');
 
 function GetMicrotime()
 {
@@ -35,6 +36,7 @@ function FormatDate($timestamp)
 
 function GetTimestamp($date)
 {
+	if($date === "") return false;
 	return strtotime($date.' UTC');
 }
 
@@ -69,7 +71,7 @@ function FsockTest()
 {
 	$fsock_base = 0; $fsock_full = 0; $warning = ""; $now = time();
 
-	$cache_file = '../'.DATA_DIR.'/detection-cache.dat';
+	$cache_file = DATA_DIR.'detection-cache.dat';
 	if(file_exists($cache_file))
 	{
 		$file = file_get_contents($cache_file);
@@ -80,7 +82,7 @@ function FsockTest()
 				return array($file_array[0], (int)$file_array[1], (int)$file_array[2], $file_array[3]);
 		}
 	}
-	elseif(!file_exists('../'.DATA_DIR.'/')) mkdir('../'.DATA_DIR.'/', 0777);
+	elseif(!file_exists(DATA_DIR)) mkdir(DATA_DIR, 0777);
 
 	if(function_exists('fsockopen') && FsockTest1('google.com', 80) && FsockTest1('google.com', 443))
 	{

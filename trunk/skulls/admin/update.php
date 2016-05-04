@@ -41,7 +41,10 @@ error_reporting(~0); ini_set('display_errors', '1');
 $log = "";
 $errors = 0;
 $updated = FALSE;
+
+$SUPPORTED_NETWORKS = array();
 include '../vars.php';
+define('DATA_DIR', '../'.DATA_FOLDER.'/');
 
 function Error($text)
 {
@@ -84,15 +87,15 @@ function truncate($name)
 
 clearstatcache();
 
-if( !file_exists('../'.DATA_DIR.'/') )
+if(!file_exists(DATA_DIR))
 {
-	$result = mkdir('../'.DATA_DIR.'/', 0777);
-	$log .= '<div>Creating <b>'.DATA_DIR.'/</b> directory: '.check($result).'</div>'."\r\n";
+	$result = mkdir(DATA_DIR, 0777);
+	$log .= '<div>Creating <b>'.DATA_DIR.'</b> directory: '.check($result).'</div>'."\r\n";
 }
 
-$gwc_name = DATA_DIR.'/alt-gwcs.dat';
-$gwc_full_name = '../'.$gwc_name;
-if( file_exists($gwc_full_name) )
+$gwc_name = DATA_DIR.'alt-gwcs.dat';
+$gwc_full_name = $gwc_name;
+if(file_exists($gwc_full_name))
 {
 	$MY_URL = $_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF'];  /* HTTP_HOST already contains port if needed */
 	$MY_URL = strtolower(str_replace('/admin/update.php', '/skulls.php', $MY_URL));
@@ -181,12 +184,13 @@ function FormatDate($timestamp)
 
 function GetTimestamp($date)
 {
+	if($date === "") return false;
 	return strtotime($date.' UTC');
 }
 
 function ConvertRunningSinceFile()
 {
-	$running_since = false; $old_name_1 = '../'.DATA_DIR.'/runnig_since.dat'; $old_name_2 = '../'.DATA_DIR.'/running_since.dat';
+	$running_since = false; $old_name_1 = DATA_DIR.'runnig_since.dat'; $old_name_2 = DATA_DIR.'running_since.dat';
 
 	if(file_exists($old_name_1))
 		$running_since = file_get_contents($old_name_1);
@@ -201,7 +205,7 @@ function ConvertRunningSinceFile()
 			$running_since = FormatDate($timestamp);
 			if($running_since !== false)
 			{
-				$fp = fopen('../'.DATA_DIR.'/running-since.dat', 'wb'); global $log;
+				$fp = fopen(DATA_DIR.'running-since.dat', 'wb'); global $log;
 				if($fp !== false)
 				{
 					flock($fp, LOCK_EX);
@@ -209,31 +213,31 @@ function ConvertRunningSinceFile()
 					fflush($fp);
 					flock($fp, LOCK_UN);
 					fclose($fp);
-					$log .= '<div>Conversion of <b>'.DATA_DIR.'/running-since.dat</b> done.</div>'."\r\n";
+					$log .= '<div>Conversion of <b>'.DATA_DIR.'running-since.dat</b> done.</div>'."\r\n";
 					global $updated; $updated = true;
 				}
 				else
 				{
-					$log .= '<div>'.Error('Error during writing').' of <b>'.DATA_DIR.'/running-since.dat</b> file.</div>'."\r\n";
+					$log .= '<div>'.Error('Error during writing').' of <b>'.DATA_DIR.'running-since.dat</b> file.</div>'."\r\n";
 					return;
 				}
 			}
 		}
 	}
-	DeleteFile($old_name_1, true);
-	DeleteFile($old_name_2, true);
+	$GLOBALS['log'] .= DeleteFile($old_name_1, true);
+	$GLOBALS['log'] .= DeleteFile($old_name_2, true);
 }
 ConvertRunningSinceFile();
 
 function DeleteFile($name, $sub_call = false)
 {
-	$full_name = ($sub_call? '' : '../').$name;
+	$full_name = $name;
 	if(file_exists($full_name)) return '<div>Deleting <b>'.$name.'</b> file: '.check(unlink($full_name)).'</div>'."\r\n";
 }
 
 function ValidateSize($name)
 {
-	$full_name = '../'.$name;
+	$full_name = $name;
 	if(file_exists($full_name))
 	{
 		if(filesize($full_name) === false) return '<div>'.Error('Unable to check the size').' of <b>'.$name.'</b> file.</div>'."\r\n";
@@ -243,13 +247,11 @@ function ValidateSize($name)
 
 function RemoveSpecificFile($name, $size, $sha1)
 {
-	$name = '../'.$name;
 	if(file_exists($name) && filesize($name) === $size && sha1_file($name) === $sha1) { global $log; $log .= DeleteFile($name, true); }
 }
 
-function RemoveFilesStartingWith($filename_prefix, $dir)
+function RemoveFilesStartingWith($dir, $filename_prefix)
 {
-	$dir = '../'.$dir.'/';
 	$dh = opendir($dir); if($dh === false) return; global $log;
 
 	while(($name = readdir($dh)) !== false)
@@ -268,33 +270,33 @@ $old_htaccess = array(
 );
 
 /* Changed files */
-foreach($old_htaccess as $val) RemoveSpecificFile('.htaccess', $val[0], $val[1]); unset($val);
+foreach($old_htaccess as $val) RemoveSpecificFile('../.htaccess', $val[0], $val[1]); unset($val);
 /* Moved files */
-$log .= DeleteFile('geoip/GeoIP.dat');  /* v0.3.1 */
-$log .= DeleteFile('admin/test-cached.dat');
-$log .= DeleteFile('license.txt');
+$log .= DeleteFile('../geoip/GeoIP.dat');  /* v0.3.1 */
+$log .= DeleteFile('../license.txt');
+$log .= DeleteFile('./test-cached.dat');
 /* Renamed files */
-RemoveSpecificFile('ext/blocklist.dat', 18131, '0c3a14080b7817aa7601c599c8820198e5ab1167');  /* v0.3.2 */
-RemoveFilesStartingWith('hosts_', DATA_DIR);
-$log .= DeleteFile(DATA_DIR.'/caches.dat');
-$log .= DeleteFile('log/unsupported_nets.log');
-$log .= DeleteFile('log/invalid_ips.log');
-$log .= DeleteFile('log/invalid_urls.log');
-$log .= DeleteFile('log/unidentified_clients.log');
-$log .= DeleteFile('log/old_clients.log');
-$log .= DeleteFile('log/invalid_queries.log');
-$log .= DeleteFile('log/invalid_leaves.log');
-if(file_exists('../index.html')) $log .= DeleteFile('index.htm');
+RemoveSpecificFile('../ext/blocklist.dat', 18131, '0c3a14080b7817aa7601c599c8820198e5ab1167');  /* v0.3.2 */
+RemoveFilesStartingWith(DATA_DIR, 'hosts_');
+$log .= DeleteFile(DATA_DIR.'caches.dat');
+$log .= DeleteFile('../log/unsupported_nets.log');
+$log .= DeleteFile('../log/invalid_ips.log');
+$log .= DeleteFile('../log/invalid_urls.log');
+$log .= DeleteFile('../log/unidentified_clients.log');
+$log .= DeleteFile('../log/old_clients.log');
+$log .= DeleteFile('../log/invalid_queries.log');
+$log .= DeleteFile('../log/invalid_leaves.log');
+if(file_exists('../index.html')) $log .= DeleteFile('../index.htm');
 /* Deleted files */
-$log .= DeleteFile('admin/index.html');
-$log .= DeleteFile('admin/index.htm');
-$log .= DeleteFile('log/invalid-host-ports.log');
+$log .= DeleteFile('../log/invalid-host-ports.log');
+$log .= DeleteFile('./index.html');
+$log .= DeleteFile('./index.htm');
 /* Size check */
-$log .= ValidateSize('data/failed_urls.dat');
-$log .= ValidateSize('stats/upd-reqs.dat');
-$log .= ValidateSize('stats/upd-bad-reqs.dat');
-$log .= ValidateSize('stats/other-reqs.dat');
-$log .= ValidateSize('stats/blocked-reqs.dat');
+$log .= ValidateSize('../data/failed_urls.dat');
+$log .= ValidateSize('../stats/upd-reqs.dat');
+$log .= ValidateSize('../stats/upd-bad-reqs.dat');
+$log .= ValidateSize('../stats/other-reqs.dat');
+$log .= ValidateSize('../stats/blocked-reqs.dat');
 
 echo $html_header.$log;
 
