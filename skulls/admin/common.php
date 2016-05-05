@@ -52,4 +52,10 @@ function GetTimestamp($date)
 	$ts = strtotime($date.' UTC'); if($ts === -1) return false;
 	return $ts;
 }
+
+function CalculateSHA1($filename)
+{
+	$hash = sha1_file($filename); if($hash === false) return false;
+	return strtoupper($hash);
+}
 ?>
