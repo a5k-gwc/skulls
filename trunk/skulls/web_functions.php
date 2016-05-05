@@ -466,10 +466,35 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 	return '<span title="'.$ua.'">'.$full_name.'</span>';
 }
 
+function BinaryToBase32($input)
+{
+	static $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';  /* RFC 4648 Base32 alphabet */
+
+	$out = ""; $in_len = strlen($input); $i = -1; $buf = 0; $buf_len = 0;
+	while(++$i < $in_len)
+	{
+		$buf <<= 8; $buf |= ord($input[$i]); $buf_len += 8;
+		while($buf_len >= 5)
+		{
+			$buf_len -= 5;
+			$out .= $alphabet[$buf >> $buf_len];
+			$buf &= ((1 << $buf_len) - 1);
+		}
+	}
+	if($buf_len) $out .= $alphabet[$buf << (5 - $buf_len)];  /* Pad the remaining bits to a 5-bit chunk */
+	return $out;
+}
+
 function CalculateSHA1($filename)
 {
 	$hash = sha1_file($filename); if($hash === false) return false;
 	return strtoupper($hash);
+}
+
+function CalculateSHA1Base32($filename)
+{
+	$hash = sha1_file($filename, true); if($hash === false) return false;
+	return BinaryToBase32($hash);
 }
 
 function CheckHashAndFilesize($filename, &$BL_file_size)
@@ -514,6 +539,97 @@ function GetBlockListInfo($filename, $unique_id, &$BL_type, &$BL_hash_check, &$B
 		$result = CheckHashAndFilesize($filename, $BL_file_size); if($result !== false) $BL_hash_check = $result;
 	}
 	return true;
+}
+
+function BLHandleConversionFailure($fp_out, $fp_info)
+{
+	if($fp_out !== false) { flock($fp_out, LOCK_UN); fclose($fp_out); }
+	if($fp_info !== false) { flock($fp_info, LOCK_UN); fclose($fp_info); }
+	ignore_user_abort(false);
+	return false;
+}
+
+function BLConvertToCidr($fp_in, $b_id, $b_rev, $b_author)
+{
+	ignore_user_abort(true); $b_out_fn = DATA_DIR.'dl/blocklist-cidr';
+
+	$fp_info = fopen($b_out_fn.'.info', 'wb'); $fp_out = fopen($b_out_fn.'.dat', 'wb');
+	set_time_limit(60);  /* Get an exclusive lock may take awhile */
+	if($fp_info === false || !flock($fp_info, LOCK_EX) || $fp_out === false || !flock($fp_out, LOCK_EX))
+		return BLHandleConversionFailure($fp_out, $fp_info);
+
+	$success = true; $bytes_read = 0; set_time_limit(30);
+	while(!feof($fp_in))
+	{
+		$buf = fread($fp_in, 16384); if($buf === false) break;
+		$buf_len = strlen($buf); $bytes_read += $buf_len;
+		if(fwrite($fp_out, $buf, $buf_len) !== $buf_len) { $success = false; break; }
+	}
+	fflush($fp_out); flock($fp_out, LOCK_UN); fclose($fp_out); $fp_out = false; touch($b_out_fn.'.dat');
+
+	clearstatcache();
+	if(!$success || filesize($b_out_fn.'.dat') !== $bytes_read)
+		return BLHandleConversionFailure($fp_out, $fp_info);
+
+	fwrite($fp_info, $b_id.'|'.$b_rev.'|'.$b_author.'|'.CalculateSHA1Base32($b_out_fn.'.dat').'|'.'|'.$bytes_read.'|');
+	fflush($fp_info); flock($fp_info, LOCK_UN); fclose($fp_info);
+
+	ignore_user_abort(false);
+	return true;
+}
+
+function BLGetInfo($b_format)
+{
+	$b_fn = DATA_DIR.'dl/blocklist-'.$b_format;
+	if(!file_exists($b_fn.'.info') || ($b_info = file_get_contents($b_fn.'.info')) === false || empty($b_info)) return false;
+	if(!file_exists($b_fn.'.dat')) return false;
+	return $b_info;
+}
+
+function BLRevCheck($b_format)
+{
+	$b_in_fn = './ext/blocklist.dat';
+	if(!file_exists($b_in_fn) || ($fp_in = fopen($b_in_fn, 'rb')) === false) return false;  /* Base blocklist missing or inaccessible */
+	if(!flock($fp_in, LOCK_SH)) { fclose($fp_in); return false; }
+	$b_in_info = fgets($fp_in, 512); if($b_in_info === false) { flock($fp_in, LOCK_UN); fclose($fp_in); return false; }
+	$b_out_info = BLGetInfo($b_format);
+
+	$success = true; $conversion_needed = true;
+	list($b_id, $b_rev, /*$b_date*/, $b_author, /*$b_license*/) = explode('|', $b_in_info, 5);
+	if($b_out_info !== false)
+	{
+		list($b_out_id, $b_out_rev, $b_out_author) = explode('|', $b_out_info, 4);
+		if($b_id === $b_out_id && $b_rev === $b_out_rev && $b_author === $b_out_author) $conversion_needed = false;
+	}
+
+	if($conversion_needed)
+	{
+		if($b_format === 'cidr')
+			$success = BLConvertToCidr($fp_in, $b_id, $b_rev, $b_author);
+		else
+			$success = false;
+	}
+	flock($fp_in, LOCK_UN); fclose($fp_in);
+
+	return $success;
+}
+
+function BLGenerateMagnet($b_format)
+{
+	$b_info = BLGetInfo($b_format); if($b_info === false) return "";
+	list($b_id, $b_rev, $b_author, $b_sha1, $b_tiger_tree, $b_size) = explode('|', $b_info, 7); if($b_author === 'Lord of the Rings') $b_author = 'LOTR';
+	if(!ctype_digit($b_rev) || !ctype_digit($b_size)) return "";
+
+	global $MY_URL;
+	$magnet = 'magnet:?xt=urn:sha1:'.$b_sha1;
+	if($b_tiger_tree !== "") $magnet .= '&xt=urn:tree:tiger:'.$b_tiger_tree;
+	$magnet .= '&dn='.rawurlencode('P2P-BlockList-'.$b_author.'-'.$b_rev.'.dat');
+	$magnet .= '&xl='.$b_size;
+	$magnet .= '&xs='.rawurlencode('http://cache.freebase.be/'.$b_sha1);
+	$magnet .= '&as='.rawurlencode(dirname($MY_URL).'/dl.php?format='.$b_format.'&hash='.$b_sha1.'&size='.$b_size);
+	$magnet .= '&blocklist-uid='.rawurlencode($b_id);
+
+	return $magnet;
 }
 
 function QueryUpdateServer($url = 'http://skulls.sourceforge.net/latest_ver.php', $came_from = null)
