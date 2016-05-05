@@ -574,7 +574,7 @@ function BLConvertToCidr($fp_in, $b_id, $b_rev, $b_author)
 	if(!$success || filesize($b_out_fn.'.dat') !== $bytes_read)
 		return BLHandleConversionFailure($fp_out, $fp_info);
 
-	fwrite($fp_info, $b_id.'|'.$b_rev.'|'.$b_author.'|'.CalculateSHA1Base32($b_out_fn.'.dat').'|'.'|'.$bytes_read.'|');
+	fwrite($fp_info, $b_id.'|'.$b_rev.'|'.$b_author.'|'.CalculateSHA1Base32($b_out_fn.'.dat').'|'./* Tiger tree */'|'./* Reserved */'|'.$bytes_read.'|');
 	fflush($fp_info); flock($fp_info, LOCK_UN); fclose($fp_info);
 
 	ignore_user_abort(false);
@@ -620,13 +620,13 @@ function BLRevCheck($b_format)
 function BLGenerateMagnet($b_format)
 {
 	$b_info = BLGetInfo($b_format); if($b_info === false) return "";
-	list($b_id, $b_rev, $b_author, $b_sha1, $b_tiger_tree, $b_size) = explode('|', $b_info, 7); if($b_author === 'Lord of the Rings') $b_author = 'LOTR';
+	list($b_id, $b_rev, $b_author, $b_sha1, $b_tiger_tree, /* Reserved */, $b_size) = explode('|', $b_info, 8); if($b_author === 'Lord of the Rings') $b_author = 'LOTR';
 	if(!ctype_digit($b_rev) || !ctype_digit($b_size)) return "";
 
 	global $MY_URL;
 	$magnet = 'magnet:?xt=urn:sha1:'.$b_sha1;
 	if($b_tiger_tree !== "") $magnet .= '&xt=urn:tree:tiger:'.$b_tiger_tree;
-	$magnet .= '&dn='.rawurlencode('P2P-BlockList-'.$b_author.'-'.$b_rev.'.dat');
+	$magnet .= '&dn='.rawurlencode('P2P-BlockList-'.$b_format.'-'.$b_author.'-'.$b_rev.'.dat');
 	$magnet .= '&xl='.$b_size;
 	$magnet .= '&xs='.rawurlencode('http://cache.freebase.be/'.$b_sha1);
 	$magnet .= '&as='.rawurlencode(dirname($MY_URL).'/dl.php?format='.$b_format.'&hash='.$b_sha1.'&size='.$b_size);
