@@ -230,6 +230,22 @@ function ValidateSize($name)
 	}
 }
 
+function RemoveOldHtaccessFiles()
+{
+	$name = '../.htaccess'; if(!file_exists($name)) return;
+	$size = filesize($name);
+	$htaccess = array(
+		array(3091, '94fa81f7cf89b6f9c552b79711ab1bc725bb0ea8'),  /* v0.3.2d, v0.3.2e */
+		array(3093, 'd9a5185e38944dfa485192cc13dca78542858c3d'),  /* v0.3.2c */
+		array(3053, '5978373c6535cc7ec7735327767ede5bfc4a3391'),  /* v0.3.2, v0.3.2b */
+		array(158,  'a32f8fef07cecefb9942d120bf4cc71bb11d7108'),  /* v0.2.9, v0.3.0, v0.3.1 */
+		array(0,    'da39a3ee5e6b4b0d3255bfef95601890afd80709')   /* Empty file */
+	);
+
+	foreach($htaccess as $val)
+		if($val[0] === $size && $val[1] === sha1_file($name)) { global $log; $log .= DeleteFile($name, true); break; }
+}
+
 function RemoveSpecificFile($name, $size, $sha1)
 {
 	if(file_exists($name) && filesize($name) === $size && sha1_file($name) === $sha1) { global $log; $log .= DeleteFile($name, true); }
@@ -246,16 +262,8 @@ function RemoveFilesStartingWith($dir, $filename_prefix)
 	closedir($dh);
 }
 
-$old_htaccess = array(
-	array(0,    'da39a3ee5e6b4b0d3255bfef95601890afd80709'),  /* Empty file */
-	array(158,  'a32f8fef07cecefb9942d120bf4cc71bb11d7108'),  /* v0.2.9, v0.3.0, v0.3.1 */
-	array(3053, '5978373c6535cc7ec7735327767ede5bfc4a3391'),  /* v0.3.2, v0.3.2b */
-	array(3093, 'd9a5185e38944dfa485192cc13dca78542858c3d'),  /* v0.3.2c */
-	array(3091, '94fa81f7cf89b6f9c552b79711ab1bc725bb0ea8')   /* v0.3.2d, v0.3.2e */
-);
-
 /* Changed files */
-foreach($old_htaccess as $val) RemoveSpecificFile('../.htaccess', $val[0], $val[1]); unset($val);
+RemoveOldHtaccessFiles();
 /* Moved files */
 $log .= DeleteFile('../geoip/GeoIP.dat');  /* v0.3.1 */
 $log .= DeleteFile('../license.txt');
@@ -318,6 +326,5 @@ else
 		echo '<div style="color: red;">Error during writing of <b>admin/revision.dat</b> file.</div>';
 }
 
-//if(!empty($footer)) echo '<div><br>'.$footer.'</div>';
 echo $html_footer;
 ?>
