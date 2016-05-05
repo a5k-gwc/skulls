@@ -140,6 +140,7 @@ define('STATS_BLOCKED', 3);
 
 function GetMicrotime()
 {
+	if((int)PHP_VERSION >= 5) return microtime(true);
 	list($usec, $sec) = explode(' ', microtime(), 2);
 	return (float)$usec + (float)$sec;
 }

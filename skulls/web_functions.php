@@ -493,7 +493,10 @@ function CalculateSHA1($filename)
 
 function CalculateSHA1Base32($filename)
 {
-	$hash = sha1_file($filename, true); if($hash === false) return false;
+	if((int)PHP_VERSION >= 5)
+		{ $hash = sha1_file($filename, true); if($hash === false) return false; }
+	else
+		{ $hash = sha1_file($filename); if($hash === false) return false; $hash = pack('H*', $hash); }
 	return BinaryToBase32($hash);
 }
 
