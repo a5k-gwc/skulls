@@ -51,6 +51,7 @@ function Initialize($supported_networks, $show_errors = false, $forced = false)
 	$errors = "";
 
 	if(!CreateFolder('./log/', DIR_FLAGS)) $errors .= '<div style="color: red;">Unable to create the folder ./log/</div>';
+	if(!CreateFolder(DATA_DIR.'dl/', DIR_FLAGS & ~0007)) $errors .= '<div style="color: red;">Unable to create the folder '.DATA_DIR.'dl/</div>';
 
 	if(!file_exists(DATA_DIR.'running-since.dat'))
 	{

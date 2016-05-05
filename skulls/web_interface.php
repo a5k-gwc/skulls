@@ -441,19 +441,42 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 <?php
 				if($geoip) $geoip->Destroy(); $geoip = null;
 			}
-			elseif($page_number == 4)	// BlockList download
+			elseif($page_number == 4)	// BlockList downloads
 			{
+				$b_formats = array('cidr' => 'CIDR version (LimeWire)');
+
+				if(!empty($_GET['format']) && isset($b_formats[$_GET['format']]))
+				{
+					$b_format = $_GET['format']; $b_name = $b_formats[$b_format]; $b_magnet = null;
+					if(!BLRevCheck($b_format) || ($b_magnet = htmlspecialchars(BLGenerateMagnet($b_format), ENT_QUOTES, 'UTF-8')) === "") $b_name = 'BlockList conversion error';
 ?>
-				<div class="page-title"><strong>P2P BlockList</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
-				<div class="padding">
-					<div class="padding"><strong>Download</strong></div>
-					<table class="inner-table-infos" summary="BlockList download">
-						<tr>
-							<td><span class="padding">Under construction</span></td>
-						</tr>
-					</table>
-				</div>
+					<div class="page-title"><strong>P2P BlockList</strong></div>
+					<div class="padding">
+						<div class="padding"><strong>Magnet link</strong></div>
+						<div class="padding"><a class="magnet" href="<?php echo $b_magnet; ?>"><img width="14" height="14" src="images/magnet-icon.png" alt="Magnet"> <?php echo $b_name; ?></a></div>
+					</div>
 <?php
+				}
+				else
+				{
+?>
+					<div class="page-title"><strong>P2P BlockList</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
+					<div class="padding">
+						<div class="padding"><strong>Downloads list</strong></div>
+						<table summary="P2P BlockList downloads list">
+							<tr class="header-column">
+								<th>Format</th>
+							</tr>
+							<tr>
+								<td><div><a href="<?php echo $base_link; ?>showblocklists=1&amp;format=cidr"><?php echo $b_formats['cidr']; ?></a></div></td>
+							</tr>
+							<tr>
+								<td><div>New formats will come in the future</div></td>
+							</tr>
+						</table>
+					</div>
+<?php
+				}
 			}
 			elseif($page_number == 5)	// BlockList informations
 			{
