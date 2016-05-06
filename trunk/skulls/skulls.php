@@ -34,6 +34,7 @@ define('MAX_HOST_AGE', 259200);									/* 3 days */
 define('RESPONSE_LINES_LIMIT', 64);
 define('ENABLE_CORS', true);
 define('DEBUG', 0);
+$MY_URL = null;
 
 if(DEBUG) { error_reporting(~0); ini_set('display_errors', '1'); }
 define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
@@ -108,7 +109,7 @@ function ValidateNormalizeRequest($is_https, $reliable_host)
 		header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING']))); die;
 	}
 	if(!empty($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']) !== 0) HandleFatalError("ERROR: Use only canonical URL\r\n");  /* Block extension strip */
-	$GLOBALS['MY_URL'] = $my_url_start.$_SERVER['SCRIPT_NAME'];
+	global $MY_URL; $MY_URL = $my_url_start.$_SERVER['SCRIPT_NAME'];
 }
 
 function InitializeValidate()
