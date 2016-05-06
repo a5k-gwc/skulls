@@ -37,8 +37,8 @@ function InitializeVars()
 	Configure();
 
 	$SUPPORTED_NETWORKS = array();
-	include '../vars.php';
-	define('DATA_DIR', '../'.DATA_DIR_PATH.'/');
+	include '../vars.php';	
+	if(USING_OPENSHIFT_HOSTING && isset($_SERVER['OPENSHIFT_DATA_DIR'])) define('DATA_DIR', $_SERVER['OPENSHIFT_DATA_DIR']); else define('DATA_DIR', '../'.DATA_DIR_PATH.'/');
 }
 
 function FormatDate($ts)
