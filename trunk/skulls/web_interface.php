@@ -463,6 +463,10 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 					<div class="page-title"><strong>P2P BlockList</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
 					<div class="padding">
 						<div class="padding"><strong>Downloads list</strong></div>
+<?php
+						if(file_exists('./ext/blocklist.dat'))
+						{
+?>
 						<table summary="P2P BlockList downloads list">
 							<tr class="header-column">
 								<th>Format</th>
@@ -474,6 +478,11 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 								<td><div>New formats will come in the future</div></td>
 							</tr>
 						</table>
+<?php
+						}
+						else
+							echo '<div class="padding">You must install the Add-on for this.</div>',"\n";
+?>
 					</div>
 <?php
 				}
