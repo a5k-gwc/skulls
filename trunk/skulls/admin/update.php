@@ -262,6 +262,8 @@ function RemoveFilesStartingWith($dir, $filename_prefix)
 	closedir($dh);
 }
 
+/* Force rechecking on update */
+$log .= DeleteFile(DATA_DIR.'update_check.dat');
 /* Changed files */
 RemoveOldHtaccessFiles();
 /* Moved files */
