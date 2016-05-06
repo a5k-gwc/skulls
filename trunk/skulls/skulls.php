@@ -37,7 +37,6 @@ define('DEBUG', 0);
 
 if(DEBUG) { error_reporting(~0); ini_set('display_errors', '1'); }
 define('NETWORKS_COUNT', count($SUPPORTED_NETWORKS));
-$UNRELIABLE_HOST = false;
 
 function GetMainFileRev()
 {
@@ -52,6 +51,17 @@ function ConfigureSettings()
 	if(function_exists('apache_setenv')) apache_setenv('no-gzip', '1');  /* Compression will be enabled later only if needed, otherwise it is just a waste of server resources */
 	if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());  /* Suppress warnings if the timezone isn't set */
 	if(function_exists('header_remove')) header_remove('X-Powered-By');
+}
+
+function SanitizeHeaderValue($val)
+{
+	if(strlen($val) > 512) return null;
+	return str_replace(array(':', '/', '\\', '"', "\r", "\n", "\0"), array('%3A', '%2F'), $val);
+}
+
+function HandleFatalError($msg)
+{
+	header('HTTP/1.0 404 Not Found'); header('Content-Length: '.strlen($msg)); die($msg);
 }
 
 function IsSecureConnection()
@@ -69,29 +79,48 @@ function ValidateHostHeader($is_https)
 {
 	if(!isset($_SERVER['HTTP_HOST']))
 	{
-		if(!IsWebInterface()) { header('HTTP/1.0 400 Bad Request'); die("ERROR: Missing host header\r\n"); }
+		if(!IsWebInterface()) HandleFatalError("ERROR: Missing host header\r\n");
 
 		$port = empty($_SERVER['SERVER_PORT'])? 0 : (int)$_SERVER['SERVER_PORT'];
 		if($port === 0 || ($is_https? $port === 443 : $port === 80)) $port = null; else $port = ':'.$port;
 
-		$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].$port; $GLOBALS['UNRELIABLE_HOST'] = true;
+		$_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'].$port;
+		return false;
 	}
 
 	if(strpos($_SERVER['HTTP_HOST'], '/') !== false || strpos($_SERVER['HTTP_HOST'], '\\') !== false) { header('HTTP/1.0 400 Bad Request'); header('Content-Length: 0'); die; }
+	return true;
 }
 
-function InitializeValidateVars()
+function ValidateNormalizeRequest($is_https, $reliable_host)
 {
-	ConfigureSettings();
-	$IS_HTTPS = IsSecureConnection(); $PHP_SELF = $_SERVER['PHP_SELF'];
-	if(!ENABLED || NETWORKS_COUNT === 0 || basename($PHP_SELF) === 'index.php') { header('HTTP/1.0 404 Not Found'); die("ERROR: Service disabled\r\n"); }
-	if($IS_HTTPS && CACHE_URL === "") { header('HTTP/1.0 404 Not Found'); die("ERROR: HTTPS is disabled\r\n"); }
+	$my_url_start = ($is_https? 'https://' : 'http://').$_SERVER['HTTP_HOST'];  /* HTTP_HOST already contains port if needed */
+	if(basename($_SERVER['SCRIPT_NAME']) === 'index.php') HandleFatalError("ERROR: Do NOT call me index\r\n");
+	if(CACHE_URL === "")
+	{
+		if($is_https) HandleFatalError("ERROR: HTTPS is disabled\r\n");
+		if(!empty($_SERVER['PATH_INFO'])) HandleFatalError("ERROR: Use only canonical URL\r\n");
+	}
+	elseif(CACHE_URL !== $my_url_start.$_SERVER['PHP_SELF'] && $reliable_host)
+	{
+		ValidateProtocol();
+		header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
+		header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING']))); die;
+	}
+	if(!empty($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']) !== 0) HandleFatalError("ERROR: Use only canonical URL\r\n");  /* Block extension strip */
+	$GLOBALS['MY_URL'] = $my_url_start.$_SERVER['SCRIPT_NAME'];
+}
 
-	ValidateHostHeader($IS_HTTPS);
-	$GLOBALS['MY_URL'] = ($IS_HTTPS? 'https://' : 'http://').$_SERVER['HTTP_HOST'].$PHP_SELF;  /* HTTP_HOST already contains port if needed */
+function InitializeValidate()
+{
+	ConfigureSettings(); $is_https = IsSecureConnection();
+	if(!ENABLED || NETWORKS_COUNT === 0) { header('HTTP/1.0 404 Not Found'); die("ERROR: Service disabled\r\n"); }
+
+	$reliable_host = ValidateHostHeader($is_https);
+	ValidateNormalizeRequest($is_https, $reliable_host);
 	if(USING_OPENSHIFT_HOSTING && isset($_SERVER['OPENSHIFT_DATA_DIR'])) define('DATA_DIR', $_SERVER['OPENSHIFT_DATA_DIR']); else define('DATA_DIR', './'.DATA_DIR_PATH.'/');
 }
-InitializeValidateVars();
+InitializeValidate();
 
 
 function IsWebInterface()
@@ -117,20 +146,6 @@ function NormalizePort($is_https, $port)
 	else { if($port === 80) return null; }
 
 	return ':'.$port;
-}
-
-function SanitizeHeaderValue($val)
-{
-	if(strlen($val) > 512) return null;
-	return str_replace(array(':', '/', '\\', '"', "\r", "\n", "\0"), array('%3A', '%2F'), $val);
-}
-
-if(CACHE_URL !== $MY_URL && CACHE_URL !== "" && !$UNRELIABLE_HOST)
-{
-	ValidateProtocol();
-	header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
-	header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING'])));
-	die;
 }
 
 define('STATS_OTHER',   0);
@@ -1428,7 +1443,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 
 function DetectEncoding($user_agent)
 {
-	$ACCEPT_ENCODING = empty($_SERVER['HTTP_ACCEPT_ENCODING']) ? "" : $_SERVER['HTTP_ACCEPT_ENCODING'];
+	$ACCEPT_ENCODING = empty($_SERVER['HTTP_ACCEPT_ENCODING'])? "" : $_SERVER['HTTP_ACCEPT_ENCODING'];
 
 	/* The deflate compression in HTTP 1.1 is the format specified by RFC 1950 instead Internet Explorer incorrectly interpret it as RFC 1951 (buggy IE, what surprise!!!) */
 	if(strpos($ACCEPT_ENCODING, 'deflate') !== false && strpos($user_agent, ' MSIE ') === false)
@@ -1709,7 +1724,7 @@ if(IsWebInterface())
 	include './web_interface.php';
 	header($_SERVER['SERVER_PROTOCOL'].' 200 OK');
 	$compressed = StartCompression($COMPRESSION, $UA, true);
-	ShowHtmlPage($_SERVER['PHP_SELF'], $COMPRESSION, $header, $footer);
+	ShowHtmlPage($COMPRESSION, $header, $footer);
 	if($compressed) ob_end_flush();
 }
 elseif( $KICK_START )

@@ -34,12 +34,6 @@ AddCharset        utf-8 .css .js
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  <Files "skulls">
-    # This should block, for the main php script, the extension strip that is enabled on some servers
-    RewriteCond %{REQUEST_FILENAME}\.php -f
-    RewriteRule . - [G,L]
-  </Files>
-
   # Redirect from the www url to the not-www url (excluding the main php script that already auto-redirect itself)
   RewriteCond "%{HTTPS}" "off"
   RewriteCond "%{REQUEST_URI}" "!/skulls\.php$"

@@ -780,12 +780,10 @@ function CheckUpdates()
 
 	if(!$cached)
 	{
-		$ip = gethostbyname($_SERVER['SERVER_NAME']);
-
-		if($ip == "127.0.0.1")
+		if($_SERVER['SERVER_ADDR'] === '127.0.0.1' || $_SERVER['SERVER_ADDR'] === '::1')
 		{
 			echo '<div class="unknown"><strong>Update check not allowed from localhost</strong></div>';
-			return NULL;
+			return null;
 		}
 
 		$returned_data = QueryUpdateServer();

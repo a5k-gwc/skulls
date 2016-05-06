@@ -19,9 +19,9 @@
 
 include "web_functions.php";
 
-function ShowHtmlPage($php_self, $compression, $header, $footer)
+function ShowHtmlPage($compression, $header, $footer)
 {
-	global $NET, $SUPPORTED_NETWORKS;
+	global $NET, $SUPPORTED_NETWORKS; $script_name = $_SERVER['SCRIPT_NAME'];
 	header('Content-Type: text/html; charset=utf-8');
 
 	$page_number = 1; $suffix = null;
@@ -40,7 +40,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 
 	$maintainer = htmlentities(MAINTAINER_NICK, ENT_QUOTES, 'UTF-8');
 	$title = NAME.'! Multi-Network WebCache '.VER.$suffix.' (by '.$maintainer.')';
-	$base_link = basename($php_self).'?'; if($compression !== null) $base_link .= 'compression='.$compression.'&amp;';
+	$base_link = basename($script_name).'?'; if($compression !== null) $base_link .= 'compression='.$compression.'&amp;';
 
 	if(!function_exists("Initialize"))
 		include "functions.php";
@@ -57,7 +57,7 @@ function ShowHtmlPage($php_self, $compression, $header, $footer)
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="includes/style.css">
 <!--[if lte IE 9]><link rel="stylesheet" type="text/css" href="includes/style-ie.css"><![endif]-->
-<?php if($page_number === 1 && !empty($_SERVER['QUERY_STRING'])) echo '<link rel="canonical" href="',$php_self,'">',"\n"; ?>
+<?php if($page_number === 1 && !empty($_SERVER['QUERY_STRING'])) echo '<link rel="canonical" href="',$script_name,'">',"\n"; ?>
 <meta name="robots" content="<?php if($page_number === 1) echo 'index'; else echo 'noindex'; ?>, follow, noarchive, noimageindex">
 <meta name="description" content="<?php echo NAME; ?> is a Multi-Network WebCache used from P2P clients to bootstrap. It support all versions of the GWC specification.">
 <meta name="keywords" content="<?php echo strtolower(NAME); ?>, gwebcache, gwc, p2p, bootstrap">
