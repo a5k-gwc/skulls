@@ -76,6 +76,12 @@ function IsSecureConnection()
 	return false;
 }
 
+function IsOpenShiftRedirectFixNeeded($is_https)  /* Workaround for the infinite redirect; it happens when redirecting from https to http and port isn't specified because it is the default one */
+{
+	if($is_https && strpos(CACHE_URL, 'http://') === 0 && strpos(CACHE_URL, ':', 7) === false) return true;
+	return false;
+}
+
 function ValidateHostHeader($is_https)
 {
 	if(!isset($_SERVER['HTTP_HOST']))
@@ -104,9 +110,13 @@ function ValidateNormalizeRequest($is_https, $reliable_host)
 	}
 	elseif(CACHE_URL !== $my_url_start.$_SERVER['PHP_SELF'] && $reliable_host)
 	{
-		ValidateProtocol();
+		ValidateProtocol(); $query = empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING']);
 		header($_SERVER['SERVER_PROTOCOL'].' 301 Moved Permanently');
-		header('Location: '.CACHE_URL.(empty($_SERVER['QUERY_STRING'])? "" : '?'.SanitizeHeaderValue($_SERVER['QUERY_STRING']))); die;
+		if(USING_OPENSHIFT_HOSTING && IsOpenShiftRedirectFixNeeded($is_https))
+			header('Location: '.substr_replace(CACHE_URL, ':80', strpos(CACHE_URL, '/', 7), 0).$query);
+		else
+			header('Location: '.CACHE_URL.$query);
+		die;
 	}
 	if(!empty($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], $_SERVER['SCRIPT_NAME']) !== 0) HandleFatalError("ERROR: Use only canonical URL\r\n");  /* Block extension strip */
 	global $MY_URL; $MY_URL = $my_url_start.$_SERVER['SCRIPT_NAME'];
