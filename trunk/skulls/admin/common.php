@@ -26,6 +26,7 @@ function GetMicrotime()
 
 function Configure()
 {
+	while(ob_get_level() && ob_end_clean());  /* Disable output buffering if it is active on the server */
 	error_reporting(~0); ini_set('display_errors', '1');
 	ini_set('default_charset', 'utf-8');  /* Set default charset to UTF-8 */
 	if(function_exists('date_default_timezone_get')) date_default_timezone_set(@date_default_timezone_get());  /* Suppress warnings if the timezone isn't set */
