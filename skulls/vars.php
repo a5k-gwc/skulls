@@ -1,5 +1,5 @@
 <?php
-//  vars.php - Skulls configuration
+//  vars.php - Settings
 //
 //  Copyright © 2005-2008, 2015-2016  ale5000
 //  You must read readme.txt in the admin directory to configure this properly.

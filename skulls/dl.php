@@ -69,7 +69,7 @@ function ServeFile2($fp, $filesize)
 		flush();
 		while(!feof($fp))
 		{
-			$buf = fread($fp, 1024*8); if($buf === false) break;
+			$buf = fread($fp, 8*1024); if($buf === false) break;
 			echo $buf; flush(); if(connection_status() !== CONNECTION_NORMAL) break;
 			$bytes_sent += strlen($buf);
 		}
