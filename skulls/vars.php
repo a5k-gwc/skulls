@@ -11,7 +11,7 @@ define( 'ENABLED',					1 );
 define( 'CACHE_URL',				'' );	// Optional but recommended - The full url of your GWC, example: http://gwc.your-site.com/skulls.php
 
 define( 'MAINTAINER_NICK', 'your nickname here' );			// Your nickname
-define( 'MAINTAINER_EMAIL', 'name AT server DOT com' );		// Optional - Your e-mail in the format "name AT server DOT com" to avoid spam. Example: pippo@excite.it => pippo AT excite DOT it
+define( 'MAINTAINER_EMAIL', 'name AT server DOT com' );		// Optional - Your e-mail in the format 'name AT server DOT com' to avoid spam. Example: ernest@gmail.com => ernest AT gmail DOT com
 define( 'MAINTAINER_WEBSITE', 'http://' );					// Optional - The url of your website (it isn't the url of your GWC), example: http://www.your-site.com/
 
 define( 'STATS_ENABLED',			1 );	// Enable collecting statistics
@@ -39,9 +39,6 @@ define('ENABLE_URL_SUBMIT', true);  // Enable the submission of alternative GWCs
 define('DATA_DIR_PATH', 'data');  // The directory where data files will be stored, it is a relative path. You can also leave it as is by default
 define('DIR_FLAGS', 0751);        // Permission flags to set when creating new folders. You can also leave it as is by default
 
-$header = '';
-$footer = '';
-
 
 /***  SECURITY  ***/
 define('USE_GWC_BLOCKLIST', true);
@@ -58,12 +55,19 @@ define('TRUST_X_REMOTE_ADDR_FROM_LOCALHOST', false);  // Do NOT enable this opti
 define('TRUST_X_CLIENT_IP_FROM_LOCALHOST', false);    // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers like OpenShift
 
 
+/***  MISC  ***/
+// Here you can set what you want to display at the top and/or at the bottom of the page, it can be text or html
+$header = '';
+$footer = '';
+
+
 /***  NETWORKS LIST  ***/
 /*
 	You can add or remove any network you want. To disable a network just add the // at the start of the line, to enable it just do the opposite.
 	The name of the network can't contains these two characters: | -
 
-	Note: Enabling the Gnutella network can increase a lot the number of requests, so don't enable it if your server can't handle the load.
+	Note: Enabling the Gnutella and/or Foxy network can increase a lot the number of requests, so do NOT enable them if your server can't handle the load.
+	IMPORTANT: Additionally the Foxy servents tend to over-query the GWebCache, so think carefully before enabling this.
 */
 
 $SUPPORTED_NETWORKS[] = 'Gnutella2';
