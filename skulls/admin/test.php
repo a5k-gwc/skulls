@@ -58,7 +58,7 @@ function FsockTest()
 		if(!empty($file))
 		{
 			$file_array = explode('|', $file, 5); unset($file);
-			if(GetTimestamp($file_array[0]) > $now - 6 * 60 * 60)
+			if(GetTimestamp($file_array[0]) > $now - 12 * 60 * 60)
 				return array($file_array[0], (int)$file_array[1], (int)$file_array[2], $file_array[3]);
 		}
 	}
