@@ -136,7 +136,7 @@ echo '<div><b><small>Last check: ',$fsock_result[0],' UTC</small></b></div>',"\r
 echo "<blockquote>\r\n";
 
 echo '<div><b>FSOCK_BASE: ',DisplayTristate($fsock_result[1]),'</b></div>',"\r\n";
-echo '<div><b>FSOCK_FULL: ',DisplayTristate($fsock_result[2]),'</b>',$fsock_result[3],'</div>',"\r\n";
+echo '<div><b>FSOCK_FULL: ',DisplayTristate($fsock_result[2]),'</b>',$fsock_result[3],'&nbsp; <small><font color="grey">(Unfortunately this test is NOT completely reliable, use it only as hint)</font></small></div>',"\r\n";
 echo '<div><b>TRUST_X_REMOTE_ADDR_FROM_LOCALHOST: ',DisplayTristate(VerifyXRemoteAddr()),'</b></div>',"\r\n";
 echo '<div><b>TRUST_X_CLIENT_IP_FROM_LOCALHOST: ',DisplayTristate(VerifyXClientIP()),'</b></div><br>',"\r\n";
 
