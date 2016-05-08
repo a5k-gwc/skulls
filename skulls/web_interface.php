@@ -489,7 +489,7 @@ function ShowHtmlPage($compression, $header, $footer)
 			}
 			elseif($page_number == 5)	// BlockList informations
 			{
-				GetBlockListInfo('./ext/gwc-blocklist.dat', '161589560', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev, $BL_license);
+				GetBlockListInfo('./ext/gwc-blocklist.dat', '58FC4518D9', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev, $BL_license);
 ?>
 				<div class="page-title"><strong>GWC BlockList</strong></div>
 				<div class="padding">
@@ -523,7 +523,7 @@ function ShowHtmlPage($compression, $header, $footer)
 				</div>
 				<div>&nbsp;</div>
 <?php
-				GetBlockListInfo('./ext/blocklist.dat', '296397923', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev, $BL_license);
+				GetBlockListInfo('./ext/blocklist.dat', '8C76B2A8FB', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev, $BL_license);
 ?>
 				<div class="page-title"><strong>P2P BlockList</strong></div>
 				<div class="padding">
