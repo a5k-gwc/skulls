@@ -55,6 +55,11 @@ define('TRUST_X_REMOTE_ADDR_FROM_LOCALHOST', false);  // Do NOT enable this opti
 define('TRUST_X_CLIENT_IP_FROM_LOCALHOST', false);    // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers like OpenShift
 
 
+/***  BLOCKLIST DISTRIBUTION  ***/
+// To enable the blocklist download you need to install the Add-on
+define('BL_SPEED_LIMIT', 128);  // Rate limit for EACH blocklist download, expressed in KB/s. Range: 16-2048 (must be multiple of 8)
+
+
 /***  MISC  ***/
 // Here you can set what you want to display at the top and/or at the bottom of the page, it can be text or html
 $header = '';
