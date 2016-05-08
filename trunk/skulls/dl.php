@@ -37,6 +37,18 @@ function Initialize()
 	if(USING_OPENSHIFT_HOSTING && isset($_SERVER['OPENSHIFT_DATA_DIR'])) define('DATA_DIR', $_SERVER['OPENSHIFT_DATA_DIR']); else define('DATA_DIR', './'.DATA_DIR_PATH.'/');
 }
 
+function GetIntSize()
+{
+	if(!defined('PHP_INT_SIZE')) { if(intval('2147483648') === 2147483647) define('PHP_INT_SIZE', 4); else define('PHP_INT_SIZE', 8); }
+	return PHP_INT_SIZE;
+}
+
+function ValidateSize($size)
+{
+	if(!ctype_digit($size) || ($size > 2147483647 && GetIntSize() === 4)) return false;
+	return true;
+}
+
 function SetStatus($status)
 {
 	header($_SERVER['SERVER_PROTOCOL'].' '.$status);
@@ -139,17 +151,21 @@ function Main()
 	$b_req_format = empty($_GET['format'])? null : $_GET['format'];
 	$b_req_hash = empty($_GET['hash'])? null : $_GET['hash'];
 	$b_req_size = empty($_GET['size'])? null : $_GET['size'];
+	$b_fn = DATA_DIR.'dl/blocklist-'.$b_req_format;
 
-	if(strpos($ua, 'Mozilla') === false && $b_req_hash !== null && $b_req_size !== null && $b_req_format === 'cidr')
+	if($b_req_format === 'cidr')
 	{
-		$b_info = file_get_contents(DATA_DIR.'dl/blocklist-'.$b_req_format.'.info');
-		list($b_id, $b_rev, $b_author, $b_sha1, /*$b_tiger_tree*/, /* Reserved */, $b_size) = explode('|', $b_info, 8); if($b_author === 'Lord of the Rings') $b_author = 'LOTR';
-
-		if($b_req_hash === $b_sha1 && $b_req_size === $b_size)
+		if(strpos($ua, 'Mozilla') === false && $b_req_hash !== null && $b_req_size !== null && file_exists($b_fn.'.info'))
 		{
-			$out_filename = 'P2P-BlockList-'.$b_req_format.'-'.$b_author.'-'.$b_rev.'.dat';
-			$result = ServeFile($b_id, DATA_DIR.'dl/blocklist-'.$b_req_format.'.dat', $b_sha1, (int)$b_size, $out_filename);
-			return true;
+			$b_info = file_get_contents($b_fn.'.info');
+			list($b_id, $b_rev, $b_author, $b_sha1, /*$b_tiger_tree*/, /* Reserved */, $b_size) = explode('|', $b_info, 8); if($b_author === 'Lord of the Rings') $b_author = 'LOTR';
+
+			if($b_req_hash === $b_sha1 && ValidateSize($b_size) && $b_req_size === $b_size)
+			{
+				$out_filename = 'P2P-BlockList-'.$b_req_format.'-'.$b_author.'-'.$b_rev.'.dat';
+				$result = ServeFile($b_id, $b_fn.'.dat', $b_req_hash, (int)$b_req_size, $out_filename);
+				return true;
+			}
 		}
 	}
 
