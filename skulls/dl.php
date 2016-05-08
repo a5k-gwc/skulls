@@ -60,7 +60,7 @@ function GetRange($filesize, &$start_byte, &$end_byte, &$length)
 
 function ServeFile2($fp, $filesize)
 {
-	$bytes_sent = 0; $i = 0;
+	$bytes_sent = 0; $i = 0; $limit = (int)(max(16, min(2048, BL_SPEED_LIMIT)) / 8);
 	if(empty($_SERVER['HTTP_RANGE']))
 	{
 		SetStatus('200 OK');
@@ -69,10 +69,10 @@ function ServeFile2($fp, $filesize)
 		flush();
 		while(!feof($fp))
 		{
-			$buf = fread($fp, 8*1024); if($buf === false) break;
+			$buf = fread($fp, 8192); if($buf === false) break;
 			echo $buf; flush(); if(connection_status() !== CONNECTION_NORMAL) break;
 			$bytes_sent += strlen($buf);
-			if(++$i % 16 === 0) sleep(1);
+			if(++$i % $limit === 0) sleep(1);
 		}
 		return ($bytes_sent === $filesize);
 	}
@@ -97,7 +97,7 @@ function ServeFile2($fp, $filesize)
 				$buf = fread($fp, 1024*8); if($buf === false) break;
 				echo $buf; flush(); if(connection_status() !== CONNECTION_NORMAL) break;
 				$bytes_sent += strlen($buf);
-				if(++$i % 16 === 0) sleep(1);
+				if(++$i % $limit === 0) sleep(1);
 			}
 			return ($bytes_sent === $length);
 		}
