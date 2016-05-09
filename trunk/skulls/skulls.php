@@ -456,7 +456,7 @@ function Logging($filename, $detected_pv = null)
 	$X_CLIENT_IP = empty($_SERVER['HTTP_X_CLIENT_IP'])? null : $_SERVER['HTTP_X_CLIENT_IP'];
 	$REFERER = empty($_SERVER['HTTP_REFERER'])? null: $_SERVER['HTTP_REFERER'];
 
-	$line = gmdate("Y/m/d H:i:s").'|'.$detected_pv.'|'.RemoveGarbage($DETECTED_NET).'|'.RemoveGarbage($CLIENT.' '.$VERSION).'|'.RemoveGarbage($ACCEPT_ENCODING).'|'.RemoveGarbage($UA).'|?'.RemoveGarbage($_SERVER['QUERY_STRING']).'|'.RemoveGarbage($REMOTE_IP).'|'.RemoveGarbage($X_FORWARDED_FOR).'|'.RemoveGarbage($X_CLIENT_IP).'|'.RemoveGarbage($ORIGIN).'|'.RemoveGarbage($REFERER).'|'."\r\n";
+	$line = gmdate('Y/m/d H:i:s').'|'.$detected_pv.'|'.RemoveGarbage($DETECTED_NET).'|'.RemoveGarbage($CLIENT.' '.$VERSION).'|'.RemoveGarbage($ACCEPT_ENCODING).'|'.RemoveGarbage($UA).'|?'.RemoveGarbage($_SERVER['QUERY_STRING']).'|'.RemoveGarbage($REMOTE_IP).'|'.RemoveGarbage($X_FORWARDED_FOR).'|'.RemoveGarbage($X_CLIENT_IP).'|'.RemoveGarbage($ORIGIN).'|'.RemoveGarbage($REFERER).'|'."\r\n";
 
 	$file = fopen('log/'.$filename.'.log', 'ab');
 	if($file === false) return;
@@ -727,7 +727,7 @@ function AddFailedUrl($url)
 {
 	$file = fopen(DATA_DIR.'failed_urls.dat', 'ab');
 	flock($file, LOCK_EX);
-	fwrite($file, $url.'|'.gmdate('Y/m/d H:i')."\r\n");
+	fwrite($file, $url.'|'.gmdate('Y/m/d H:i:s')."\r\n");
 	flock($file, LOCK_UN);
 	fclose($file);
 }
@@ -1088,7 +1088,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 		}
 	}
 	if($h_ver === '5.3.6' && $net === 'gnutella') $h_suspect = $h_suspect + 1;
-	$this_host = gmdate('Y/m/d h:i:s A').'|'.$h_ip.'|'.$h_port.'|'.$h_leaves.'|'.$h_max_leaves.'|'.$h_uptime.'|'.RemoveGarbage($h_vendor).'|'.RemoveGarbage($h_ver).'|'.RemoveGarbage($h_ua).'|'.$h_suspect."|||\n";
+	$this_host = gmdate('Y/m/d H:i:s').'|'.$h_ip.'|'.$h_port.'|'.$h_leaves.'|'.$h_max_leaves.'|'.$h_uptime.'|'.RemoveGarbage($h_vendor).'|'.RemoveGarbage($h_ver).'|'.RemoveGarbage($h_ua).'|'.$h_suspect."|||\n";
 
 	if($host_exists)
 	{
@@ -1212,7 +1212,7 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 			}
 			else
 			{
-				$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
+				$this_alt_gwc = gmdate('Y/m/d H:i:s').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
 				ReplaceCache($file_path, $i, $cache_file, $this_alt_gwc);
 				return 1; // Updated timestamp
 			}
@@ -1246,7 +1246,7 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 		}
 		else
 		{
-			$this_alt_gwc = gmdate('Y/m/d h:i:s A').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
+			$this_alt_gwc = gmdate('Y/m/d H:i:s').'|'.$new_specs_only.'|'.$gwc_ip.'|'.$gwc_url.'|'.$cache_data[1].'|'.$cache_data[2].'|'./* $gwc_vendor .*/'|'./* $gwc_version .*/'|'.$cache_data[0].'|'./*gwc_server.*/'|'.$client.'|'.$version.'|'.((int)$is_a_gwc_param).'|'.RemoveGarbage($user_agent)."|\n";
 
 			if($file_count >= max(5, min(200, MAX_CACHES)))
 			{
@@ -1713,7 +1713,7 @@ if(!file_exists(DATA_DIR.'last_action.dat'))
 	if($file !== FALSE)
 	{
 		flock($file, LOCK_EX);
-		fwrite($file, VER."|".STATS_ENABLED."|-1|".gmdate("Y/m/d H:i")."|");
+		fwrite($file, VER."|".STATS_ENABLED."|-1|".gmdate('Y/m/d H:i:s')."|");
 		flock($file, LOCK_UN);
 		fclose($file);
 	}
@@ -2259,7 +2259,7 @@ else
 		}
 		if($changed)
 		{
-			$last_action_date = gmdate("Y/m/d H:i");
+			$last_action_date = gmdate('Y/m/d H:i:s');
 			rewind($file);
 			fwrite($file, VER."|".STATS_ENABLED."|".$last_action."|".$last_action_date."|");
 		}
