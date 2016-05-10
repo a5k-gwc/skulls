@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-define('REVISION', '5.0.0.7');
+define('REVISION', '5.0.0.8');
 
 include './common.php';
 InitializeVars();
@@ -173,7 +173,7 @@ if(file_exists($gwc_full_name))
 	}
 }
 
-function ConvertRunningSinceFile()
+function RenameConvertRunningSinceFile()
 {
 	$running_since = false; $old_name_1 = DATA_DIR.'runnig_since.dat'; $old_name_2 = DATA_DIR.'running_since.dat';
 
@@ -194,8 +194,7 @@ function ConvertRunningSinceFile()
 				if($fp !== false)
 				{
 					flock($fp, LOCK_EX);
-					fwrite($fp, $running_since);
-					fflush($fp);
+					fwrite($fp, $running_since); fflush($fp);
 					flock($fp, LOCK_UN);
 					fclose($fp);
 					$log .= '<div>Conversion of <b>'.DATA_DIR.'running-since.dat</b> done.</div>'."\r\n";
@@ -212,7 +211,39 @@ function ConvertRunningSinceFile()
 	$GLOBALS['log'] .= DeleteFile($old_name_1, true);
 	$GLOBALS['log'] .= DeleteFile($old_name_2, true);
 }
-ConvertRunningSinceFile();
+
+function MoveTotalRequestsFile()
+{
+	$old_name = '../stats/requests.dat';
+
+	if(file_exists($old_name))
+	{
+		$total_requests = file_get_contents($old_name);
+
+		if($total_requests !== false)
+		{
+			$total_requests = rtrim($total_requests);
+			if($total_requests !== "" && ctype_digit($total_requests))
+			{
+				$fp = fopen(DATA_DIR.'total-requests.dat', 'wb');
+				if($fp !== false)
+				{
+					flock($fp, LOCK_EX);
+					fwrite($fp, $total_requests); fflush($fp);
+					flock($fp, LOCK_UN);
+					fclose($fp);
+					$GLOBALS['updated'] = true; $GLOBALS['log'] .= '<div>Conversion of <b>'.DATA_DIR.'total-requests.dat</b> done.</div>'."\r\n";
+				}
+				else
+				{
+					$log .= '<div>'.Error('Error during writing').' of <b>'.DATA_DIR.'total-requests.dat</b> file.</div>'."\r\n";
+					return;
+				}
+			}
+		}
+		$GLOBALS['log'] .= DeleteFile($old_name, true);
+	}
+}
 
 function DeleteFile($name, $sub_call = false)
 {
@@ -262,10 +293,13 @@ function RemoveFilesStartingWith($dir, $filename_prefix)
 	closedir($dh);
 }
 
+/* Misc */
+RemoveOldHtaccessFiles();
+MoveTotalRequestsFile();
+RenameConvertRunningSinceFile();
 /* Force rechecking on update */
 $log .= DeleteFile(DATA_DIR.'update_check.dat');
-/* Changed files */
-RemoveOldHtaccessFiles();
+$log .= DeleteFile(DATA_DIR.'detection-cache.dat');
 /* Moved files */
 $log .= DeleteFile('../geoip/GeoIP.dat');  /* v0.3.1 */
 $log .= DeleteFile('../license.txt');
