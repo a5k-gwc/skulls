@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-define('REVISION', '5.0.0.8');
+define('REVISION', '5.0.0.9');
 
 include './common.php';
 InitializeVars();
@@ -266,20 +266,21 @@ function RemoveOldHtaccessFiles()
 	$name = '../.htaccess'; if(!file_exists($name)) return;
 	$size = filesize($name);
 	$htaccess = array(
-		array(3091, '94fa81f7cf89b6f9c552b79711ab1bc725bb0ea8'),  /* v0.3.2d, v0.3.2e */
-		array(3093, 'd9a5185e38944dfa485192cc13dca78542858c3d'),  /* v0.3.2c */
-		array(3053, '5978373c6535cc7ec7735327767ede5bfc4a3391'),  /* v0.3.2, v0.3.2b */
-		array(158,  'a32f8fef07cecefb9942d120bf4cc71bb11d7108'),  /* v0.2.9, v0.3.0, v0.3.1 */
-		array(0,    'da39a3ee5e6b4b0d3255bfef95601890afd80709')   /* Empty file */
+		array(3000, 'E2455FC820148AA20E98417A3FA96BDF570ED1E6'),  /* v0.3.3, v0.3.3b */
+		array(3091, '94FA81F7CF89B6F9C552B79711AB1BC725BB0EA8'),  /* v0.3.2d, v0.3.2e */
+		array(3093, 'D9A5185E38944DFA485192CC13DCA78542858C3D'),  /* v0.3.2c */
+		array(3053, '5978373C6535CC7EC7735327767EDE5BFC4A3391'),  /* v0.3.2, v0.3.2b */
+		array(158,  'A32F8FEF07CECEFB9942D120BF4CC71BB11D7108'),  /* v0.2.9, v0.3.0, v0.3.1 */
+		array(0,    'DA39A3EE5E6B4B0D3255BFEF95601890AFD80709')   /* Empty file */
 	);
 
 	foreach($htaccess as $val)
-		if($val[0] === $size && $val[1] === sha1_file($name)) { global $log; $log .= DeleteFile($name, true); break; }
+		if($val[0] === $size && $val[1] === CalculateSHA1($name)) { global $log; $log .= DeleteFile($name, true); break; }
 }
 
 function RemoveSpecificFile($name, $size, $sha1)
 {
-	if(file_exists($name) && filesize($name) === $size && sha1_file($name) === $sha1) { global $log; $log .= DeleteFile($name, true); }
+	if(file_exists($name) && filesize($name) === $size && CalculateSHA1($name) === $sha1) { global $log; $log .= DeleteFile($name, true); }
 }
 
 function RemoveFilesStartingWith($dir, $filename_prefix)
@@ -300,12 +301,13 @@ RenameConvertRunningSinceFile();
 /* Force rechecking on update */
 $log .= DeleteFile(DATA_DIR.'update_check.dat');
 $log .= DeleteFile(DATA_DIR.'detection-cache.dat');
-/* Moved files */
-$log .= DeleteFile('../geoip/GeoIP.dat');  /* v0.3.1 */
+/* Old files */
 $log .= DeleteFile('../license.txt');
-$log .= DeleteFile('./test-cached.dat');
+$log .= DeleteFile('../log.php');
+$log .= DeleteFile('../geoip/GeoIP.dat');  /* v0.3.1 */
+$log .= DeleteFile('./test-cached.dat');   /* v0.3.2d, v0.3.2e */
 /* Renamed files */
-RemoveSpecificFile('../ext/blocklist.dat', 18131, '0c3a14080b7817aa7601c599c8820198e5ab1167');  /* v0.3.2 */
+RemoveSpecificFile('../ext/blocklist.dat', 18131, '0C3A14080B7817AA7601C599C8820198E5AB1167');  /* v0.3.2 */
 RemoveFilesStartingWith(DATA_DIR, 'hosts_');
 $log .= DeleteFile(DATA_DIR.'caches.dat');
 $log .= DeleteFile('../log/unsupported_nets.log');
