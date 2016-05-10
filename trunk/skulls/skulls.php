@@ -69,7 +69,7 @@ function IsSecureConnection()
 {
 	if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 		return true;
-	if(USING_CLOUDFLARE && isset($_SERVER['HTTP_CF_VISITOR']) && strpos($_SERVER['HTTP_CF_VISITOR'], '"https"') !== false)
+	if(USING_CLOUDFLARE_CDN && isset($_SERVER['HTTP_CF_VISITOR']) && strpos($_SERVER['HTTP_CF_VISITOR'], '"https"') !== false)
 		return true;
 	if(isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
 		return true;
@@ -1799,7 +1799,7 @@ else
 	if(isset($_SERVER['HTTP_CF_CONNECTING_IP']))
 	{
 		include_once './update.php';
-		if(USING_CLOUDFLARE && ValidateIP($REMOTE_IP) && IsCloudFlareIP($REMOTE_IP))
+		if(USING_CLOUDFLARE_CDN && ValidateIP($REMOTE_IP) && IsCloudFlareIP($REMOTE_IP))
 		{
 			$CLOUDFLARE_IP = $REMOTE_IP;
 			$REMOTE_IP = $_SERVER['HTTP_CF_CONNECTING_IP'];

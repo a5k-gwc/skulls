@@ -49,7 +49,7 @@ define('FSOCK_BASE', true);  // Disable ONLY if the server have FSOCKOPEN disabl
 define('FSOCK_FULL', true);  // Use admin/test.php to check
 define('CONTENT_TYPE_WORKAROUND', false);  // Use admin/test.php to know the right value
 
-define('USING_CLOUDFLARE', false);  // Enable this option only if CloudFlare is configured and enabled on the DNS of your site
+define('USING_CLOUDFLARE_CDN', false);  // Enable this option only if CloudFlare is configured and enabled on the DNS of your site
 define('USING_OPENSHIFT_HOSTING', false);
 define('TRUST_X_REMOTE_ADDR_FROM_LOCALHOST', false);  // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers like SourceForge
 define('TRUST_X_CLIENT_IP_FROM_LOCALHOST', false);    // Do NOT enable this option if it isn't strictly needed on your server. This may be needed on some servers like OpenShift
