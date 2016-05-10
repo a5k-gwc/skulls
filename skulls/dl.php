@@ -158,13 +158,16 @@ function Main()
 		if(strpos($ua, 'Mozilla') === false && $b_req_hash !== null && $b_req_size !== null && file_exists($b_fn.'.info'))
 		{
 			$b_info = file_get_contents($b_fn.'.info');
-			list($b_id, $b_rev, $b_author, $b_sha1, /*$b_tiger_tree*/, /* Reserved */, $b_size) = explode('|', $b_info, 8); if($b_author === 'Lord of the Rings') $b_author = 'LOTR';
-
-			if($b_req_hash === $b_sha1 && ValidateSize($b_size) && $b_req_size === $b_size)
+			if(!empty($b_info))
 			{
-				$out_filename = 'P2P-BlockList-'.$b_req_format.'-'.$b_author.'-'.$b_rev.'.dat';
-				$result = ServeFile($b_id, $b_fn.'.dat', $b_req_hash, (int)$b_req_size, $out_filename);
-				return true;
+				list($b_id, $b_rev, $b_author, $b_sha1, /*$b_tiger_tree*/, /* Reserved */, $b_size) = explode('|', $b_info, 8); if($b_author === 'Lord of the Rings') $b_author = 'LOTR';
+
+				if($b_req_hash === $b_sha1 && ValidateSize($b_size) && $b_req_size === $b_size)
+				{
+					$out_filename = 'P2P-BlockList-'.$b_req_format.'-'.$b_author.'-'.$b_rev.'.dat';
+					$result = ServeFile($b_id, $b_fn.'.dat', $b_req_hash, (int)$b_req_size, $out_filename);
+					return true;
+				}
 			}
 		}
 	}
