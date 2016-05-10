@@ -1054,10 +1054,10 @@ function CheckGWC($cache, $net_param = null, $congestion_check = false)
 function IDN_Encode($hostname)
 {
 	/* It needs the PHP Intl extension (bundled version with --enable-intl or PECL) enabled on the server */
-	$idn_hostname = false;
+	$idn_hostname = false; $options = defined('IDNA_NONTRANSITIONAL_TO_ASCII')? IDNA_NONTRANSITIONAL_TO_ASCII : 0;
 	if(function_exists('idn_to_ascii'))
 	{
-		if(defined('INTL_IDNA_VARIANT_UTS46')) $idn_hostname = idn_to_ascii($hostname, 0, INTL_IDNA_VARIANT_UTS46);
+		if(defined('INTL_IDNA_VARIANT_UTS46')) $idn_hostname = idn_to_ascii($hostname, $options, INTL_IDNA_VARIANT_UTS46);
 		else $idn_hostname = idn_to_ascii($hostname);
 	}
 	if($idn_hostname === false) return $hostname;
