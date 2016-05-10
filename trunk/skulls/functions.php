@@ -88,11 +88,11 @@ function Initialize($supported_networks, $show_errors = false, $forced = false)
 	if(STATS_ENABLED)
 	{
 		if(!CreateFolder('./stats/', DIR_FLAGS & ~0007)) $errors .= '<div style="color: red;">Unable to create the folder ./stats/</div>';
-		if(!file_exists('stats/requests.dat'))
+		if(!file_exists(DATA_DIR.'total-requests.dat'))
 		{
-			$file = @fopen('stats/requests.dat', 'wb');
+			$file = @fopen(DATA_DIR.'total-requests.dat', 'wb');
 			if($file !== FALSE) { flock($file, LOCK_EX); fwrite($file, "0"); flock($file, LOCK_UN); fclose($file); }
-			else $errors .= "<font color=\"red\">Error during writing of stats/requests.dat</font><br>";
+			else $errors .= '<font color="red">Error during writing of '.DATA_DIR.'total-requests.dat</font><br>';
 		}
 		if(!file_exists('stats/upd-reqs.dat'))
 		{

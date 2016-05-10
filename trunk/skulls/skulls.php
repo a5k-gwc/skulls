@@ -1600,7 +1600,7 @@ function UpdateStats($type)
 
 function ReadStatsTotalReqs()
 {
-	$requests = file('stats/requests.dat');
+	$requests = file(DATA_DIR.'total-requests.dat');
 	return $requests[0];
 }
 
@@ -1608,7 +1608,7 @@ function WriteStatsTotalReqs()
 {
 	if(!STATS_ENABLED) return;
 
-	$file = fopen('stats/requests.dat', 'r+b'); if($file === false) return;
+	$file = fopen(DATA_DIR.'total-requests.dat', 'r+b'); if($file === false) return;
 	flock($file, LOCK_EX);
 	$requests = fgets($file, 50);
 	if($requests === "") $requests = 1; else $requests++;
