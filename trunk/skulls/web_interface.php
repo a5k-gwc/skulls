@@ -81,7 +81,7 @@ function ShowHtmlPage($compression, $header, $footer)
 <?php
 			if($page_number == 1)	// Info
 			{
-				$idn_support = (function_exists('idn_to_ascii'));
+				$idna_support = (function_exists('idn_to_ascii'));
 ?>
 				<div class="page-title"><strong>Cache Info</strong></div>
 				<div class="padding">
@@ -118,10 +118,10 @@ function ShowHtmlPage($compression, $header, $footer)
 							</td>
 						</tr>
 						<tr>
-							<th>- IDN support:</th>
+							<th>- IDNA support:</th>
 							<td>
-								<span class="<?php echo ($idn_support? 'good' : 'bad'); ?>">
-									<span class="bold"><?php echo ($idn_support? 'Yes' : 'No'); ?></span>
+								<span class="<?php echo ($idna_support? 'good' : 'bad'); ?>">
+									<span class="bold"><?php echo ($idna_support? 'Yes' : 'No'); ?></span>
 								</span>
 							</td>
 						</tr>
