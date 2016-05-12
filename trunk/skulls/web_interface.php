@@ -83,9 +83,9 @@ function ShowHtmlPage($compression, $header, $footer)
 			{
 				$idna_support = (function_exists('idn_to_ascii'));
 ?>
-				<div class="page-title"><strong>Cache Info</strong></div>
+				<div class="page-title" title="Informations about this GWebCache"><strong>Cache Info</strong></div>
 				<div class="padding">
-					<table class="inner-table-infos" summary="Informations about this GWC">
+					<table class="inner-table-infos">
 						<tr>
 							<th>- Running since:</th>
 							<td>
