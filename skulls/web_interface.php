@@ -222,7 +222,7 @@ function ShowHtmlPage($compression, $header, $footer)
 ?>
 				<div class="page-title"><strong><?php echo htmlentities(ucfirst($NET), ENT_QUOTES, 'UTF-8'); ?> Hosts (<?php echo $elements." of ".$max_hosts; ?>)</strong></div>
 				<div class="padding">
-					<table class="inner-table" summary="Current hosts in cache">
+					<table class="inner-table">
 						<tr class="header-column">
 							<th>Host address (Leaves)</th>
 							<th>Client</th>
@@ -282,7 +282,7 @@ function ShowHtmlPage($compression, $header, $footer)
 ?>
 				<div class="page-title"><strong>Alternative GWCs (<?php echo $elements." of ".MAX_CACHES; ?>)</strong> &nbsp;&nbsp; <a id="Send-GWCs" href="#Send-GWCs" onclick="sendGWCs(event);" rel="nofollow">Add first 20 GWCs to your P2P application</a></div>
 				<div class="padding">
-					<table class="inner-table" summary="Current GWCs in cache">
+					<table class="inner-table">
 						<tr class="header-column">
 							<th>URL</th>
 							<th>Name</th>
@@ -382,7 +382,7 @@ function ShowHtmlPage($compression, $header, $footer)
 ?>
 				<div class="page-title"><strong>Alternative UDP host caches (<?php echo $elements." of ".MAX_CACHES; ?>)</strong></div>
 				<div class="padding">
-					<table class="inner-table" summary="Current UDP host caches in cache">
+					<table class="inner-table">
 						<tr class="header-column">
 							<th>URL</th>
 							<th>Name</th>
