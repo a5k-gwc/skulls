@@ -441,16 +441,16 @@ function ShowHtmlPage($compression, $header, $footer)
 <?php
 				if($geoip) $geoip->Destroy(); $geoip = null;
 			}
-			elseif($page_number == 4)	// BlockList downloads
+			elseif($page_number == 4)	// Blocklist downloads
 			{
 				$b_formats = array('cidr' => 'CIDR version (LimeWire)');
 
 				if(!empty($_GET['format']) && isset($b_formats[$_GET['format']]))
 				{
 					$b_format = $_GET['format']; $b_name = $b_formats[$b_format]; $b_magnet = null;
-					if(!BLRevCheck($b_format) || ($b_magnet = htmlspecialchars(BLGenerateMagnet($b_format), ENT_QUOTES, 'UTF-8')) === "") $b_name = 'BlockList conversion error';
+					if(!BLRevCheck($b_format) || ($b_magnet = htmlspecialchars(BLGenerateMagnet($b_format), ENT_QUOTES, 'UTF-8')) === "") $b_name = 'Blocklist conversion error';
 ?>
-					<div class="page-title"><strong>P2P BlockList</strong></div>
+					<div class="page-title"><strong>P2P Blocklist</strong></div>
 					<div class="padding">
 						<div class="padding"><strong>Magnet link</strong></div>
 						<div class="padding"><a class="magnet" href="<?php echo $b_magnet; ?>"><img width="14" height="14" src="images/magnet-icon.png" alt="Magnet"> <?php echo $b_name; ?></a></div>
@@ -460,7 +460,7 @@ function ShowHtmlPage($compression, $header, $footer)
 				else
 				{
 ?>
-					<div class="page-title"><strong>P2P BlockList</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
+					<div class="page-title"><strong>P2P Blocklist</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
 					<div class="padding">
 <?php
 						if(file_exists('./ext/blocklist.dat'))
@@ -486,14 +486,13 @@ function ShowHtmlPage($compression, $header, $footer)
 <?php
 				}
 			}
-			elseif($page_number == 5)	// BlockList informations
+			elseif($page_number == 5)	// Blocklist informations
 			{
 				GetBlockListInfo('./ext/gwc-blocklist.dat', '58FC4518D9', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev, $BL_license);
 ?>
-				<div class="page-title"><strong>GWC BlockList</strong></div>
+				<div class="page-title"><strong>GWC Blocklist</strong></div>
 				<div class="padding">
-					<div class="padding"><strong>Lite BlockList (to be used by this GWC)</strong></div>
-					<table class="inner-table-infos" summary="GWC BlockList">
+					<table class="inner-table-infos"><caption class="table-caption"><strong>Lite Blocklist (to be used by this GWC)</strong></caption>
 						<tr>
 							<th>- Type:</th>
 							<td><strong><?php echo $BL_type; ?></strong></td>
@@ -524,10 +523,9 @@ function ShowHtmlPage($compression, $header, $footer)
 <?php
 				GetBlockListInfo('./ext/blocklist.dat', '8C76B2A8FB', $BL_type, $BL_hash_check, $BL_file_size, $BL_author, $BL_rev, $BL_license);
 ?>
-				<div class="page-title"><strong>P2P BlockList</strong></div>
+				<div class="page-title"><strong>P2P Blocklist</strong></div>
 				<div class="padding">
-					<div class="padding"><strong>Full BlockList (to be used by P2P applications)</strong></div>
-					<table class="inner-table-infos" summary="P2P BlockList">
+					<table class="inner-table-infos"><caption class="table-caption"><strong>Full Blocklist (to be used by P2P apps)</strong></caption>
 						<tr>
 							<th>- Type:</th>
 							<td><strong><?php echo $BL_type; ?></strong></td>
