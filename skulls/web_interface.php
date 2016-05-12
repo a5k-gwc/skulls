@@ -67,7 +67,7 @@ function ShowHtmlPage($compression, $header, $footer)
 	<div class="header">
 		<div id="accessible-links"><a href="#content">[Skip to content]</a></div>
 <?php
-		if($header !== "") echo "\t\t",'<div class="center">',$header,'</div> <div class="spacer"></div>',"\n";
+		if($header !== "") echo "\t\t",'<div class="center">',EncodeAmpersand($header),'</div> <div class="spacer"></div>',"\n";
 ?>
 	</div>
 
@@ -634,7 +634,7 @@ function ShowHtmlPage($compression, $header, $footer)
 
 	<div class="footer">
 <?php
-		if($footer !== "") echo "\t\t",'<div class="center">',$footer,'</div> <div class="spacer"></div>',"\n";
+		if($footer !== "") echo "\t\t",'<div class="center">',EncodeAmpersand($footer),'</div> <div class="spacer"></div>',"\n";
 ?>
 		<div><a href="http://www1429309663.blogrover.com/" onclick="this.blur();" rel="nofollow"><img width="80" height="15" src="images/sticker.png" alt="Sticker"></a></div>
 	</div>
