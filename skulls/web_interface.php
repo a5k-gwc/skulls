@@ -467,7 +467,7 @@ function ShowHtmlPage($compression, $header, $footer)
 						if(file_exists('./ext/blocklist.dat'))
 						{
 ?>
-						<table summary="P2P BlockList downloads list">
+						<table><caption class="table-caption"><strong>Downloads list</strong></caption>
 							<tr class="header-column">
 								<th>Format</th>
 							</tr>

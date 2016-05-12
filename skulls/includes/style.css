@@ -9,7 +9,8 @@ strong, th, .bold { font-weight: bold; }
 img, a { border: 1px none black; -moz-outline: 1px none black; outline: 1px none black; }
 
 .title-spacing { margin: 0.4em; }
-.padding, .page-title { padding: 0.4em; }
+.table-caption { text-align: left; }
+.padding, .page-title, .table-caption { padding: 0.4em; }
 
 .container { border: 1px solid red; background: white; color: inherit; }
 div.container { display: -moz-inline-stack; display: inline-block; }  /* IE compatibility added inside style-ie.css */
