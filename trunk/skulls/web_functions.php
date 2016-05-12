@@ -635,6 +635,12 @@ function BLGenerateMagnet($b_format)
 	return $magnet;
 }
 
+function EncodeAmpersand($code)
+{
+	if(strpos($code, '&amp;') === false) return str_replace('&', '&amp;', $code);
+	return $code;
+}
+
 function QueryUpdateServer($url = 'http://skulls.sourceforge.net/latest_ver.php', $came_from = null)
 {
 	global $MY_URL;
