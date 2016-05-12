@@ -462,7 +462,6 @@ function ShowHtmlPage($compression, $header, $footer)
 ?>
 					<div class="page-title"><strong>P2P BlockList</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
 					<div class="padding">
-						<div class="padding"><strong>Downloads list</strong></div>
 <?php
 						if(file_exists('./ext/blocklist.dat'))
 						{
