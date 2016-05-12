@@ -757,6 +757,12 @@ function ReplaceCache($file_path, $line, &$cache_file, $this_alt_gwc)
 	fclose($file);
 }
 
+/* Detect whether the needed port is allowed for an outgoing connection */
+function IsFsockAllowedPort($port)
+{
+	return (FSOCK_BASE && (FSOCK_FULL || $port === 80 || $port === 443));
+}
+
 function cURL_SetOptions($ch, $idn_host, $port)
 {
 	$headers = array();
@@ -811,7 +817,7 @@ function ConnectionTest()
 
 function PingPort($ip, $port)
 {
-	if(!FSOCK_FULL) return true;  //ToDO: Add cURL support
+	if(!IsFsockAllowedPort($port)) return true;  //ToDO: Add cURL support
 
 	$fp = @fsockopen($ip, $port, $errno, $errstr, 8); if($fp === false) { if(LOG_MINOR_ERRORS) Logging('broken-hosts'); return false; }
 	fclose($fp);
@@ -842,7 +848,7 @@ function PingGWC($gwc_url, $query, $net_param = null, $identity = null)
 
 	$final_query = $query; if($net_param !== null) $final_query .= '&net='.$net_param;
 	$cache_data = null; $pong = ""; $oldpong = ""; $error = ""; $nets_list1 = null;
-	if(FSOCK_FULL || (FSOCK_BASE && ($gwc_port === 80 || $gwc_port === 443)))
+	if(IsFsockAllowedPort($gwc_port))
 	{
 		$errno = -1; $errstr = "";
 		$fp = @fsockopen(($secure_http? 'tls://' : "").$gwc_idn_hostname, $gwc_port, $errno, $errstr, (float)CONNECT_TIMEOUT);
@@ -1097,7 +1103,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 
 		if($time_diff < 6)
 			return 0; // Exists
-		elseif($h_port !== $h_curr_port && VERIFY_HOSTS && $verify_host && !PingPort($h_ip, $h_port))  /* ToDO: Remove host in this case */
+		elseif($h_port !== $h_curr_port && VERIFY_HOSTS && $verify_host && !PingPort($h_ip, (int)$h_port))  /* ToDO: Remove host in this case */
 			return 4; // Error, failed verification
 		else
 		{
@@ -1107,7 +1113,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 	}
 	else
 	{
-		if(VERIFY_HOSTS && $verify_host && !PingPort($h_ip, $h_port))
+		if(VERIFY_HOSTS && $verify_host && !PingPort($h_ip, (int)$h_port))
 			return 4; // Error, failed verification
 		elseif($file_count === max(10, min(200, MAX_HOSTS)))
 		{
@@ -2145,7 +2151,7 @@ else
 		echo 'I|info|ver|',VER,"\r\n";
 		echo 'I|info|vendor|',VENDOR,"\r\n";
 
-		echo 'I|info|hosts-verification|',(int)(VERIFY_HOSTS && FSOCK_FULL),"\r\n";
+		echo 'I|info|hosts-verification|',(int)(VERIFY_HOSTS && FSOCK_BASE && FSOCK_FULL),"\r\n";
 
 		echo 'I|info|software-url|',GWC_SITE,"\r\n";
 		echo 'I|info|license|',LICENSE_NAME,' v',LICENSE_VER,"\r\n";
