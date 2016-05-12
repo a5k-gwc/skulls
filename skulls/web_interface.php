@@ -570,9 +570,9 @@ function ShowHtmlPage($compression, $header, $footer)
 					$other_reqs = ReadStats(STATS_OTHER);
 				}
 ?>
-				<div class="page-title"><strong>Statistics</strong></div>
+				<div class="page-title" title="Statistics about this GWebCache"><strong>Statistics</strong></div>
 				<div class="padding">
-					<table class="inner-table-infos" summary="Statistics about this GWC">
+					<table class="inner-table-infos">
 						<tr>
 							<th>- Total requests:</th>
 							<td>
