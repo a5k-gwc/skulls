@@ -1719,8 +1719,8 @@ if(!file_exists(DATA_DIR.'last_action.dat'))
 		echo "<b>You must create the file manually, and give to the file the correct permissions.</b><br><br>";
 	}
 
-	include "functions.php";
-	Initialize($SUPPORTED_NETWORKS, TRUE);
+	include './functions.php';
+	InitializeDatas($SUPPORTED_NETWORKS, TRUE);
 }
 
 
@@ -2246,11 +2246,9 @@ else
 
 		if($last_ver != VER || $last_stats_status != STATS_ENABLED)
 		{
-			if( !function_exists("Initialize") )
-			{
-				include "functions.php";
-			}
-			Initialize($SUPPORTED_NETWORKS);
+			if(!function_exists('InitializeDatas'))
+				include './functions.php';
+			InitializeDatas($SUPPORTED_NETWORKS);
 			$changed = TRUE;
 		}
 		if($changed)

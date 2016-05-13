@@ -42,10 +42,10 @@ function ShowHtmlPage($compression, $header, $footer)
 	$title = NAME.'! Multi-Network WebCache '.VER.$suffix.' (by '.$maintainer.')';
 	$base_link = basename($script_name).'?'; if($compression !== null) $base_link .= 'compression='.$compression.'&amp;';
 
-	if(!function_exists("Initialize"))
-		include "functions.php";
+	if(!function_exists('InitializeDatas'))
+		include './functions.php';
 
-	Initialize($SUPPORTED_NETWORKS, TRUE, TRUE);
+	InitializeDatas($SUPPORTED_NETWORKS, TRUE, TRUE);
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="en">
