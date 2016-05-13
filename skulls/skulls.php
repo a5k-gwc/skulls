@@ -1081,7 +1081,7 @@ function WriteHostFile($net, $h_ip, $h_port, $h_leaves, $h_max_leaves, $h_uptime
 {
 	$file_path = DATA_DIR.'hosts-'.$net.'.dat';
 	$host_file = file($file_path);
-	$file_count = count($host_file);
+	$file_count = ($host_file === false? 0 : count($host_file));
 	$host_exists = FALSE;
 
 	for($i = 0; $i < $file_count; $i++)
@@ -1158,7 +1158,7 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 	$client = RemoveGarbage($client);
 	$version = RemoveGarbage($version);
 	$cache_file = file($file_path);
-	$file_count = count($cache_file);
+	$file_count = ($cache_file === false? 0 : count($cache_file));
 	$cache_exists = FALSE;
 
 	for($i = 0; $i < $file_count; $i++)
