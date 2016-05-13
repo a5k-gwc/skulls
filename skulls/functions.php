@@ -46,7 +46,7 @@ function InitializeNetworkFile($net, $show_errors = false)
 	}
 }
 
-function Initialize($supported_networks, $show_errors = false, $forced = false)
+function InitializeDatas($supported_networks, $show_errors = false, $forced = false)
 {
 	$errors = "";
 
