@@ -1163,7 +1163,7 @@ function WriteCacheFile($file_path, $is_udp, $gwc_url, $client, $version, $is_a_
 
 	for($i = 0; $i < $file_count; $i++)
 	{
-		list($time, /* New specs only */, $gwc_ip, $read, /* Networks */, $net_param,) = explode('|', $cache_file[$i], 7);
+		list($time, /* New specs only */, $gwc_old_ip, $read, /* Networks */, $net_param,) = explode('|', $cache_file[$i], 7);
 
 		if(strtolower($gwc_url) == strtolower($read))
 		{
@@ -1291,12 +1291,7 @@ function HostFile($net, $age, $is_web_tool)
 {
 	$now = time(); $offset = date('Z');
 	$host_file = file(DATA_DIR.'hosts-'.$net.'.dat');
-	$count_host = count($host_file);
-
-	if($count_host <= MAX_HOSTS_OUT)
-		$max_hosts = $count_host;
-	else
-		$max_hosts = MAX_HOSTS_OUT;
+	$count_host = count($host_file); $max_hosts = min($count_host, MAX_HOSTS_OUT);
 
 	$hosts_sent = 0;  /* Send at least 5 hosts (emergency mode when there are few recent hosts, especially useful on small networks) */
 	for($i = 0; $i < $max_hosts; $i++)
@@ -1358,12 +1353,7 @@ function Get($detected_pv, $net, $get, $getleaves, $getvendors, $getuptime, $get
 	if($get)
 	{
 		$host_file = file(DATA_DIR.'hosts-'.$net.'.dat');
-		$count_host = count($host_file);
-
-		if($count_host <= MAX_HOSTS_OUT)
-			$max_hosts = $count_host;
-		else
-			$max_hosts = MAX_HOSTS_OUT;
+		$count_host = count($host_file); $max_hosts = min($count_host, MAX_HOSTS_OUT);
 
 		for($i=0; $i<$max_hosts; $i++)
 		{
