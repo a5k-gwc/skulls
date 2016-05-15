@@ -660,6 +660,7 @@ function CheckBlockedGWC($gwc_url)
 		|| $gwc_url === 'http://p2p.findclan.org/'					/* Bugged/bad - Completely empty */
 		|| $gwc_url === 'http://cache-doxu.rhcloud.com/'			/* Bugged/bad - No hosts */
 		|| $gwc_url === 'http://59.175.238.8:9030/beacon2/gwc.php'	/* Bugged/bad - Partially broken */
+		|| $gwc_url === 'http://185.12.117.0/gwc/'					/* Bugged/bad */
 		|| $gwc_url === 'http://gwc.gallaxial.com/beacon2/gwc'		/* Duplicate URL */
 		|| $gwc_url === 'http://gwc.gallaxial.com/mcached/mcache'	/* Duplicate URL */
 		|| $gwc_url === 'http://webcache.peerproject.org/'			/* No longer exist */
