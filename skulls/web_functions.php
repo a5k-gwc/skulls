@@ -176,7 +176,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'MMMM':  /* Morpheus 2.0+ */
 			$client_name = 'Morpheus';
-			$url = 'http://en.wikipedia.org/wiki/Morpheus_%28software%29';
+			$url = 'https://en.wikipedia.org/wiki/Morpheus_%28software%29';
 			break;
 		case 'MNAP':
 			$client_name = 'MyNapster';
@@ -186,7 +186,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'MRPH':  /* Morpheus - old versions */
 			$client_name = 'Morpheus (old)';
-			$url = 'http://en.wikipedia.org/wiki/Morpheus_%28software%29';
+			$url = 'https://en.wikipedia.org/wiki/Morpheus_%28software%29';
 			break;
 		case 'MUTE':  /* MUTE - client of MUTE network (Network parameter enforced in the code to prevent leakage on Gnutella) */
 			$client_name = 'MUTE';
