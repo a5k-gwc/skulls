@@ -17,6 +17,20 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
+function GetLMModVersion($version, $ua)
+{
+	if(strpos($ua, 'LimeWire/') === 0 && strpos($ua, '(') !== false)
+	{
+		list($base, $mod) = explode('(', $ua, 2); list(,$base) = explode('/', $base, 2);
+		if(rtrim($base, ' ') === $version && strpos($mod, '/') !== false)
+		{
+			list(,$mod) = explode('/', $mod, 2);
+			return rtrim($mod, ')');
+		}
+	}
+	return $version;
+}
+
 function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 {
 	$IS_GWC = 0; $IS_crawler = false; $url = null; $ua_prefix = null;
@@ -43,6 +57,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'ACQX':
 			$client_name = 'Acquisition';
+			$version = GetLMModVersion($version, $ua);
 			$url = 'http://www.acquisitionx.com/';
 			break;
 		case 'AGIO':
