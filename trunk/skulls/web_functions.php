@@ -316,6 +316,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'CABO':  /* Cabos (client of gnutella network) - the original vendor code is LIME */
 			$client_name = 'Cabos'; $ua_prefix = 'LimeWire MOD - ';
+			$version = GetLMModVersion($version, $ua);
 			$url = 'https://sourceforge.net/projects/cabos/';
 			/* http://cabos.osdn.jp/ */
 			break;
