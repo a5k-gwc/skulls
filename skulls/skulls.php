@@ -235,7 +235,7 @@ function ValidateIdentity($method, &$vendor, &$ver, &$ua, $net, &$detected_net, 
 	}
 	elseif($vendor === 'LIME')
 	{
-		if(strpos($ua, 'Cabos/') !== false) { $vendor = 'CABO'; $ver = substr($ua, strpos($ua, 'Cabos/')+6, -1); }
+		if(strpos($ua, 'Cabos/') !== false) $vendor = 'CABO';
 		elseif(strpos($ua, 'LimeWire/') !== 0 || (float)$ver >= 5.7) $vendor = 'LIMM';  /* Change vendor code of mod versions */
 	}
 	elseif($vendor === 'MUTE')  /* There are MUTE (MUTE network client) and Mutella (Gnutella network client), both identify themselves as MUTE */
