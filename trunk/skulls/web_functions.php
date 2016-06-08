@@ -56,7 +56,7 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			$url = 'http://acqlite.sourceforge.net/';
 			break;
 		case 'ACQX':
-			$client_name = 'Acquisition';
+			$client_name = 'Acquisition'; $ua_prefix = 'LimeWire MOD - ';
 			$version = GetLMModVersion($version, $ua);
 			$url = 'http://www.acquisitionx.com/';
 			break;
