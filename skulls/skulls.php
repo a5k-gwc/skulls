@@ -512,6 +512,12 @@ function Support($support, $supported_networks)
 			echo 'I|support|',strtolower($supported_networks[$i]),"\r\n";
 }
 
+function LiveTest($live_test)
+{
+	/* Xor 16 low bits with 16 high bits (the first one of the high bits is always 0) */
+	echo 'I|livetest|',(($live_test & 0xFFFF) ^ ($live_test >> 16)),"\r\n";
+}
+
 function CheckNetwork($supported_networks, $net)
 {
 	$net = strtolower($net);
@@ -1636,6 +1642,7 @@ function DetectRemoteIP($remote_ip)
 $REMOTE_IP = $_SERVER['REMOTE_ADDR'];
 
 $PING = !empty($_GET["ping"]) ? $_GET["ping"] : 0;
+$LIVE_TEST = empty($_GET["livetest"])? null : $_GET["livetest"];
 
 $NET = !empty($_GET["net"]) ? strtolower($_GET["net"]) : NULL;
 $IS_CRAWLER = empty($_GET["crawler"])? false : true;	// This must be added to every request made by a crawler, to clarify that the request is made from a crawler
@@ -1934,6 +1941,10 @@ else
 		die;
 	}
 
+	if($LIVE_TEST !== null && (!ctype_digit($LIVE_TEST) || $LIVE_TEST < 65536 || $LIVE_TEST > 2147483647))
+	{
+		$LIVE_TEST = null; if(LOG_MAJOR_ERRORS) Logging('invalid-live-tests', $DETECTED_PV);
+	}
 	if($LEAVES !== null && (!ctype_digit($LEAVES) || $LEAVES > 2047))
 	{
 		$LEAVES = null; $HOST = null; if(LOG_MAJOR_ERRORS) Logging('invalid-leaves', $DETECTED_PV);
@@ -1974,7 +1985,10 @@ else
 
 	if($PING)
 		if($supported_net || $MULTI)
+		{
 			Pong($DETECTED_PV, $SUPPORT, $MULTI, $NET, $CLIENT, $VERSION, $REMOTE_IP);
+			if($LIVE_TEST !== null) LiveTest((int)$LIVE_TEST);
+		}
 
 	if($SUPPORT)
 		Support($SUPPORT, $SUPPORTED_NETWORKS);
