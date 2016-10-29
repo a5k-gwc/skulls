@@ -450,7 +450,7 @@ function ShowHtmlPage($compression, $header, $footer)
 					$b_format = $_GET['format']; $b_name = $b_formats[$b_format]; $b_magnet = null;
 					if(!BLRevCheck($b_format) || ($b_magnet = htmlspecialchars(BLGenerateMagnet($b_format), ENT_QUOTES, 'UTF-8')) === "") $b_name = 'Blocklist conversion error';
 ?>
-					<div class="page-title"><strong>P2P Blocklist</strong></div>
+					<div class="page-title"><strong>P2P Blocklist Beta</strong></div>
 					<div class="padding">
 						<div class="padding"><strong>Magnet link</strong></div>
 						<div class="padding"><a class="magnet" href="<?php echo $b_magnet; ?>"><img width="14" height="14" src="images/magnet-icon.png" alt="Magnet"> <?php echo $b_name; ?></a></div>
@@ -460,7 +460,7 @@ function ShowHtmlPage($compression, $header, $footer)
 				else
 				{
 ?>
-					<div class="page-title"><strong>P2P Blocklist</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
+					<div class="page-title"><strong>P2P Blocklist Beta</strong> &nbsp;&nbsp; <a href="<?php echo $base_link; ?>showblocklists=2">Show informations</a></div>
 					<div class="padding">
 <?php
 						if(file_exists('./ext/blocklist.dat'))
