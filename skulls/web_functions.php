@@ -91,7 +91,9 @@ function ReplaceVendorCode($vendor, $version, $ua, $is_a_gwc_param = 0)
 			break;
 		case 'ENVY':
 			$client_name = 'Envy';
-			$url = 'https://sourceforge.net/projects/getenvy/';
+			$url = 'http://getenvy.com/';
+			/* https://github.com/GetEnvy/Envy */
+			/* https://sourceforge.net/projects/getenvy/ */
 			break;
 		case 'FISH':
 			$client_name = 'PEERanha';
