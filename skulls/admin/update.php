@@ -17,7 +17,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with Skulls.  If not, see <http://www.gnu.org/licenses/>.
 
-define('REVISION', '5.0.0.9');
+define('REVISION', '5.0.1.0');
 
 include './common.php';
 InitializeVars();
