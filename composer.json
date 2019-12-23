@@ -1,0 +1,15 @@
+{
+    "name": "a5k-gwc/skulls",
+    "description": "Skulls is a Multi-Network WebCache used from P2P clients to bootstrap",
+    "type": "project",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "ale5000",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=4.3.0"
+    }
+}
